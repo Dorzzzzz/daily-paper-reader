@@ -1,0 +1,818 @@
+Title: Understanding Complexity in VideoQA via Visual Program Generation
+
+URL Source: https://openreview.net/pdf?id=6GFPnVHEKB
+
+Number of Pages: 24
+
+Markdown Content:
+# Understanding Complexity in VideoQA via Visual Program Generation 
+
+Crist´ obal Eyzaguirre 1 Igor Vasiljevic 2 Achal Dave 2 Jiajun Wu 1 Rares Andrei Ambrus 2 Thomas Kollar 2
+
+Juan Carlos Niebles 1 Pavel Tokmakov 2
+
+ceyzaguirre4.github.io/codeplexity 
+
+## Abstract 
+
+We propose a data-driven approach to analyz-ing query complexity in Video Question Answer-ing (VideoQA). Previous efforts in benchmark design have relied on human expertise to de-sign challenging questions, yet we experimen-tally show that humans struggle to predict which questions are difficult for machine learning mod-els. Our automatic approach leverages recent ad-vances in code generation for visual question an-swering, using the complexity of generated code as a proxy for question difficulty. We demon-strate that this measure correlates significantly better with model performance than human esti-mates. To operationalize this insight, we propose an algorithm for estimating question complexity from code. It identifies fine-grained primitives that correlate with the hardest questions for any given set of models, making it easy to scale to new approaches in the future. Finally, to fur-ther illustrate the utility of our method, we ex-tend it to automatically generate complex ques-tions, constructing a new benchmark that is 1.9 times harder than the popular NExT-QA. 
+
+## 1. Introduction 
+
+Humans can effortlessly reason about activities, whether that reasoning requires understanding space and time, cause and effect, or fine-grained details and high-level con-text (Decety & Gr` ezes, 1999; Decety et al., 1997; Wurm & Caramazza, 2022; Aflalo et al., 2020). This versatility allows us to function effectively in dynamic environments, yet it simultaneously complicates our ability to assess what is hard for machines. Consider the two video-question pairs              
+
+> 1Stanford Computer Science 2Toyota Research Insti-tute. Correspondence to: Crist´ obal Eyzaguirre <ceyza-guirre@cs.stanford.edu >.
+> Proceedings of the 42 nd International Conference on Machine Learning , Vancouver, Canada. PMLR 267, 2025. Copyright 2025 by the author(s).
+
+shown in Figure 1 (top). In our study, human subjects over-whelmingly perceive the question on the right as the more complex to answer, but evaluating a variety of state-of-the-art VideoQA models (Yu et al., 2023a; Wang et al., 2022a; Sur´ ıs et al., 2023; Fu et al., 2021) shows that the question on the left presents a significantly greater challenge for them. Experts might assume they would perform better at this task, but the history of VideoQA benchmarks suggests oth-erwise. Despite authors’ best efforts, studies show most datasets are dominated by questions solvable by naive, single-frame baselines (Buch et al., 2022; Huang et al., 2018; Liu et al., 2021). Although many attempts have been made to address this limitation, they predominantly adopt a top-down approach. These works start from an expert hypothesis of what is hard and validate this assumption by evaluating models on samples that specifically target the identified skill (Xiao et al., 2021; Mangalam et al., 2023). While this has led to some progress, such static, heuristic-based definitions of complexity are inherently myopic. In this work, we propose a bottom-up approach instead that discovers human-interpretable insights about the sources of complexity for VideoQA models from the data. To this end, we capitalize on a recent large language model (LLM)-based code generation paradigm (Sur´ ıs et al., 2023; Gupta & Kembhavi, 2023; Subramanian et al., 2023), which pro-duces modular executable programs to answer natural lan-guage queries. While this approach has shown promise for zero-shot VideoQA (Sur´ ıs et al., 2023; Ge et al., 2024), we are not interested in its task performance per se. Instead, we use its rich, structured intermediate representations— programs, as shown in Figure 1 (bottom)—to capture the elusive complexity of the original questions. Specifically, we begin by collecting visual programs gen-erated by recent methods (Sur´ ıs et al., 2023; Ge et al., 2024) on the validation set of the challenging NExT-QA benchmark (Xiao et al., 2021), together with predictions of a large collection of diverse algorithms. We then cal-culate several standard structural complexity metrics (Mc-Cabe, 1976) for these programs and collect human judg-ments for a subset of the dataset. Intriguingly, our analysis demonstrates that, despite the programs being imperfect, 1Understanding Complexity in VideoQA via Visual Program Generation What does the dog do after letting go of the bone? Query: Where is this? Query: 
+
+Human Estimate: Hard! 
+
+CodePlexity Estimate: Easy     
+
+> SeVILA SeViLA ZS ViperGPT InternVideo Violet
+
+Human Estimate: Easy! 
+
+CodePlexity Estimate: Hard                             
+
+> SeVILA SeViLA ZS ViperGPT InternVideo Violet
+> middle_frame =video .get_frame (video .num_frames // 2)
+> middle_caption =middle_frame .caption ()
+> location =middle_frame .classify_location ()
+> answer =answer_question (question ,middle_caption ,location )
+> for frame in video :
+> if frame .simple_qa ("is the dog letting go of the bone? "):
+> let_go_started =True
+> elif let_go_started :
+> frame_after_started =frame
+> break
+> description =frame_after_started .caption ()
+
+Figure 1. Humans struggle to judge which questions present higher challenges for machine learning models. In our study, the question on the left is universally perceived as being easier than the one on the right, which is inversely correlated with the models’ performance. We show that the complexity of the corresponding visual program can serve as a much more reliable predictor. 
+
+standard code complexity metrics correlate better with ma-chine learning models’ performance than human estimates (see Figure 3). Moreover, improvements in code generation result in stronger corelation (Figure 19), and these observa-tions generalize between benchmarks (Figure 20). We then propose CodePlexity – a novel algorithm for es-timating question complexity from code that takes into ac-count the content of the program, in addition to its structure (Section 3.2). In particular, it learns to correlate individual subroutines with models’ performances, effectively mining for human-interpretable patterns that summarize the error modes of any given set of models. Crucially, like any data-driven approach, our CodePlexity metric is easy to extend to new models and datasets, ensuring sustained progress. This is in stark contrast to the static, heuristic-based defini-tions of complexity that are dominant in the field. Finally, to further demonstrate the utility of our analysis tool, we design an algorithm for automatically generating challenging questions for any given collection of videos in Section 3.4. In particular, our approach takes as input a compact description of a video and uses an LLM (OpenAI, 2023a) to generate question candidates first. We then gen-erate visual programs for each question and use our code-based metric to select the hardest subset. We evaluate sev-eral zero-shot VideoQA methods on the resulting bench-mark and observe a 1.9 × gap in performance compared to existing datasets like NExT-QA (Xiao et al., 2021). To summarize, our contributions are as follows: (1) We demonstrate that generated code complexity is a robust, data-driven metric of question complexity in VideoQA, generalizing across code generation methods and datasets; (2) We present CodePlexity, an adaptable tool for evalu-ating model-specific challenges in VideoQA, identifying common failure modes and providing actionable insights for future research; (3) We use CodePlexity to automati-cally construct CodePlex-QA — a novel benchmark that is 1.9 times harder than the popular NExT-QA. 
+
+## 2. Related Work 
+
+Large single-stage models. Current methods for video-language understanding explores various modeling strate-gies.HGA (Jiang & Han, 2020) uses Graph Convolutional Networks (GCNs) to align video and language. Mer-lot (Zellers et al., 2021) leverages ASR-captioned videos for self-supervised training. VIOLET (Fu et al., 2021) em-ploys dVAE (Van Den Oord et al., 2017) for masked video-text pretraining, evaluated on VideoQA and text-to-video retrieval. Masked space-time autoencoders, such as Times-Former (Bertasius et al., 2021) and VideoMAE (Feichten-hofer et al., 2022), focus on action recognition. mPLUG-2 (Xu et al., 2023) unifies image- and video-language tasks with task-specific modules. More recently, large language model (LLM)-based approaches, such as Tar-sier (Wang et al., 2024), LLaVA-NeXT (Liu et al., 2024), and VideoChat2 (Maaz et al., 2024), explore unified video-language modeling by extending the language model with visual adapters. Similarly, SeViLA (Yu et al., 2023a) fol-lows this LLM-based paradigm but adds an additional stage for frame selection, extending the select-then-answer ap-proach popularized by ATP (Buch et al., 2022). 
+
+Code generation models. Recent works address frame se-lection and question answering via code generation , lever-aging text-to-code models like Codex (Chen et al., 2021). VisProg (Gupta & Kembhavi, 2023) decomposes natural language queries into compositional programs using zero-shot pretrained models. ViperGPT (Sur´ ıs et al., 2023) gen-erates and executes Python code via a vision-API prompt, achieving state-of-the-art results without additional train-ing. CodeVQA (Subramanian et al., 2023), a concurrent work, specializes in single-frame QA with a smaller API. RVP (Ge et al., 2024) introduces a recursive strategy to break down complex queries into subproblems, enhancing flexibility. Earlier models (Andreas et al., 2016; Johnson et al., 2017b; Kim et al., 2018; Hu et al., 2017; Yi et al., 2018) integrated code generation through supervised learn-2Understanding Complexity in VideoQA via Visual Program Generation 
+
+ing or reinforcement learning. 
+
+Complexity estimation. Prior work has proposed ways to estimate complexity for other settings and modalities. In NLP, text complexity is often approximated by length (Pla-tanios et al., 2019; Spitkovsky et al., 2010; Tay et al., 2019), with variations including conjunction count (Kocmi & Bo-jar, 2017), phrase count (Tsvetkov et al., 2016a), and de-pendency tree depth (Tsvetkov et al., 2016b). In computer vision, image complexity has been linked to object count (Wei et al., 2016) or human annotations (Tudor Ionescu et al., 2016; Soviany et al., 2020). Finally, (Graves, 2016) suggested that, in reasoning tasks, complexity can be es-timated by the number of steps required by a recurrent model. Later (Eyzaguirre & Soto, 2020) used a similar ap-proach it to quantify the complexity of VQA questions. 
+
+Complexity from code. Measuring complexity through code has a rich history; Kolmogorov defines complexity based on the succinctness of the program that can repre-sent said object (Kolmogorov, 1963; Solomonoff, 2009). However, its incomputability limits its practical application (Zvonkin & Levin, 1970). Software engineering rely on tangible metrics like cyclomatic complexity that measure the number of independent paths in a program (McCabe, 1976), a computable yet less philosophically rich approach. Synthetic datasets play a key role in Video Question Answering by using symbolic programs to separate per-ception from reasoning (Johnson et al., 2017a; Grunde-McLaughlin et al., 2021; Yu et al., 2023b; Wu et al., 2021). Grouping these programs into skill-based families enables correlation of model performance with reasoning patterns. In contrast, we leverage code generation to estimate ques-tion complexity without costly annotations, extending to diverse question types. Our approach provides a direct, computable complexity measure, bridging theoretical and practical aspects of machine learning. 
+
+## 3. Methodology 
+
+3.1. Preliminaries 
+
+We study the problem of estimating the complexity of questions in VideoQA. We are given a dataset consist-ing of collections of videos, questions, and answers D =
+
+{V, Q, A}, along with a set of K models already trained on the task M = {m0, ..., m K }. Our goal then is to de-sign a function C that allows us to categorize questions 
+
+qi ∈ Q into groups based on their complexity with re-spect to M. Crucially, we are interested in a general met-ric consistent across all models mj ∈ M . Concretely, for any two questions q1, q 2 ∈ Q, together with corre-sponding videos v1, v 2 ∈ V, if C(q1) > C(q2), we ex-pect model performance P (m, q, v ) to vary accordingly: 
+
+P (mj , q 1, v 1) < P (mj , q 2, v 2) ∀mj ∈ M , indicating that models perform worse on more complex questions. However, directly estimating complexity C from natural language question q is a challenging problem even for hu-mans, as we demonstrate in a Section 4.2. Instead, our key idea, inspired by the notion of Kolmogorov Complex-ity ( KC ) (Kolmogorov, 1963), is to utilize the rich and highly-structured intermediate representations - programs, to capture the elusive complexity of the original natural language queries. Concretely, we capitalize on the recent code generation-based methods (Sur´ ıs et al., 2023; Gupta & Kembhavi, 2023; Subramanian et al., 2023) that oper-ate in a 2-stage fashion: first, given a question q a pro-gram generator π from a Large Language Model (LLM) is used to translate it into an executable program z = π(q).An off-the-shelf execution engine like Python can then be used to produce an answer ˆa = ϕ(v, z ). Running such an approach on a dataset D results in a set of programs 
+
+P(D) = {z1, z 2, ..., z N }.Next, in Section 3.2 we propose several techniques for code analysis of increasing intricacy and show how they can be used to build a function for question complexity estimation via code C(q) ∝ C (z). Then, in Section 3.3, we demon-strate how analysis of the generated code can help gain in-sights into the failure modes of VideoQA models. Finally, in Section 3.4 we discuss how such algorithms can be used to automatically construct challenging benchmarks. 
+
+3.2. CodePlexity: Estimating Question Complexity from Code 
+
+As a first step we review existing software engineering met-rics that map code into complexity scores C(z) → R. In particular, we focus on Lines of Code (LoC) and Cyclo-matic Complexity (McCabe, 1976). The former simply correlates the number of lines in a program with its com-plexity C(z) ∝ | z|, whereas the latter quantifies the number of linearly-independent paths through the source code and is denoted as C(z) = CC (z). To minimize the impact of spurious factors, we pre-process the code by removing all the comments and empty lines first, and make sure to use the same set of basic primitives in all experiments. Both metrics are indicative of the code’s structural complexity, with higher values suggesting more intricate control flow. However, they do not take the contents of the code into con-sideration, which, as we shown in Section 4.2, limits their predictive power. To address this drawback, we propose a new method, Code-Plexity, illustrated in Figure 2. CodePlexity involves an-alyzing the components of the generated code that affect question complexity, considering both its structure and se-mantic content. More specifically, we develop a compiler to parse each question’s code into its basic syntactic ele-ments, creating a Abstract Syntax Tree or AST (Hoe et al., 3Understanding Complexity in VideoQA via Visual Program Generation What was the teacher 
+
+doing while he was playing 
+
+the piano for the first time?                                      
+
+> def execute_command (video ,possible_answers ,question ):
+> video_segment =VideoSegment (video )
+> student_playing =False
+> frame_of_interest =None
+> for frame in enumerate (video_segment .frame_iterator ()):
+> if frame .detect_object ("student ")and \
+> frame .simple_qa ("Is the student playing the piano? ")== "yes ":
+> student_playing =True
+> elif student_playing and frame .detect_object ("teacher "):
+> frame_of_interest =frame
+> break
+> description =frame_of_interest .caption ()
+> info ={
+> "Description of frame while student playing piano ":description
+> }
+> answer =video_segment .answer_question (info ,question ,possible_answers )
+> return answer ,info
+
+AST Generation   
+
+> Exprenumerate()video_segment.frame_iterator()
+
+1
+
+1
+
+1
+
+0
+
+Subtree encoding  Complexity Estimation 
+
+CodePlexity  0.85 
+
+Code Generation Query 
+
+Figure 2. Estimating question complexity via code. Our approach to estimating question complexity involves converting the question into code, decomposing the pseudo-code into abstract syntax subtrees ( Si), before correlating subtree presence with model performance. 
+
+1986) T = compile (z) with nodes N and edges E. In this model, nodes represent variables, functions, and con-trol structures, while the edges capture the logical and hier-archical relationships between them. The AST framework abstracts the code away from its syntax, allowing us to fo-cus on the underlying logic and structure. By generating ASTs for the entire dataset, we obtain a comprehensive set 
+
+T (D) = {compile (z) | z ∈ P (D)}, laying the ground-work for a deeper analysis of code complexity factors. Next, we mine T for common subroutines (recurring log-ical patterns or functions) that occur in the code. In ASTs subroutines manifest as subtrees, which we denote as S =(N ′, E ′), where N ′ ⊆ N , E′ ⊆ E and ∀(u, v ) ∈ E′, u ∈
+
+N ′ ∧ v ∈ N ′. Importantly, not all subtrees constitute valid Python code, since they might fail to comply with Python’s syntax rules. To systematically identify valid subtrees, we define a function G(T ) that yields an unordered set of all valid subtrees of T , denoted as G(T ) = {S1, S 2, . . . , S n}.Considering the entire dataset, the collection of all valid subtrees across the dataset can be represented as S(D) = S
+
+T ∈T (D) G(T ).Then, to avoid duplicates, we merge subtrees that always co-occur when one is a descendant of the other. Specif-ically, Smerged (D) is defined as the subset of S(D) that excludes S2 if there exists a subtree S1 such that S1 and S2
+
+always co-occur and S2 is contained in S1 (see Section 7.1 for formal definition). The presence of a specific subrou-tine within a program’s AST can be verified via a subgraph isomorphism check: 
+
+ISO (T, S ) ≡ S ∈ G (T ). (1) To aggregate the identified subtrees into a quantitative met-ric of complexity, we assign each subtree in Smerged (D)
+
+an index and encode each question qi in the dataset using one-hot encoding xi ∈ R|S merged (D)|, where a 1 in index k
+
+of xi signifies the presence of subtree Sk in question’s AST 
+
+Ti.
+
+xik =
+
+(
+
+1 if ISO (Ti, S k)0 otherwise (2) This representation transforms the complex structure of code into a fixed-size vector, enabling straightforward ap-plication of machine learning models. We then employ a logistic regression model trained on these one-hot encod-ings to predict the success of models mj ∈ M . Note that the training set effectively treats each (xi, y (j)
+
+i ) pair as a distinct instance, where y(j)
+
+i is the binary outcome for ques-tion i with respect to model mj (1 for success, 0 for fail-ure). This approach is justified by our objective to identify subtrees that universally challenge the models, implying a structural complexity in the code that transcends specific models. We then obtain the final complexity function via: CodePlexity (z) = −ˆyi = −σ(wx i + b). (3) Next, we discuss how our subtree analysis approach allows to obtain deeper insights into the sources of complexity for existing VideoQA models. 
+
+3.3. Subtree Analysis 
+
+Unlike black-box metrics, in addition to a numerical score, our approach also outputs an interpretable set of subtrees that correlate with challenging questions. We now demon-strate how to identify subroutines that have a high impact on model performance. More specifically, we are interested in subtrees that are linked to a decrease in model mj ’s per-formance with a high degree of statistical significance (set at 0.99). To test this, we establish a null hypothesis ( H0)stating that the proportion of successes is the same with and without the subtree present: 
+
+H0 : P (mj , q 1|S ∈ S (D)) = P (mj , q 1|S / ∈ S (D)) . (4) Conversely, our alternative hypothesis posits that the pro-portion of successes without the subtree is greater, imply-ing that its presence hurts performance: 
+
+HA : P (mj , q 1|S ∈ S (D)) < P (mj , q 1|S / ∈ S (D)) .
+
+(5) We conduct a one-sided test to evaluate these hypotheses and define a subset of subtrees, denoted as S∗
+
+mj (D), for which their presence is statistically correlated with a de-crease in the performance of the model mj :
+
+S∗
+
+mj (D) = {S ∈ S (D) | p(S, m j ) < 0.01 } , (6) where p(S, m j ) denotes the corresponding p-value. Fi-nally, to identify the subroutines that are associated with 4Understanding Complexity in VideoQA via Visual Program Generation 
+
+performance decrease for multiple models, we consider the intersection of the sets: 
+
+S∗ = \ 
+
+> mj∈M
+
+S∗ 
+
+> mj
+
+(D). (7) Identifying the specific subtrees that cause a decrease in models’ performance allows us to obtain deeper insights into where and how they may falter. In Section 4.3, we perform this analysis for several state-of-the-art approaches and suggest areas for improvement in model design. 
+
+3.4. Learning to Ask Hard Questions 
+
+We now build on our code-based question complexity met-ric described in Section 3.2, and propose a method for auto-matically generating challenging question-answer pairs for any given set of videos. Concretely, our approach takes as input a set of videos V paired with natural language sum-maries C. We then follow prior work by (Mangalam et al., 2023) and prompt a large language model (LLM) to gener-ate question and answer candidates based on each summary individually ˜q, ˜a = LLM (c, prompt ). The exact prompts are listed in Section 7.4 of the appendix. Importantly, our approach is agnostic to the nature of C,which can either be annotated manually, or generated auto-matically. In this work, we take the latter approach and capitalize on existing datasets with scene graph annota-tions (Luo et al., 2021; 2022; Zhou et al., 2019; Ji et al., 2020) paired with an image captioning model to generate natural language summaries of the video such that a lan-guage model can understand them (Menon & Vondrick, 2022; Wang et al., 2022b; Zeng et al., 2023). We detail this algorithm in Section 8 of the appendix. Following our approach from Section 3.2, we then convert each generated question ˜q into code, and use our trained CodePlexity model (Equation 3) to estimate its complexity. A set of candidate questions ˜Q∗ can be selected by setting a threshold δ for minimum complexity: 
+
+˜Q∗ = {˜q ∈ ˜Q|C (˜ q) ≥ δ}. (8) Finally, we manually filter the candidate dataset ˜D∗ =
+
+{V, ˜Q∗, ˜A∗} to remove the question/answer pairs that can-not be accurately answered from the corresponding videos due to inaccuracies in the generated summaries or LLM hallucination. We emphasize that this final manual filter-ing is only needed to ensure the perfect quality of the final dataset D∗. In practice, we only had to remove 12% of the questions, demonstrating that the fully automatic pipeline is capable of producing useful datasets by itself. 
+
+## 4. Evaluating Complexity Estimation 
+
+In this section, we compare different approaches to estimat-ing question complexity in VideoQA. To this end, we first define a thorough evaluation protocol and detail our exper-imental setup in Section 4.1. We then evaluate how the code-based metrics proposed in this work compare to hu-man subjects and several simple baselines in predicting the performance of a wide variety of contemporary approaches on the popular NextQA benchmark in Section 4.2. We con-clude by performing a detailed analysis of the subroutines that show the strongest correlations with challenging ques-tions in Section 4.3. 
+
+4.1. Experimental Setup Evaluation protocol. Our goal is to compare the predictive power of several approaches for estimating question com-plexity in VideoQA with respect to a variety of machine learning models M on a dataset D. Importantly, some of the metrics we study require training data in the form of questions paired with outcomes of a model mj ∈ M on them (qi, y (j) 
+
+> i
+
+). Thus we split the whole pool of models M
+
+into the training Mtr and held-out validation Mval sets and report results on the latter. To quantitatively compare the effectiveness of different ap-proaches, some of which map a question to a numerical value corresponding to its complexity, whereas others di-rectly return an ordering of the questions, we propose a uni-fying metric, Performance Extremity Gap (PEG). In partic-ular, we first use numerical complexity estimates to sort questions accordingly. We then measure the disparity in model mj ’s performance P between the easiest and the hardest α% of the questions via: PEG (mj , α ) = 1
+
+Nα
+
+X
+
+> q∈Qhardest ,α
+
+P (mj , q, v q )
+
+− 1
+
+Nα
+
+X
+
+> q∈Qeasiest ,α
+
+P (mj , q, v q )
+
+(9) Finally, inspired by the mAP metric (Everingham et al., 2010), we average the PEG values over α ∈ (0 , 0.5] to obtain the final mPEG score. 
+
+CodeGen Models. We leverage ViperGPT (Sur´ ıs et al., 2023) as our main approach for generating visual programs from questions. To investigate the influence of the Code-Gen model, we also re-ran our experiments with the recent RVP (Ge et al., 2024) approach (see Section 10.4). 
+
+VideoQA Models. We ground our complexity metric in the performance of seven representative VideoQA methods, chosen for their coverage of existing architectural philoso-phies, pre-training strategies, and state-of-the-art perfor-mance. In particular, we use VIOLET (Fu et al., 2021) and InternVideo (Wang et al., 2022a), which are pre-trained with contrastive visual-language objectives and fine-tuned for VideoQA. We also evaluate SeViLA (Yu et al., 2023a), which is based on the BLIP-2 (Li et al., 2023) large-scale 5Understanding Complexity in VideoQA via Visual Program Generation 0 2 4 6 8             
+
+> Human Annotator Score
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+> Success Rate vs Human Annotator Score 12345678
+> Dependency Parse Tree Max. Depth
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+> Success Rate vs Dependency Parse Tree Max. Depth 1234567
+> Cyclomatic Complexity
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+> Success Rate vs Cyclomatic Complexity
+> Average
+> LLaVA-Video
+> Tarsier
+> SeViLA
+> SeViLA ZS
+> ViperGPT
+> InternVideo
+> ATP
+> VIOLET
+> HGA
+
+Figure 3. Correlation of various approaches for estimating question complexity with VideoQA models’ success rate on these questions. We observe that humans struggle to accurately predict what is hard for machine learning models and that code can serve as a more reliable source of prediction than natural language questions. 
+
+visual-language model; we assess both its zero-shot vari-ant (SeViLA-ZS) and a fine-tuned version (SeViLA). Ad-ditionally, we evaluate HGA (Jiang & Han, 2020), a GNN-based model for video reasoning, representing earlier ap-proaches prior to the prevalence of video large language models (videoLLMs). We also evaluate the simple but ef-fective ATP baseline (Buch et al., 2022), a model inten-tionally restricted to processing only a single frame. Fur-thermore, we include the results from executing the pro-grams generated by ViperGPT (Sur´ ıs et al., 2023). Fi-nally, we evaluate the recent state-of-the-art model, Tar-sier (Wang et al., 2024), and the current state-of-the-art model LLaVa-Video (Zhang et al., 2024). The mod-els are split into training and validation sets as follows: 
+
+Mtr = {VIOLET , SeViLA , ViperGPT , ATP }, Mval =
+
+{HGA , SeViLA-ZS , InternVideo , Tarsier , LLaVa-Video }.
+
+Dataset. It is crucial that the dataset used to perform our analysis features as many diverse challenges as possible. We focus on the NExT-QA (Xiao et al., 2021) benchmark for its size, variety of human-annotated questions, and its focus on spatio-temporal reasoning in videos over mere visual-fact retrieval (Zhong et al., 2022). In addition, its popularity provides a large pool of models with pre-trained, public checkpoints for our study. We perform the evalua-tion on the validation set, further splitting the questions into 80% used to train the metrics and the other 20% held out for computing mPEG. To assess generalizability, we also evaluated our method on the recent MVBench dataset (Li et al., 2024), including additional models such as LLaVA-NeXT (Liu et al., 2024) and VideoChat2 (Li et al., 2024), in Section 10.5 of the appendix. 
+
+Baselines. In addition to the code-based metrics introduced in Section 3.2, we evaluate several baselines that attempt to directly estimate question complexity from the natural language query itself. In particular, as a learning-free base-line, we follow (Tsvetkov et al., 2016b) and correlate the complexity of a question with the maximum depth of its parsed dependency tree. To more fairly compare to our learnable, code-based metric we fine-tune BERT (Kenton & Toutanova, 2019) to predict the probability of model success given the question using exactly the same train-ing data. We also prompt GPT-4 (OpenAI, 2023b) to esti-mate the complexity of a question on a Likert scale (Likert, 1932). Details and prompts are provided in Section 7.3. Finally, we conduct a human study on a subset of 150 ques-tions. To this end, we recruited 30 human subjects via the Prolific platform (Palan & Schitter, 2018). The subjects were asked to sort three questions at a time according to their perceived relative complexity. The final sequence or-der of the entire subset was calculated via pairwise ELO scores (Elo, 1967). More details and an example of the an-notation interface are provided in Section 7.2. 
+
+4.2. Results 
+
+We begin by visualizing the correlation of human estimates of question complexity with the performance of all 9 mod-els used in our study on the manually annotated questions from NExT-QA in Figure 3 (left). We observe that, while a downward trend clearly exists, with the questions labeled as the hardest by humans resulting in lower success rate for models compared to the easiest ones, the correlation is very weak. Notably, the questions that are ranked as being average in complexity are in fact the hardest for the models. We then evaluate two baselines on the same set of ques-tions, one based on the natural language queries (depen-dency tree depth shown in Figure 3, center) and one based on the generated code (cyclomatic complexity, Figure 3, right). Both show a much stronger correlation with the models’ performance, with cyclomatic complexity being the most consistent. These results demonstrate that human intuition about sources of complexity in VideoQA does not reflect the main challenges for machine learning models, and that generated code can be a more reliable source for estimating complexity than natural language. Next, we report a more systematic comparison of different text- and code-based metrics using mPEG on the validation set of NExT-QA in Table 1. Comparing the three language-6Understanding Complexity in VideoQA via Visual Program Generation                                                            
+
+> Train Models Val. Models SeViLA ViperGPT ATP VIOLET HGA SeViLA ZS InternVideo Tarsier LLaVa-Video Dependency Tree Depth 12.9 7.9 11.1 15.9 7.4 13.5 17.7 10.1 6.9 GPT-4 (OpenAI, 2023b) 9.6 8.9 11.6 5.8 7.8 14.6 13.9 10.8 5.2 BERT (Kenton & Toutanova, 2019) 12.5 6.0 18.3 17.3 7.7 14.3 21.1 10.8 11.4 Lines of Code 16.4 15.3 14.2 12.0 9.9 16.2 17.5 14.4 9.38 Cyclomatic Complexity 18.2 14.2 18.7 15.9 8.9 17.2 24.2 16.7 11.5 CodePlexity (Ours) 26.7 21.3 21.0 15.8 14.1 25.6 26.6 24.9 17.3
+> Table 1. Comparison of question complexity metrics using mPEG on the validation set of NExT-QA. BERT and CodePlexity are trained using the outputs of the first four models (labeled as Train in the table), and evaluated on the rest. Text-based metrics (above) perform worse than the code-based ones (below), and our approach demonstrates the highest correlation with the models’ performance.
+
+based metrics in the upper part of the table on the held-out models, we find them to perform similarly. Notably, the BERT-based model which is trained on the questions and prediction outcomes of the four models, performs better than the learning-free baselines for InternVideo and LlaVa-Video, but fails to generalize to SeViLA. This demonstrates that the space of the natural language is not structured enough to fit a robust complexity estimation model. In contrast, code-based metrics, shown in the lower part of Table 1 demonstrate better predictive ability overall, with even the simplest Lines of Code baseline outperforming the text-based metrics in most scenarios. Cyclomatic Com-plexity shows top results among all non-learning-based metrics, and our proposed approach, CodePlexity, achieves significant improvements over it by learning to identify code primitives which correlate with challenging questions. Notably, ViperGPT is the only model that executes gen-erated programs, making it more sensitive to code com-plexity — reflected in its declining success rate as program intricacy increases. Yet, intriguingly, similar declines are seen in models without access to code, suggesting our met-rics capture broadly challenging patterns across architec-tures and training regimes. Even cutting-edge models like Tarsier and LLaVa-Video struggle with questions flagged as hard by CodePlexity, despite it being trained on older models. In addition, while all code-based metrics are af-fected by code correctness (see Section 10.3), CodePlexity demonstrates the greatest robustness. In the next section, we apply the techniques introduced in Section 3.3 to identify the code structures responsible for this universal challenge to model performance. 
+
+4.3. Subtree Analysis 
+
+This brings us to the final aspect of our analysis: under-standing these structural elements of the code that con-tribute to question complexity. We follow the approach proposed in Section 3.3 and identify the subtrees which are statistically correlated with a decrease in the performance 
+
+S∗ 
+
+> mj
+
+for three models out of out training set Mtr : SeViLA, ViperGPT, and VIOLET. In Figure 4 (right) we visualize the intersections between these three individual sets S∗
+
+(Equation 7) as a Venn diagram. A perceptible common trend is apparent: different architectures have their own weaknesses, but the commonalities are surprisingly fre-quent. We manually inspect the eight subroutines that are shared among all three sets and identify that they represent two clear patterns (subtrees are listed in Section 9.3). The first group of primitives, manifesting in such structures as those containing For loops with complex control flow in them, captures reasoning about not just the content of the frame, but also its placement in a sequence of events. We provide an example of a corresponding subtree together with a question that requires this reasoning pattern in Fig-ure 4 (left). The second group contains primitives that rep-resent detailed analysis of specific elements (objects, rela-tionships) within a scene. The examples include questions that require identifying the precise placement of an object within a frame. In summary, we discovered that VideoQA methods strug-gle with fine-grained temporal reasoning and lack spatio-temporal, object-centric representations. This is in ac-cord with prior studies (Buch et al., 2022; Huang et al., 2018; Liu et al., 2021) that demonstrated that naive, single-frame baselines can achieve top performance on main-stream VideoQA benchmarks, which were used to develop these methods. Note that the granularity of the functions provided to the code generation model controls the specificity of the in-sights produced by our analysis tool. If too coarse — for instance, collapsing all questions into a single function — it could lose the ability to differentiate between questions. In contrast, using finer-grained functions enables more nu-anced analysis, such as revealing if models tend to struggle more with “why” questions than with “how” questions. Next, we show how our approach can be used to automat-ically generate a new benchmark that challenges existing approaches. 7Understanding Complexity in VideoQA via Visual Program Generation QUERY : What did the             
+
+> man sitting on top do
+> after he came off the
+> person on the ground?
+> Figure 4. Detailed analysis of subtrees that correlate with challenging questions among several models. We find that, although each model has its own error-modes, 8 subroutines are shared among all 3 of them (right). One of the patterns we find then analyzing the shared code structures is reasoning about the order of events (left).
+
+Dataset LLaVa-Video Tarsier SeViLA ZS ViperGPT InternVideo VIOLET Random NExT-QA 82.5% 70.9% 64.2% 60.0% 50.9% 37.7% 20.0% ATP-Hard 77.6% 59.8% 54.9% 51.8% 24.6% 25.4% 20.0% CodeplexQA 65.0% 52.5% 43.7% 45.8% 29.9% 27.6% 20.0%  
+
+> Table 2. Difference in prediction accuracy between the manually annotated NExT-QA, its adversarially selected subset ATP-Hard and our automatically generated CodePlex-QA for a representative set of zero-shot VideoQA models. Our benchmark is empirically 1.9 times harder than NExT-QA, validating the effectiveness of our complexity estimation approach.
+
+## 5. Dataset Generation 
+
+In this section, we apply our method to automatically create a new, challenging VideoQA benchmark, CodePlex-QA. We begin by detailing the source datasets and key imple-mentation details in Section 5.1. We then compare the performance of recent VideoQA methods on the popular NExT-QA (Xiao et al., 2021) to that on CodePlex-QA in Section 5.2 to validate the effectiveness of our approach. Our dataset will be released. 
+
+5.1. Experimental Setup Source datasets. We generate questions using 3 differ-ent datasets, all of which provide scene-graphs annotations: MOMA (Luo et al., 2021; 2022); ActivityNet (Caba Heil-bron et al., 2015), which we combine with ActivityNet-Entities (Zhou et al., 2019) and ActivityNet-Captions (Kr-ishna et al., 2017), and the ActionGenome (Ji et al., 2020) annotations for Charades (Sigurdsson et al., 2016). This results in pool of 4191 videos that are passed to our algo-rithm. Additionally, Section 10.2 of the appendix includes an ablation experiment that controls for video content while keeping the question generation pipeline unchanged. To this end, we use only videos from VidOR (Shang et al., 2019), matching those used to construct NExT-QA. 
+
+Implementation details. We use GPT-4 (OpenAI, 2023b) to generate question and answer candidates following prior work by (Mangalam et al., 2023) and leverage a state-of-the-art image captioning model, LLaVA 1.5 (Liu et al., 2023a;b), to list visual attributes of the main actors and ob-jects in the videos. Following (Xiao et al., 2021) we gener-ate 5 answer candidates for each question (1 correct answer and 4 distractors), and use accuracy as the evaluation met-ric. We set the δ in Equation 8 to select the top 10% of the data according to the estimated complexity (calibrated on NExT-QA). Further details are provided in Section 8. 
+
+5.2. Results 
+
+To construct CodePlex-QA, we run the generation pipeline described in Section 3.4, obtaining 20791 candidate ques-tions (several question candidates are generated for each video). Then we calculate each question’s complexity score using CodePlexity to only retain questions that meet or exceed the minimum complexity threshold as in Equa-tion 8. The resulting datasets consists of 2261 questions. The final manual filtering to ensure the answerability of the generated questions removes only 12% of the candidates, leaving 1981 samples, all of which are used for evaluation. We then evaluate the zero-shot baselines from our pool of methods on CodePlex-QA and report their accuracy in Ta-ble 2. We also report the results on the popular NExT-QA benchmark and on ATP-Hard (Buch et al., 2022), an adver-sarial split of NExT-QA, for reference. Note that the accu-racy of the random baseline is the same for all the bench-marks, so the numbers are directly comparable. We observe that that the accuracy on our generated questions is signif-icantly lower than on NExT-QA. Specifically, CodePlex-QA is 1.9 times harder than the manually annotated NExT-QA (complexity estimated by averaging the accuracy of the methods and subtracting random chance). 8Understanding Complexity in VideoQA via Visual Program Generation QUERY : What action does the barber                    
+
+> perform most frequently?
+> QUERY :What was the person's reaction
+> to tripping on the stairs?
+> QUERY :What does the man do after
+> painting the sofa?
+> A) Washing hair
+> B) Applying shampoo
+> C) Combing hair
+> D) Drying hair
+> E) Massaging face
+> A) Leaves the sofa to dry
+> B) Starts painting another sofa
+> C) Places one unpainted seat cushion back on the sofa
+> D) Cleans up his painting supplies
+> E) Places one painted seat cushion back on the sofa
+> A) They cried and stopped walking
+> B) They laughed and kept walking
+> C) They got angry and threw the book
+> D) They ignored it and kept walking
+> E) They picked up the book and ran upstairs
+
+Figure 5. Example questions in CodePlex-QA generated with our approach. It features many challenges that are under-represented in existing, manually-designed benchmarks, motivating development of new approaches with enhanced spatio-temporal modeling capacity. 
+
+We further report models’ performance on ATP-Hard, a subset of NExT-QA created using ground truth labels and specifically designed to be adversarial to CLIP-based mod-els. Despite this oracle nature of ATP-Hard, CodeplexQA is substantially more challenging for the top performing models and approximately equally hard for the weakest VI-OLET baseline. ATP-Hard is somewhat more challenging than CodeplexQA for InternVideo, because it is finetuned from CLIP and the samples in ATP-Hard specifically target CLIP-based models. These results support the effective-ness of both our complexity metric and of our automatic approach for generating VideoQA benchmarks. Figure 5 includes a representative sample of gener-ated questions that illustrate the variety of scenarios in CodePlex-QA. They include questions that require fine-grained temporal reasoning (e.g., comparing the frequency of different actions), sequential event understanding (e.g. identifying actions that follow specific trigger events), as well as reasoning about objects. Data-driven nature of our approach ensures that CodePlex-QA highlights under-represented challenges in video-understanding. More ex-amples are shown in the video. Further experiments that isolate and evaluate specific com-ponents of our pipeline can be found in the appendix. In particular, in Section 10.1 we validate our question selec-tion algorithm. Similarly, in Section 10.2 we isolate the impact of video source on dataset difficulty, confirming the effectiveness of our question generation approach. 
+
+## 6. Conclusion 
+
+We demonstrated that generated code complexity is an ef-fective measure of question complexity in VideoQA, in-troducing a novel metric that outperforms existing ones. Our approach identifies subroutines associated with diffi-cult questions across a wide range of models, providing in-sights into key challenges in VideoQA. Finally, we have shown how our metric can be used to automatically gen-erate a novel benchmark – CodePlex-QA, which is 1.9 times harder for existing models than the manually labeled NExT-QA. As new methods are developed, our approach can be re-applied, ensuring continued progress in the field. 
+
+## Impact Statement 
+
+In our study, we utilize many distinct pre-trained mod-els, each with its inherent biases, to identify challenging questions within an existing dataset. Although they have different pre-training schemes, these models likely encode similar implicit biases, owning to their training on internet scale data collections. In particular, several of our selected models, along with our visual descriptors extractor, rely on CLIP (Radford et al., 2021) as a visual encoder, meaning they likely replicate the same biases including those identi-fied in previous studies (Agarwal et al., 2021). Furthermore, the dataset we base the majority of our analy-sis on, NExT-QA (Xiao et al., 2021), is not fully represen-tative of real-world diversity and complexity. This limita-tion in addition to the biases present in the chosen models can lead to skewed or incomplete analysis. In addition, our analysis’ focus on interplay between the constituent syn-tactic elements in code may overlooks critical sources of complexity not apparent in the code structure. These in-clude, for example, differences related to gender and eth-nicity, which are not explicitly manifested in the code. Our own proposed benchmark, CodePlex-QA, builds upon the existing datasets MOMA (Luo et al., 2021; 2022), Ac-tivityNet (Caba Heilbron et al., 2015), and Action Genome (Ji et al., 2020), and therefore includes the same biases. We urge researchers and practitioners to refer to the relevant dataset cards. Finally, our selection methodology for filter-ing videos and questions may inadvertently introduce new biases, or amplify existing ones. 
+
+Acknowledgments. This work is in part supported by the Toyota Research Institute (TRI), AFOSR YIP FA9550-23-1-0127, ONR N00014-23-1-2355, and ONR YIP N00014-24-1-2117. 9Understanding Complexity in VideoQA via Visual Program Generation 
+
+## References 
+
+Aflalo, T., Zhang, C., Rosario, E., Pouratian, N., Orban, G., and Andersen, R. A shared neural substrate for action verbs and observed actions in human posterior parietal cortex. Science advances , 6(43), 2020. Agarwal, S., Krueger, G., Clark, J., Radford, A., Kim, J. W., and Brundage, M. Evaluating CLIP: towards char-acterization of broader capabilities and downstream im-plications. arXiv preprint arXiv:2108.02818 , 2021. Andreas, J., Rohrbach, M., Darrell, T., and Klein, D. Neu-ral module networks. In CVPR , 2016. Bertasius, G., Wang, H., and Torresani, L. Is space-time at-tention all you need for video understanding? In ICML ,2021. Buch, S., Eyzaguirre, C., Gaidon, A., Wu, J., Fei-Fei, L., and Niebles, J. C. Revisiting the “video” in video-language understanding. In CVPR , 2022. Byrd, R. H., Lu, P., Nocedal, J., and Zhu, C. A lim-ited memory algorithm for bound constrained optimiza-tion. SIAM Journal on scientific computing , 16(5):1190– 1208, 1995. Caba Heilbron, F., Escorcia, V., Ghanem, B., and Car-los Niebles, J. ActivityNet: A large-scale video bench-mark for human activity understanding. In CVPR , 2015. Chen, M., Tworek, J., Jun, H., Yuan, Q., Pinto, H. P. d. O., Kaplan, J., Edwards, H., Burda, Y., Joseph, N., Brock-man, G., et al. Evaluating large language models trained on code. arXiv preprint arXiv:2107.03374 , 2021. Chiang, W.-L., Li, Z., Lin, Z., Sheng, Y., Wu, Z., Zhang, H., Zheng, L., Zhuang, S., Zhuang, Y., Gonzalez, J. E., et al. Vicuna: An open-source chatbot impressing gpt-4 with 90%* chatgpt quality. See https://vicuna. lmsys. org (accessed 14 April 2023) , 2023. Decety, J. and Gr` ezes, J. Neural mechanisms subserving the perception of human actions. Trends in cognitive sci-ences , 3(5):172–178, 1999. Decety, J., Grezes, J., Costes, N., Perani, D., Jeannerod, M., Procyk, E., Grassi, F., and Fazio, F. Brain activity during observation of actions. influence of action content and subject’s strategy. Brain: a journal of neurology ,120(10):1763–1777, 1997. Elo, A. E. The proposed uscf rating system, its develop-ment, theory, and applications. Chess Life , 22(8):242– 247, 1967. Everingham, M., Van Gool, L., Williams, C. K., Winn, J., and Zisserman, A. The pascal visual object classes (VOC) challenge. International journal of computer vi-sion , 88:303–338, 2010. Eyzaguirre, C. and Soto, A. Differentiable adaptive com-putation time for visual reasoning. In CVPR , 2020. Feichtenhofer, C., Li, Y., He, K., et al. Masked autoen-coders as spatiotemporal learners. NeurIPS , 2022. Fu, J., Ng, S.-K., Jiang, Z., and Liu, P. GPTScore: Evaluate as you desire. arXiv preprint arXiv:2302.04166 , 2023. Fu, T.-J., Li, L., Gan, Z., Lin, K., Wang, W. Y., Wang, L., and Liu, Z. VIOLET: End-to-end video-language transformers with masked visual-token modeling. arXiv preprint arXiv:2111.12681 , 2021. Ge, J., Subramanian, S., Shi, B., Herzig, R., and Darrell, T. Recursive visual programming. In ECCV , 2024. Graves, A. Adaptive computation time for recurrent neural networks. In NIPS , 2016. Grunde-McLaughlin, M., Krishna, R., and Agrawala, M. AgQA: A benchmark for compositional spatio-temporal reasoning. In CVPR , 2021. Gupta, T. and Kembhavi, A. Visual programming: Com-positional visual reasoning without training. In CVPR ,2023. Hoe, A. V., Sethi, R., and Ullman, J. D. Compil-ers—principles, techniques, and tools . Pearson Addison Wesley Longman, 1986. Hu, R., Andreas, J., Rohrbach, M., Darrell, T., and Saenko, K. Learning to reason: End-to-end module networks for visual question answering. In ICCV , 2017. Huang, D.-A., Ramanathan, V., Mahajan, D., Torresani, L., Paluri, M., Fei-Fei, L., and Niebles, J. C. What makes a video a video: Analyzing temporal information in video understanding models and datasets. In CVPR , 2018. Hudson, D. A. and Manning, C. D. GQA: A new dataset for real-world visual reasoning and compositional question answering. In CVPR , 2019. Ji, J., Krishna, R., Fei-Fei, L., and Niebles, J. C. Action genome: Actions as compositions of spatio-temporal scene graphs. In CVPR , 2020. Jiang, P. and Han, Y. Reasoning with heteroge-neous graph alignment for video question answer-ing. In AAAI Conference on Artificial Intelligence ,2020. URL https://api.semanticscholar. org/CorpusID:213506079 .10 Understanding Complexity in VideoQA via Visual Program Generation 
+
+Johnson, J., Hariharan, B., Van Der Maaten, L., Fei-Fei, L., Lawrence Zitnick, C., and Girshick, R. CLEVR: A diagnostic dataset for compositional language and ele-mentary visual reasoning. In CVPR , 2017a. Johnson, J., Hariharan, B., Van Der Maaten, L., Hoffman, J., Fei-Fei, L., Lawrence Zitnick, C., and Girshick, R. Inferring and executing programs for visual reasoning. In ICCV , 2017b. Kenton, J. D. M.-W. C. and Toutanova, L. K. BERT: Pre-training of deep bidirectional transformers for language understanding. In naacL-HLT , 2019. Kim, S. W., Tapaswi, M., and Fidler, S. Visual reasoning by progressive module networks. In ICLR , 2018. Kocmi, T. and Bojar, O. Curriculum learning and mini-batch bucketing in neural machine translation. In 
+
+RANLP , 2017. Kolmogorov, A. N. On tables of random numbers. 
+
+Sankhy¯ a: The Indian Journal of Statistics, Series A , pp. 369–376, 1963. Kramer, O. and Kramer, O. Scikit-learn. Machine learning for evolution strategies , pp. 45–53, 2016. Krishna, R., Hata, K., Ren, F., Fei-Fei, L., and Car-los Niebles, J. Dense-captioning events in videos. In 
+
+ICCV , 2017. Li, J., Li, D., Savarese, S., and Hoi, S. BLIP-2: Bootstrap-ping language-image pre-training with frozen image en-coders and large language models. In ICML , 2023. Li, K., Wang, Y., He, Y., Li, Y., Wang, Y., Liu, Y., Wang, Z., Xu, J., Chen, G., Luo, P., et al. MVBench: A compre-hensive multi-modal video understanding benchmark. In 
+
+CVPR , 2024. Likert, R. A technique for the measurement of attitudes. 
+
+Archives of psychology , 1932. Liu, H., Li, C., Li, Y., and Lee, Y. J. Improved baselines with visual instruction tuning. In NeurIPS Workshop on Instruction Tuning and Instruction Following , 2023a. Liu, H., Li, C., Wu, Q., and Lee, Y. J. Visual instruction tuning. In NeurIPS , 2023b. Liu, H., Li, C., Li, Y., Li, B., Zhang, Y., Shen, S., and Lee, Y. J. LLaVA-NeXT: Improved rea-soning, ocr, and world knowledge, January 2024. URL https://llava-vl.github.io/blog/ 2024-01-30-llava-next/ .Liu, X., Pintea, S. L., Nejadasl, F. K., Booij, O., and Van Gemert, J. C. No frame left behind: Full video ac-tion recognition. In CVPR , 2021. Luo, Z., Xie, W., Kapoor, S., Liang, Y., Cooper, M., Niebles, J. C., Adeli, E., and Li, F.-F. MOMA: Multi-object multi-actor activity parsing. NeurIPS , 2021. Luo, Z., Durante, Z., Li, L., Xie, W., Liu, R., Jin, E., Huang, Z., Li, L. Y., Wu, J., Niebles, J. C., et al. MOMA-LRG: Language-refined graphs for multi-object multi-actor activity parsing. NeurIPS , 2022. Maaz, M., Rasheed, H., Khan, S., and Khan, F. VideoGPT+: Integrating image and video encoders for enhanced video understanding. arXiv preprint arXiv:2406.09418 , 2024. Madaan, A., Tandon, N., Gupta, P., Hallinan, S., Gao, L., Wiegreffe, S., Alon, U., Dziri, N., Prabhumoye, S., Yang, Y., et al. Self-refine: Iterative refinement with self-feedback. NeurIPS , 2023. Mangalam, K., Akshulakov, R., and Malik, J. EgoSchema: A diagnostic benchmark for very long-form video lan-guage understanding. In NeurIPS , 2023. McCabe, T. J. A complexity measure. IEEE Transactions on Software Engineering , SE-2(4):308–320, 1976. Menon, S. and Vondrick, C. Visual classification via de-scription from large language models. In ICLR , 2022. OpenAI. Chatgpt. https://www.openai.com ,2023a. OpenAI. GPT-4 technical report, 2023b. Palan, S. and Schitter, C. Prolific. a subject pool for online experiments. Journal of Behavioral and Experimental Finance , 17:22–27, 2018. Platanios, E. A., Stretcu, O., Neubig, G., Pocz´ os, B., and Mitchell, T. Competence-based curriculum learning for neural machine translation. In ACL , 2019. Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J., et al. Learning transferable visual models from natural language supervision. In ICML , 2021. Rafailov, R., Sharma, A., Mitchell, E., Manning, C. D., Ermon, S., and Finn, C. Direct preference optimiza-tion: Your language model is secretly a reward model. 
+
+NeurIPS , 2023. Shang, X., Di, D., Xiao, J., Cao, Y., Yang, X., and Chua, T.-S. Annotating objects and relations in user-generated videos. In Proceedings of the 2019 on International Con-ference on Multimedia Retrieval , pp. 279–287. ACM, 2019. 11 Understanding Complexity in VideoQA via Visual Program Generation 
+
+Shen, Y., Song, K., Tan, X., Li, D., Lu, W., and Zhuang, Y. HuggingGPT: Solving AI tasks with ChatGPT and its friends in hugging face. NeurIPS , 2023. Sigurdsson, G. A., Varol, G., Wang, X., Farhadi, A., Laptev, I., and Gupta, A. Hollywood in homes: Crowd-sourcing data collection for activity understanding. In 
+
+ECCV , 2016. Solomonoff, R. J. Algorithmic probability: Theory and applications. Information theory and statistical learning ,pp. 1–23, 2009. Soviany, P., Ardei, C., Ionescu, R. T., and Leordeanu, M. Image difficulty curriculum for generative adversarial networks (CuGAN). In WACV , 2020. Spitkovsky, V. I., Alshawi, H., and Jurafsky, D. From baby steps to leapfrog: How “less is more” in unsupervised dependency parsing. In ACL , 2010. Subramanian, S., Narasimhan, M., Khangaonkar, K., Yang, K., Nagrani, A., Schmid, C., Zeng, A., Darrell, T., and Klein, D. Modular visual question answering via code generation. In ACL , 2023. Sur´ ıs, D., Menon, S., and Vondrick, C. ViperGPT: Visual inference via python execution for reasoning. In ICCV ,2023. Tay, Y., Wang, S., Luu, A. T., Fu, J., Phan, M. C., Yuan, X., Rao, J., Hui, S. C., and Zhang, A. Simple and effective curriculum pointer-generator networks for reading com-prehension over long narratives. In ACL , 2019. Thomee, B., Shamma, D. A., Friedland, G., Elizalde, B., Ni, K., Poland, D., Borth, D., and Li, L.-J. YFCC100M: The new data in multimedia research. Communications of the ACM , 59(2):64–73, 2016. Tsvetkov, Y., Faruqui, M., Ling, W., MacWhinney, B., and Dyer, C. Learning the curriculum with bayesian opti-mization for task-specific word representation learning. In ACL , 2016a. Tsvetkov, Y., Faruqui, M., Ling, W., MacWhinney, B., and Dyer, C. Learning the curriculum with bayesian opti-mization for task-specific word representation learning. In ACL , 2016b. Tudor Ionescu, R., Alexe, B., Leordeanu, M., Popescu, M., Papadopoulos, D. P., and Ferrari, V. How hard can it be? estimating the difficulty of visual search in an image. In 
+
+CVPR , 2016. Van Den Oord, A., Vinyals, O., et al. Neural discrete rep-resentation learning. NeurIPS , 2017. Wang, J., Yuan, L., Zhang, Y., and Sun, H. Tarsier: Recipes for training and evaluating large video description mod-els. arXiv preprint arXiv:2407.00634 , 2024. Wang, Y., Li, K., Li, Y., He, Y., Huang, B., Zhao, Z., Zhang, H., Xu, J., Liu, Y., Wang, Z., et al. InternVideo: General video foundation models via generative and discrimina-tive learning. arXiv preprint arXiv:2212.03191 , 2022a. Wang, Z., Li, M., Xu, R., Zhou, L., Lei, J., Lin, X., Wang, S., Yang, Z., Zhu, C., Hoiem, D., et al. Language mod-els with image descriptors are strong few-shot video-language learners. NeurIPS , 2022b. Wei, Y., Liang, X., Chen, Y., Shen, X., Cheng, M.-M., Feng, J., Zhao, Y., and Yan, S. STC: A simple to com-plex framework for weakly-supervised semantic seg-mentation. IEEE Transactions on Pattern Analysis and Machine Intelligence , 39(11):2314–2320, 2016. Wu, B., Yu, S., Chen, Z., Tenenbaum, J. B., and Gan, C. STAR: A benchmark for situated reasoning in real-world videos. In NeurIPS , 2021. Wurm, M. F. and Caramazza, A. Two ‘what’ pathways for action and object recognition. Trends in cognitive sciences , 26(2):103–116, 2022. Xiao, J., Shang, X., Yao, A., and Chua, T.-S. Next-QA: Next phase of question-answering to explaining tempo-ral actions. In CVPR , 2021. Xu, H., Ye, Q., Yan, M., Shi, Y., Ye, J., Xu, Y., Li, C., Bi, B., Qian, Q., Wang, W., et al. mPLUG-2: A modu-larized multi-modal foundation model across text, image and video. arXiv preprint arXiv:2302.00402 , 2023. Yang, Z., Qi, P., Zhang, S., Bengio, Y., Cohen, W. W., Salakhutdinov, R., and Manning, C. D. HotpotQA: A dataset for diverse, explainable multi-hop question an-swering. In EMNLP , 2018. Yi, K., Wu, J., Gan, C., Torralba, A., Kohli, P., and Tenen-baum, J. Neural-symbolic VQA: Disentangling reason-ing from vision and language understanding. NeurIPS ,2018. Yu, S., Cho, J., Yadav, P., and Bansal, M. Self-chained image-language model for video localization and ques-tion answering. In NeurIPS , 2023a. Yu, Z., Zheng, L., Zhao, Z., Wu, F., Fan, J., Ren, K., and Yu, J. ANetQA: A large-scale benchmark for fine-grained compositional reasoning over untrimmed videos. In CVPR , 2023b. Zellers, R., Lu, X., Hessel, J., Yu, Y., Park, J. S., Cao, J., Farhadi, A., and Choi, Y. Merlot: Multimodal neural script knowledge models. NeurIPS , 2021. 12 Understanding Complexity in VideoQA via Visual Program Generation 
+
+Zeng, A., Attarian, M., Ichter, B., Choromanski, K., Wong, A., Welker, S., Tombari, F., Purohit, A., Ryoo, M., Sind-hwani, V., et al. Socratic models: Composing zero-shot multimodal reasoning with language. In ICLR , 2023. Zhang, Y., Wu, J., Li, W., Li, B., Ma, Z., Liu, Z., and Li, C. Video instruction tuning with synthetic data, 2024. URL 
+
+https://arxiv.org/abs/2410.02713 .Zhang, Z., Zhao, Z., Zhao, Y., Wang, Q., Liu, H., and Gao, L. Where does it exist: Spatio-temporal video grounding for multi-form sentences. In CVPR , 2020. Zhong, Y., Ji, W., Xiao, J., Li, Y., Deng, W., and Chua, T.-S. Video question answering: Datasets, algorithms and challenges. In EMNLP , 2022. Zhou, L., Kalantidis, Y., Chen, X., Corso, J. J., and Rohrbach, M. Grounded video description. In CVPR ,2019. Zvonkin, A. K. and Levin, L. A. The complexity of finite objects and the development of the concepts of infor-mation and randomness by means of the theory of algo-rithms. Russian Mathematical Surveys , 25(6):83, 1970. 13 Understanding Complexity in VideoQA via Visual Program Generation 
+
+## Appendix 
+
+This appendix includes further details, results and discus-sions that were not included in the main paper due to space limitations: 1. Section 7 provides additional technical details for our baselines and complexity estimation methods. 2. Section 8 compliments Section 5 in the main pa-per providing extra technical specifics regarding the dataset generation pipeline. 3. Section 9 reports additional results and analysis to those in Sections 4.2 and 4.3 in main paper. 4. Finally, Section 10 includes important ablations to validate the importance of individual components of our model and data generation pipeline. We also include a separate video with qualitative ex-amples of the analyzed questions and samples from our new dataset at youtu.be/lMvZNpZP1WQ. Finally, we release code, models, and other materials at ceyza-guirre4.github.io/codeplexity. 
+
+## 7. Additional Technical Details 
+
+7.1. Merging Duplicate Subtrees 
+
+To avoid duplicated subtrees and reduce redundancy, we merge subtrees that always co-occur when one is a descen-dant of the other. Specifically, a subtree S1 is said to always co-occur with another subtree S2 if every occurrence of S2
+
+in the dataset D is also an occurrence of S1. In such cases, since S2 is always contained within S1, we can merge S2
+
+into S1 without losing any unique patterns. Merging these subtrees does not risk missing important pat-terns because any syntactic or semantic information cap-tured by S2 is inherently included in S1. This is due to the fact that S1 encompasses all occurrences of S2, ensuring that the features associated with S2 are preserved within 
+
+S1. By eliminating redundant subtrees, we streamline the dataset, which can improve computational efficiency with-out compromising data integrity. The merged set of subtrees Smerged (D) is defined as: 
+
+Smerged (D) = S(D) \
+
+n
+
+S2 ∈ S (D) ∃S1 ∈ S (D) : 
+
+ ∀T ∈ D , ISO( T, S 2) → ISO( T, S 1)
+
+∧  S2 ⊆ S1
+
+o
+
+.
+
+(10) Here, ISO (T, S ) indicates that subtree S is isomorphic to a subtree within program T , and S2 ⊆ S1 denotes that S2
+
+is contained within S1.By applying this merging strategy, we ensure that all sig-nificant patterns are retained. The one-hot encodings of S1
+
+and S2 are identical across all programs where they appear, so merging them does not alter the representation of the data. This approach maintains the richness of the syntactic structures while optimizing the dataset for analysis. 
+
+7.2. Human Annotation Interface and Processing 
+
+For our human baseline we conduct an annotation effort on a subset of 150 questions from the validation set of the NExT-QA dataset. To this end, we recruited 65 human sub-jects via the Prolific platform (Palan & Schitter, 2018), us-ing the provided filters to select for annotators that are pro-ficient in English. The annotators were shown 50 sets of 3 questions (one set at a time), where they were asked to sort the questions ac-cording to their perceived complexity by indicating which questions were the easiest and hardest . An example set and the annotation interface is shown in Figure 6. Consis-tency was validated by repeating pairs of questions multiple times (the third question can vary). We check that relative orders remain consistent and don’t consider subjects who demonstrated low consistency. We further filter out anno-tations that were done in too little time, and annotators who finished the complete study in less than a minimum reason-able time. The annotations from the remaining 30 subjects were used to calculate the total ordering of the questions. Move backward Move forward               
+
+> Video Question Complexity Estimation Home Statistics Help Finished
+> 0/50
+> Current _id
+> 2
+> Currently
+> logged in
+> as
+> deleteme
+> A. How many people can be seen dancing on the stage ?(a) one. (b) six.
+> (c) three. (d) nine. (e) two.
+> B. How does the lady react to the man moving his hand to her waist ?(a)
+> put on the girl s nose. (b) laugh. (c) dance. (d) plays the instrument. (e)
+> waves her hand.
+> C. Why does the man bend down while cutting ?(a) dribbling ball. (b)
+> play with elmo. (c) chop leaves. (d) keep the rod fixed at one place. (e)
+> play game.
+> Which question is the *hardest* to
+> answer about a video ?
+> ABC
+> Which question is the *easiest* to
+> answer about a video ?
+> ABC
+> Copyright © 2022 Blablablab
+> Fork on GitHub |Cite Us
+
+Figure 6. We ask human annotators to provide the relative order-ing of three provided questions according to the estimated com-plexity of answering the question about an unseen video. 
+
+We compute the final order of the questions using Elo scores (Elo, 1967). Originally developed to rank chess players, the Elo system models the outcome probability of unseen comparison between a pair of entities ( eg. chess 14 Understanding Complexity in VideoQA via Visual Program Generation 
+
+players or, in our case, questions) as a function of their score ratings si. In a comparison each entity’s comparative performance is assumed to be Normally distributed around their score with fixed variance β2. The probability of a fa-vorable outcome for entity i when compared to an opponent entity j is given by the probability that the performance of 
+
+i surpasses the performance of j:
+
+Φ
+
+ si − sj
+
+√2β
+
+
+
+, (11) where Φ represents the cumulative distribution of a zero-mean, unit-variance Gaussian. The scores are updated after every comparison according to the Elo update rule. 
+
+7.3. GPT question complexity scoring 
+
+In order to automatically estimate the complexity of a ques-tion directly from it’s text without biasing the method to-wards any specific definition of complexity we refer to the Natural Language Processing literature which has shown that assessments made by Large Language Models corre-late with human judgement (Madaan et al., 2023; Fu et al., 2023; Chiang et al., 2023; Rafailov et al., 2023). To this end, we leverage GPT-4 (OpenAI, 2023b) to generate a complexity score on a Likert scale (Likert, 1932) (ranging from one to five). We set the temperature to zero (for repli-cable results) and generate a single token with the score. We prompt the model as follows: 
+
+Prompt 
+
+[SYSTEM] You are an assistant that -for the pro-vided question and its corresponding answer options-estimates the complexity of answering said question about an unknown video. Return your answer as score from 1 to 5 (1 being the easiest and 5 being the hard-est). [USER] I’ll provide a question and its candidate an-swers. Estimate the complexity of answering the question about a (unseen) video. Output should ONLY be the integer score (1-5) that you assign to the question (ie. no JSON, no text, no markdown, no nothing). 
+
+query A: answers [0] , B: answers [1] , C: 
+
+answers [2] , D: answers [3] , E: answers [4] 
+
+7.4. CodeGen details 
+
+We use the same API as in the original ViperGPT pa-per (Sur´ ıs et al., 2023). For NExT-QA analysis we use the programs and predictions from (Sur´ ıs et al., 2023), which were generated by Codex (Chen et al., 2021), a Code Com-pletion LLM. Since Codex is no longer avaialble, for the CodePlex-QA code generations we instead use a text vari-ant of GPT-3.5 with support for 16k context window (nec-essary because of the long API Specification). We prompt this model with both the API and a System message to make sure the output is usable as code. Additionally, we process the output to extract the code and format it such that it can be executed and analyzed. We include the prompt used: 
+
+Prompt 
+
+[SYSTEM]Only use the functions you have been provided with.” [SYSTEM]Only complete the code. Don’t include markdown syntax (eg. ticks). [USER] <API Spec. >
+
+# query 
+
+# [answers [0] , answers [1] , answers [2] ,
+
+answers [3] , answers [4] ]def execute command(video, possible answers, question): # Reason every step 
+
+7.5. Logistic Regression Parameters 
+
+We use the SciKit-Learn (Kramer & Kramer, 2016) imple-mentation of Logistic Regression model. Each question-subtree pair has multiple labels (one per model in the train-ing set) so we average them into a single soft label. The logistic regression model is then trained on these, allowing it to capture consensus across the different models We train until convergence and choose parameters based on the re-ported mean accuracy over 5 folds. The resulting model uses L2 regularization with weight c = 1 .0 and is trained with the L-BFGS solver (Byrd et al., 1995). 
+
+7.6. Cyclomatic Complexity Calculation 
+
+We compute of Cyclomatic Complexity via an open source implementation 1.
+
+## 8. Additional Question Generation Details 
+
+As noted in Section 5 of the main paper, we leverage ex-isting video datasets with scene-graph annotations MOMA (Luo et al., 2021; 2022), ActivityNet (Caba Heilbron et al., 2015), and Action Genome (Ji et al., 2020). As necessary step we need to translate the annotations into a textual for-mat such that a generative language model could use it. We begin by identifying the main activity and its sub-activities, including the start and end times of each. This temporal framework serves as a scaffold for the detailed enumera-tion of the actors and objects involved. Actors and objects are cataloged not just by their presence, but also in rela-tion to specific sub-activities. When a high level textual 
+
+> 1https://radon.readthedocs.org
+
+15 Understanding Complexity in VideoQA via Visual Program Generation 
+
+description is not available we leverage captioning mod-els to generate visual descriptors of the actors in the video. More details in Section 8.1. The resulting dataset has an average of 2.40 questions per video. The duration of each video ranges from approxi-mately 3 seconds to 10 minutes with an average video du-ration of about 1.5 minutes. This diverse range of video lengths is desirable as it is conducent to generating a wide variety of questions. The following sections describe the methods and prompts we used to translate the graphs into textual scripts for each specific dataset: MOMA (Luo et al., 2021; 2022) in Sec-tion 8.2, ActivityNet (Caba Heilbron et al., 2015) in Sec-tion 8.3, and Action Genome (Ji et al., 2020) in Section 8.4. Finally, Section 8.5 describes how the generated scripts are used to generate new questions. 
+
+8.1. Visual Descriptors extraction 
+
+A limitation of using Scene Graphs is that they tipically don’t include visual descriptions of the nodes they relate. This is in juxtaposition with the way humans typically refer to actors and objects. To this end we describe the main actors in the video using a Captioning model. In particular, we use Llava1.5 (Liu et al., 2023a;b) to describe a single instance of the actor in the video. We leverage the included bounding box annotations for the actors in each annotated interaction. We choose the bounding box with the largest area (in pixels) in the first subactivity the actor appears in. We then crop the relevant area and zero-pad the borders to make the final image square, as this is the format that Llava1.5 was trained with. The resulting cropped image is passed into the captioning model along with a prompt modified from Llava. 
+
+Prompt 
+
+”A chat between a curious human and an artificial in-telligence assistant. The assistant gives helpful, de-tailed, and polite answers to the human’s questions. [USER] <image >
+
+Look at the picture and tell me only about the per-son’s looks that don’t change. Like what they’re wear-ing, their hair color and style. Don’t talk about where they are OR what they’re doing . (Tag is 
+
+<actor classname >). [ASSISTANT] Importantly, we also pass in the textual identifier for the actor, indicated in the prompt as <actor classname >.
+
+8.2. MOMA 
+
+A significant limitation specific to MOMA is the inconsis-tency in annotated identifiers for object or actor through-out the entire video. Consequently, we exclude videos in the dataset for which objects or actors cannot be reli-ably identified. Our implementation of the filtering process eliminates any videos from the dataset where the identities of actors are not consistently recognizable based on their 
+
+class name identifier. In practice, we define a Python function to detect ’collisions’ - instances where the same identifier is used for different class names within a subac-tivity, or across different subastivities without a consistent mapping. As noted in Section 5 of the main paper, we need to trans-late the contents of the scene-graph-in-time annotated in MOMA into a textual format such that a generative lan-guage model could use it. We now describe the method we used to translate the graphs into textual scripts .We begin by identifying the main activity and its sub-activities, including the start and end times of each. This temporal framework serves as a scaffold for the detailed enumeration of the actors and objects involved. Actors and objects are cataloged not just by their presence, but also in relation to specific sub-activities. We identify their class names and descriptive attributes along with arrival their de-parture times within each sub-activity and store these for later. We also track state changes and action, both tran-sitive and intransitive, that occur during the sub-activities, along with the identifiers that map to the actors and objects involved. The final script is structured in a hierarchical format, start-ing with the main activity title and its timeframe, followed by detailed sections for each sub-activity. These sections enumerate the actors present, and a chronological account of events, actions, and state changes. We also generate a descriptive caption for each actor involved following Sec-tion 8.1 and include it in the prompt. An example of an activity and its first sub-activity is shown: # Activity: ”Dining” (0-597) All actors: • ROLE: customer. Visual description: The per-son in the picture is a woman with long, dark hair. She is wearing a white shirt and a black tie. • ROLE: waiter. Visual description: The waiter in the picture is a young man wearing a white shirt and a black tie. ## Sub activity (0-10): The waiter is talking to the customer or helping them into their seat • Actors present: customer, waiter 16 Understanding Complexity in VideoQA via Visual Program Generation 
+
+• Happened during sub-activity: – (attribute) waiter standing 
+
+– (transitive action) waiter talking to cus-tomer 
+
+– (intransitive action) waiter bending 
+
+8.3. ActivityNet 
+
+Although the original ActivityNet (Caba Heilbron et al., 2015) dataset didn’t include scene-graphs, follow up work ActivityNet-Entities (Zhou et al., 2019) provides additional annotations for objects, attributes, relationships and ac-tions. Further, we also use the per-subactivity captions in the ActivityNet-Captions (Krishna et al., 2017) dataset. As was the case with MOMA, we translate the contents of the scene-graph-in-time annotated into a textual format such that it can be parsed by a generative language model. We once again divide a video into a main activity and its component subactivities, and take note of their start and end times. Actors present in a particular subactivity are listed within the subactivity description, along with their provided visual descriptions when available in ActivityNet-Entities (Zhou et al., 2019). Finally, we filter relationships such that we only keep those that involve actors and list those for each actor. An example of an activity and a sub-activity is shown below: # Activity: ”doing archery” (time: 11-177) ## Sub activity (15-39): He loads an arrow in the bow. All actors descriptions from subactivity: • Visual description (time: 31): attributeclass: person - age&sex: man - hairstyle: straight -hairlength: short - haircolor: [’black’] - acces-sory: [’glove’] - skincolor: white - upperclothes-type: t-shirt - upperclothescolor: [’white’]-lowerclothestype: shorts - lowerclothescolor: [’black’] - status: [’standing’, ’shooting’] - lo-cation: outdoors • Relations for actor in subactivity: 
+
+– person pulling bow 
+
+– person holding arrow 
+
+8.4. Action Genome 
+
+We leverage the scene-graph annotations in Ac-tionGenome (Ji et al., 2020) for the Charades video dataset (Sigurdsson et al., 2016) and use the annotated activity along with its duration and high level description. When available we also include the location and other descriptions. We then list the annotated actions (along with their respective start and end times). Finally, we iterate over the annotated-per-frame object-actor relationships and track when their state changes. We provide the timestamp at which the state-change occurred and the change itself to the generation model. As was the case with ActivityNet, we don’t need to generate visual attributes as the high level description often provides them. An example script 
+
+is shown below: # Activity (duration: 30.62): ”A person sits at a desk in the living room. The person laughs as they pick up a bag of groceries from under the desk.” Location: ”Bedroom” Other descriptions: • A person is sitting at adesk they pick up a bag and then they get up • The person is sitting at the computer desk and bends over to pick up the garbage, which he sits on his lap, and then gets up carrying the garbage. Actions: • Taking a bag from somewhere (9.00, 16.40) • Sitting at a table (0.00, 29.30) • Someone is standing up from somewhere (25.00, 30.80) • Holding a bag (12.70, 32.00) • Someone is laughing (0.00, 30.80) • Sitting in a chair (0.00, 32.00) Relation Changes (wrt. actor): • bag goes from ”’holding’” to ”’touching’ at 18.0” • bag goes from ”’touching’” to ”’holding’ at 20.0” • bag goes from ”’holding’” to ”’touching’ at 26.0” • bag goes from ”’touching’” to ”’holding’ at 27.0” 17 Understanding Complexity in VideoQA via Visual Program Generation 
+
+• chair goes from ”’sitting on’” to ”None at 28.0” • chair goes from ”None” to ”’not contacting’ at 28.0” 
+
+8.5. Question Generation from Scripts 
+
+Each textual script generated above is combined with a prompt requesting that the language model output inter-esting questions about the video, without specifying that they should be hard, or how interesting should be inter-preted. The complete prompt is used to condition a Large Language Model to generate the requested questions and answer candidates in a JSON format. The chosen language model is GPT-4. We set the sampling temperature to zero and decode greedily (for replicability). We include the ex-act prompt used here: 
+
+Prompt 
+
+[SYSTEM]You generate interesting questions to ask about the video for which the description is provided. Pretend you don’t get the exact description (ie. no exact times or player ids) but you did watch the video, so you have a notion of what happens, and when. [SYSTEM]Return a list of Multiple Choice questions formated as a json with q, ans, dist1, dist2, dist3, dist4 keys. ‘distN‘ are 4 distractors.. [USER]What are interesting questions to ask about this video? (description provided) Return a numbered list of Multiple Choice questions formated as a json with q, ans, dist1, dist2, dist3, dist4 keys. ‘distN‘ are 4 distractors Try to use visual descriptions of the actors instead of their role sometimes (eg. the person with the red shirt instead of the waiter). **NEVER** say subactivities. Eg. don’t say ”first subactivity”, instead say ”while the waiters served the drinks”. Video description: —
+
+<DESC >
+
+—Remember, **NEVER** say subactivities. Eg. don’t say ”first subactivity”, instead say ”while the waiters served the drinks”. When generating questions for videos from the MOMA dataset we also include an additional instruction to make sure the model doesn’t refer to actors as unclassified when the annotations are missing descriptions: Also avoid saying ”unclassified ...” to refer to actors. If you weren’t provided with a role use visual descrip-tions instead. 
+
+## 9. Additional Results and Analysis 
+
+9.1. Relation to Video Complexity 
+
+Our approach to estimating the complexity of VideoQA tasks is grounded in insights from classical complexity the-ory, specifically the Chain Rule for Kolmogorov Complex-ity. According to this rule, the complexity of a composite entity, such as a (video, question) pair, can be expressed as the sum of the complexity of one component (e.g., the question) and the conditional complexity of the other com-ponent (e.g., the video conditioned on the question), plus a logarithmic term: 
+
+K(x, y ) = K(x) + K(y|x) + O(log( K(x, y ))) (12) In cases where there is minimal shared information be-tween the video and the question, the complexity of the pair can be approximated as the sum of their individual com-plexities, up to this logarithmic term: 
+
+K(x, y ) ≈ K(x) + K(y) + O(log( K(x, y ))) (13) In this work, we focus on estimating the complexity of the question, which parallels the structure suggested by the Chain Rule for Kolmogorov Complexity. If we treat the video as x and the question as y, then the complexity of the (video, question) pair can be thought of in a similar way, where the complexity of the question K(y) is a key component of the overall task complexity. While we do not directly compute Kolmogorov complexities, this anal-ogy provides a theoretical motivation for focusing only on the question complexity. Estimating the complexity of the question is valuable because it can later be combined with robust methods for assessing the complexity of the video to achieve a more comprehensive measure of the total task complexity in future work. The difference between the predicted complexity of the question and the actual model performance on a given question can be used as a proxy for estimating the video’s complexity. Prior work by (Wei et al., 2016) has approxi-mated image complexity by the number of objects present in an image. We extend this approach to video complexity, utilizing the VidOR dataset (Shang et al., 2019), which pro-vides annotations of entities and their relations in videos. Conveniently, VidOR and NextQA share the same video 18 Understanding Complexity in VideoQA via Visual Program Generation 
+
+source, YFCC100M (Thomee et al., 2016), allowing us to align entity counts with our models’ performance on Nex-tQA. SeViLA 
+
+> SeViLA ZS
+> ViperGPT
+> InternVideo
+> ATP
+> VIOLET
+> 0.2
+> 0.1
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> Difference in Number of Subjects/Objects  Correctly Answered Hard Questions
+> Incorrectly Answered Easy Questions
+
+Figure 7. Comparison of the average number of entities (subjects and objects) in videos where models perform poorly on low com-plexity tasks (easier questions) versus where they perform well on high complexity tasks (harder questions). More entities make easy questions harder, while fewer entities make hard questions easier. 
+
+Figure 7 compares the difference in the average number of entities (subjects and objects) in videos where mod-els perform poorly on low complexity tasks (easier ques-tions) versus where they perform well on high complexity tasks (harder questions). The trend indicates that, for easier questions (low complexity), videos with more subjects/ob-jects tend to result in poorer model performance, while for harder questions (high complexity), models perform better when fewer subjects/objects are present in the video. This pattern supports the idea that the sources of complex-ity of a VideoQA task can be combined. Simple questions become more challenging when accompanied by complex videos, and difficult questions can be made easier in the presence of simpler videos. This relationship between video complexity and question complexity reinforces the importance of estimating both components. While our cur-rent approach focuses on question complexity, combining it with accurate video complexity estimations can yield a more precise measure of the overall task complexity. We leave the exploration of more accurate methods for video complexity estimation to future work. 
+
+9.2. Applicability to other tasks 
+
+In principle, our approach applicable to any QA domain. However, we limit the scope of this paper to VideoQA, where the reasoning complexity is significantly higher and model failure modes are more nuanced; thus, our approach has the most significant utility. To illustrate this, we analyzed the GQA image QA bench-mark (Hudson & Manning, 2019), generating programs with ViperGPT (Sur´ ıs et al., 2023). For consistency, we evaluated the BLIP-2 (Li et al., 2023) VQA model (cho-sen as it shares the same backbone with SeViLA) and ViperGPT. We found that the overall complexity of gen-erated programs is significantly lower in images (10% of programs with cyclomatic complexity above 5 compared to 
+
+≈45% in NExT-QA). As a result, the relationship between cyclomatic complexity and model performance is much stronger in VideoQA than in ImageQA, as evidenced by a higher coefficient of determination R2 of 0.75 vs. 0.39. Intuitively, this difference in program complexity is not sur-prising, as answering a question in a video typically re-quires analyzing more content than in a single image. In the case of NLP, the underlying tasks often involve even sim-pler reasoning patterns. For example, the multi-step rea-soning chains in HotPotQA (Yang et al., 2018) are linear, and the dataset collected to evaluate HuggingGPT (Shen et al., 2023) has fewer than 2 module calls per prompt on average, and in simple patterns. 
+
+9.3. Subtrees Visualization 
+
+In this section, we present visualizations of subtrees which correlate with question that are challenging to answer for all 3 models analyzed in the main paper (see Sections 3.3 and 4.3). A majority of the nodes present in the ASTs encode non-essential information such as variable names, while we care about the actual structure and the operations being executed on the frames. For this reason, we ignore variable names and values when comparing two subtrees to one another. Similarly, we develop a tool to visualize the general structure of subtrees that performs a related node-trimming step. Finally, the visualizations of ASTs in the paper ( eg. Figure 4 of the main paper) include an addi-tional simplification step in which nodes are merged to aid in understanding and interpretability. All the 8 subtrees that are shared by the 3 models in the main paper are shown in Figure 16. There are two principal patterns that can bee seen from analyzing them. The first group includes primitives that allow for temporal reason-ing (Figures 8 to 13). The other common pattern group in-cludes questions that require more detailed analysis of spe-cific elements (objects, relationships) within a scene (Fig-ures 14 and 15). First, we consider the primitives necessary for temporal reasoning, i.e. for questions that necessitate taking into ac-count a specific frame’s placement in a sequence of events. The subtrees shown in Figures 8 and 9 both contain the control flow necessary for identifying an event that happens after a particular condition has been met. Figure 8 in partic-ular illustrates a common pattern for finding the frame after 
+
+19 Understanding Complexity in VideoQA via Visual Program Generation Module Assign Const. For If False enumerate() If video_segment.frame_iterator() condition Assign Const. Break True condition Assign Var. Assign Var. Add 1FloorDiv video_segment.num_frames 2
+
+Figure 8. Module Assign Const. For None enumerate() If video_segment.frame_iterator() condition Assign Const. ElseIf True condition Assign Const. Break Figure 9. Module Assign Const. Assign Const. False None 
+
+Figure 10. Expr FloorDiv video_segment.num_frames 2 Figure 11. If condition Assign Const. Break Figure 12. Expr enumerate() video_segment.frame_iterator() 
+
+Figure 13. Expr And frame.detect_object() frame.detect_object() Eq frame.simple_qa() 
+
+Figure 14. Expr frame.detect_object() Figure 15. Figure 16. Subtrees identified as hard. 
+
+something has happened, with a For Loop that identifies the relevant part of the video, followed by an addition to look 
+
+after . Similarly, Figure 9 is common in programs that have to identify a second condition that happens after a first one. For this reason the control-flow is slightly more complex, and includes a second conditional that is only checked for after the first condition has been satisfied. Figures 10 to 13, while also temporal, are less obviously so. The presence of the primitives shown in Figure 10 cor-relates with code that includes a loop over frames in the video. This pattern is commonly used to setup for iterating over the video until a relevant frame is found. Upon identi-fication, the first boolean variable switches to True and the other one is used to store the frame. Intuitively, this pattern is useful for answering questions about a specific moment of a video. The primitives in Figure 11 show code that se-lects a frame from the middle of the video. In practice, pro-grams include this code as a fail-safe when searching for a specific frame, falling back to selecting the middle frame in case no satisfying frame is found ( eg. Fig. 8). Figure 12 shows a break statement that will halt an iteration over the video when a frame that meets the required criteria is seen. Intuitively, this pattern allows for the identification of the first event in the video that meets some criteria, as the break in the loop avoids overwriting the variable with frames that come in the future. And Figure 13 shows an iterator over the video, which is the main primitive necessary to consider frames in order. This primitive is often used in conjunction with others shown, eg. with the break statement in Fig. 12 to find the first frame that meets the condition. The other common pattern group involves questions that require a more granular consideration of specific elements (objects, relationships) within a scene. For example, the subtree shown in Figure 15 is included in questions that require focusing on a single specific object or actor in a frame of the video. Relatedly, programs that include the subtree in Figure 14 require identifying at least two objects or actors and then relating them (by calling simple qa() , an image question answering module). 20 Understanding Complexity in VideoQA via Visual Program Generation Counting questions Single-frame Multi-frame 
+
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> Average Success Rate
+> Success Rate per Model by Number of Frames in Temporal Support
+> Models
+> SeViLA
+> SeViLA ZS
+> ViperGPT
+> InternVideo
+> ATP
+> VIOLET
+
+Figure 17. Temporal support ( i.e. number of frames a question needs) according to the generated program. All models tested per-form significantly worse on questions that require more frames. Counting questions are listed separately, as they potentially re-quire every frame to be checked. 
+
+9.4. Additional Analysis Results: Temporal Support 
+
+The interpretable nature of subtrees allows us to manually identify a subset of subtrees we know correspond to sub-routines that store frames. We leverage Equation 1 to count the appearance of said subtrees in each program’s ASTs to find the temporal support of each question. As pre-vious works have proposed (Mangalam et al., 2023), we validate that a significant source of question complexity in Video Question Answering is owed to the number of frames needed to answer the question (Figure 17). 
+
+9.5. Dataset Statistics: CodePlex-QA 
+
+The outcome of the data generation process is summarized in Table 3, which presents a breakdown of CodePlex-QA. For each source dataset, the table shows the number of questions and videos that pass the described CodePlexity filter. Importantly, a majority of the questions are associ-ated with a unique video. 
+
+## 10. Ablations 
+
+10.1. Validating Question Selection Algorithm 
+
+We now validate our approach for selecting hard questions based on our complexity estimation using the NExT-QA validation set. In particular, we follow the same approach (and with the same threshold and parameters) as when con-structing CodePlex-QA, and select the most challenging questions from this set. We then evaluate the same models from Section 5.2 on this subset, which we call NExT-QA ∗,and compare to both the original NExT-QA dataset, and CodePlex-QA. This allows to separate the effects of ques-tion generation and question filtering when constructing CodePlex-QA as NExT-QA and NExT-QA ∗ share exactly the same base set of questions. Figure 18 indeed validates that our approach is success-ful in identifying a subset of NExT-QA that is more chal-lenging for all models evaluated compared to the original dataset. However, our final dataset generation pipeline re-sults in an even more challenging benchmark by first con-structing a more diverse pool of videos and questions for the filtering approach to select from. 
+
+10.2. Validating Question Generation Pipeline with Same Videos 
+
+While the validation of the question selection algorithm component of our dataset construction pipeline in Sec-tion 10.1 shows that our selection algorithm is effective in identifying challenging subsets of questions, this does not fully guarantee that the higher observed complexity in CodePlex-QA in Table 2 is exclusively due to the question generation pipeline. Therefore in this section we isolate the video source effects by adapting our pipeline to use the same videos from VidOR (Shang et al., 2019) as NExT-QA. To generate the questions, we use VidOR annotations and augment them with annotations from VidSTG (Zhang et al., 2020) and captions generated by ChatGPT (Zhang et al., 2024). We then apply our full pipeline without modifica-tions to obtain CodePlex-QA-VidOR. Finally, we evaluate the baseline models from Table 2 and report the results in Table 4. As Table 4 shows, CodePlexQA-VidOR remains consis-tently more difficult than NExT-QA across all models, de-spite using identical video sources. CodePlexQA-Vidor is slightly easier than our original CodePlexQA, both because of divergent data sources and because the less detailed Vi-dOR scenegraphs limit the expressivity of the generated questions. This confirms that while video source con-tributes to overall dataset characteristics, the key driver of difficulty is our question generation and selection method-ology, not merely differences in video content. 
+
+10.3. Impact of Code Generation Correctness on Complexity Metrics 
+
+To investigate the relationship between code generation correctness and the alignment of complexity metrics to problem structure, we conduct an ablation study compar-ing cases where the generated code produces correct an-swers with those where it does not. Note that ”incorrect answers” do not necessarily imply that the code itself is in-valid; rather, it may fail to produce the expected output. The results are summarized in Table 5, which presents the correlation between the complexity metrics and the mPEG metric for various models. From Table 5, it is evident that the correlation between the mPEG metric and the various code-based complexity metrics is consistently higher for 21 Understanding Complexity in VideoQA via Visual Program Generation 
+
+#Questions # Videos Action Genome (Ji et al., 2020) 1572 1154 ActivityNet (Caba Heilbron et al., 2015) 749 594 MOMA (Luo et al., 2021; 2022) 133 93 
+
+Table 3. Composition of CodePlex-QA in terms of number of questions and videos from each source dataset. 
+
+Dataset Tarsier SeViLA ZS ViperGPT InternVideo VIOLET Random NExT-QA 70.9% 64.2% 60.0% 50.9% 37.7% 20.0% CodePlexQA 52.5% 43.7% 45.8% 29.9% 27.6% 20.0% CodePlexQA-VidOR 59.6% 58.5% 50.4% 46.2% 30.0% 20.0% 
+
+Table 4. Difference in prediction accuracy of zero-shot VideoQA models between the manually annotated NExT-QA, our automatically generated CodePlex-QA, and its VidOR-based variant. CodePlexQA-VidOR is consistently harder than NExT-QA despite sharing video sources, while slightly easier than the full CodePlexQA. NExT-QA NExT-QA* CodePlex-QA 
+
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> Average Success Rate
+> Success Rate per Model in Easy vs. Hard Subsets
+> Models
+> SeViLA ZS
+> InternVideo
+> VIOLET
+> Random
+
+Figure 18. Filtering NExT-QA using our approach indeed results in a more challenging subset for all the evaluated models. How-ever, our full dataset construction pipeline results in an even more challenging benchmark by first generating a more diverse pool of samples to select from. 
+
+cases where the generated code produces correct answers. However, we highlight that CodePlexity is a lot more ro-bust to code generation errors than the baselines. In other words, while the correlation between models’ performance and metric value improves when code is correct, CodePlex-ity consistently outperforms baselines in robustness to code generation errors. This underscores its practicality even when errors occur. These results suggest that correct code generation often aligns better with problem complexity, as reflected in higher correlations with the mPEG metric. By contrast, incorrect code, while potentially valid in syntax or struc-ture, often fails to capture the underlying complexity of the problem, thereby diluting the relationship between the met-rics. In a similar manner, Section 10.4 how that using more advanced code generation models improves the predictive power of code-based complexity metrics. 
+
+10.4. Impact of Code Generation Model Choice 
+
+This section evaluates the influence of the code generation model on the performance of our complexity estimation framework. Specifically, we compare ViperGPT, the pri-mary model used in our analysis, with Recursive Visual Programming (RVP) (Ge et al., 2024), a newer model de-signed for visual programming tasks. Unlike traditional ap-proaches, RVP employs a recursive code generation strat-egy, which systematically breaks down complex problems into manageable subproblems. This allows it to handle in-tricate question structures with greater flexibility. Figure 19 illustrates the relationship between the estimated complexity of questions and the performance of Visual Pro-gramming models. For both ViperGPT and RVP, we ob-serve a significant negative correlation between the com-plexity metric and the model’s success rate. This trend highlights that as the estimated complexity of a question increases, the likelihood of the model correctly addressing it decreases. This correlation underscores the utility of the complexity metric as a predictive tool for identifying chal-lenging questions. 
+
+10.5. Impact of Analysis Dataset Choice 
+
+To assess the generality and robustness of our find-ings, we replicated our analysis using a different dataset, MVBench (Li et al., 2024), which offers a diverse set of videos and questions compared to NExT-QA. Specif-ically, we repeat the same experimental setup as that in Section 4.1, first generating programs for the questions in MVBench, and then rerunning our pipeline to generate pro-grams using ViperGPT, extract code based metrics, and train our CodePlexity metric. Furthermore, we additionally consider two new models in our analysis: VideoChat2 (Li 22 Understanding Complexity in VideoQA via Visual Program Generation                                                       
+
+> Train Models Validation Models SeViLA ViperGPT ATP VIOLET HGA SeViLA ZS InternVideo Tarsier
+> Lines of Code
+> Correct 0.1373 —0.1747 0.1455 0.0712 0.1654 0.2022 0.1475 Incorrect 0.1245 —0.0540 0.0656 0.0735 0.0756 0.0831 0.0696
+> Cyclomatic Complexity
+> Correct 0.1702 —0.2128 0.1930 0.0649 0.1739 0.2825 0.1634 Incorrect 0.1351 —0.1118 0.0881 0.0664 0.0973 0.1388 0.1071
+> CodePlexity
+> Correct 0.2608 —0.3128 0.3178 0.0867 0.2095 0.2877 0.1950 Incorrect 0.2810 —0.2041 0.2542 0.1087 0.1839 0.1700 0.1857
+> Table 5. Correlation of complexity metrics with mPEG for cases where the generated code produces correct and incorrect answers.
+
+et al., 2024) and Llava-NExT (Liu et al., 2024) as these represent the state of the art on the MVBench dataset. We first visualize the correlation between code-based com-plexity metrics and the performance of various VideoQA models on MVBench in Figure 20. Consistent with our ob-servations on NExT-QA, we found that code-based com-plexity metrics exhibit a strong negative correlation with model performance on MVBench. Specifically, both Lines of Code and Cyclomatic Complexity continued to demon-strate a consistent and strong correlation, indicating that questions requiring more intricate code are more challeng-ing for all the models evaluated. This is despite the base code generation model ViperGPT (and RVP) performing worse on MVBench than on NExT-QA, where they achieve accuracies of 38.4% and 35.0%, respectively. For refer-ence, these are comparable to recent approaches such as GPT-4V (run with 16 frames as input at 512×512 resolu-tion), which obtains 43.5%, and VideoChat (Li et al., 2024) (also with 16 frames), which achieves 35.5%. We further conducted a systematic evaluation of different code-based metrics using the mPEG metric on the val-idation set of MVBench, summarized in Table 6. Our proposed CodePlexity metric significantly outperformed the naive code complexity measures, such as Lines of Code and Cyclomatic Complexity. CodePlexity achieved higher predictive accuracy in estimating question difficulty across all evaluated models on MVBench. Note that Code-Plexity generalizes to the held-out models in our analysis (VideoChat2 (Li et al., 2024) and Llava-NExT (Liu et al., 2024)). These consistent results across two distinct datasets sug-gest that code-based complexity metrics, and CodePlexity in particular, are effective tools for assessing question dif-ficulty in VideoQA tasks regardless of the dataset’s charac-teristics. 
+
+10.6. Training on CodePlexQA 
+
+We split CodePlex-QA into train and val sets and fine-tuned SeViLA. We observed that training on CodePlex-QA in-deed can help improve the performance of VideoQA mod-els on these hard questions (accuracy increases from 44.8 to 47.3). However, the gap is narrower compared to fine-tuning the same method on NExT-QA (accuracy improve-ment from 64.2 to 73.4). This suggests that our analysis un-covered deeper reasoning limitations in existing VideoQA approaches, which may not be easily resolved by simply increasing the amount or diversity of the training data. 23 Understanding Complexity in VideoQA via Visual Program Generation 
+
+Train Models Val. Models InternVideo SeViLA ZS Tarsier VideoChat2 LLaVA-NeXT Dependency Tree Depth 6.5 6.2 19.7 16.5 12.2 GPT-4 (OpenAI, 2023b) 2.3 0.0 14.8 12.8 8.9 BERT (Kenton & Toutanova, 2019) 25.5 11.6 18.7 20.9 21.6 Lines of Code 4.4 9.5 12.5 10.3 9.2 Cyclomatic Complexity 13.0 9.6 6.1 5.2 4.5 CodePlexity (Ours) 41.3 33.0 44.6 29.9 27.5 
+
+Table 6. Comparison of question complexity metrics using mPEG on the validation set of MVBench. CodePlexity is trained on the first three models. Our approach demonstrates the highest correlation with the models’ performance. 1 2 3 4 5 6 7
+
+> Cyclomatic Complexity
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+
+Success Rate vs Cyclomatic Complexity 
+
+> Average
+> Tarsier
+> SeViLA
+> SeViLA ZS
+> ViperGPT
+> InternVideo
+> ATP
+> VIOLET
+> HGA
+
+ViperGPT 1 2 3 4 5 6 7 8
+
+> Cyclomatic Complexity
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+
+Success Rate vs Cyclomatic Complexity 
+
+> Average
+> Tarsier
+> SeViLA
+> SeViLA ZS
+> ViperGPT
+> InternVideo
+> ATP
+> VIOLET
+> HGA
+
+RVP 
+
+Figure 19. Comparison of code-based complexity metrics when using different code generation models. Lines in both cases show significant negative correlation of complexity metric with model performance for both variants. 8 9 10 11 12 13 14 15 16 
+
+> Lines of Code
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+
+Success Rate vs Lines of Code         
+
+> Average
+> VideoChat2
+> Tarsier
+> LlavaNext
+> SeViLA ZS
+> InternVideo 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0
+> Cyclomatic Complexity
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Success Rate
+
+Success Rate vs Cyclomatic Complexity 
+
+> Average
+> VideoChat2
+> Tarsier
+> LlavaNext
+> SeViLA ZS
+> InternVideo
+
+Figure 20. Correlation of VideoQA models’ success rate on MVBench for various approaches for estimating question com-plexity. As was the case for NExT-QA, we observe that code complexity correlated strongly with question complexity. 
+
+24

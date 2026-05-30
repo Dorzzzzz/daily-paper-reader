@@ -1,0 +1,924 @@
+Title: Fine-Grained Captioning of Long Videos through Scene Graph Consolidation
+
+URL Source: https://openreview.net/pdf?id=aTC2euLwnh
+
+Number of Pages: 17
+
+Markdown Content:
+# Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Sanghyeok Chu 1 Seonguk Seo † 1 Bohyung Han 1 2 
+
+Abstract 
+
+Recent advances in vision-language models have led to impressive progress in caption generation for images and short video clips. However, these models remain constrained by their limited tempo-ral receptive fields, making it difficult to produce coherent and comprehensive captions for long videos. While several methods have been pro-posed to aggregate information across video seg-ments, they often rely on supervised fine-tuning or incur significant computational overhead. To address these challenges, we introduce a novel framework for long video captioning based on graph consolidation. Our approach first gener-ates segment-level captions, corresponding to in-dividual frames or short video intervals, using off-the-shelf visual captioning models. These cap-tions are then parsed into individual scene graphs, which are subsequently consolidated into a uni-fied graph representation that preserves both holis-tic context and fine-grained details throughout the video. A lightweight graph-to-text decoder then produces the final video-level caption. This framework effectively extends the temporal un-derstanding capabilities of existing models with-out requiring any additional fine-tuning on long video datasets. Experimental results show that our method significantly outperforms existing LLM-based consolidation approaches, achieving strong zero-shot performance while substantially reduc-ing computational costs. 
+
+1. Introduction 
+
+Vision-language models (VLMs) have demonstrated im-pressive capabilities across diverse vision-language tasks, including visual question answering, visual dialogue, cross-modal retrieval, and spatiotemporal understanding (Alayrac        
+
+> 1ECE, Seoul National University, Korea. 2IPAI, Seoul National University, Korea. †: Currently at Meta. Correspondence to: Bohyung Han <bhhan@snu.ac.kr >.
+> Proceedings of the 42 nd International Conference on Machine Learning , Vancouver, Canada. PMLR 267, 2025. Copyright 2025 by the author(s).
+
+et al., 2022; Dai et al., 2023; OpenAI, 2023; Chen et al., 2024b; Huang et al., 2024; Zhang et al., 2025; Xu et al., 2024; Maaz et al., 2024). Notably, substantial progress has been made in generating captions for images and short video clips (Liu et al., 2024; Chai et al., 2025; Zhao et al., 2024; Wang et al., 2024; Chen et al., 2024a; Mun et al., 2019). However, generating captions for longer videos remains a significant challenge. Most existing models are designed for short-term visual inputs, such as images or short video clips, and lack effective support for holistic encoding of entire long videos. As a result, captioning videos beyond a model’s temporal window typically requires processing and integrating information from multiple temporal segments. Several approaches, such as memory-based (Zhou et al., 2024; Song et al., 2024; Balazevic et al., 2024) and recur-sive frameworks (Zhou et al., 2024; Islam et al., 2024; Qian et al., 2024; Weng et al., 2024; Kahatapitiya et al., 2024), have been proposed to consolidate information across these segments. However, these methods often rely on supervised fine-tuning with the target datasets, which limits their gen-eralizability to unseen video domains. More recently, large language models (LLMs) have been employed to generate textual summaries across multiple video segments (Wang et al., 2022b; Chen et al., 2023; Zhang et al., 2024a). While these LLM-based approaches eliminate the need to adapt existing models for long videos, they typically incur high inference overhead and require significant computational resources. To address these limitations, we propose a novel framework that integrates segment-level captions into a unified global description via graph-based consolidation. We first obtain segment-level captions—each corresponding to either a sin-gle frame or a short video clip, depending on the chosen visual captioning model—using an off-the-shelf captioning algorithm. Each caption is then parsed into a scene graph, and these graphs are consolidated into a unified structure that captures the comprehensive semantics of the entire video. Finally, a lightweight graph-to-text decoder, trained solely on external text corpora, translates the consolidated graph into a coherent global caption. The proposed approach enhances understanding and process-ing of long-range temporal information without requiring architectural changes or fine-tuning on long video datasets. 1Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+In particular, our framework can be paired with any off-the-shelf VLM, effectively extending its captioning capability beyond the model’s inherent temporal constraints. Unlike other LLM-based consolidation methods, it minimizes com-putational overhead by employing a lightweight graph-to-text decoder with significantly fewer parameters. Our ex-perimental results demonstrate that our approach achieves superior performance in both zero-shot video captioning and zero-shot video paragraph captioning, demonstrating its effectiveness and efficiency. In summary, our key contributions are organized as follows: • We propose a novel approach to generate fine-grained captions for long videos using the information across multiple temporal segments. • We introduce a graph consolidation algorithm that merges segment-level scene graphs into a unified rep-resentation to capture both holistic context and fine-grained details across the entire video. • Our method achieves strong zero-shot captioning per-formance with significantly lower computational cost compared to LLM-based approaches. 
+
+2. Related Works 
+
+Video captioning Recent advances in video captioning have predominantly rely on supervised training using large-scale datasets, achieving impressive results across various benchmarks (Lei et al., 2021; Wang et al., 2022a; Yan et al., 2022; Liu et al., 2024; Zhao et al., 2024; Wang et al., 2024; Chen et al., 2024a). However, extending these supervised approaches to longer videos remains challenging, primar-ily due to the scarcity of annotated data covering extensive temporal contexts and the computational complexity in-volved in modeling long-range dependencies. While various methods have been proposed to tackle these challenges, the needs for supervised fine-tuning for specific target datasets hampers scalability and generalization to unseen video do-mains (Yang et al., 2023; Islam et al., 2024; Song et al., 2024; Balazevic et al., 2024; Qian et al., 2024; Weng et al., 2024; Kahatapitiya et al., 2024). 
+
+Zero-shot video captioning Researchers have explored methods for video captioning without using paired video-text annotations. One approach involves refining language model outputs solely at test time. ZeroCap (Tewel et al., 2022) and related methods (Tewel et al., 2023) use image-text alignment score calculated by CLIP (Radford et al., 2021) in gradient updates to adjust language model fea-tures, while MAGIC (Su et al., 2022) employs a CLIP-induced decoding strategy to ensure semantic relevance. Although initially developed for images, these methods ex-tend to videos by aggregating frame-level features into a single representation. Another approach, often termed zero-shot, involves text-only training without paired video-text annotations, where text decoders are used in conjunction with image-text aligned encoders such as CLIP and Image-Bind (Girdhar et al., 2023). Methods such as DeCap (Li et al., 2023b) and C 3 (Zhang et al., 2024b) generate captions by aligning visual and textual features in a shared embed-ding space. However, these approaches often fail to produce accurate and coherent captions, especially when applied to videos with complex events. 
+
+Zero-shot long video captioning Generating coherent and comprehensive captions for long-context videos under zero-shot settings often relies on the consolidation of infor-mation derived from multiple temporal segments. Existing consolidation techniques, including memory-based (Zhou et al., 2024; Song et al., 2024; Balazevic et al., 2024) and recursive approaches (Islam et al., 2024; Qian et al., 2024; Weng et al., 2024; Kahatapitiya et al., 2024), require su-pervised fine-tuning on the target dataset, which limits their applicability to zero-shot scenarios. Recently, LLMs have emerged as a promising tool for zero-shot consolida-tion, leveraging their general reasoning capabilities without task-specific fine-tuning. For example, VidIL (Wang et al., 2022b) constructs prompts by integrating multi-level textual information from image-language models, including objects, events, attributes, frame captions, and subtitles. Due to the complexity of these prompts, it incorporates illustrative few-shot exemplars from training dataset, to guide LLMs in inter-preting and utilizing these textual cues for video captioning Similarly, Video ChatCaptioner (Chen et al., 2023) adopts an interactive framework, where an LLM queries an im-age VLM for captions of individual frames and aggregates them to generate video caption. While these LLM-based methods are powerful and flexible, they typically incur high computational costs. 
+
+3. Scene Graph Construction for Videos 
+
+To enable effective captioning of long videos, we propose a novel framework that constructs and consolidates scene graphs derived from segment-level captions, as illustrated in Figure 1. The framework comprises four main stages: (1) generating captions for individual video segments using VLMs, (2) converting these captions into scene graphs, (3) merging the scene graphs from all segments into a unified graph, and (4) generating a comprehensive description from the consolidated graph. By aggregating information across segments, the proposed method produces captions that are more coherent and contextually informative, capturing fine-grained details throughout the video. Throughout this paper, we use the term segment to denote a temporal unit of a video—either a single frame or a short interval—depending on the characteristics of the employed VLM. 2Fine-Grained Captioning of Long Videos through Scene Graph Consolidation ut frame fM 
+
+VLM ❄  
+
+> Woman
+> Elderly
+> Cook in Kitchen
+> Wear
+> Shirt Red
+> Cabinets
+> White
+
+VLM ❄       
+
+> ⋯
+> Kitchen Cabinets
+> White
+> with
+> Wooden Boiling Spoon Onion stir
+> Elderly Shirt Woman wear Red
+> wear
+> Shirt
+> Woman
+> Red
+> Elderly
+> [CLS]
+> Graph input to text output
+> Elegant Woman [CLS]
+> Counter on Something
+> point to Kitchen shown in
+> Parsing
+> (c) Scene graph consolidation
+> Kitchen
+> Woman Camera
+> Elderly
+> Glasses
+> VLM
+
+“An elderly woman with glasses is sitting in a kitchen, speaking to the camera.” 
+
+> Parsing
+
+“An elderly woman wearing glasses and a red shirt is cooking in a kitchen with white cabinets, speaking to the camera and pointing to something on the counter.”      
+
+> ⋯
+> Video-level scene graph
+> Parsing
+> with sit in
+> speak to
+> Woman cook in Kitchen
+> wear
+> Shirt Cabinets
+> Elderly
+> White Red
+> Kitchen
+> shown in
+> Woman Something
+> point to
+> Elegant
+> with
+> (a) Segment-level caption generation
+> (b) Scene graph parsing
+> (d) video-level caption generation
+
+“An elderly woman wearing a red shirt is cooking in a kitchen with white cabinets.” 
+
+“An elegant woman is shown in a kitchen, pointing to something on the counter.”  
+
+> ⋯
+> ⋯
+> Time
+> Kitchen
+> shown in
+> Woman
+> speak to Camera
+> Shirt
+> wear
+> Something
+> with
+> Glasses
+> point to
+> Elderly
+> Cabinets
+> White
+> Red
+> with
+> Counter
+> on
+> Counter
+> on
+> Elegant
+> “An elegant woman is shown in a kitchen, pointing to something on the counter.”
+> input sequence
+> Graph-to-text model
+> attention mask
+> Graph-to-text model
+> [CLS]
+> Elegant
+> Woman
+> shown in
+> Kitchen
+> point to
+> Something
+> on
+> Counter
+> [CLS]
+> Elegant
+> Woman
+> shown in
+> Kitchen
+> point to
+> Something
+> on
+> [CLS]
+> Elegant
+> Woman
+> shown in
+> Kitchen
+> point to
+> Something
+> on
+> Counter
+> [CLS]
+> Elegant
+> Woman
+> shown in
+> Kitchen
+> point to
+> Something
+> on
+> Counter
+
+Figure 1. An overview of our zero-shot video caption generation framework. (left): The pipeline consists of (a) segment-level caption generation using off-the-shelf VLMs, (b) scene graph parsing for each caption, (c) consolidation of individual scene graphs into a unified graph representing the entire video, and (d) video caption generation through our graph-to-text model. (right): Illustration of how the scene graph is transformed into an input for the graph-to-text model to generate a caption. 
+
+3.1. Generating segment-level captions 
+
+Given an input video, we first divide it into a series of temporal segments. We then generate segment-level cap-tions using off-the-shelf VLMs, with prompts guiding the models to produce descriptive sentences suitable for scene graph construction. While we primarily utilize open-source VLMs as our captioning backbone, our framework is flexi-ble enough to incorporate any VLM, including proprietary or closed-source models, as long as APIs are accessible. 
+
+3.2. Parsing captions into scene graphs 
+
+A scene graph G = ( O, E) is defined by a set of objects 
+
+O = {o1, o 2, . . . }, and a set of edges between objects, E.Each object oi = ( ci, Ai) consists of an object class ci ∈ C 
+
+and its attribute set Ai ⊆ A , where C is a set of object classes and A is a set of all possible attributes. A directed edge, ei,j ≡ (oi, o j ) ∈ E , has a label ri,j ∈ R , specifying the relationship from one object to the other. All object classes, attributes, and relationship labels are represented as text strings. We convert the generated caption from each segment into a scene graph, providing a more structured understanding of each segment. A caption is parsed into a scene graph by textual scene graph parser, and FACTUAL-MR parser (Li et al., 2023c) is used in our implementation. This parser first maps the caption to an intermediate semantic representa-tion consisting of objects, attributes, and relationships, then deterministically converts it into a scene graph. By repre-senting each segment as a graph consisting of objects and their relationships, we can apply a graph merging technique to produce a holistic representation of the entire input video. 
+
+3.3. Scene graph consolidation 
+
+The scene graph consolidation step combines all individual 
+
+Algorithm 1 Scene graph consolidation 
+
+1: Input: 
+
+2: G = {G1, G 2, . . . , G n}: set of scene graphs 
+
+3: φ(·): a graph encoder 
+
+4: ψi(·): a function returning the ith object in a graph 
+
+5: π: a permutation function 
+
+6: τ : a threshold 
+
+7: Output: Gvideo : a video-level scene graph 
+
+8: while |G| > 1 do 
+
+9: Retrieve the most similar pair {Gs, G t} from G
+
+10: Gs = ( Os, Es), G t = ( Ot, Et)
+
+11: Gm = ( Om, Em) ← (Os ∪ O t, Es ∪ E t)
+
+12: π∗ ← arg max 
+
+π∈Π
+
+∑
+
+i
+
+ψi(φ(Gs)) 
+
+‖ψi(φ(Gs)) ‖ · ψi(φ(Gtπ )) 
+
+‖ψi(φ(Gtπ )) ‖
+
+13: for (p, q ) ∈ M such that sp,q > τ do 
+
+14: Set the class label of the merged object, ˆc
+
+15: ˆom ← (ˆ c, Asp ∪ A tq )
+
+16: Om ← { ˆom} ∪ (Om \ { osp, o tq })
+
+17: Update Em : em, ∗ ← ep, ∗ and e∗,m ← e∗,q 
+
+18: end for 
+
+19: G ← { Gm} ∪ (G \ { Gs, G t})
+
+20: end while 
+
+21: Gvideo ← extract (G)
+
+22: return Gvideo 
+
+scene graphs derived from each segment into a unified graph that represents the overall visual content of the video. We first describe our graph merging procedure and then intro-duce a subgraph extraction technique designed to support more focused and coherent video caption generation. 3.3.1. M ERGING TWO SCENE GRAPHS 
+
+We first describe our scene graph merging technique. Given two scene graphs, Gs = ( Os, Es) and Gt = ( Ot, Et), con-3Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+structed from captions corresponding to two different seg-ments, we run the Hungarian algorithm to obtain an optimal matching between the two object sets, Os and Ot, which is formally expressed as 
+
+π∗ = arg max 
+
+> π∈Π
+
+∑
+
+> i
+
+ψi(φ(Gs)) 
+
+‖ψi(φ(Gs)) ‖ · ψi(φ(Gtπ )) 
+
+‖ψi(φ(Gtπ )) ‖ , (1) where φ(·) denotes a graph encoder, ψi(·) is a function to extract the ith object from an embedded graph, and π ∈ Π
+
+indicates a permutation of objects in a graph. Note that the object matching is based on their cosine similarity, where we introduce dummy objects to deal with different numbers of objects for matching. After computing all matching pairs using the Hungarian algorithm, we identify a set of valid matches M by selecting object pairs (osp, o tq ) whose similarity score sp,q exceeds a predefined threshold τ . For each valid match (p, q ) ∈ M ,the merged object ˆom ∈ ˆO is defined as 
+
+ˆom = (ˆ c, Asp ∪ A tq ) ∈ ˆO, (2) where ˆc denotes a class label of a merged object and ˆO
+
+represents the set of all merged objects obtained from valid matches. Note that ˆc may differ from the original class label of osp or otq . This procedure results in a new merged scene graph, Gm = ( Om, Em), which combines each valid pair of matched objects, creating a new object. We perform graph merging by iteratively selecting and con-solidating pairs of graphs based on their embedding similar-ity. In each iteration, the two most similar graphs are merged into a single graph, which replaces the original pair in the set of graphs. This process is repeated until only one unified scene graph remains. The final scene graph provides a com-prehensive representation of the entire video that preserves detailed information from individual segments. Algorithm 1 describes the detailed procedure of our graph consolidation strategy. 3.3.2. P RIORITIZED SUBGRAPH EXTRACTION 
+
+When concise and focused video captions are desired, we apply subgraph extraction to retain only the most contextu-ally relevant information. During the graph merging process, we track each node’s merge count as a measure of its sig-nificance within the consolidated graph. We then identify the top k nodes with the highest merge counts and extract their corresponding subgraphs. This approach prioritizes objects that consistently appear across multiple frames, as they often represent key entities in the scene. By focusing on salient elements and filtering out irrelevant details, our method constructs a compact scene graph that enables more focused video captioning. 
+
+4. Video Caption Generation 
+
+Our ultimate goal is to generate captions from a consoli-dated scene graph. To this end, we develop a graph-to-text decoding model trained on a dataset of graph-text pairs. At inference time, the model takes the consolidated scene graph representing the entire video as input and generates a caption that describes the video as a whole. 
+
+4.1. Graph-to-text model 
+
+Our graph-to-text model consists of a transformer-based graph encoder and a text decoder. The encoder processes the input scene graph to produce a graph embedding, which conditions the decoder to generate the final caption. To reflect the graph topology in our model, we design an at-tention mask in the graph encoder that restricts attention propagation to the edges defined in the scene graph. To construct input tokens for the graph encoder, we con-vert the text values associated with each graph component, such as object classes ci, attribute sets Ai, and edge labels 
+
+ri,j (e.g. , “elderly”, “woman”, “cook in”, “kitchen”), to se-quences of embedding vectors. Additionally, we append a learnable embedding token that attends to all other tokens, enabling the aggregation of global context and facilitating information flow across the entire graph, including between disconnected nodes. 
+
+4.2. Training 
+
+We train the graph-to-text model on a large-scale collection of graph-text pairs. To construct this dataset, we curated approximately 2.5 million captions from diverse image cap-tioning datasets, including MS-COCO (Chen et al., 2015), Flickr30k (Young et al., 2014), TextCaps (Sidorov et al., 2020), Visual Genome (Krishna et al., 2017b), and Visual Genome Paragraph Captions (Krause et al., 2017), to cover a broad range of visual scene contexts. To further enrich the dataset, we incorporated model-generated captions for videos in Kinetics-400 (Kay et al., 2017), where LLaVA-NeXT-7B (Liu et al., 2024) is applied to four uniformly sampled frames per video. Each caption is then parsed into a scene graph using a textual scene graph parser, yielding a graph-text pair for training. Using the graph-text pairs, we train the graph-to-text de-coder with a next-token prediction objective, aiming to gen-erate the ground-truth caption conditioned on the input scene graph, as formally defined below: 
+
+L(θ) = 
+
+> N
+
+∑
+
+> i=1
+
+log Pθ (ti | t1: i−1, G ), (3) where ti represents the ith token in the source text, and N
+
+denotes the total number of tokens. 4Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+5. Experiment 
+
+This section presents the effectiveness of the proposed ap-proach through performance evaluation and analysis on both video captioning and video paragraph captioning datasets. 
+
+5.1. Experimental setup 
+
+We provide the detailed information about target tasks with their datasets and baselines. We also discuss a list of perfor-mance metrics used in our evaluation. 5.1.1. T ARGET TASKS AND BASELINES 
+
+Our evaluation consists of two zero-shot tasks: (1) video captioning, using the standard test splits of MSR-VTT (Xu et al., 2016) and MSVD (Chen & Dolan, 2011), and (2) video paragraph captioning, using the ae-val set of Activ-ityNet Captions (Krishna et al., 2017a), which contains longer videos with multiple events. We primarily compare our method against LLM-based ap-proaches. Specifically, we first establish an LLM summa-rization baseline, which directly summarizes the same set of segment-level captions used by our method. This base-line provides a direct comparison between the proposed scene graph consolidation and the simple aggregation of segment-level captions by LLMs. We use the open-source Mistral-7B-Instruct-v0.3 1 for all datasets. For the Activ-ityNet Captions dataset, we additionally employ GPT-4o mini, a more powerful proprietary model. Details of the prompt instructions used for the LLM summarization base-lines are provided in Appendix B. We also compare our method against LLM-based video un-derstanding methods, e.g. , VidIL (Wang et al., 2022b) and Video ChatCaptioner (Chen et al., 2023), which utilize com-mercial LLMs along with textual representations derived from VLMs. VidIL constructs rich input sequences by com-bining various textual cues such as objects, events and frame captions extracted from multiple image-based VLMs, and incorporates few-shot exemplars to guide the LLM in gener-ating video captions. Similarly, Video ChatCaptioner adopts an interactive question-answering framework between im-age VLM and LLMs. Note that we primarily focus on LLM-based approaches, as other approaches typically require supervised fine-tuning, making direct zero-shot comparisons infeasible. Addi-tional comparisons with broader zero-shot video captioning approaches—for example, test-time optimization, inference optimization, and text-only training methods—on MSR-VTT are included in the supplementary document. 
+
+> 1https://huggingface.co/mistralai/ Mistral-7B-Instruct-v0.3
+
+5.1.2. E VALUATION METRICS 
+
+Following standard performance evaluation protocols in video captioning, our experiments adopt n-gram-based met-rics, including BLEU-4 (B@4) (Papineni et al., 2002), ME-TEOR (Banerjee & Lavie, 2005), and CIDEr (Vedantam et al., 2015), which measure the overlap between generated and reference captions. Since these n-gram-based metrics are limited in capturing semantic details and contextual accuracy beyond literal phrase matching, we additionally employ BERTScore (Zhang et al., 2020), an embedding-based evaluation metric widely used in natural language processing tasks such as machine translation and summa-rization. BERTScore measures token-level cosine similar-ities between generated and reference captions, capturing semantic similarity beyond n-gram matches as follows: 
+
+PBERT = 1
+
+| ˆZ| 
+
+∑  
+
+> ˆzj∈ˆZ
+
+max  
+
+> zi∈Z
+
+z> 
+
+> i
+
+ˆzj , (4) 
+
+RBERT = 1
+
+|Z| 
+
+∑
+
+> zi∈Z
+
+max   
+
+> ˆzj∈ˆZ
+
+z> 
+
+> i
+
+ˆzj , (5) 
+
+FBERT = 2 · PBERT · RBERT 
+
+PBERT + RBERT 
+
+, (6) where Z ≡ { z1, z 2, . . . } and ˆZ ≡ { ˆz1, ˆz2, . . . } represent the sets of token embeddings in the reference and generated captions, respectively. 
+
+5.2. Implementation details 
+
+Our graph-to-text model consists of a graph encoder and a text decoder, with a total of 235M parameters. The BERT-base model (Devlin et al., 2019) is employed for our encoder, with attention masking as described in Section 4.1, and only the decoder part of T5-base (Raffel et al., 2020) is used as our text decoder. The graph-to-text model is trained on graph-text pairs con-structed in Section 4.2 for 1K iterations with a batch size of 512. We employ the AdamW (Loshchilov, 2019) opti-mizer with a weight decay of 0.05, an initial learning rate of 0.0001, and linear warm-up for the first 1% of training steps. For video paragraph captioning, the model is further fine-tuned for 400 iterations on the subset of the constructed graph-text pairs obtained from the Visual Genome paragraph captioning dataset (Krause et al., 2017). Segment-level captions are generated using off-the-shelf VLMs. To demonstrate the flexibility of our approach, we employed both image-centric VLMs, including BLIP (Li et al., 2022) and BLIP2 (Li et al., 2023a), and video-centric VLM, InternVL2.5 (Chen et al., 2024a). For MSR-VTT and MSVD, we uniformly sample six frames per video to generate captions using image-centric models. For Activ-ityNet Captions, we select twelve frames per video when 5Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Table 1. Zero-shot video captioning results on the MSR-VTT (Xu et al., 2016) and MSVD (Chen & Dolan, 2011) test sets, comparing our method (SGVC) with LLM-based video understanding methods. † indicates that the method utilizes reference captions from the target dataset to construct few-shot exemplar prompts. Bold numbers indicate the highest scores among methods not using reference captions.                                                                             
+
+> Dataset Method Backbone VLM B@4 METEOR CIDEr PBERT RBERT FBERT
+> MSR-VTT VidIL (Wang et al., 2022b) BLIP+CLIP 3.2 14.8 3.1 0.134 0.354 0.225 VidIL †(Wang et al., 2022b) 13.6 20.0 20.2 0.461 0.552 0.490 Video ChatCaptioner (Chen et al., 2023) BLIP2 13.2 22.0 16.5 0.396 0.510 0.436
+> SGVC (Ours) BLIP 17.7 22.5 24.0 0.476 0.539 0.490
+> BLIP2 18.4 23.1 26.1 0.467 0.542 0.487 MSVD VidIL (Wang et al., 2022b) BLIP+CLIP 2.5 16.5 2.3 0.124 0.404 0.238 VidIL †(Wang et al., 2022b) 30.7 32.0 60.3 0.656 0.726 0.674 Video ChatCaptioner (Chen et al., 2023) BLIP2 22.7 31.8 35.8 0.496 0.651 0.550
+> SGVC (Ours) BLIP 22.6 30.2 50.2 0.575 0.646 0.589 BLIP2 25.3 32.0 53.3 0.571 0.669 0.597
+
+Table 2. Zero-shot video captioning results on the MSR-VTT (Xu et al., 2016) and MSVD (Chen & Dolan, 2011) test sets, comparing SGVC with the LLM summarization baseline. Bold numbers indicate the highest scores.                                                             
+
+> Dataset Method Backbone VLM B@4 METEOR CIDEr PBERT RBERT FBERT
+> MSR-VTT Summarization w/ Mistral-7B BLIP 9.6 21.6 10.8 0.313 0.516 0.395 BLIP2 11.5 23.1 15.4 0.308 0.528 0.397
+> SGVC (Ours) BLIP 17.7 22.5 24.0 0.476 0.539 0.490
+> BLIP2 18.4 23.1 26.1 0.467 0.542 0.487 MSVD Summarization w/ Mistral-7B BLIP 15.2 28.3 30.3 0.477 0.623 0.527 BLIP2 22.5 31.9 41.6 0.500 0.664 0.558
+> SGVC (Ours) BLIP 22.6 30.2 50.2 0.575 0.646 0.589 BLIP2 25.3 32.0 53.3 0.571 0.669 0.597
+
+using image-centric VLMs, while extracting twelve video clips for the video-centric model. To obtain graph embeddings for Hungarian matching, the graph encoder of our graph-to-text model is used. For generating the final video caption, we apply a beam search with five beams, a maximum sequence length of 32 and a length penalty of 0.6. For video captioning on MSR-VTT, we apply prioritized subgraph extraction with k = 1 
+
+to emphasize salient visual information. Video paragraph caption, which requires more detailed descriptions, is gen-erated using a beam search with three beams, a maximum sequence length of 400, and a repetition penalty of 3.0. 
+
+5.3. Main results 
+
+We present quantitative results for zero-shot video caption-ing on the MSR-VTT and MSVD datasets in Tables 1 and 2, and for zero-shot video paragraph captioning on the Ac-tivityNet Captions ae-val set in Tables 3 and 4. 5.3.1. Z ERO -SHOT VIDEO CAPTIONING 
+
+Table 1 compares the proposed method, SGVC, with exist-ing LLM-based video understanding approaches, VidIL and Video ChatCaptioner. SGVC consistently achieves strong zero-shot performance across most metrics on both the MSR-VTT and MSVD datasets, outperforming the existing methods. VidIL, although it leverages diverse textual cues from multiple sources, shows limited performance in the zero-shot setting. Notably, SGVC performs competitively even against VidIL’s few-shot setting, which heavily de-pends on dataset-specific exemplars. Video ChatCaptioner, which aggregates information through multi-turn question answering between an LLM and BLIP2, often suffers from hallucinations or overemphasis on irrelevant details, leading to failures in capturing the core content of the video ( e.g. ,“There are no animals present in the park scene.”). Table 2 provides a controlled comparison between SGVC and an LLM-based summarization method, clearly high-lighting the effectiveness of our scene graph consolida-tion approach. Both methods start from an identical set of segment-level captions and this experiments isolates the impact of the graph consolidation. Although LLM summa-rization produces fluent and expressive captions, it some-times overlooks details of objects and events within a scene. In contrast, SGVC explicitly integrates segment-level scene graphs into a unified representation, which is helpful for preserving object identities and relationships consistently throughout the video. 6Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Table 3. Zero-shot video paragraph captioning results on the ActivityNet Captions (Krishna et al., 2017a) ae-val set, comparing our method (SGVC) with LLM-based video understanding methods. † indicates that the method utilizes reference captions from the target dataset to construct few-shot exemplar prompts. Bold numbers indicate the highest scores among methods not using reference captions.                                          
+
+> Method Backbone VLM B@4 METEOR CIDEr PBERT RBERT FBERT
+> VidIL (Wang et al., 2022b) BLIP+CLIP 1.0 5.8 4.6 0.122 0.135 0.125 VidIL †(Wang et al., 2022b) 2.9 7.6 3.3 0.414 0.243 0.323 Video ChatCaptioner (Chen et al., 2023) BLIP2 2.4 8.9 1.6 0.207 0.202 0.200
+> SGVC (Ours) BLIP 6.7 11.6 16.6 0.367 0.285 0.322 BLIP2 7.4 12.4 20.9 0.367 0.304 0.331
+
+Table 4. Zero-shot video paragraph captioning results on the ActivityNet Captions (Krishna et al., 2017a) ae-val set, comparing SGVC with the LLM summarization baselines. Bold numbers indicate the highest scores.                                                              
+
+> Method Backbone VLM B@4 METEOR CIDEr PBERT RBERT FBERT
+> Summarization w/ Mistral-7B BLIP 3.4 9.4 7.5 0.292 0.268 0.276 BLIP2 4.1 10.4 9.6 0.307 0.293 0.295 InternVL2.5 4.5 10.8 11.6 0.333 0.318 0.319 Summarization w/ GPT-4o mini BLIP 4.6 10.2 10.3 0.325 0.284 0.300 BLIP2 5.0 10.6 12.1 0.343 0.301 0.317 InternVL2.5 5.8 11.4 15.3 0.352 0.332 0.336
+> SGVC (Ours)
+> BLIP 6.7 11.6 16.6 0.367 0.285 0.322 BLIP2 7.4 12.4 20.9 0.367 0.304 0.331 InternVL2.5 8.0 13.2 24.1 0.359 0.326 0.338
+
+Table 5. Comparison of computational costs between SGVC and LLM-based methods on the MSR-VTT test set.                                                
+
+> Method VLM Backbone Params. (B) GPU (GB) Time (s) CIDEr Using reference Using GPT API VidIL BLIP+CLIP 0.67 3.57 1.32 20.2 XX
+> Video ChatCaptioner BLIP2 3.75 14.53 3.65 16.5 -X
+> Summarization w/ Mistral-7B BLIP 7.50 14.50 1.27 10.8 --BLIP2 11.00 28.20 1.51 15.4 ––
+> SGVC (Ours) BLIP 0.74 5.07 1.14 24.0 --BLIP2 4.24 18.40 1.37 26.1 ––
+
+5.3.2. Z ERO -SHOT VIDEO PARAGRAPH CAPTIONING 
+
+Table 3 presents a comparison between SGVC and other LLM-based video understanding methods for zero-shot video paragraph captioning on the ActivityNet Captions 
+
+ae-val set. Consistent with the results observed in zero-shot video captioning in Table 1, SGVC clearly outperforms competing methods. The performance gap is even more pro-nounced in the paragraph captioning task, where effectively modeling long-range context and maintaining coherence across multiple events is essential. Table 4 compares SGVC with LLM summarization tech-niques, using both Mistral-7B and a stronger commercial model, GPT-4o mini. While GPT-4o mini offers signifi-cant performance gains over Mistral-7B, it still falls short of SGVC, highlighting the effectiveness of our graph con-solidation approach. Furthermore, replacing the backbone captioner with InternVL2.5 further improves SGVC’s perfor-mance, benefiting from its video-centric design and strong temporal modeling capabilities, despite having significantly fewer parameters than BLIP2 (938M vs. 3.74B). These results clearly demonstrate SGVC’s flexibility and plug-and-play compatibility with a wide range of vision-language model architectures. 
+
+5.4. Analysis Efficiency Table 5 presents a detailed comparison of com-putational costs, in terms of average per-video inference time and peak GPU memory usage on a single NVIDIA A6000 GPU, along with captioning performance (CIDEr) on the MSR-VTT test set. SGVC consistently outperforms LLM-based summarization approaches across all compu-tational measures, regardless of the underlying backbones. Moreover, our scene graph merging algorithm, which cur-rently runs on the CPU, could be further accelerated by 7Fine-Grained Captioning of Long Videos through Scene Graph Consolidation [LLM summ.] A woman in a blue jacket poses outdoors, followed by a man in a military uniform standing.     
+
+> [VidIL] A female athlete competes in a military-themed sports event.
+> [Video ChatCaptioner] The video features a woman in a navy uniform standing in front of a sign that says "phili" with a white wall in the background.
+> [Ours] A woman in a uniform stands in front of a sign, holding medals and smiling.
+> [Ground-truth] A female soldier talks about her athletics.
+
+Figure 2. Example of zero-shot video captioning results on the MSR-VTT test set. We compare our results with LLM-based methods, listed from top to bottom as 1) LLM summarization using Mistral-7B, 2) VidIL, 3) Video ChatCaptioner, and 4) SGVC (Ours). 
+
+Table 6. Analysis on the hyperparameter k in the prioritized sub-graph extraction, on the MSR-VTT test set. 
+
+k METEOR CIDEr PBERT RBERT FBERT 
+
+1 23.1 26.1 0.467 0.542 0.487 
+
+3 23.8 24.9 0.454 0.554 0.486 
+
+GPU implementation. VidIL and Video ChatCaptioner ex-hibit slower inference times and lower captioning accuracy. While they consume less GPU memory, their dependence on GPT API calls introduces additional latency. 
+
+Impact of hyperparameters We analyze the effect of the hyperparameter k, which controls the size of the ex-
+
+Table 7. Analysis on the threshold τ used in graph consolidation, on the MSVD test set. 
+
+τ CIDEr FBERT τ CIDEr FBERT 
+
+0.95 50.0 0.589 0.85 49.9 0.589 0.90 50.2 0.589 0.80 49.9 0.589 
+
+tracted subgraph, as described in Section 3.3.2. As shown in Table 6, lower k values result in more concise subgraphs that emphasize salient objects, leading to improvements in precision-oriented metrics, such as CIDEr and PBERT .In contrast, higher k values yield richer subgraphs that capture broader contextual information, thereby improving recall-oriented metrics, METEOR and RBERT .8Fine-Grained Captioning of Long Videos through Scene Graph Consolidation Two men working out in a gym, performing various activities such as weightlifting, martial arts, and stretching A group of men and women are seen working out in a gym, doing various exercises such as flipping tires, punching bags, and using a mesh sled The video features a man wearing a black shirt standing on a ledge in front of a red wall indoors. He appears to be leaning forward and looking at the camera with a nervous expression. 
+
+Figure 3. Example of zero-shot video paragraph captioning results on the ae-val set of the ActivityNet captions dataset. We compare our results with LLM-based methods, listed from top to bottom as 1) LLM summarization using Mistral-7B, 2) VidIL, 3) Video ChatCaptioner, and 4) SGVC (Ours). 
+
+We also conducted evaluation by varying the cosine similar-ity threshold τ , as reported in Table 7. The results demon-strate stable performance within the range τ ∈ [0 .80 , 0.95] ,and we set τ = 0 .9 for all experiments. 
+
+Qualitative results Figures 2 and 3 present qualitative ex-amples of zero-shot video captioning on the MSR-VTT test set and video paragraph captioning on ActivityNet Captions 
+
+ae-val set, respectively. Our method generates detailed and contextually rich captions that accurately capture events, ob-jects, and relationships across frames. While LLM summa-rization and Video ChatCaptioner produce fluent sentences, they occasionally introduce hallucinated content, such as objects or attributes that are not actually present in the video. 
+
+6. Conclusion 
+
+We introduced a novel framework for fine-grained caption-ing of long videos by consolidating information across mul-tiple temporal segments. Our approach merges scene graphs extracted from segment-level captions to generate compre-hensive and coherent video descriptions. This framework provides a computationally efficient and training-free al-ternative to existing methods. In contrast to LLM-based approaches, our method significantly reduces computational demands by leveraging a lightweight graph-to-text model with substantially fewer parameters. Extensive experiments on both video captioning and video paragraph captioning tasks validate the effectiveness of our method. These results highlight the potential of graph-based consolidation as a foundation for future advances in long video captioning. 
+
+Acknowledgements 
+
+We thank Do Young Eun at North Carolina State Univer-sity for the valuable discussions. This work was supported in part by National Research Foundation of Korea (NRF) grants [RS-2022-NR070855, Trustworthy Artificial Intelli-gence; RS-2024-00408610, Brain Pool program], Institute of Information & communications Technology Planning & Evaluation (IITP) grants [RS2022-II220959 (No.2022-0-00959), (Part 2) Few-Shot Learning of Causal Inference in Vision and Language for Decision Making; No.RS-2021-II212068, AI Innovation Hub (AI Institute, Seoul National University); No.RS-2021-II211343, Artificial Intelligence Graduate School Program (Seoul National University)] funded by the Korea government (MSIT). 9Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Impact Statement 
+
+The broader impact of this research lies in enabling effective captioning of long videos by leveraging existing vision-language models without any additional fine-tuning on large-scale annotated video datasets. While there is potential for societal impacts arising from this technology, we have not identified any significant negative consequences directly associated with our approach. 
+
+References 
+
+Alayrac, J.-B., Donahue, J., Luc, P., Miech, A., Barr, I., Hasson, Y., Lenc, K., Mensch, A., Millican, K., Reynolds, M., et al. Flamingo: a visual language model for few-shot learning. In NeurIPS , 2022. Balazevic, I., Shi, Y., Papalampidi, P., Chaabouni, R., Kop-pula, S., and Henaff, O. J. Memory consolidation enables long-context video understanding. In ICML , 2024. Banerjee, S. and Lavie, A. Meteor: An automatic metric for mt evaluation with improved correlation with human judgments. In ACL Workshop on Intrinsic and Extrinsic Evaluation Measures for Machine Translation and/or Summarization , 2005. Chai, W., Song, E., Du, Y., Meng, C., Madhavan, V., Bar-Tal, O., Hwang, J.-N., Xie, S., and Manning, C. D. Auroracap: Efficient, performant video detailed captioning and a new benchmark. In ICLR , 2025. Chen, D. and Dolan, W. B. Collecting highly parallel data for paraphrase evaluation. In ACL , 2011. Chen, J., Zhu, D., Haydarov, K., Li, X., and Elhoseiny, M. Video chatcaptioner: Towards enriched spatiotemporal descriptions. arXiv , 2023. Chen, X., Fang, H., Lin, T.-Y., Vedantam, R., Gupta, S., Doll ´ar, P., and Zitnick, C. L. Microsoft coco captions: Data collection and evaluation server. arXiv , 2015. Chen, Z., Wang, W., Cao, Y., Liu, Y., Gao, Z., Cui, E., Zhu, J., Ye, S., Tian, H., Liu, Z., et al. Expanding per-formance boundaries of open-source multimodal models with model, data, and test-time scaling. arXiv , 2024a. Chen, Z., Wang, W., Tian, H., Ye, S., Gao, Z., Cui, E., Tong, W., Hu, K., Luo, J., Ma, Z., et al. How far are we to gpt-4v? closing the gap to commercial multimodal models with open-source suites. arXiv , 2024b. Dai, W., Li, J., Li, D., Tiong, A. M. H., Zhao, J., Wang, W., Li, B., Fung, P., and Hoi, S. Instructblip: Towards general-purpose vision-language models with instruction tuning. In NeurIPS , 2023. Devlin, J., Chang, M.-W., Lee, K., and Toutanova, K. Bert: Pre-training of deep bidirectional transformers for lan-guage understanding. In ACL , 2019. Girdhar, R., El-Nouby, A., Liu, Z., Singh, M., Alwala, K. V., Joulin, A., and Misra, I. Imagebind: One embedding space to bind them all. In CVPR , 2023. Huang, B., Wang, X., Chen, H., Song, Z., and Zhu, W. Vtimellm: Empower llm to grasp video moments. In 
+
+CVPR , 2024. Islam, M. M., Ho, N., Yang, X., Nagarajan, T., Torresani, L., and Bertasius, G. Video recap: Recursive captioning of hour-long videos. In CVPR , 2024. Kahatapitiya, K., Ranasinghe, K., Park, J., and Ryoo, M. S. Language repository for long video understanding. arXiv ,2024. Kay, W., Carreira, J., Simonyan, K., Zhang, B., Hillier, C., Vijayanarasimhan, S., Viola, F., Green, T., Back, T., Natsev, P., et al. The kinetics human action video dataset. 
+
+arXiv , 2017. Krause, J., Johnson, J., Krishna, R., and Fei-Fei, L. Ahierarchical approach for generating descriptive image paragraphs. In CVPR , 2017. Krishna, R., Hata, K., Ren, F., Fei-Fei, L., and Niebles, J. C. Dense-captioning events in videos. In ICCV , 2017a. Krishna, R., Zhu, Y., Groth, O., Johnson, J., Hata, K., Kravitz, J., Chen, S., Kalantidis, Y., Li, L.-J., Shamma, D. A., et al. Visual genome: Connecting language and vi-sion using crowdsourced dense image annotations. IJCV ,2017b. Lei, J., Li, L., Zhou, L., Gan, Z., Berg, T. L., Bansal, M., and Liu, J. Less is more: Clipbert for video-and-language learning via sparse sampling. In CVPR , 2021. Li, J., Li, D., Xiong, C., and Hoi, S. Blip: Bootstrapping language-image pre-training for unified vision-language understanding and generation. In ICML , 2022. Li, J., Li, D., Savarese, S., and Hoi, S. Blip-2: Bootstrapping language-image pre-training with frozen image encoders and large language models. In ICML , 2023a. Li, W., Zhu, L., Wen, L., and Yang, Y. Decap: Decoding clip latents for zero-shot captioning via text-only training. In ICLR , 2023b. Li, Z., Chai, Y., Zhuo, T. Y., Qu, L., Haffari, G., Li, F., Ji, D., and Tran, Q. H. FACTUAL: A benchmark for faithful and consistent textual scene graph parsing. In ACL Findings ,2023c. 10 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Liu, H., Li, C., Li, Y., Li, B., Zhang, Y., Shen, S., and Lee, Y. J. Llava-next: Improved reasoning, ocr, and world knowledge. https://llava-vl.github. io/blog/2024-01-30-llava-next/ , 2024. Loshchilov, I. Decoupled weight decay regularization. In 
+
+ICLR , 2019. Maaz, M., Rasheed, H., Khan, S., and Khan, F. S. Video-chatgpt: Towards detailed video understanding via large vision and language models. In ACL , 2024. Mun, J., Seo, P. H., Jung, I., and Han, B. Marioqa: Answer-ing questions by watching gameplay videos. In ICCV ,2017. Mun, J., Yang, L., Ren, Z., Xu, N., and Han, B. Streamlined dense video captioning. In CVPR , 2019. Noh, H., Seo, P. H., and Han, B. Image question answer-ing using convolutional neural network with dynamic parameter prediction. In CVPR , 2016. OpenAI. Gpt-4v(ision) system card. https: //cdn.openai.com/papers/GPTV_System_ Card.pdf , 2023. Papineni, K., Roukos, S., Ward, T., and Zhu, W.-J. Bleu: a method for automatic evaluation of machine translation. In ACL , 2002. Qian, R., Dong, X., Zhang, P., Zang, Y., Ding, S., Lin, D., and Wang, J. Streaming long video understanding with large language models. NeurIPS , 2024. Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J., et al. Learning transferable visual models from natural language supervision. In ICML , 2021. Raffel, C., Shazeer, N., Roberts, A., Lee, K., Narang, S., Matena, M., Zhou, Y., Li, W., and Liu, P. J. Exploring the limits of transfer learning with a unified text-to-text transformer. Journal of machine learning research , 21 (140):1–67, 2020. Sidorov, O., Hu, R., Rohrbach, M., and Singh, A. Textcaps: a dataset for image captioning with reading comprehen-sion. In ECCV , 2020. Song, E., Chai, W., Wang, G., Zhang, Y., Zhou, H., Wu, F., Chi, H., Guo, X., Ye, T., Zhang, Y., et al. Moviechat: From dense token to sparse memory for long video un-derstanding. In CVPR , 2024. Su, Y., Lan, T., Liu, Y., Liu, F., Yogatama, D., Wang, Y., Kong, L., and Collier, N. Language models can see: Plugging visual controls in text generation. arXiv , 2022. Tewel, Y., Shalev, Y., Schwartz, I., and Wolf, L. Zero-shot image-to-text generation for visual-semantic arithmetic. In CVPR , 2022. Tewel, Y., Shalev, Y., Nadler, R., Schwartz, I., and Wolf, L. Zero-shot video captioning by evolving pseudo-tokens. In BMVC , 2023. Vedantam, R., Lawrence Zitnick, C., and Parikh, D. Cider: Consensus-based image description evaluation. In CVPR ,2015. Wang, J., Chen, D., Wu, Z., Luo, C., Zhou, L., Zhao, Y., Xie, Y., Liu, C., Jiang, Y.-G., and Yuan, L. Omnivl: One foundation model for image-language and video-language tasks. In NeurIPS , 2022a. Wang, Y., Li, K., Li, X., Yu, J., He, Y., Chen, G., Pei, B., Zheng, R., Xu, J., Wang, Z., et al. Internvideo2: Scaling video foundation models for multimodal video understanding. In ECCV , 2024. Wang, Z., Li, M., Xu, R., Zhou, L., Lei, J., Lin, X., Wang, S., Yang, Z., Zhu, C., Hoiem, D., et al. Language mod-els with image descriptors are strong few-shot video-language learners. In NeurIPS , 2022b. Weng, Y., Han, M., He, H., Chang, X., and Zhuang, B. Longvlm: Efficient long video understanding via large language models. In ECCV , 2024. Xu, J., Mei, T., Yao, T., and Rui, Y. Msr-vtt: A large video description dataset for bridging video and language. In 
+
+CVPR , 2016. Xu, L., Zhao, Y., Zhou, D., Lin, Z., Ng, S. K., and Feng, J. Pllava: Parameter-free llava extension from images to videos for video dense captioning. arXiv , 2024. Yan, S., Zhu, T., Wang, Z., Cao, Y., Zhang, M., Ghosh, S., Wu, Y., and Yu, J. Videococa: Video-text modeling with zero-shot transfer from contrastive captioners. arXiv ,2022. Yang, A., Nagrani, A., Seo, P. H., Miech, A., Pont-Tuset, J., Laptev, I., Sivic, J., and Schmid, C. Vid2seq: Large-scale pretraining of a visual language model for dense video captioning. In CVPR , 2023. Young, P., Lai, A., Hodosh, M., and Hockenmaier, J. From image descriptions to visual denotations: New similarity metrics for semantic inference over event descriptions. 
+
+ACL , 2014. Zhang, B., Li, K., Cheng, Z., Hu, Z., Yuan, Y., Chen, G., Leng, S., Jiang, Y., Zhang, H., Li, X., et al. Videollama 3: Frontier multimodal foundation models for image and video understanding. arXiv , 2025. 11 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Zhang, C., Lu, T., Islam, M. M., Wang, Z., Yu, S., Bansal, M., and Bertasius, G. A simple llm framework for long-range video question-answering. In EMNLP , 2024a. Zhang, T., Kishore, V., Wu, F., Weinberger, K. Q., and Artzi, Y. Bertscore: Evaluating text generation with bert. In 
+
+ICLR , 2020. Zhang, Y., Sui, E., and Yeung-Levy, S. Connect, collapse, corrupt: Learning cross-modal tasks with uni-modal data. In ICLR , 2024b. Zhao, L., Gundavarapu, N. B., Yuan, L., Zhou, H., Yan, S., Sun, J. J., Friedman, L., Qian, R., Weyand, T., Zhao, Y., Hornung, R., Schroff, F., Yang, M.-H., Ross, D. A., Wang, H., Adam, H., Sirotenko, M., Liu, T., and Gong, B. VideoPrism: A foundational visual encoder for video understanding. In ICML , 2024. Zhou, X., Arnab, A., Buch, S., Yan, S., Myers, A., Xiong, X., Nagrani, A., and Schmid, C. Streaming dense video captioning. In CVPR , 2024. 12 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+A. Additional Experiment 
+
+We provide an extended comparison against a broader set of zero-shot video captioning methods on MSR-VTT test set in Table 8. We compared our approach with several existing approaches, including: 1) test-time optimization via gradient manipu-lation with CLIP embeddings, e.g. , ZeroCap (Tewel et al., 2022) and Tewel et al. (Tewel et al., 2023), 2) optimiza-tion of inference procedure in the decoder using the CLIP image-text similarity, e.g. , MAGIC (Su et al., 2022), and 3) text-only training methods, e.g. , DeCap (Li et al., 2023b) and C 3 (Zhang et al., 2024b), which are trained solely on text corpora, 4) LLM-based video understanding methods, e.g. ,VidIL (Wang et al., 2022b) and Video ChatCaptioner (Chen et al., 2023), which utilize proprietary, commercially avail-able LLMs along with textual representations derived from various image-language models, and 5) LLM summariza-tion, which takes the same set of segment-level captions as our method and generates video captions using a pretrained LLM, Mistral-7B-Instruct-v0.3 by text summarization. Note that DeCap-MSRVTT, C 3, and VidIL all utilize an-notations from the training dataset but differ in how these annotations are employed. Specifically, DeCap-MSRVTT and C 3 use text annotations from the MSR-VTT training set to train their text decoders. In contrast, VidIL constructs few-shot exemplars to serve as prompts, enabling LLM 2 to perform video captioning through in-context learning. This comprehensive comparison demonstrates that our ex-plicit scene-graph-based modeling achieves superior perfor-mance over existing zero-shot video captioning methods across all evaluation metrics. 
+
+B. Prompt Instructions 
+
+We provide prompt instructions for segment-level caption generation and LLM summarization of these captions, illus-trated here using an image-centric VLM for video caption-ing. 
+
+B.1. Segment caption generation 
+
+Table 9 lists the instructional prompts, generated using GPT-4, which guide VLM in generating the segment-level cap-tions. These prompts are designed to ensure captions remain grounded in the visible content of the image, thereby avoid-ing factual errors or hallucinated details not supported by the image. A prompt was randomly selected for each seg-ment, allowing captions to reflect diverse aspects of a video. 
+
+> 2In all our experiments, we use GPT-3.5-turbo-instruct since text-davinci-002 has been deprecated.
+
+B.2. LLM summarization 
+
+To construct the LLM summarization baseline in our experi-ments, we designed prompts by combining the instructions with segment-level captions, as shown in Table 10. This inputs guide the LLM to generate a concise and coherent video-level summary. 
+
+C. Failure Cases 
+
+We present two failure cases from our framework, arising due to hallucinations in the initial segment-level captions. 
+
+Case 1: Incorrect entity counting 
+
+• Reference captions : [“A group of people dressed in all of the colors of the rainbow sing a happy song.”, “Two elderly women dancing with a group of men.”, . . . ] • SGVC output : “Two guys in multi-colored tops dance in front of a wall.” While the caption accurately captures specific visual details such as “multi-colored tops”, “wall”, and “dance”, the VLM hallucinate the number of individuals (“two guys”, instead of the actual group of“five people”). 
+
+Case 2. Object misidentification 
+
+• Reference captions : [“A man fixes a piece of machin-ery that appears to be a miniature tank.”, “A guy fixing his camera equipment.”, . . . ] • SGVC output : “A man is holding a drill in his hand while working on machinery.” The object in the person’s hand is a camera, but the initial frame-level captioner incorrectly identified it as a “drill”, influenced by the surrounding context. This hallucinated detail was propagated to the final consolidated caption. 
+
+D. Illustration of the Overall Framework 
+
+We provide illustrations of the end-to-end flow of our pro-posed framework for long video captioning, along with additional examples, in Figures 4. The framework includes generating segment-level captions using off-the-shelf VLMs, scene graph parsing for these captions, scene graph consoli-dation to produce a unified representation, and graph-to-text translation for generate video generation. 
+
+E. Additional Qualitative Results 
+
+We provide additional qualitative results for video caption-ing on the test set of MSR-VTT (Xu et al., 2016) dataset in Figure 5 and for video paragraph captioning on the ae-val 
+
+set of the ActivityNet (Krishna et al., 2017a) Captions dataset in Figure 6. 13 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Table 8. Zero-shot video captioning results on the MSR-VTT test set (Xu et al., 2016). X indicates that the method utilizes reference captions from the MSR-VTT dataset. * indicates methods were adapted to zero-shot video captioning by Tewel et al. (Tewel et al., 2023). Bold numbers indicate the highest scores among methods not using reference captions.                                                                                                                
+
+> Method Backbone VLM Using reference B@4 METEOR CIDEr PBERT RBERT FBERT
+> Consolidation-based approaches
+> VidIL (Wang et al., 2022b) BLIP+CLIP 3.2 14.8 3.1 0.134 0.354 0.225
+> X13.6 20.0 20.2 0.461 0.552 0.490 Video ChatCaptioner (Chen et al., 2023) BLIP2 13.2 22.0 16.5 0.396 0.510 0.436 Summ. w/ Mistral-7B BLIP 9.6 21.6 10.8 0.313 0.516 0.395 BLIP2 11.5 23.1 15.4 0.308 0.528 0.397 LLAVA-Next-7B 15.3 23.8 19.5 0.338 0.535 0.414
+> SGVC (Ours)
+> BLIP 17.7 22.5 24.0 0.476 0.539 0.490 BLIP2 18.4 23.1 26.1 0.467 0.542 0.487 LLAVA-Next-7B 17.1 23.0 24.0 0.455 0.547 0.497
+> Other zero-shot video captioning approaches
+> MAGIC* (Su et al., 2022) CLIP 5.5 13.3 7.4 ---ZeroCap* (Tewel et al., 2022) CLIP 2.3 12.9 5.8 ---Tewel et al. (Tewel et al., 2023) 3.0 14.6 11.3 0.280 0.391 0.319 Decap-BookCorpus (Li et al., 2023b) CLIP 6.0 12.7 12.3 ---Decap-COCO (Li et al., 2023b) 14.7 20.4 18.6 0.429 0.537 0.465 Decap-MSRVTT (Li et al., 2023b) X23.1 23.6 34.8 ---C3(Zhang et al., 2024b) ImageBind X25.3 23.4 27.8 0.518 0.550 0.519
+
+Table 9. The list of instructional prompts for segment-level caption generation using an image-centric VLM. • “Please describe what is happening in the image using one simple sentence. Focus only on what is visible.” • “Now, provide a single sentence caption that describes only what is explicitly shown in the image” • “In one sentence, describe what you see in the image without adding any extra details.” • “Provide a concise one-sentence description of the image, focusing on only the visible elements.” • “Please give a one-sentence caption that includes only what is clearly shown in the image.” • “Describe what is happening in the image in one simple sentence, without any added information.” • “Please generate a single sentence caption that describes only what can be seen in the image.” • “Provide a one-sentence description of the image, focusing solely on what is shown.” • “Now, give a brief, one-sentence caption based strictly on the visible content in the image.” • “In a single sentence, describe what the image shows, without including anything extra.” 
+
+Table 10. Illustration of the input construction for LLM summarization, consisting of the instructional prompt and segment-level captions. 
+
+Instructional prompt: 
+
+Below are captions generated from individual frames of a video, each describing specific moments. Please review these frame-by-frame captions and summarize them into a single, compact caption. 
+
+Frame captions: 
+
+[1 / 6] A woman in a blue jacket is sitting in front of a sports logo. [2 / 6] Woman in blue jacket standing outdoors. [3 / 6] A man in a military uniform is standing in front of a navy sign. [4 / 6] Man in military uniform standing in front of navy sign. [5 / 6] The image shows three women wearing sports uniforms and holding medals, smiling and posing for the camera. [6 / 6] Three women wearing blue and white uniforms, smiling and holding medals. 
+
+14 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation VLM 
+
+> ❄
+
+“The image shows a woman standing in a room with a window and a toy box.” 
+
+Parsing Video-level scene graph 
+
+“A person's hand reaching for a towel in a bathroom.” 
+
+> time
+
+“A brown rodent being held in a person's hand.” 
+
+“A person holding a brown, furry animal wrapped in a towel.” 
+
+“A person is holding a small animal in a towel.” 
+
+“A person is holding a small animal in a towel.” 
+
+Bathroom Hand 
+
+Towel Person 
+
+have 
+
+in 
+
+reach to 
+
+Rodent Hand 
+
+> Brown
+
+Person have 
+
+hold in 
+
+Animal 
+
+Towel 
+
+> Small
+
+Person 
+
+hold 
+
+in 
+
+Graph-to-text model 
+
+(d) Video caption generation 
+
+(a) Segment-level caption generation 
+
+Toy box 
+
+Room 
+
+Window 
+
+Woman stand in 
+
+with with 
+
+Person 
+
+Animal 
+
+Towel 
+
+> Brown
+
+hold 
+
+wrap in 
+
+> Furry
+
+“A woman is standing in a room with a small, brown, and furry rodent wrapped in a towel on tiled floor.” 
+
+Toy box 
+
+Room Window 
+
+Woman 
+
+stand in 
+
+with 
+
+Hand 
+
+have 
+
+Bathroom 
+
+in 
+
+Towel 
+
+reach to 
+
+with 
+
+Rodent 
+
+> Brown
+
+hold in 
+
+Towel 
+
+> Furry
+> Small
+
+wrap in 
+
+Floor 
+
+> Tiled
+
+on 
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+
+Animal 
+
+Towel 
+
+> Small
+
+Person 
+
+> ⋯
+> ⋯
+> ⋯
+> ⋯
+
+Parsing 
+
+Parsing 
+
+Parsing 
+
+Parsing 
+
+Parsing 
+
+> (c) Scene graph consolidation
+
+(b) Scene graph parsing 
+
+hold 
+
+in VLM 
+
+> ❄
+
+“A woman is standing next to a basket of laundry.” 
+
+Parsing 
+
+“The image shows a cartoon dog sitting on the ground.” 
+
+> time
+
+“The image shows a cartoon of a young girl with blonde hair, smiling and looking to the side.” 
+
+“A stack of folded newspapers.” 
+
+“A woman in a black dress is carrying a basket of laundry down a dirt road.” 
+
+“Woman in black dress looking at man holding white sheet.” 
+
+Hair 
+
+> Blonde
+
+Girl 
+
+have 
+
+Woman 
+
+Road 
+
+Dress 
+
+wear 
+
+carry 
+
+Graph-to-text model 
+
+(d) Video caption generation 
+
+(a) Segment-level caption generation 
+
+Laundry Woman 
+
+standing next to 
+
+Newspapers 
+
+“A young girl with blond hair and a cartoon dog sitting on a dirt road with a white sheet.” 
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+
+Video-level scene graph 
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+
+VLM 
+
+> ❄
+> ⋯
+> ⋯
+> ⋯
+> ⋯
+
+Parsing 
+
+Parsing 
+
+Parsing 
+
+Parsing 
+
+Parsing 
+
+> (c) Scene graph consolidation
+
+(b) Scene graph parsing 
+
+Dog Ground 
+
+sit on 
+
+> Cartoon
+> Young Smiling
+> Folded
+
+Laundry 
+
+> Dirt
+
+Woman 
+
+Sheet 
+
+Dress 
+
+wear 
+
+look at 
+
+Man 
+
+> White
+
+Newspapers 
+
+> Folded
+
+Sheet 
+
+> White
+
+Road 
+
+> Dirt
+
+Dog sit on 
+
+> Cartoon
+
+Hair 
+
+> Blonde
+
+Girl 
+
+have 
+
+> Young Smiling
+
+Laundry Woman 
+
+standing next to 
+
+carry 
+
+Dress 
+
+> Black
+
+wear 
+
+Man 
+
+look at 
+
+> Black
+> Black
+
+Figure 4. Illustrations of the end-to-end flow of the proposed framework. The pipeline consists of: (1) segment-level caption generation via VLMs, (2) scene graph parsing for each segments, (3) scene graph merging to produce a unified representation, and (4) graph-to-text transformation for final caption generation. 
+
+15 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation 
+
+Figure 5. Additional example of zero-shot video captioning results on MSR-VTT test set. We compare our results with other comparisons, listed from top to bottom as 1) Tewel et al. : test-time optimization method, 2) Decap-COCO: text-only training on COCO, 3) C 3: text-only training on MSRVTT, 4) LLM summarization using Mistral-7B-Instruct-v0.3, 5) VidIL: LLM-based video understanding with few-shot examples, 6) Video ChatCaptioner: video understanding via multi-turn conversations between VLM and LLM, and 7) SGVC (Ours). 
+
+16 Fine-Grained Captioning of Long Videos through Scene Graph Consolidation [LLM summarizaton] A person plays the piano while a woman plays the flute; a music sheet is involved in multiple scenes, and a woman is also seen sitting at a desk with a keyboard. 
+
+[VidIL] A woman is seen playing a silver flute in a music studio. 
+
+[Video ChatCaptioner] The video features a person standing in a living room, wearing a black shirt. The room contains a couch, a chair, and a coffee table. The person is facing the camera and appears to be interacting with objects in the room. 
+
+[Ours] A woman is sitting at a desk in front of a piano playing a flute. The woman is holding a sheet of paper with musical symbols on the stand. 
+
+[Ground-truth] We see a lady sitting in front of a keyboard. The lady moves the sheet music. We see the lady shows the keys and pretend to play. We see the lady change the sheet music. We see the lady pretend to play again. [LLM summarization] A white dog is sitting, standing, and walking on various tiled surfaces, is sniffing bushes and the ground, and is accompanied by a woman in high heels at different points. 
+
+[VidIL] woman is seen walking into a house with a bag in her hand. 
+
+[Video ChatCaptioner] The video features two men interacting in a narrow staircase indoors. The men are not in a hurry and appear to be engaged in physical activity. 
+
+[Ours] A white dog is walking on a tiled walkway in front of a tiled floor. A woman is standing outside next to a woman with a white door. The dog is sniffing a bush near the hedge. 
+
+[Ground-truth] A dog is seen walking outside walking runny while one person sits and the other leads the dog. The woman and dog walking around the driveway and the continues walking strange. [LLM summarization] A group of musicians are performing on stage, with a man singing into a microphone, a man playing a guitar, and several men playing drum sets. The stage is illuminated by red lights. 
+
+[VidIL] A band is seen performing on a stage with red lights and a man playing drums. 
+
+[Video ChatCaptioner] The video features a man outdoors hammering a nail into a board using a sledgehammer at a construction site. He is wearing a shirt and shorts, without any safety equipment. The scene has a red and black color scheme. 
+
+[Ours] A man is playing a drum set on stage. The man is singing into a microphone on stage. There is a red light on the stage. 
+
+[Ground-truth] A man performs on stage standing and playing a drum set while singing. The crowd waves their hands in the air. [LLM summarization] A young child plays with an iron while various individuals iron clothes on mats or the floor. A baby girl in a green and white dress is also present. 
+
+[VidIL] A child is playing with various household items, including a hair dryer, remote control, and iron. 
+
+[Video ChatCaptioner] The video features a man sitting on a bench in a small garden with a friend. They appear relaxed in the blue and white color scheme of the surroundings. 
+
+[Ours] A young child is sitting on the floor playing with an ironing machine. She is wearing a green dress. The ironing is white. The child is holding an orange cloth. 
+
+[Ground-truth] A baby sits on a mat on the ground. She plays with an iron. She pretends to iron clothes. She sets the clothes aside. 
+
+Figure 6. Additional example of zero-shot video paragraph captioning results on the ae-val set of the ActivityNet captions dataset. We compare our results with other comparisons, listed from top to bottom as 1) LLM summarization using Mistral-7B-instruct-v0.3, 2) VidIL, 3) Video ChatCaptioner, and 4) SGVC (Ours). 
+
+17

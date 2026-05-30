@@ -1,0 +1,413 @@
+Title: [width=0.25in]figures/guardagentlogo.png GuardAgent: Safeguard LLM Agents via Knowledge-Enabled Reasoning
+
+URL Source: https://openreview.net/pdf?id=2nBcjCZrrP
+
+Number of Pages: 27
+
+Markdown Content:
+# GuardAgent : Safeguard LLM Agents via Knowledge-Enabled Reasoning 
+
+Zhen Xiang * 1 Linzhi Zheng * 2 Yanjie Li 3 Junyuan Hong 4 Qinbin Li 5 Han Xie 6 Jiawei Zhang 2
+
+Zidi Xiong 3 Chulin Xie 3 Carl Yang 6 Dawn Song 5 Bo Li 2 3 7 
+
+# Abstract 
+
+The rapid advancement of large language model (LLM) agents has raised new concerns regard-ing their safety and security. In this paper, we propose GuardAgent , the first guardrail agent to protect target agents by dynamically checking whether their actions satisfy given safety guard requests . Specifically, GuardAgent first ana-lyzes the safety guard requests to generate a task plan, and then maps this plan into guardrail code for execution. By performing the code execution, 
+
+GuardAgent can deterministically follow the safety guard request and safeguard target agents. In both steps, an LLM is utilized as the reasoning component, supplemented by in-context demon-strations retrieved from a memory module storing experiences from previous tasks. In addition, we propose two novel benchmarks: EICU-AC bench-mark to assess the access control for healthcare agents and Mind2Web-SC benchmark to evalu-ate the safety policies for web agents. We show that GuardAgent effectively moderates the vi-olation actions for different types of agents on these two benchmarks with over 98% and 83% guardrail accuracies, respectively. Project page: 
+
+https://guardagent.github.io/ 
+
+# 1. Introduction 
+
+AI agents empowered by large language models (LLMs) have showcased remarkable performance across diverse ap-plication domains, including finance (Yu et al., 2023), health-care (Abbasian et al., 2024; Shi et al., 2024; Yang et al., 2024; Tu et al., 2024; Li et al., 2024), daily work (Deng et al., 2023; Gur et al., 2024; Zhou et al., 2023; Zheng et al., 2024), and autonomous driving (Cui et al., 2024; Jin et al.,           
+
+> *Equal contribution 1University of Georgia 2University of Chicago 3UIUC 4University of Texas at Austin 5University of Cali-fornia, Berkeley 6Emory University 7Virtue AI. Correspondence to: Zhen Xiang <zxiangaa@uga.edu>, Bo Li <bol@uchicago.edu>.
+> Proceedings of the 42 nd International Conference on Machine Learning , Vancouver, Canada. PMLR 267, 2025. Copyright 2025 by the author(s).
+
+Figure 1: Illustration of GuardAgent safeguarding other target agents on diverse tasks. Given a) a set of safety guard requests informed by a specification of the target agent and b) the input and output logs recording the target agent’s action trajectories, GuardAgent first generates an action plan based on the experiences retrieved from the memory. Then, a guardrail code is generated based on the action plan with a list of callable functions. The actions of the target agent with safety violations will be denied. 2023; Mao et al., 2024). For each user query, these agents typically employ an LLM for task planning, leveraging the reasoning capability of the LLM with the optional support of long-term memory from previous use cases (Lewis et al., 2020). The proposed plan is then executed by calling exter-nal tools (e.g., through APIs) with potential interaction with the environment (Yao et al., 2023). Unfortunately, existing works on LLM agents primarily fo-cus on their effectiveness in solving specific tasks while significantly overlooking their potential for misuse, which can lead to harmful consequences (Chen et al., 2024). For example, if misused by unauthorized personnel, a health-care agent could easily expose confidential patient informa-tion (Yuan et al., 2024a). Indeed, some existing LLM agents, particularly those used in high-stakes applications like au-tonomous driving, are equipped with safety controls to pre-vent the execution of undesired dangerous actions (Mao 1GuardAgent 
+
+et al., 2024; Han et al., 2024). However, these task-specific safeguards are hardcoded into the LLM agent and, therefore, cannot be generalized to other agents (e.g., for healthcare) with different safety guard requests (e.g., for privacy). On the other hand, guardrails for LLMs provide input and output moderation to detect and mitigate a wide range of potential harms (Markov et al., 2023; Lees et al., 2022; Rebedea et al., 2023; Inan et al., 2023; Yuan et al., 2024b). This is typically achieved by building the guardrail upon another pre-trained LLM to understand the input and output of the target LLM contextually. More importantly, the ‘ non-invasiveness ’ of guardrails, achieved through their parallel deployment alongside the target LLM, allows for their ap-plication to new models and harmfulness taxonomies with only minor modifications. However, LLM agents differ from LLMs by involving a significantly broader range of output modalities and highly specific guard requests. For instance, a web agent might generate actions like clicking a designated button on a webpage (Zheng et al., 2024). The safety guard request here could involve prohibiting certain users (e.g., underaged users) from purchasing specific items (e.g., alcoholic beverages or certain drugs). Clearly, existing guardrails designed to moderate the textual harmfulness of LLMs cannot address such intricate safety guard requests. In this paper, we present the first study on guardrails for LLM agents . We propose GuardAgent , the first LLM agent designed to safeguard other LLM agents (referred to as ‘ target agents ’ henceforth) by adhering to diverse real-world safety guard requests from users, such as safety rules or privacy policies. The deployment of GuardAgent 
+
+requires the prescription of a set of textural safety guard requests informed by a specification of the target agent (e.g., the format of agent output and logs). During the inference, user inputs to the target agent, along with associated outputs and logs, will be provided to GuardAgent for examination to determine whether the safety guard requests are satisfied or not. Specifically, GuardAgent first uses an LLM to generate an action plan based on the requests and the inputs and outputs of the target agent. Subsequently, this action plan is transformed by the LLM into guardrail code, which is then executed by calling an external API (see Fig. 1). For both the action plan and the guardrail code generation, the LLM is provided with related demonstrations retrieved from a memory module, which archives inputs and outputs from prior use cases. Such knowledge-enabled reasoning 
+
+is the foundation for GuardAgent to understand diverse safety guard requests for different types of LLM agents. The design of GuardAgent offers it three key advantages. Firstly, unlike safety or privacy controls hardcoded to the target agent, GuardAgent can potentially adapt to new target agents by uploading relevant functions to the toolbox. Secondly, GuardAgent provides guardrails by code gen-eration and execution, which is more reliable than guardrails solely based on natural language. Thirdly, GuardAgent 
+
+employs the core LLM by in-context learning, enabling di-rect utilization of off-the-shelf LLMs without the need for additional training. Before introducing GuardAgent in Sec. 4, we investigate diverse safety guard requests for different types of LLM agents and propose two novel benchmarks in Sec. 3. The first benchmark, EICU-AC, is designed to assess the ac-cess control for healthcare agents. The second benchmark, Mind2Web-SC, focuses on evaluating the safety control of web agents. These two benchmarks will be used to evaluate our GuardAgent in our experiments in Sec. 5. Note that the two types of safety guard requests considered here – access control and safety control – are closely related to pri-vacy and safety, respectively, which are critical perspectives of AI trustworthiness (Wang et al., 2023a). Our technical contributions are summarized as follows: • We propose GuardAgent , the first LLM agent frame-work providing guardrails to other target LLM agents via knowledge-enabled reasoning in order to address diverse user safety guard requests. • We propose a novel agent design for GuardAgent – a knowledge-enabled task planning leveraging an effective memory module design, followed by guardrail code gen-eration and execution, which involve an extendable array of functions. Such design endows GuardAgent with great flexibility, reliable guardrail code generation, and no need for additional training. • We create two benchmarks with high diversity, EICU-AC and Mind2Web-SC, to evaluate access control of health-care agents and safety control of web agents, respectively. • We show that GuardAgent effectively moderates the safety violation actions for different types of agents on EICU-AC and Mind2Web-SC. GuardAgent achieves over 98% and 83% guardrail accuracies based on four dif-ferent core LLMs on these benchmarks, respectively, with-out affecting the task performance of the target agents. 
+
+# 2. Related Work 
+
+LLM agents refer to AI agents that use LLMs as their cen-tral engine for task understanding and planning and then ex-ecute the plan by interacting with the environment (e.g., by calling third-party APIs) (Xi et al., 2023). Such fundamental difference from LLMs with purely textual outputs enables the deployment of LLM agents in diverse applications, in-cluding finance (Yu et al., 2023), healthcare (Abbasian et al., 2024; Shi et al., 2024; Yang et al., 2024; Tu et al., 2024; Li et al., 2024), daily work (Deng et al., 2023; Gur et al., 2024; Zhou et al., 2023; Zheng et al., 2024), and autonomous driv-ing (Cui et al., 2024; Jin et al., 2023; Mao et al., 2024). LLM agents are also commonly equipped with a retrievable mem-2GuardAgent 
+
+ory module, allowing them to perform knowledge-enabled reasoning (Lewis et al., 2020). Such property endows LLM agents with the ability to handle different tasks within an ap-plication domain. Our GuardAgent is a very typical LLM agent, but with different objectives from existing agents, as it is the first agent to safeguard other LLM agents. 
+
+LLM-based guardrails belong to a family of moderation approaches for harmfulness mitigation (Yuan et al., 2024a; Qi et al., 2024). Traditional guardrails were operated as classifiers trained on categorically labeled content (Markov et al., 2023; Lees et al., 2022). Recent guardrails for LLMs can be categorized into either ‘ model guarding models ’ ap-proaches (Rebedea et al., 2023; Inan et al., 2023; Yuan et al., 2024b) or ‘ agent guarding models ’ approaches (gua, 2023). These guardrails are designed to detect and moderate harm-ful content in LLM outputs based on predefined categories, such as violent crimes, sex crimes, child exploitation, etc. They cannot be applied to LLM agents with diverse out-put modalities and safety requirements. For example, an autonomous driving agent may produce outputs such as trajectory predictions that must adhere to particular safety regulations. In this work, we take the initial step towards developing guardrails for LLM agents by investigating both ‘model guarding agents ’ (using an LLM with carefully de-signed prompts to safeguard agents) and ‘ agent guarding agents ’ approaches. We demonstrate that GuardAgent ,the first ‘agent guarding agents’ framework, surpasses the ‘model guarding agents’ approach in our experiments. 
+
+# 3. Safety Requests for Diverse LLM Agents 
+
+Before introducing GuardAgent , we investigate safety requests for different types of LLM agents in this section. We focus on two representative LLM agents: an EHRAgent for healthcare and a web agent SeeAct. EHRAgent repre-sents agents used by organizations such as enterprises or government officials for high-stake tasks, while SeeAct rep-resents generalist agents for diverse web tasks. We briefly review these two agents, their designated tasks, and their original evaluation benchmarks. More importantly, due to the lack of benchmarks for privacy or safety evaluation on these two representative agent types, we propose two novel benchmarks: 1) EICU-AC for assessing access control of healthcare agents, and 2) Mind2Web-SC for evaluating safety control of web agents. Specifically, EICU-AC is de-veloped from the EICU dataset commonly used to evaluate healthcare agents, while Mind2Web-SC is developed from Mind2Web which is a common benchmark for web agents. 
+
+3.1. Access Control for Organizational Agents 
+
+As organizations increasingly integrate AI-driven agents into their workflows, which can access sensitive information in different private databases, ensuring secure and context-aware access control is critical. Here we build an access control agent benchmark based on a medical agent to character the real-world requirement. 
+
+EHRAgent EHRAgent is designed to respond to healthcare-related queries by generating code to retrieve and analyze data from provided databases (Shi et al., 2024). EHRAgent has been evaluated and shown decent perfor-mance on several benchmarks, including an EICU dataset containing questions regarding the clinical care of ICU pa-tients (see Fig. 12 in App. C for example) and 10 relevant databases (Pollard et al., 2018). Each database contains sev-eral types of patient information stored in different columns. In practical healthcare systems, it is crucial to restrict access to specific databases based on user identities. For example, personnel in general administration should not have access to patient diagnosis details. Thus, healthcare agents, such as EHRAgent, should be able to deny requests for infor-mation from the patient diagnosis database when the user is a general administrator. In essence, these agents should incorporate access controls to safeguard patient privacy. 
+
+EICU-AC In this paper, we create an EICU-AC bench-mark from EICU to evaluate A ccess Control approaches for EHRAgent (and potentially other organizational agents with database retrieval). EICU-AC includes three user roles, ‘physician’, ‘nursing’, and ‘general administration’, to simu-late practical healthcare scenarios. The access control being evaluated is supposed to ensure that each identity has ac-cess to only a subset of databases and columns of the EICU benchmark. We generate the ground truth access permis-sion for each role by joint efforts of clinicians and ChatGPT (see App. A.1 for more details). Then, each example in EICU-AC is designed to include the following information: 1) a healthcare-related question and the correct answer, 2) the databases and the columns required to answer the ques-tion, 3) a user identity, 4) a binary label ‘0’ if all required databases and columns are accessible to the given identity or ‘1’ otherwise, and 5) the required databases and columns inaccessible to the identity if the label is ‘1’. An illustrative example from EICU-AC is shown in Fig. 12 of App. C. In particular, all questions in EICU-AC are sampled or adapted from the EICU dataset. We ensure that all these questions are correctly answered by EHRAgent using GPT-4 (at temperature zero) as the core LLM so that the eval-uation using our benchmark will mainly focus on access control without much influence from the task performance of the target agent. Initially, we generate three EICU-AC examples from each question by assigning it with the three roles respectively. After labeling, we found that the two la-bels are highly imbalanced for all three identities. Thus, for each identity, we remove some of the generated examples while adding new ones to achieve a relative balance between the two labels (see more details in App. A.2). Ultimately, EICU-AC contains 52, 57, and 45 examples labeled to ‘0’ 3GuardAgent 
+
+for ‘physician’, ‘nursing’, and ‘general administration’, re-spectively, and 46, 55, and 61 examples labeled to ‘1’ for the three roles respectively. Among these 316 examples, there are 226 unique questions spanning 51 ICU informa-tion categories, underscoring the diversity of EICU-AC. 
+
+3.2. Safety Policies for Web Agents 
+
+As web agents become increasingly autonomous in tasks such as web shopping, information search, and transaction execution, ensuring their alignment with safety policies re-mains a critical challenge. Here we formalize and construct a safety control agent benchmark with web safety policy requests for generic real-world web agents. 
+
+SeeAct SeeAct is a generalist web agent that follows nat-ural language instructions to complete tasks on any given website by sequential generation of actions, including click-ing on a button, typing specific texts, etc. (see Fig. 12 of App. C for example) (Zheng et al., 2024). SeeAct is demon-strated successful on the Mind2Web benchmark contain-ing over 2,000 complex web tasks spanning 137 websites across 31 domains (e.g., car rental, shopping, entertainment, etc.) (Deng et al., 2023). However, practical web agents like SeeAct lacks a safety control that restricts certain actions for specific users. For example, in most regions of the world, a driver’s license should be required for car rental. 
+
+Mind2Web-SC We create a Mind2Web-SC benchmark to evaluate Safety Control of SeeAct and other web agents that operate based on action generation. The objective of safety control is to ensure that the agent obeys safety policies for online activities. Here, we consider six rules created based on common web regulations and regional conventions: 1) user must be a member to shop, 2) unvaccinated user cannot book a flight, 3) user without a driver’s license cannot buy or rent a car, 4) user aged under 18 cannot book a hotel, 5) user must be in certain countries to search movies/musics/video, 6) user under 15 cannot apply for jobs. The examples in Mind2Web-SC are created by the following steps. First, we obtain all tasks with correct action predic-tion by SeeAct (using GPT-4 as the core LLM) from the travel, shop, and entertainment domains of the test set of Mind2Web . Second, for each task, we randomly create a user profile containing ‘age’ in integer and ‘domestic’, ‘dr_license’, ‘vaccine’, and ‘membership’, all boolean (see Fig. 12 in App. C). Note that each user information is non-trivial, as it is related to at least one of the six safety rules we created. Third, we manually label each example based on the task and the user information. If the task itself is not related to any of the six rules, the example will be labeled to ‘0’ for ‘action permitted’. If the task is related to at least one rule (e.g. the one for car rental), we check the user information and will label the example to ‘1’ for ‘action denied’ if the rule is violated (e.g. ‘dr_license’ is ‘false’) and ‘0’ otherwise. For each example labeled to ‘1’, the violated rules are also included. Finally, we balance the two classes by creating additional examples (based on existing tasks but with different user information) while re-moving some examples with tasks irrelevant to any rule (see details in App. B). The created Mind2Web-SC contains 100 examples per class with only unique tasks within each class. 
+
+# 4. GuardAgent Framework 
+
+Considering the varied safety guard requests for different LLM agents, can we ensure that the agent actions comply with these requests without compromising their task utility? 
+
+To answer this question, we introduce GuardAgent with three key features: 1) flexibility – unlike specific safety guardrails hardcoded to each agent, the “non-invasiveness” of GuardAgent , along with its extendable memory and toolbox, allows it to address new target agents and novel safety guard requests without interference with the tar-get agent’s decision-making; 2) reliability – outputs of 
+
+GuardAgent are obtained only if the generated guardrail code is successfully executed; 3) free of training –
+
+GuardAgent is in-context-learning-based and does not need any additional LLM training or fine-tuning. 
+
+4.1. Overview of GuardAgent 
+
+The intended user of GuardAgent is the developer or operator of a target LLM agent who seeks to imple-ment a guardrail on it. The mandatory textual inputs to 
+
+GuardAgent include a set of safety guard requests Ir , a specification Is of the target agent, inputs Ii to the target agent (by its own user), and the output log Io by the target agent (recording its reasoning and action corresponding to 
+
+Ii). Here, Ir is informed by Is including the functionality of the target agent, the content in the inputs and output logs, their formats, etc. The objective of GuardAgent is to check whether Ii and Io satisfy the safety guard requests Ir
+
+and then produce a label prediction Ol, where Ol = 0 means the safety guard requests are satisfied and Ol = 1 otherwise. The outputs or actions proposed by the target agent will be admitted by GuardAgent if Ol = 0 or denied if Ol = 1 .If Ol = 1 , GuardAgent should also output the detailed reasons Od (e.g., by printing the inaccessible databases and columns for EICU-AC) for potential further actions. The key idea of GuardAgent is to leverage the logical rea-soning capabilities of LLMs with knowledge retrieval from past experience to accurately ‘translate’ textual safety guard requests into executable code. Correspondingly, the pipeline of GuardAgent comprises two major steps (see Fig. 1). In the first step (Sec. 4.2), a step-by-step action plan is gener-ated by prompting an LLM with the above-mentioned inputs to GuardAgent . In the second step (Sec. 4.3), we prompt the LLM with the action plan and a set of callable func-4GuardAgent 
+
+Figure 2: A toy example of GuardAgent executing a safety guard request for access control on a healthcare target agent (EHRAgent). A general administration user requests the lab results of a patient. However, based on the safety guard request, this user type cannot access the ‘lab’ database. 
+
+GuardAgent detects this rule violation by analyzing the safety guard requests and the action proposed by the target agent via guardrail code generation and execution. tions to generate a guardrail code, which is then executed by calling an external engine. A memory module is available in both steps to retrieve in-context demonstrations. In Fig. 2, we show a toy example of GuardAgent executing a safety guard request for access control on the EHRAgent. Complete safety requests, task plan, and guardrail code gen-erated by GuardAgent are shown in appendix (Fig. 14 and Fig. 21) due to space limitations. 
+
+4.2. Task Planning 
+
+The objective for task planning is to generate a step-by-step action plan P from the inputs to GuardAgent . A naive de-sign is to prompt a foundation LLM with [Ip, I s, I r , I i, I o],where Ip contains carefully designed planning instruc-tions that 1) define each GuardAgent input, 2) state the guardrail task (i.e., checking if Ir is satisfied by Ii and Io), and 3) guide the generation of action steps (see Fig. 14 in App. E for example). However, understanding the complex safety guard requests and incorporating them with the target agent remains a challenging task for existing LLMs. We address this challenge by allowing GuardAgent to re-trieve demonstrations from a memory module that archives target agent inputs and outputs from past use cases. Here, an element D in the memory module is denoted by D =[Ii,D , I o,D , P D , C D ], where Ii,D and Io,D are the target agent inputs and outputs respectively, PD contains the ac-tion steps, and CD contains the guardrail code. Retrieval is based on the similarity between the current target agent inputs and outputs and those from the memory. Specifi-cally, we retrieve k demonstrations by selecting k elements from the memory with the smallest Levenshtein distance 
+
+L([ Ii,D , I o,D ], [Ii, I o]) . Then the action plan is obtained by 
+
+P = LLM([ Ip, I s, I r , D 1, · · · , D k, I i, I o]) . For brevity of the prompt, we remove the guardrail code in each demon-stration in our experiments. In the cases where GuardAgent is applied to a new LLM agent for some specific safety guard requests, we also allow the user of GuardAgent to manually inject demonstrations into the memory module. In particular, we request the action plan in each demonstration provided by the user to contain four mandatory steps, denoted by 
+
+PD = [ p1,D , p 2,D , p 3,D , p 4,D ], where the four steps form a chain-of-thought (Wei et al., 2022). In general, p1,D sum-marizes guard requests to identify the keywords, such as ‘access control’ with three roles, ‘physician’, ‘nursing’, and ‘general administration’ for EICU-AC. Then, p2,D filters information in the safety guard request that is related to the target agent input, while p3,D summarizes the target agent output log and locates related content in the safety guard request. Finally, p4,D instructs guardrail code generation to compare the information obtained in p2,D and p3,D , as well as the supposed execution engine. Example action plans are shown in Fig. 21 of App. J. 
+
+4.3. Guardrail Code Generation and Execution 
+
+The goal of this step is to generate a guardrail code C based on the action plan P . Once generated, C is executed through the external engine E specified in the action plan. However, guardrail code generated by directly prompting an LLM with the action plan P and straightforward instructions may not be reliably executable. One of our key designs to ad-dress this issue is to adopt more comprehensive instructions that include a list F of callable functions with specification of their input arguments. The definitions of these functions are stored in the toolbox of GuardAgent , which can be easily extended by users through code uploading to address 5GuardAgent 
+
+new safety guard requests and target agents. The LLM is instructed to use only the provided functions for code gener-ation; otherwise, it easily makes up non-existent functions. Furthermore, we utilize past examples retrieved from mem-ory, employing the same approach used in task planning, to serve as demonstrations for code generation. Thus, we have 
+
+C = LLM( Ic(F), D 1, · · · , D k, I i, I o, P ), where Ic(F)
+
+are the instructions based on the callable functions in F and 
+
+D1, · · · , D k are the retrieved demonstrations. The outputs of GuardAgent are obtained by executing the generated code, i.e., (Ol, O d) = E(C, F). Finally, we adopt the de-bugging mechanism proposed by Shi et al. (Shi et al., 2024), which invokes an LLM to analyze any error messages that may arise during execution to enhance the reliability of the generated code. Note that this debugging step is seldom activated in our experiments, since in most cases, the code produced by GuardAgent is already executable. 
+
+# 5. Experiments 
+
+Overview of results. In Sec. 5.3, we show the effective-ness of GuardAgent in safeguarding EHRAgent on EICU-AC and SeeAct on Mind2Web-SC, compared with several strong baseline approaches. In Sec. 5.4, we conduct the following ablation studies: 1) We present a breakdown of results for the roles in EICU-AC and the rules in Mind2Web-SC, showing that GuardAgent performs consistently well across most roles and rules, enabling it to manage complex guard requests effectively. 2) We assess the significance of long-term memory by varying the number of demonstrations provided to GuardAgent . 3) We show the importance of the toolbox of GuardAgent by observing a performance decline when critical tools (i.e., functions) are removed. In-terestingly, GuardAgent compensates for such removal by autonomously defining necessary functions, demonstrat-ing its ability to handle emergent safety requests. Finally, although this paper focuses on guardrails for complex agent tasks, we also include a study on the CSQA benchmark in App. P to show the effectiveness of GuardAgent safe-guarding standalone LLMs on generic QA tasks. 
+
+5.1. Setup Datasets and agents We test GuardAgent on EICU-AC and Mind2Web-SC with EHRAgent and SeeAct (using their original settings) as the target agents, respectively. The role and question from each EICU-AC example are inputs to EHRAgent, and the output logs include the reasoning steps, the generated code, and the final answer produced by EHRAgent. The inputs to SeeAct contain the task and user information from each example in Mind2Web-SC, and the output logs include the predicted action and the reasoning by SeeAct. Example inputs ( Ii) and output logs ( Io) of the two target agents are shown in App. E. Other inputs to GuardAgent , including the specifications of the two target agents ( Is), the safety guard requests associated with the two benchmarks ( Ir ), and the planning instructions ( Ip), are also shown in App. E due to space limitations. 
+
+Settings of GuardAgent In the main experiments, we set the number of demonstrations to k = 1 and k = 3 for EICU-AC and Mind2Web-SC, respectively. Other choices will be considered in our ablation study. For each bench-mark, we initialize the memory of GuardAgent by k
+
+manually created demonstrations (see App. J for exam-ple). We evaluate GuardAgent with GPT-4, Llama3-70B, Llama3.1-70B, and Llama3.3-70B (with temperature zero) as the core LLMs, respectively. We use Python as the default code execution engine, with two initial functions, ‘CheckAc-cess’ and ‘CheckRules’, in the toolbox (see App. F). Note that users of GuardAgent can easily upload new func-tions or engines into the toolbox. Finally, we allow three debugging iterations, though in most cases, the guardrail code generated by GuardAgent is directly executable. 
+
+Evaluation metrics We consider five evaluation metrics: label prediction accuracy ( LPA ), label prediction precision (LPP ), label prediction recall ( LPR ), explanation accuracy (EA ), and final response accuracy ( FRA ), all in percentage .LPA, LPP, and LPR represent the accuracy, precision, and recall for label prediction, respectively, all calculated over all examples in each dataset. Here, a prediction of label ‘1’ is counted only if the denial message (‘access denied’ or ‘action denied’) appears. EA considers all examples with a ground truth label ‘1’. It is defined as the proportion of these examples being correctly predicted to ‘1’ AND with all inaccessible databases and columns (for EICU-AC) or all violated rules (for Mind2Web-SC) successfully detected. In contrast, FRA considers all examples with a ground truth label ‘0’. It is defined as the proportion of these examples being correctly predicted to ‘0’ (i.e. access/action granted) 
+
+AND with the agent producing the correct answer or ac-tion. In particular, EA measures the prediction recall for the inaccessible datasets on EICU-AC or the violated rules on Mind2Web-SC. FRA measures the influence of the guardrail on the task performance of the target agent. 
+
+5.2. Baselines Model-Guarding-Agent Since this is the first work study-ing the guardrail for LLM agents, we create a baseline using models with carefully crafted prompts for guardrails. Here, we consider the same choices for the core LLM of 
+
+GuardAgent , GPT-4, Llama3-70B, Llama3.1-70B, and Llama3.3-70B, as the guardrail models. We create com-prehensive prompts containing high-level instructions I′
+
+> p
+
+adapted from the one for GuardAgent , the same num-ber of demonstrations as for GuardAgent but without guardrail code generation, denoted by D′
+
+> 1
+
+, · · · , D ′
+
+> k
+
+, and the same set of inputs as for GuardAgent . Example prompts 6GuardAgent 
+
+Table 1: Performance of GuardAgent in safeguarding EHRAgent on EICU-AC and SeeAct on Mind2Web-SC, compared with the                                                                                                                                                          
+
+> Model-Guarding-Agent baseline on four LLM choices. Performance of strong baselines such as Hardcoded Safety Rules for target agents and the SOTA LlamaGuard are also presented. GuardAgent outperforms the baselines with higher label prediction accuracies (LPAs) and explanation accuracies (EAs) on both benchmarks with different core LLMs. Unlike the Hardcoded Safety Rules with low final response accuracies (FRAs), GuardAgent maintains 100% FRAs (i.e. not affecting the task performance of target agents) across all settings due to its ‘non-invasiveness’. The LPA of LlamaGuard is close to random guesses, demonstrating its inability to safeguard agents. EHRAgent on EICU-AC SeeAct on Mind2Web-SC Core LLM Method LPA LPP LPR EA FRA LPA LPP LPR EA FRA LlamaGuard3-8B LlamaGuard 50.3 100 3.1 n.a. 100 51.0 100 2.0 n.a. 100 Llama3-70B Hardcoded Safety Rules 82.0 86.7 76.5 2.5 29.2 52.5 100 5.0 5.0 28.0 Model-Guarding-Agent 92.1 95.4 88.9 41.4 100 76.5 93.4 57.0 57.0 100
+> GuardAgent 98.4 100 96.9 96.9 100 83.5 98.6 69.0 68.0 100 Llama3.1-70B Hardcoded Safety Rules 65.8 62.7 82.1 16.7 27.9 61.0 95.8 23.0 23.0 29.0 Model-Guarding-Agent 92.7 97.3 88.3 45.7 100 81.5 95.9 70.0 66.0 100
+> GuardAgent 98.4 100 96.9 95.7 100 84.5 85.6 83.0 83.0 100 Llama3.3-70B Hardcoded Safety Rules 87.9 93.7 82.1 11.7 59.7 69.5 100 39.0 39.0 31.0 Model-Guarding-Agent 98.4 100 96.9 91.4 100 80.5 96.9 63.0 60.0 100
+> GuardAgent 99.1 100 98.1 96.9 100 93.0 92.2 94.0 94.0 100 GPT-4 Hardcoded Safety Rules 81.0 76.6 90.7 50.0 3.2 77.5 95.1 58.0 58.0 71.0 Model-Guarding-Agent 97.5 95.3 100 67.9 100 82.5 100 65.0 65.0 100
+> GuardAgent 98.7 100 97.5 97.5 100 90.0 100 80.0 80.0 100
+
+for both benchmarks are shown in App. I. Then the out-puts of the guardrail models are obtained by (Ol, O d) = LLM( I′
+
+> p
+
+, I s, I r , D ′
+
+> 1
+
+, · · · , D ′
+
+> k
+
+, I i, I o).
+
+Model-Guarding-Model We consider LlamaGuard de-signed to detect harmful content in LLM inputs and out-puts, which is not aligned with the safety guard requests for agents (Inan et al., 2023). Note that LlamaGuard uses a specially trained LLM for the detection. 
+
+Hardcoded Safety Rules We hardcode the access control policies from EICU-AC into the system prompt of EHRA-gent by specifying the three roles with their accessible databases and columns. During the evaluation, this modi-fied EHRAgent will be provided with both the role and the query of the EICU-AC examples. Its system prompt will include instructions to display the ‘denial message’ along with the inaccessible databases and columns for the given role, if there are any. Similarly, we incorporate textual in-structions for safety checks from Mind2Web-SC into the system prompt of SeeAct. If any rules are violated for the given user profile, the safety-enforced SeeAct is supposed to print the ‘denial message’ with the violated rules. Detailed system prompts for the modified agents are deferred to App. D. We evaluate this “invasive” defense using the same set of LLMs as for our GuardAgent .
+
+5.3. Guardrail Performance 
+
+In Tab. 1, we compare the performance of GuardAgent 
+
+with the baselines using our comprehensive evaluation met-rics. Compared with the Model-Guarding-Agent baseline, 
+
+GuardAgent achieves uniformly better LPAs on the two benchmarks for all LLM choices ( > 98% on EICU-AC and > 83% on Mind2Web-SC), with also clear gaps in EAs. We attribute such advantage of ‘ Agent-Guarding-Agent ’ over ‘ Model-Guarding-Agent approaches to our design of reasoning-based code generation . As shown by our case study in Fig. 3, for a query by a nurse (with-out access to the ‘diagnosis’ database) that requires ac-cess to both the ‘medication’ and ‘diagnosis’ databases, the Model-Guarding-Agent baseline ‘considerately’ included the ‘diagnosis’ database to the accessible list for nurs-ing, leading to an incorrect grant of access. Conversely, 
+
+GuardAgent strictly follows the safety guard requests to generate guardrail code and execute it, which avoids such a mistake due to the ‘autonomy’ of LLMs. In many other failure cases of the Model-Guarding-Agent baseline on EICU-AC, guardrails based on natural language cannot effectively distinguish column names if they are shared by different databases. In another case study in Fig. 18, App. G, the entire database ‘vitalperiodic’ with a col-umn named ‘patientunitstayid’ is not accessible to ‘general administration’, while the column with the same name in the database ‘patient’ is accessible to the same role. In this case, the model-based guardrail fails to determine the column ‘patientunitstayid’ in the database ‘vitalperiodic’ as ‘inacces-sible’. In contrast, GuardAgent based on code generation accurately converts each database and its columns into a dictionary, avoiding the ambiguity in column names. On the other hand, Hardcoded Safety Rules fail to protect target agents, exhibiting low LPAs and low EAs on both 7GuardAgent 
+
+Figure 3: A case study comparing GuardAgent with the Model-Guarding-Agent baseline. For a query by a nurse (without access to the ‘diagnosis’ database) that requires access to both the ‘medication’ and ‘diagnosis’ databases (bolded), the baseline approach ‘considerately’ included the ‘diagnosis’ database to the accessible list for nursing, leading to an incorrect grant of access. GuardAgent , however, strictly follow the safety guard requests to generate guardrail code, which avoids making such ‘autonomy-driven’ mistakes. benchmarks. Moreover, these hardcoded safety requests introduce additional burdens to these target agents, signifi-cantly degrading their performance on the original tasks – on EHRAgent, for example, the FRA measuring the task perfor-mance is merely 3.2%. In contrast, GuardAgent achieves 100% FRAs, i.e., zero degradation to the task performance of the target agents, for all settings, since it is ‘non-invasive’ to these agents. Despite the poor performance, Hardcoded Safety Rules cannot be transferred to other LLM agents with different designs. This shortcoming further highlights the need for our GuardAgent , which is both effective and flexible in safeguarding different LLM agents. Finally, we find that the Model-Guarding-Agent approach, LlamaGuard, cannot safeguard LLM agents since it is de-signed for content moderation. 
+
+5.4. Ablation Studies Performance under different safety guard requests In Fig. 4, we show LPA and EA of GuardAgent with Llama3.3-70B (top row) and GPT-4 (bottom row), respec-tively, for a) EHRAgent for each role in EICU-AC and b) SeeAct for each rule in EICU-AC (by only considering pos-itive examples). In general, GuardAgent performances uniformly well for the three roles in EICU-AC and the six rules in Mind2Web-SC, except for rule 5 related to movies, music, and videos with GPT-4. We find that all the failure cases for this rule are due to its broader cover-age, plus the overwhelming details in the query that prevent 8GuardAgent 
+
+Figure 4: Breakdown of GuardAgent results over three roles in EICU-AC and the six rules in Mind2Web-SC for GuardAgent   
+
+> with Llama3.3-70B (top row) and GPT-4 (bottom row), respec-tively. GuardAgent performs uniformly well for all roles and rules except for rule 5 related to movies, music, and videos due to the broader scenario coverage of the safety rule.
+
+GuardAgent from connecting the query to the rule. Still, 
+
+GuardAgent demonstrates relatively strong capabilities in handling complex safety guard requests with high diversity. 
+
+Influence of memory We vary the number of demonstra-tions retrieved from the memory base of GuardAgent and show the corresponding LPAs and EAs in Fig. 5. Again, we consider GuardAgent with GPT-4 for brevity. The results show the importance of memory and that GuardAgent 
+
+can achieve descent guardrail performance with very few shots of demonstrations. More evaluation and discussion about memory retrieval are deferred to App. M. 
+
+Influence of toolbox We test GuardAgent with GPT-4 on EICU-AC by removing a) the functions in the toolbox relevant to the safety guard requests and b) demonstrations for guardrail code generation (that may include the required functions). Specifically, the guardrail code is now gener-ated by C′ = LLM( Ic(F′), I i, I o, P ), where F′ represents the toolbox without the required functions. In this case, 
+
+GuardAgent either defines the required functions (see Fig. 19 in App. H) or produces procedural code towards the same goal, and has achieved a 90.8% LPA with a 96.1% EA (compared with the 98.7% LPA and the 97.5% EA with the required functions) on EICU-AC. The removal of the toolbox and memory mainly reduces the executable rate of generated code, as shown in Tab. 2. More details about code generation and debugging of GuardAgent are deferred to App. K. The clear performance drop supports the need for the relevant tools (i.e. functions) in the code genera-tion step. The results also demonstrate the adaptability of 
+
+GuardAgent to address new safety guard requests. 
+
+The trend of code-based guardrails. We further consider a very challenging model-guarding-agent task where GPT-4 
+
+Figure 5: Performance of GuardAgent (with GPT-4 as the core LLM) provided with different numbers of demon-strations on EICU-AC and Mind2Web-SC. Table 2: The executable rate (ER, the percentage of exe-cutable code) before debugging and after debugging, and the LPA for GuardAgent (with GPT-4) on EICU-AC. Both ERs and LPA reduce when the toolbox and memory bank of GuardAgent are removed.         
+
+> ER before ER after LPA w/o toolbox and memory 90.8 93.7 90.8 w/ toolbox and memory 100 100 98.7
+
+is used to safeguard EHRAgent on EICU-AC but with all instructions related to code generation removed. In this case, the LLM has to figure out whether or not to create a code-based guardrail by itself. Interestingly, we find that for 
+
+68.0% examples in EICU-AC, the LLM chose to generate a code-based guardrail (though mostly inexecutable). This result shows the intrinsic tendency of LLMs to utilize code as a structured and precise method for guardrail, support-ing our design of GuardAgent based on code generation. More analysis of this tendency is deferred to App. L. 
+
+# 6. Conclusion and Future Research 
+
+In this paper, we present the first study on guardrails for LLM agents to address diverse user safety or pri-vacy requests. We propose GuardAgent , the first LLM agent framework designed to safeguard other LLM agents. 
+
+GuardAgent leverages knowledge-enabled reasoning ca-pabilities of LLMs to generate a task plan and convert it into a guardrail code. It is featured by the flexibility in handling diverse guardrail requests, the reliability of the code-based guardrail, and the low computational overhead. Future research in this direction includes automated toolbox design, advanced reasoning strategies for task planning, and multi-agent frameworks to safeguard various agents. 9GuardAgent 
+
+# Acknowledgement 
+
+This work is partially supported by the National Science Foundation under grant No. 1910100, No. 2046726, NSF AI Institute ACTION No. IIS-2229876, DARPA TIAMAT No. 80321, the National Aeronautics and Space Adminis-tration (NASA) under grant No. 80NSSC20M0229, ARL Grant W911NF-23-2-0137, Alfred P. Sloan Fellowship, the research grant from eBay, AI Safety Fund, Virtue AI, and Schmidt Science. 
+
+# Impact Statement 
+
+We propose GuardAgent , a novel framework with a promising social impact as the first LLM agent designed to safeguard other LLM agents. By demonstrating the re-liability of code-based guardrails and their flexibility in meeting diverse safety requirements across application do-mains, GuardAgent directly addresses growing concerns around the safety and trustworthiness of LLM agents. This work lays the foundation for more advanced and adaptable guardrail solutions in the future. 
+
+# References 
+
+Guardrails AI. https://www.guardrailsai.com/ ,2023. Abbasian, M., Azimi, I., Rahmani, A. M., and Jain, R. Con-versational health agents: A personalized llm-powered agent framework, 2024. Chen, Z., Xiang, Z., Xiao, C., Song, D., and Li, B. Agent-poison: Red-teaming llm agents via poisoning memory or knowledge bases. In Thirty-eighth Conference on Neural Information Processing Systems , 2024. Cui, C., Yang, Z., Zhou, Y., Ma, Y., Lu, J., Li, L., Chen, Y., Panchal, J., and Wang, Z. Personalized autonomous driving with large language models: Field experiments, 2024. Deng, X., Gu, Y., Zheng, B., Chen, S., Stevens, S., Wang, B., Sun, H., and Su, Y. Mind2web: Towards a generalist agent for the web, 2023. Gur, I., Furuta, H., Huang, A. V., Safdari, M., Matsuo, Y., Eck, D., and Faust, A. A real-world webagent with plan-ning, long context understanding, and program synthesis. In The Twelfth International Conference on Learning Representations , 2024. URL https://openreview. net/forum?id=9JQtrumvg8 .Han, W., Guo, D., Xu, C.-Z., and Shen, J. Dme-driver: Integrating human decision logic and 3d scene perception in autonomous driving, 2024. Inan, H., Upasani, K., Chi, J., Rungta, R., Iyer, K., Mao, Y., Tontchev, M., Hu, Q., Fuller, B., Testuggine, D., and Khabsa, M. Llama guard: Llm-based input-output safe-guard for human-ai conversations, 2023. Jin, Y., Shen, X., Peng, H., Liu, X., Qin, J., Li, J., Xie, J., Gao, P., Zhou, G., and Gong, J. Surrealdriver: Designing generative driver agent simulation framework in urban contexts based on large language model, 2023. Lees, A., Tran, V. Q., Tay, Y., Sorensen, J., Gupta, J., Met-zler, D., and Vasserman, L. A new generation of per-spective api: Efficient multilingual character-level trans-formers. In Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Min-ing , 2022. URL https://doi.org/10.1145/ 3534678.3539147 .Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W.-t., Rocktäschel, T., Riedel, S., and Kiela, D. Retrieval-augmented genera-tion for knowledge-intensive nlp tasks. In Proceedings of the 34th International Conference on Neural Information Processing Systems , 2020. Li, J., Wang, S., Zhang, M., Li, W., Lai, Y., Kang, X., Ma, W., and Liu, Y. Agent hospital: A simulacrum of hospital with evolvable medical agents, 2024. Mao, J., Ye, J., Qian, Y., Pavone, M., and Wang, Y. Alanguage agent for autonomous driving. In First Con-ference on Language Modeling , 2024. URL https: //openreview.net/forum?id=UPE6WYE8vg .Markov, T., Zhang, C., Agarwal, S., Eloundou, T., Lee, T., Adler, S., Jiang, A., and Weng, L. A holistic approach to undesired content detection in the real world. In AAAI ,2023. Pollard, T. J., Johnson, A. E. W., Raffa, J. D., Celi, L. A., Mark, R. G., and Badawi, O. The eicu collaborative research database, a freely available multi-center database for critical care research. Scientific Data , 2018. Qi, X., Zeng, Y., Xie, T., Chen, P.-Y., Jia, R., Mittal, P., and Henderson, P. Fine-tuning aligned language models compromises safety, even when users do not intend to! In The Twelfth International Conference on Learning Representations , 2024. URL https://openreview. net/forum?id=hTEGyKf0dZ .Rebedea, T., Dinu, R., Sreedhar, M. N., Parisien, C., and Cohen, J. NeMo guardrails: A toolkit for control-lable and safe LLM applications with programmable rails. In Proceedings of the 2023 Conference on Em-pirical Methods in Natural Language Processing: Sys-tem Demonstrations , December 2023. URL https: //aclanthology.org/2023.emnlp-demo.40 .10 GuardAgent 
+
+Shi, W., Xu, R., Zhuang, Y., Yu, Y., Zhang, J., Wu, H., Zhu, Y., Ho, J., Yang, C., and Wang, M. D. Ehragent: Code empowers large language models for few-shot complex tabular reasoning on electronic health records, 2024. Shinn, N., Cassano, F., Gopinath, A., Narasimhan, K. R., and Yao, S. Reflexion: language agents with verbal reinforcement learning. In Thirty-seventh Conference on Neural Information Processing Systems , 2023. Talmor, A., Herzig, J., Lourie, N., and Berant, J. Com-monsenseQA: A question answering challenge targeting commonsense knowledge. In Proceedings of the 2019 Conference of the North American Chapter of the Associ-ation for Computational Linguistics: Human Language Technologies, Volume 1 (Long and Short Papers) , 2019. Tu, T., Palepu, A., Schaekermann, M., Saab, K., Freyberg, J., Tanno, R., Wang, A., Li, B., Amin, M., Tomasev, N., Azizi, S., Singhal, K., Cheng, Y., Hou, L., Webson, A., Kulkarni, K., Mahdavi, S. S., Semturs, C., Gottweis, J., Barral, J., Chou, K., Corrado, G. S., Matias, Y., Karthike-salingam, A., and Natarajan, V. Towards conversational diagnostic ai, 2024. Wang, B., Chen, W., Pei, H., Xie, C., Kang, M., Zhang, C., Xu, C., Xiong, Z., Dutta, R., Schaeffer, R., et al. Decod-ingtrust: A comprehensive assessment of trustworthiness in gpt models. In Thirty-seventh Conference on Neural In-formation Processing Systems Datasets and Benchmarks Track , 2023a. Wang, X., Wei, J., Schuurmans, D., Le, Q., Chi, E., Narang, S., Chowdhery, A., and Zhou, D. Self-consistency im-proves chain of thought reasoning in language mod-els, 2023b. URL https://arxiv.org/abs/2203. 11171 .Wei, J., Wang, X., Schuurmans, D., Bosma, M., brian ichter, Xia, F., Chi, E. H., Le, Q. V., and Zhou, D. Chain of thought prompting elicits reasoning in large language models. In Advances in Neural Information Processing Systems , 2022. Xi, Z., Chen, W., Guo, X., He, W., Ding, Y., Hong, B., Zhang, M., Wang, J., Jin, S., Zhou, E., Zheng, R., Fan, X., Wang, X., Xiong, L., Zhou, Y., Wang, W., Jiang, C., Zou, Y., Liu, X., Yin, Z., Dou, S., Weng, R., Cheng, W., Zhang, Q., Qin, W., Zheng, Y., Qiu, X., Huang, X., and Gui, T. The rise and potential of large language model based agents: A survey, 2023. Xiao, W., Weissman, J. L., and Johnson, P. L. F. Ecologi-cal drivers of crispr immune systems. mSystems , 9(12): e00568–24, 2024. doi: 10.1128/msystems.00568-24. Yang, Q., Wang, Z., Chen, H., Wang, S., Pu, Y., Gao, X., Huang, W., Song, S., and Huang, G. Llm agents for psychology: A study on gamified assessments, 2024. Yao, S., Zhao, J., Yu, D., Du, N., Shafran, I., Narasimhan, K., and Cao, Y. ReAct: Synergizing reasoning and act-ing in language models. In International Conference on Learning Representations (ICLR) , 2023. Yu, Y., Li, H., Chen, Z., Jiang, Y., Li, Y., Zhang, D., Liu, R., Suchow, J. W., and Khashanah, K. Finmem: Aperformance-enhanced llm trading agent with layered memory and character design, 2023. Yuan, T., He, Z., Dong, L., Wang, Y., Zhao, R., Xia, T., Xu, L., Zhou, B., Fangqi, L., Zhang, Z., Wang, R., and Liu, G. R-judge: Benchmarking safety risk awareness for LLM agents. In ICLR 2024 Workshop on Large Language Model (LLM) Agents , 2024a. URL https: //openreview.net/forum?id=g6Yy46YXrU .Yuan, Z., Xiong, Z., Zeng, Y., Yu, N., Jia, R., Song, D., and Li, B. Rigorllm: Resilient guardrails for large language models against undesired content. In ICML , 2024b. Zheng, B., Gou, B., Kil, J., Sun, H., and Su, Y. Gpt-4v(ision) is a generalist web agent, if grounded. arXiv preprint arXiv:2401.01614 , 2024. Zhou, S., Xu, F. F., Zhu, H., Zhou, X., Lo, R., Sridhar, A., Cheng, X., Bisk, Y., Fried, D., Alon, U., et al. Webarena: A realistic web environment for building autonomous agents. arXiv preprint arXiv:2307.13854 , 2023. URL 
+
+https://webarena.dev .11 GuardAgent 
+
+Figure 6: List of all databases and columns. Figure 7: Databases and columns accessible by ‘physician’. 
+
+Figure 8: Databases and columns accessible by ‘nursing’. empty space 
+
+Figure 9: Databases and columns accessible by ‘general administration’. Figure 10: Databases and columns accessible to the three roles defined for EICU-AC, and the complete list of databases and columns for reference. Accessible columns and inaccessible columns for each role are marked in green while inaccessible ones are shaded. 
+
+# A. Details About the EICU-AC Benchmark 
+
+A.1. Role-Based Access Permission 
+
+For the EICU-AC benchmark, we consider three roles: ‘physician’, ‘nursing’, and ‘general administration’. These roles are selected based on the realities of the ICU environment. Although various other roles exist, we focus on these three roles due to their prevalence, ensuring sufficient queries relevant to each role when creating the benchmark. For each role, we select a subset of accessible databases and columns from the EICU benchmark, as shown in Fig. 10. Our selection rule is to query ChatGPT about the access permission for the three roles over each database and then verify the suggested access permission by human experts 1 For example, for the ‘diagnosis’ database with four columns, ‘patientunitstayid’, ‘icd9code’, ‘diagnosisname’, and ‘diagnosistime’, we query ChatGPT using the prompt shown in Fig. 11. ChatGPT responds with the recommended access permission (‘full access’, ‘limited access’, or ‘no access’) for each role to each of the four columns. Here, we follow all ‘full access’ and ‘no access’ recommendations by ChatGPT. For ‘limited access’, we set it to ‘no access’ if it is recommended for ‘physician’ or ‘nursing’; if it is recommended for ‘general administration’, we set it to ‘full access’. This is to ensure both ‘physician’ and ‘nursing’ roles have sufficient inaccessible databases so that there will be sufficient queries that should be denied in the ground truth (to achieve relatively balanced labeling for both roles). 
+
+> 1Our human experts are from the Nationwide Children’s Hospital, Ohio, USA and Peking University Third Hospital, Beijing, China.
+
+12 GuardAgent 
+
+Figure 11: Our prompt to ChatGPT for the access permission for the three roles to the ‘diagnosis’ database (with four columns, ‘patientunitstayid’, ‘icd9code’, ‘diagnosisname’, and ‘diagnosistime’), and the responses of ChatGPT. 
+
+A.2. Sampling from EICU 
+
+As mentioned in the main paper, each example in EICU-AC contains 1) a healthcare-related question and the correct answer, 2) the databases and the columns required to answer the question, 3) a user identity, 4) a binary label (either ‘0’ for ‘access granted’ and ‘1’ for ‘access denied’), and 5) databases and the columns required to answer the question but not accessible for the given role (if there are any). The examples in EICU-AC are created by sampling from the original EICU dataset following the steps below. First, from the 580 test examples in EICU, we obtain 183 examples that are correctly responded to by EHRAgent with GPT-4 at temperature zero. For each of these examples, we manually check the code generated by EHRAgent to obtain the databases and columns required to answer the question. Second, we assign the three roles to each example, which gives 549 examples in total. We label these examples by checking if any of the required databases or columns are inaccessible to the given role (i.e., by comparing with the access permission for each role in Fig. 10). This will lead to a highly imbalanced dataset with 136, 110, and 48 examples labeled ‘0’ for ‘physician’, ‘nursing’, and ‘general administration’, respectively, and 47, 73, and 135 examples labeled ‘1’ for ‘physician’, ‘nursing’, and ‘general administration’, respectively. In the third step, we remove some of the 549 created examples to a) achieve a better balance between the labels and b) reduce the duplication of questions among these examples. We notice that for ‘general administration’, there are many more examples labeled ‘1’ than ‘0’, while for the other two roles, there are many more examples labeled ‘0’ than ‘1’. Thus, for each example with ‘general administration’ and label ‘1’, we remove it if any of the two examples with the same question for the other two roles are labeled ‘1’. Then, for each example with ‘nursing’ and label ‘1’, we remove it if any example with the same question for ‘physician’ is labeled ‘1’. Similarly, we remove each example with ‘physician’ and label ‘0’ if any of the two examples with the same question for the other two roles are also labeled ‘0’. Then for each example with ‘nursing’ and label ‘0’, we remove it if any example with the same question for ‘general administration’ is labeled ‘0’. After this step, we have 41, 78, and 48 examples labeled ‘0’ for ‘physician’, ‘nursing’, and ‘general administration’, respectively, and 47, 41, and 62 examples labeled ‘1’ for ‘physician’, ‘nursing’, and ‘general administration’, respectively. Finally, we randomly remove some examples for ‘nursing’ with label ‘0’ and ‘general administration’ with label ‘1’, and randomly add some examples for the other four categories (‘physician’ with label ‘0’, ‘general administration’ with label ‘0’, ‘physician’ with label ‘1’, and ‘nursing’ with label ‘1’) to achieve a better balance. The added examples are generated based on the questions from the training set 2 of the original EICU benchmark. The ultimate number of examples in our created EICU-AC benchmark is 316, with the distribution of examples across the three roles and two labels displayed in Tab 3. 
+
+> 2In the original EICU dataset, both the training set and the test set do not contain the ground truth answer for each question. The ground truth answers in the test set of EICU are provided by Shi et al. (Shi et al., 2024).
+
+13 GuardAgent 
+
+Table 3: Number of examples in EICU-AC for each role and each label.         
+
+> physician nursing general administration label ‘0’ (access denied) 52 57 45 label ‘1’ (access granted) 46 55 61
+
+Table 4: Number of examples labeled ‘1’ in Mind2Web-SC for each rule violation. Note that examples labeled ‘0’ do not violate any rules.        
+
+> Safety rules No. examples Rule 1: User must be a member to shop. 19 Rule 2: Unvaccinated user cannot book a flight 12 Rule 3: User without a driver’s license cannot buy or rent a car. 24 Rule 4: User aged under 18 cannot book a hotel. 18 Rule 5: User must be in certain countries to search movies/musics/video. 21 Rule 6: User under 15 cannot apply for jobs. 6
+
+A.3. Healthcare Questions Involved in EICU-AC 
+
+As mentioned in the main paper, our created EICU-AC dataset involves healthcare questions spanning 50 different ICU information categories, i.e., columns across all 10 databases of the EICU benchmark. We further categorize the questions in EICU-AC following the ‘template’ provided by EICU (extracted from the ‘q_tag’ entry of each example (Shi et al., 2024)). This gives 70 different question templates, showing the high diversity of healthcare questions involved in our EICU-AC benchmark. 
+
+# B. Details About the Mind2Web-SC Benchmark 
+
+In Sec. 3.2, we have defined six safety rules for the Mind2Web-SC Benchmark. Rule 1 requires ‘membership’ in the user information to be ‘true’. Rule 2 requires ‘vaccine’ in the user information to be ‘true’. Rule 3 requires ‘dr_license’ in the user information to be ‘true’. Rule 4 requires ‘age’ in the user information to be no less than 18. Rule 5 requires ‘domestic’ in the user information to be ‘true’. Rule 6 requires ‘age’ in the user information to be no less than 15. In Tab. 4, we show the number of examples labeled ‘1’ in Mind2Web-SC for each rule violation. Note that examples labeled ‘0’ do not violate any rules. During the construction of Mind2Web-SC, we added some examples with label ‘1’ and removed some examples with label ‘0’ to balance the two classes. By only following the steps in Sec. 3.2 without any adding or removal of examples, we obtain a highly imbalanced dataset with 178 examples labeled ‘0’ and only 70 examples labeled ‘1’. Among the 178 examples labeled ‘0’, there are 148 examples with the tasks irrelevant to any of the rules – we keep 50 of them and remove the other 
+
+(148 − 50 =) 98 examples. All 30 examples labeled ‘0’ but related to at least one rule are also kept. Then, we create 30 examples labeled ‘1’ by reusing the tasks for these 30 examples labeled ‘0’. We keep generating random user profiles for these tasks until the task-related rule is violated, and the example is labeled to ‘1’. Note that the tasks are randomly selected but manually controlled to avoid duplicated tasks within one class. Similarly, we created 20 examples labeled ‘0’ by reusing the tasks for examples labeled ‘1’, with randomly generated user information without any rule violation. Finally, we obtain the Mind2Web-SC dataset with 100 examples in each class (200 examples in total). Among the 100 examples labeled ‘0’, 50 are related to at least one of the rules. 
+
+# C. Illustration of Examples in EICU-AC and Mind2Web-SC 
+
+In Fig. 12, we illustrate the examples we created for EICU-AC and Mind2Web-SC, respectively. The two blue boxes illustrate the questions and answers from the original EICU and Mind2Web datasets, respectively. The yellow boxes illustrate the required databases and the required actions determined by EHRAgent and SeeAct, respectively. The two green boxes illustrate the data attributes we added when creating the EICU-AC and Mind2Web-SC datasets, respectively. For EICU-AC, 14 GuardAgent 
+
+Figure 12: An example from EICU-AC (left) and an example from Mind2Web-SC (right). 
+
+Figure 13: Instructions injected into the system prompt of EHRAgent for access control and SeeAct for safety control, as naive baselines that motivate our GuardAgent .we include a user identity, the ground truth label for whether the user requests (i.e. the question) should be denied, and the required databases that are not accessible to the given user identity (which causes the denial). For Mind2Web-SC, we include a user profile, a ground truth label for whether the agent action should be denied, and potential rule violations of the action if there are any. 
+
+# D. Detailed System Prompts for Naive Access Control and Safety Control Based on Instructions 
+
+In our preliminary studies, We created a naive access control for EHRAgent and a naive safety control for SeeAct by directly modifying their system prompts for planning. These approaches are either ineffective in safeguarding the agents or degrade the benign performance of the agents. In Fig. 13, we show the instructions we injected into the system prompts of these two agents. 
+
+# E. Complete Inputs and Outputs of GuardAgent 
+
+Complete Inputs to GuardAgent As described in Sec. 4.2, the inputs to GuardAgent include a specification Is of the target agent, a set of guard requests Ir , inputs Ii to the target agent, and the output log Io by the target agent corresponding to Ii. In Fig. 14, we show the actual Is and Ir for GuardAgent in our experiments for both EHRAgent on EICU-AC and SeeAct on Mind2Web. In the same figure, we also show the actual planning instruction Ip and the actual instruction Ic used for code generation. In Fig. 15, we show real examples for the target agent inputs Ii and output logs Io for both EHRAgent 15 GuardAgent 
+
+on EICU-AC and SeeAct on Mind2Web. 
+
+Outputs of GuardAgent The intermediate outputs of GuardAgent , including the generated action plan P and the guardrail code C, are similar to those in the manually created demonstrations (see App. J); thus, we do not repeatedly show them. Here, we show example outputs, including the label prediction Ol and the detailed reasons Od of GuardAgent for both benchmarks in Fig. 16. 
+
+# F. Callable Functions 
+
+Our experiments involve two callable functions shown in Fig. 17. However, the user of GuardAgent can easily extend the toolbox by uploading more functions. The actual toolbox of GuardAgent in practice will contain much more callable functions than for our experiments. 
+
+# G. A Case Study on the Reliability of Code-Based Guardrails 
+
+In Sec. 5.3, we have demonstrated the superior performance of GuardAgent compared with the “model guarding agent” baselines. We attribute this advantage to our design of reasoning-based code generation for GuardAgent . On EICU-AC, for example, guardrails based on natural language cannot effectively distinguish column names if they are shared by different databases. However, GuardAgent based on code generation accurately converts each database and its columns into a dictionary, avoiding the ambiguity in column names. This is illustrated by an example in Fig. 18. The entire database ‘vitalperiodic’ that contains a column named ‘patientunitstayid’ is not accessible to ‘general administration’, while the column with the same name in the database ‘patient’ is accessible to the same role. The model-based guardrail fails to determine the column ‘patientunitstayid’ in the database ‘vitalperiodic’ as ‘inaccessible’; while GuardAgent find it not a challenge at all. 
+
+# H. Self-Defined Function by GuardAgent 
+
+As shown in Fig. 19, when there is no toolbox (and related functions) installed, GuardAgent defines the necessary functions on its own. The example is a function defined for the access control on EICU-AC. 
+
+# I. Prompts for Baselines 
+
+In the main experiments, we compare GuardAgent with two baselines using LLMs to safeguard LLM agents. The guardrail is created by prompting the LLM with a system instruction, the specification of the target agent, the guard requests, the user inputs to the target agent with the associated output logs, and a few show of examples. Here the system instruction is adapted from the one used by GuardAgent for task planning. However, we include additional instructions about the format of the guardrail outputs. The baselines do not involve any guardrail code generation, and this is reflected by the demonstrations we created that generate guardrails solely based on reasoning over the textual inputs to the LLM. In Fig. 20, we show the modified system prompt template for the baselines, with two example demonstrations for the two benchmarks, respectively. 
+
+# J. Manually Created Demonstrations 
+
+We manually created a set of demonstrations for each benchmark. In Fig. 21, we show two example demonstrations for EHRAgent on EICU-AC and SeeAct on Mind2Web-SC, respectively. 
+
+# K. Further Analysis of the Debugging Mechanism 
+
+In most cases in our main experiments, the code generated by GuardAgent is directly executable without the need for debugging. Here, we investigate the error handling of GuardAgent for the more challenging scenario where the toolbox and memory are both removed. In this scenario, 29/316 generated codes are not executable initially, including 11 name errors, 3 syntax errors, and 15 type errors. Logical errors will not trigger the debugging process since the code is still executable. Debugging solves 9/29 errors, including 8 name errors and 1 type error. None of the syntax errors have been successfully debugged – they are all caused by incorrectly printing the change-line symbol as ‘\\n’. 16 GuardAgent 
+
+Table 5: The performance of GuardAgent (with GPT-4) on the two datasets when the retrieval of demonstrations is based on lease-similarity and most-similarity, respectively. The accuracy of the guardrail (measured by LPA) reduces with the relevance of the retrieved demonstrations.                         
+
+> EHRAgent on EICU-AC SeeAct on Mind2Web-SC LPA LPP LPR EA LPA LPP LPR EA least-similarity 98.1 99.4 96.9 96.9 84.0 100.0 79.0 79.0 most-similarity (default) 98.7 100 97.5 97.5 90.0 100.0 80.0 80.0
+
+# L. Further Analysis of the “the trend of code-based guardrails” 
+
+In the main paper, we show that when the instructions related to code-based guardrails are removed, there are still 68% code-based guardrails generated by GuardAgent on EICU-AC. The tendency for GuardAgent to generate code-based guardrails may relate to the structure in the input guard requests that enables easier code generation. Especially for the access control on EICU-AC, the accessible databases for each role are formatted as: allergy: drugname, allergytime, . . . ; cost: uniqueqid, chargetime, . . . ; . . . Such formatting facilitates the date representation in code generation via .csv or .json. Here, we remove the structured format by providing accessible databases using natural language: “Physicians have access to the allergy database (patientunitstayid, drugname, allergyname, allergytime), diagnosis database (patientunitstayid, icd9code, . . . ), . . . ” With this change, the percentage of generating code-based guardrails reduces from 68% to 62%. 
+
+# M. More Details about Memory Usage of GuardAgent 
+
+Normally, LLM agents retrieve the most similar past use cases as in-context demonstrations. Thus, the relevance of these retrieved demonstrations to the current query is usually high; and the diversity between the retrieved demonstrations is usually low (since they are all neighbouring to the test query). GuardAgent follows the same design. However, how does the relevance of the stored memory affect the performance of GuardAgent ?In Tab. 5, we show the performance of GuardAgent when the retrieval of the demonstrations is based on “least similarity”. That is, we follow the same setting as in our main experiments in Sec. 5.3, where k = 1 and k = 3 demonstrations are retrieved for EICU-AC and Mind2Web-SC, respectively. But these demonstrations are those with the largest Levenshtein distances to the test query. From the table, we observe that the accuracy of the guardrail (measured by LPA) reduces with the relevance of the retrieved demonstrations, which supports our design of memory retrieval based on the “most-similarity” rule. 
+
+# N. Cost of GuardAgent 
+
+In Tab. 6, we show the average execution time of GuardAgent with GPT-4, Llama3-70B, and Llama3.1-70B, compared with the ‘model guarding agent’ baseline with GPT-4. The average execution time of the target agents on their designated tasks is also shown for reference. Additionally, the time costs for one debugging iteration on EICU-AC and Mind2Web-SC are 15.2s and 17.8s, respectively, though in most cases, the code generated by GuardAgent is directly executable without the need for debugging. Furthermore, in Tab. 7, we show the average word count of one demonstration, full prompts with one demonstration, and full responses for GuardAgent on the two benchmarks. From the results, we found that while slower than the baseline, the execution time for GuardAgent is comparable to the execution time of the target agent. Moreover, human inspectors will likely need much more time than our GuardAgent to read the guard requests and then moderate the inputs and outputs of the target agent correspondingly. Given the effectiveness of our GuardAgent as shown in the main paper, GuardAgent is the current best for safeguarding LLM agents. 17 GuardAgent 
+
+Table 6: Average execution time (in second) of GuardAgent with GPT-4, Llama3-70B, and Llama3.1-70B, compared with the ‘model guarding agent’ baseline with GPT-4. The average execution time of the target agent on their designated tasks is shown for reference.               
+
+> EICU-AC Mind2Web-SC Target Agent (reference) 31.9 30.0 Baseline (GPT-4) 8.5 14.4
+> GuardAgent (GPT-4) 45.4 37.3
+> GuardAgent (Llama3-70B) 10.1 9.7
+> GuardAgent (Llama3.1-70B) 16.6 15.5
+
+Table 7: Average word count of one demonstration, full prompts with one demonstration, and full responses (including both task plan and code) for GuardAgent on EICU-AC and Mind2Web-SC.        
+
+> EICU-AC Mind2Web-SC one demonstration 298 494 full prompts with one demonstration 571 1265 full responses 195 277
+
+# O. Choice of the Core Model for GuardAgent 
+
+In the main paper, we show in Tab. 1 that the capability of the core LLM does affect the performance of GuardAgent .This is generally true for most specialized LLM agents, such as those used in autonomy, healthcare, and finance. However, EHRAgent achieves only 53.1% task accuracy on the EICU dataset, even when utilizing GPT-4 as the core LLM. Similarly, SeeAct achieves 40.8% task accuracy on Mind2Web using GPT-4 as the core LLM. As a consequence, it is unlikely for these agents to adopt much weaker models (e.g. with 7B or 13B parameters). Thus, as the guardrail for these target agents, 
+
+GuardAgent will likely share the same (powerful) core, and it is not interesting to discuss the case where GuardAgent 
+
+is equipped with a weak core LLM. 
+
+# P. Investigating the Code Generation Design for GuardAgent 
+
+The code generation design enables GuardAgent to provide reliable and precise guardrails, as discussed in the case studies in App. G. This is the main motivation for us to adopt the code generation design for GuardAgent . However, is the code-based guardrail really a better design than guardrails based on natural language? What if the designated task of the target agent does not require any code generation, e.g., being a complex Q&A task? If the guard requests require 
+
+GuardAgent to respond with non-binary outputs, i.e., risk-based or threshold-based responses, is code generation still a good design? The answer is ‘Yes’. P.1. Setup 
+
+To show this, we consider a commonly used Q&A dataset CSQA (Talmor et al., 2019), which consists of multiple-choice questions for common sense reasoning. The AI system performing this Q&A task can be either an LLM agent or just an LLM. Here, we consider a GPT-4 model for simplicity since GuardAgent will only use the input question and the output answer of the AI system. Note that this Q&A task does not require any code generation and the AI system will also not generate any code when answering the questions. Since there are no safety rules (i.e. guard requests) associated with CSQA, we create a set of “pseudo rules”. Note that these rules do not reflect any practical safety requirements – they are created merely to test the performance of GuardAgent on AI systems for Q&A tasks. Here, we create four pseudo-rules to mimic a guard request for safety control: 1) When there are multiple answer choices containing the same words (including words with the same root, for example, “eye” and “eyes”, “slow” and “slowly”, “to” in “work to advantage” and “matter to”, etc.), none of these options should be selected. 18 GuardAgent 
+
+Table 8: Performance of GuardAgent on the CSQA compared with the “model guarding agents” baseline, both based on a GPT-4 core model. The prediction recall (in percentage) for each “risk level” is reported for both approaches. GuardAgent 
+
+outperforms the baseline with better guardrail performance.                
+
+> no risk low risk med risk high risk overall Baseline w/ GPT-4 97.4 77.8 59.1 100 82.5 (66/80)
+> GuardAgent w/ GPT-4 100 88.9 81.8 100 92.5 (74/80)
+
+2) If the question is longer than or equal to 15 words, do not pick A, B, or C. 3) If the question contains animals, the answer should be B. 4) If the question contains a number ranging from one to five, the answer should not be the corresponding letter. The mapping should follow this rule: 1 = A, 2 = B, 3 = C, 4 = D, 5 = E. For example, if the question contains the number one, the answer should not be A. Moreover, we set five risk levels: “no risk” for zero rule violations, “low risk” for one rule violation, “medium risk” for two rule violations, “high risk” for three rule violations, and “very high risk” for four rule violations. In other words, 
+
+GuardAgent is requested to output non-binary and risk-based responses. Based on our design, the inputs to GuardAgent 
+
+include the safety guard request, a description of the Q&A task, the question, and the answer produced by the AI system (i.e., the GPT-4 model). We sample 80 questions from the original dataset, with 39 questions not violating any rules in the safety guard requests and 41 questions violating at least one rule. As a result, among these 41 questions with rule violations, 18 are labeled ‘low risk’, 22 are labeled ‘medium risk’, and 1 is labeled ‘high risk’. For all the questions in the test, the answer produced by GPT-4 is correct, so the test will mainly focus on the quality of the guardrail. For the settings of GuardAgent , we use GPT-4 as the core LLM and one demonstration for both the task planning step and the code generation step based on the same retrieval mechanism in our main experiments. We introduce three functions for CSQA, as shown in Fig. 22. We compare GuardAgent with the “model guarding agents” baseline based on GPT-4, where the prompt generation follows the principles described under “baseline” in Sec. 5.2. 
+
+P.2. Results and Case Studies 
+
+As shown in Tab. 8, we report for each “risk level” the recall achieved by the two methods respectively – GuardAgent 
+
+outperforms the baseline. GuardAgent first identifies the rules relevant to the question in the task planning phase, then generates code to validate each rule deemed ‘relevant to the question’, and finally counts the number of rule violations to estimate the risk level. Among the six instances where GuardAgent fails to respond with the correct risk level, two are due to the failure to relate the question to rule 2, one is due to the failure to relate the question to rule 3, and three are due to the failure to relate the question to rule 4. The baseline approach achieves 10% lower recall than GuardAgent ,possibly due to the entanglement of multiple tasks, including identifying rules related to the given question, validating the related rules, and estimating the risk level based on the number of rule violations. In Fig. 23, we show the logs of 
+
+GuardAgent and the model output of the baseline, respectively, for an example question where GuardAgent makes the correct guardrail decision but the baseline is wrong. The “model guarding agent” baseline fails to recognize the shared word “have” in answer choices C and D, thus failing to relate the question to rule 1. 
+
+# Q. More discussion on future research 
+
+As the initial work on ‘agent guarding agents’ approaches, GuardAgent can be further improved in the following directions: 1) Like most existing LLM agents, the toolbox of GuardAgent is specified manually. An important future research is to have the agent (or an auxiliary agent) create the required tools. 2) The reasoning capabilities of GuardAgent can be further enhanced. Currently, the reasoning is based on a simple chain of thought without any validation of the reasoning steps. One possible future direction is to involve more advanced reasoning strategies, such as self-consistency or reflexion (Wang et al., 2023b; Shinn et al., 2023) to achieve more robust task planning. 3) GuardAgent is still a single-agent system. The future development of GuardAgent can involve a multi-agent design, 19 GuardAgent 
+
+for example, with multiple agents handling task planning, code generation, and memory management respectively. The multi-agent system can also handle more complicated guardrail requests. For example, suppose for an access control task, the user profile includes attributes like the college, department, and position of the user. Consider a set of complicated access requirements, such as “faculty members from colleges A and B, and graduate assistants from college C and department a of college D cannot access database α”. We could involve a coordinate agent to divide the guardrail task into subtasks, for example, one corresponding to an access requirement. Then a group of “sub-agents” will be employed, each handling a subtask. The coordinate agent will then aggregate the results from all the sub-agents to make a final guardrail decision. Such a separation of roles may improve the performance of each individual step of GuardAgent , leading to an improved overall performance. 4) GuardAgent may potentially be integrated with more complex tools. For example, an ecosystem monitoring agent may incorporate metagenomic tools (Xiao et al., 2024). For another example, an autonomous driving agent may require a complex module (a Python package with a set of functions) to test if there is a collision given the environment information. 20 GuardAgent 
+
+Figure 14: The actual planning instruction Ip, instruction Ic for guardrail code generation, target agent specification Is
+
+and guard requests Ir we used in our experiments for the two agents, EHRAgent and SeeAct, and the two benchmarks, EICU-AC and Mind2Web-SC. 21 GuardAgent 
+
+Figure 15: Examples for target agent inputs Ii and output logs Io, as the inputs to GuardAgent , for the two agents, EHRAgent and SeeAct, and the two benchmarks, EICU-AC and Mind2Web-SC. 
+
+Figure 16: Example outputs of GuardAgent , including the label prediction Ol, the detailed reasons Od, and the final answer/action of the target agent with guardrail, for the two agents, EHRAgent and SeeAct, and the two benchmarks, EICU-AC and Mind2Web-SC. 22 GuardAgent 
+
+Figure 17: Callable functions in the toolbox of GuardAgent involved in our experiments. 
+
+Figure 18: A case where the GPT-4 baseline fails to effectively distinguish the same column name (‘patientunitstayid’) shared by different databases, while GuardAgent accurately converts the tabular information into the guardrail code. 
+
+Figure 19: When relevant functions are not provided in the toolbox, GuardAgent defines its own. 23 GuardAgent 
+
+Figure 20: System prompt template for the baselines and the two example demonstrations for EICU-AC and Mind2Web-SC, respectively. 24 GuardAgent 
+
+Figure 21: Example demonstrations for EHRAgent on EICU-AC and SeeAct on Mind2Web-SC. Actual task plans and guardrail code generated by GuardAgent are similar to these demonstrations. 25 GuardAgent 
+
+Figure 22: Toolbox functions for the “pseudo access control” on CSQA. 26 GuardAgent 
+
+Figure 23: An example on CSQA where GuardAgent effectively detects the rule violation with a correct inference of the risk level while the “model guarding agent” baseline fails. The failure of the baseline is due to its overlooking the repeated use of the word “have” in both options C and D, which relate the question to rule 1. 27
