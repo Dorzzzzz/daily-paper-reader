@@ -1,0 +1,831 @@
+Title: MemMark: State-Evolution Attribution Watermarking for Agent Long-Term Memory Systems
+
+URL Source: https://arxiv.org/pdf/2605.25002v2
+
+Published Time: Wed, 27 May 2026 00:39:46 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+## MEM MARK : State-Evolution Attribution Watermarking for Agent Long-Term Memory Systems 
+
+Haobo Zhang 1* Xutao Mao 2*
+
+Guangyuan Dong 3 Ziwei Li 4 Xuanbo Su 5
+
+Kaijie Chen 6 Jing Yang 7 Zheng Lin 8†
+
+> 1
+
+Zhejiang University of Technology, 2Independent Researcher 
+
+> 3
+
+National University of Singapore, 4King Abdullah University of Science and Technology 
+
+> 5
+
+Bairong, 6Tongji University, 7Universiti Malaya, 8University of Hong Kong 
+
+zhanghaobo@zjut.edu.cn 
+
+Abstract 
+
+Memory-backed agents need provenance that can survive leaked or migrated snapshots, where logs, visible outputs, and trusted meta-data may be absent. We propose M EM MARK ,a state-evolution attribution watermark that embeds an owner-controlled signal into latent memory-write decisions. At each internal LLM call, M EM MARK samples among admissible candidates using keyed, distribution-preserving selection, and records cryptographic commit-ments with signed session anchors and reveal evidence. This makes attribution depend on reproducible backend behavior rather than mu-table provenance fields. Across A-M EM and GRAPHITI on LoCoMo, with three LLM back-bones, M EM MARK preserves memory util-ity: Overall F1 retains 99.6% of the unwater-marked baseline, while BLEU-1 changes by +0.2%. It also provides usable carrier capacity, with 1.16, 1.14, and 1.26 bits of mean entropy for update-target, link-target, and semantic-realization decisions. In the snapshot-only R3 setting, M EM MARK recovers the full 40-bit payload from final snapshots, while wrong-key verification remains near chance. Under nine memory-lifecycle attacks, verification dis-tinguishes tampering, evidence deletion, and partial payload recovery. These results show that robust snapshot-only attribution is feasible for long-term agent memory without surviving traces, trusted metadata, or utility-degrading. 
+
+1 Introduction 
+
+LLM agents are increasingly moving from single-session responders to persistent actors whose de-cisions depend on state that survives across inter-actions. In such systems, the memory layer is no longer a passive cache: it becomes part of the se-curity boundary (Park et al., 2023; Packer et al., 2024; Zhong et al., 2024; Chen et al., 2024; Wei 
+
+> *Equal contribution.
+> †Corresponding author.
+
+et al., 2025; Lin et al., 2026). Recent systems such as A-M EM , G RAPHITI , Mem0, MemOS, Memory-R1, and MemMachine (Xu et al., 2026; Rasmussen et al., 2025; Chhikara et al., 2025; Li et al., 2025; Yan et al., 2025; Wang et al., 2026b) maintain long-lived state through extraction, updates, con-solidation, linking, and deletion. Benchmarks like-wise evaluate memory through long-horizon recall, knowledge updates, temporal reasoning, and in-cremental multi-turn state maintenance (Maharana et al., 2024; Wu et al., 2025; Hu et al., 2025). As memory writing becomes an explicit object of sys-tem design (Zhang et al., 2025, 2026; Sun et al., 2025), a natural response is to attach provenance fields, such as source anchors, versions, or lifecy-cle traces (Zhu et al., 2026; Li et al., 2025). These fields are useful when the writer and storage layer are trusted, but they are much less useful when the memory snapshot itself may have been rewritten. We study a post-compromise forensic setting in which the verifier may not have access to a trusted write-time trace. Prompts, tool calls, memory-write requests, and backend logs may be absent, incom-plete, or controlled by the same actor who controls the memory store; the only durable artifact may be the final memory snapshot. This setting is not a replacement for trusted logging in normal op-eration, but the fallback case that remains when such logs are lost, withheld, or suspected to be cor-rupted. An attacker can rewrite ownership fields, erase identifiers, fabricate provenance chains, or edit backend-native histories such as A-M EM evo-lution logs and G RAPHITI fact-invalidation traces. This threat model is motivated by evidence that agent memory can be poisoned, stealthily modified, or persistently compromised (Chen et al., 2024; Wei et al., 2025; Srivastava and He, 2025; Lin et al., 2026), and by recent surveys that identify agent memory attacks as a distinct safety risk for large-model-powered agents (Ma et al., 2026). Thus, field-based provenance has a circular failure mode: 
+
+> arXiv:2605.25002v2 [cs.CR] 26 May 2026
+
+the same untrusted snapshot contains both the con-tested memory and the mutable fields that certify it. Watermarking offers a natural way to make attribution survive untrusted handling. Token-level LLM watermarks (Kirchenbauer et al., 2023; Dathathri et al., 2024; Pan et al., 2024; Mao et al., 2025), RAG or structured-data watermarks (Lv et al., 2025; Jovanovi´ c et al., 2025; Liu et al., 2025; Chen et al., 2026; Hristov et al., 2023; Peng et al., 2025), and agent-level behavioral water-marks (Huang et al., 2025, 2026; Meng et al., 2026; Wang et al., 2026a) provide important attribution mechanisms. However, their signals are placed in generated text, protected corpora or graphs, visible tool use, or action trajectories. Long-term memory forensics exposes a different evidence channel: the original prompts, tool calls, and execution trace may be unavailable, while the surviving artifact is only the final memory snapshot. The question is therefore whether memory evolution itself can leave reproducible evidence of who wrote it. We propose M EM MARK , a watermark for long-term memory evolution under adversarial snapshot control. Instead of storing attribution in mutable metadata, M EM MARK embeds it into latent but utility-preserving state-transition choices: which existing item to update, which related item to link, or which semantically equivalent realization to store. A keyed sampler selects among admissible candidates while preserving the backend’s prefer-ence distribution, so attribution is carried by the backend’s own evolution behavior rather than by a self-reported field. To make this evidence usable af-ter the external execution trace is lost, M EM MARK 
+
+records an in-snapshot audit path whose validity is checked by replay against the keyed sampler and the admissible transition set. M EM MARK supports three verification regimes: R1 with a complete ex-ternal log, R2 with a partial log, and R3 with only the final memory snapshot. In this way, M EM -MARK moves provenance from editable claims to a reproducible behavioral trace. 
+
+Contributions. 
+
+1. Snapshot-only attribution with full payload recovery. We introduce an audit design and R1/R2/R3 verification hierarchy that supports attribution even when only the final memory snapshot is available. In R3, M EM MARK re-covers the full 40-bit payload, compared with no recovery for signed-metadata-only and 15% wrong-key recovery. 2. Utility-preserving memory-evolution water-marking. We introduce MEM MARK , abackend-invariant watermarking abstraction that embeds attribution into latent memory-evolution decisions rather than editable provenance fields. Across six model–backend settings, MEM -MARK retains 99.6% of the unwatermarked Overall F1 and improved by 0.2% of BLEU. 3. Cross-backend capacity and attack diagnos-tics. Across A-M EM and G RAPHITI , M EM -MARK exposes mean carrier entropies of 1.16, 1.14, and 1.26 bits for update-target, link-target, and semantic-realization decisions, and remains diagnostic under nine memory-lifecycle attacks at strengths 0.1, 0.3, and 0.5. 
+
+2 Related Work 
+
+2.1 Watermarking for Text, Data, and Agent Behavior 
+
+Existing watermarks protect evidence channels that may be absent in memory forensics. Text water-marks embed signals in generated tokens (Kirchen-bauer et al., 2023; Dathathri et al., 2024; Pan et al., 2024; Mao et al., 2025); data-level methods protect retrieval corpora, multimodal stores, or graphs (Lv et al., 2025; Jovanovi´ c et al., 2025; Liu et al., 2025; Chen et al., 2026; Hristov et al., 2023; Peng et al., 2025); and agent watermarks target visible plan-ning, tool use, or trajectory data (Huang et al., 2025, 2026; Meng et al., 2026; Wang et al., 2026a). M EM -MARK keeps the behavioral intuition but moves the carrier to memory-evolution decisions that remain recoverable from the backend snapshot itself. 
+
+2.2 Long-Term Agent Memory and Adversarial Provenance 
+
+Persistent-memory agents and backends such as A-M EM , G RAPHITI , MemOS, Memory-R1, and MemMachine maintain note networks, temporal graphs, or structured memory objects (Park et al., 2023; Packer et al., 2024; Zhong et al., 2024; Xu et al., 2026; Rasmussen et al., 2025; Li et al., 2025; Yan et al., 2025; Wang et al., 2026b); benchmarks evaluate their long-horizon recall, updates, tem-poral reasoning, and incremental multi-turn mem-ory (Maharana et al., 2024; Wu et al., 2025; Hu et al., 2025). Work on admission, update, and cura-tion treats memory writing as an explicit decision MemMark: Watermarking the Memory-Evolution Channel 
+
+Memory-Evolution Decisions      
+
+> Long-Term Memory Backend
+> A-MEM Graphiti
+> MemMark changes only
+> the selection layer.
+> Incoming event 𝐀 𝐀
+> ... New info
+> Current snapshot 𝐀 𝐀
+> state
+> of memory
+
+𝐀𝐀𝐀𱠀𝐀𱠀𝐀𲠀 𝐀  
+
+> carrier
+> Which channel to use
+> candidate set
+> Feasible options to choose
+> preference dist.
+> which channel to use
+> context
+> Query, recency, graph , etc.
+> Link-
+> target
+> Update-
+> Target
+> Semantic-
+> Realization
+> Native commit path unchanged
+
+(a) Update-Target Carrier 
+
+> A new fact can update one of several existing records.
+> Which
+> record
+> should be
+> updated?
+> R1: Alice
+> Age: 29
+> City: Berlin
+> Hobby: Hiking
+> R2: Bob
+> Age: 34
+> City: Paris
+> Hobby: Cycling
+> R3: Cara
+> Age: 27
+> City: Rome
+> Hobby: Piano
+> New fact: Bob completed a
+> marathon.
+> Changes update destination
+> Preserves memory meaning
+> Content same,
+> target differs
+
+(b) Link-Target Carrier 
+
+> A new evidence node links to one of several prior notes.
+> Choose which
+> prior node
+> receives link.
+> New
+> Evidence
+> Note A
+> 2024-06-01
+> Note B
+> 2024-06-05
+> Note C
+> 2024-06-09
+> Natural for graph memory
+> Equivalent linkage choices
+> Meaning same,
+> link differs
+
+(c) Semantic-Realization Carrier 
+
+> Multiple equivalent phrasings encode the same fact.
+> Which
+> phrasing
+> should be
+> written?
+> "likes oat milk"
+> "prefers oat milk"
+> "usually orders oat milk"
+> Same fact, different surface form
+> Good decode robustness
+> Surface
+> varies,
+> fact identical
+
+Distribution-Preserving Behavioral Watermark 
+
+1 Backend Adapter 
+
+> Enumerate
+> Candidates
+> Score
+> Candidates
+
+2 Boundary Interception 
+
+> c1
+> 0.50
+> c2
+> 0.30
+> c3
+> 0.20
+
+4 Memory Update 
+
+𝐀 𝐀 
+
+(selected )
+
+decision and commit remain separated 
+
+5 Cryptographic Audit Trace 
+
+3 Keyed Sampler 
+
+𲠀𝐀𲠀𝐀𝐀 𝐀 = PRF(K, ctx_t) 
+
+𝐀 𝐀 = Enc(p_t, r_t) 
+
+> Preserves the
+> marginal distribution
+
+𝐀 𝐀 +1 
+
+> commit
+> (hash )
+> Merkle
+> (all commits )
+> Signed Anchor
+> (sealed root)
+> reveal data memory record
+
+Verification and Evaluation 
+
+R1 Full External Log 
+
+> full commit + trace data
+
+R2 Partial External Log 
+
+> some trace segments
+
+R3 Snapshot 
+
+> memory snapshot + sidecar
+> Scenarios
+> of
+> available
+> evidence
+
+Replay keyed picks 
+
+> (using context + trace )
+
+Verify provenance 
+
+(check consistency )
+
+Secret K 
+
+kept 
+
+private 
+
+> Decode success
+> Bit recovery
+> Utility preservation
+> Wrong-key rejection
+> Tamper detection
+> Carrier-level capacity
+
+Figure 1: End-to-end M EM MARK pipeline. A memory write exposes carrier-specific choices over update targets, link targets, and semantic realizations. M EM MARK enumerates and scores feasible candidates, intercepts the LLM-call boundary, and uses a secret-keyed, distribution-preserving sampler to select c∗ while leaving the native commit path unchanged. Each selected decision is bound to a commitment, per-session Merkle log, and signed anchor; reveal data is stored with the memory record. The same evidence supports R1 full-log, R2 partial-log, and R3 snapshot-only attribution by replaying keyed picks and checking provenance consistency. 
+
+layer (Zhang et al., 2025, 2026; Sun et al., 2025), which is exactly the layer M EM MARK watermarks. Provenance and security work motivate the ad-versarial setting. TIER MEM and MemOS at-tach source anchors, versioning, or lifecycle meta-data (Zhu et al., 2026; Li et al., 2025), while poison-ing and memory-security studies show that mem-ory can be maliciously or persistently compro-mised (Chen et al., 2024; Wei et al., 2025; Sri-vastava and He, 2025; Lin et al., 2026). Metadata helps under trusted storage, but not when the at-tacker controls the snapshot containing both mem-ory and claimed provenance. M EM MARK instead combines replayable keyed choices with commit-ments, Merkle trees, and transparency logs (Peder-sen, 1991; Merkle, 1987; Laurie et al., 2013). 
+
+3 Problem Formulation 
+
+3.1 Preliminaries and Notation 
+
+We consider a long-term memory backend over T
+
+turns. At turn t ∈ { 1, . . . , T }, the backend maps an incoming event et and current snapshot Mt to 
+
+Mt+1 . This transition is not monolithic: it contains latent state-evolution choices that are semantically admissible but not uniquely determined. We formalize each such choice as a memory-evolution decision 
+
+decision t = ⟨ carrier t, candset t,
+
+probdist t, ctx t⟩ (1) where carrier t is the carrier type, Ct =
+
+{c1
+
+t , . . . , c kt
+
+t } is the candidate set, πt ∈ ∆( Ct) is the backend preference distribution, and ctx t is reconstructible context. We assume the backend induces a latent prefer-ence distribution π⋆t over Ct, and that the baseline backend would commit ct ∼ π⋆t . We elicit an ex-plicit estimate πt from self-reported model weights and define distribution preservation with respect to this estimate: 
+
+ˆct ∼ πt for all t ∈ { 1, . . . , T }. (2) Decision–commit separation. MEM MARK 
+
+observes and modifies only (Ct, π t, ctx t);candidate generation and the commit step 
+
+> APPLY
+
+_SELECTED (Mt, ˆct) → Mt+1 remain on the native backend path. Thus, the watermark changes only the selected candidate, not the backend write operation itself. 
+
+3.2 Memory-Evolution Channel and Distribution-Preserving Coding 
+
+We model each decision stage as a time-varying discrete channel. To embed a provenance pay-load, M EM MARK replaces native sampling with a distribution-preserving encoder: 
+
+ˆct ← Enc (πt, r t) ∈ C t, (3) where rt is per-decision randomness reproducible by the embedder and verifier. 
+
+Keyed pseudorandomness. The watermark se-cret K and context derive a nonce 
+
+nonce t ← PRF( K, ctx t), (4) which seeds the sampling stream consumed by Enc .Since ctx t is reconstructible from surviving evi-dence, the verifier can replay the keyed pick. 
+
+3.3 Threat Model 
+
+The watermark is embedded at write time but veri-fied later, possibly after backend maintenance and partial or full loss of the external audit log. 
+
+Structural attacks on the backend. Memory stores may be poisoned or compacted (Chen et al., 2024; Wei et al., 2025; Srivastava and He, 2025). Such operations can remove, merge, or rewrite records, but cannot forge a commitment that opens against the anchored Merkle root without K. We therefore model the dominant effect as a surviving decision set I ⊆ { 1, . . . , T }.
+
+Verification regimes. We consider three deploy-ment regimes: • R1 (full external log): the verifier holds all per-decision commitments and the complete Merkle tree. • R2 (partial external log): only a subset I
+
+of commitments survives, due to truncation, retention limits, or partial loss. • R3 (snapshot only): the external log is un-available; verification relies on the memory snapshot plus an in-record sidecar carrying reveal data and the anchored header.               
+
+> Carrier carrier A-M EM GRAPHITI
+> update_target note id fact-edge id
+> link_target keyword cluster entity attach point
+> semantic_realize. note description edge label
+> Table 1: Carriers Taxonomy .Each carrier is a non-trivial-candidate-set evolve decision realized in backend-specific form; the watermark sampler reads only (C, π, ctx) and is therefore backend-invariant.
+
+3.4 Objectives 
+
+We formalize two objectives under the hard con-straint ˆct ∼ πt.
+
+Utility preservation. Watermarking should pre-serve downstream memory quality. For baseline and watermarked snapshots MT and ˆMT , we re-quire 
+
+E[U( ˆMT )] − E[U(MT )] ≤ εU , (5) where U(·) is any downstream utility metric. This motivates carriers whose candidates are semanti-cally equivalent. 
+
+Robust attribution. The verifier should recover provenance whenever enough decisions survive. In R1 and R2, given I, we require 
+
+Pr Verify  {ˆct, π t, ctx t}t∈I ; K = 1 
+
+≥ 1 − δ(|I| ), (6) with failure probability δ(|I| ) decreasing as |I| 
+
+grows. R3 uses the in-record sidecar instead of external commitments. 
+
+4 MemMark 
+
+4.1 Overview 
+
+Figure 1 gives the roadmap. M EM MARK exposes carrier-specific choices in a backend, turns them into a discrete candidate distribution at the LLM-call boundary, selects c∗ with a secret-keyed sam-pler, and stores the evidence needed for R1–R3 ver-ification. We follow the same structure below: car-riers and adapter hooks (Section 4.2), distribution-preserving sampling (Section 4.3), and the crypto-graphic audit trace (Section 4.4). 
+
+4.2 Carrier Taxonomy and Backend Adapter 
+
+Table 1 lists our three carriers. The update-target carrier changes which existing object is modified; the link-target carrier changes which prior object is connected to new evidence; and the semantic-realization carrier changes the surface form encod-ing the same fact. Each captures backend decision freedom while satisfying the semantic-equivalence requirement of Section 3.4. Connecting a backend to MEM MARK 
+
+requires three adapter hooks: ENUMER -
+
+> ATE
+
+_CANDIDATES (Mt, e t, carrier) → C,
+
+> SCORE
+
+_CANDIDATES (C, ctx) → π, and AP -
+
+> PLY
+
+_SELECTED (Mt, c ∗) → Mt+1 . They expose the choice space, score candidates, and commit the selected candidate. The same abstraction also yields the carrier-level entropy and payload-allocation statistics used in RQ2. Since the adapter is the only backend-specific code path, one watermarking layer can operate over structurally distinct systems such as A-M EM and G RAPHITI .
+
+4.3 Distribution-Preserving Behavioral Watermark Decision interception and elicitation. Each in-ternal LLM call provides an intervention boundary: the backend would often accept several nearby al-ternatives without changing the semantic role of the write. M EM MARK extends the prompt to request 
+
+K plausible answers with self-reported preference weights. Parsing this wrapper response yields can-didates {d1 
+
+> t
+
+, . . . , d Kt } and a normalized distribu-tion πt, reducing open-vocabulary generation to a discrete choice that can be keyed, audited, and replayed. The backend receives only the final se-lected response. 
+
+Keyed distribution-preserving sampling. 
+
+MEM MARK feeds (Ct, π t, ctx t) to a distribution-preserving binning sampler keyed by the watermark secret K and the context-bound nonce 
+
+nonce t from Section 3.2. The sampler returns ˆct
+
+and the number of embedded bits while preserving the marginal: 
+
+Pr[ˆ ct = c | πt, K] = πt(c), ∀c ∈ C t. (7) 
+
+Properties. The sampler provides the following guarantees; proofs are deferred to Appendix B. 
+
+Lemma 1 (Strict distribution preservation) . For any valid πt, the keyed pick ˆct satisfies Pr[ˆ ct = ci |
+
+K, ctx t]marg = πt(ci).
+
+Lemma 2 (Cascade composition) . Keyed picks across multiple calls of a single event are inde-pendent under distinct context-derived nonces, so expected embedding capacity grows approximately additively in the number of valid decisions. 
+
+Lemma 3 (Backend invariance) . Once 
+
+(Ct, π t, ctx t) is fixed, the keyed pick depends only on the candidate distribution and secret key, not on the backend that produced the candidates. 
+
+4.4 Cryptographic Audit Trace 
+
+To support verification after execution, MEM -MARK records a cryptographic trace for the regimes in Section 3.3. 
+
+Per-decision commitments. Each sampled deci-sion produces a commitment 
+
+cm t = H  ctx t ∥ H(Ct) ∥ H(πt) ∥
+
+ˆct ∥ bits t ∥ nonce t
+
+,
+
+with H collision-resistant and inputs canonically serialized. 
+
+Per-session Merkle tree and signed anchor. 
+
+Per-decision commitments form a Merkle tree whose root is sealed in 
+
+hdr = ( agent_id , user_id , session_id , T, 
+
+root T , sig K(root T )) ,
+
+making the trace tamper-evident. 
+
+Per-leaf inclusion proofs. Each record carries its Merkle inclusion path at seal time, so a surviving leaf can be checked directly against the anchored root without rebuilding the log. Thus, structural attacks do not collapse verification into an all-or-nothing rebuilt-root test. 
+
+5 Experiments 
+
+We evaluate utility preservation (RQ1), capacity (RQ2), snapshot-only verification (RQ3), robust-ness to memory-lifecycle attacks (RQ4), and mem-ory integrity (RQ5). 
+
+5.1 Setup Backends & Models. We test two long-term memory backends: A-M EM (Xu et al., 2026), a note-centric system with dynamic linking and mem-ory evolution, and G RAPHITI (Rasmussen et al., 2025), a temporal graph memory with evolving entities and relations. We use Deepseek-V4-pro (DeepSeek-AI, 2026), Qwen3.6-flash (Qwen Team, 2026), and GLM-5 (GLM-5-Team et al., 2026). Candidate enumeration uses K=4 and Tenum =0 .7
+
+by default (Appendix E), candidate scoring uses 
+
+Tscore =0 .0, and JSON mode is enabled throughout. Benchmark. We use LoCoMo (Maharana et al., 2024), which contains ten multi-session dialogues with QA annotations spanning single-hop, multi-hop, temporal, commonsense, and adversarial. 
+
+Baselines. We compare MEM MARK with four controls: no-watermark , random-replace ,
+
+signed-metadata-only , and KGM ARK (Peng et al., 2025) on G RAPHITI , isolating native utility, unkeyed randomization, signed metadata without embedding, and the closest structured-memory watermark baseline. 
+
+Metrics. Appendix C defines all metrics. RQ1 reports LoCoMo F1, BLEU-1, and F1 deltas; RQ2 reports per-carrier entropy, payload share, and bits per decision; RQ3 reports R1/R2/R3 bit recovery and wrong-key bit recovery; RQ4 reports post-attack recovery, the verifier mode triggered by each attack, and wrong-key separation above the baseline under nine attacks 1; and RQ5 reports car-rier distribution, evidence-grounded retrieval recall, and write failures. 
+
+5.2 RQ1 — Utility Preservation 
+
+Table 2 compares MEM MARK with unwater-marked and ablated controls on LoCoMo. Across the six model–backend settings, M EM MARK pre-serves downstream utility: the average Overall F1 changes from 0.2816 for no-watermark to 0.2804 
+
+for M EM MARK , retaining 99 .6% of the unwa-termarked score, while average BLEU-1 changes from 0.3069 to 0.3077 , retaining 100 .2% . The ab-solute mean F1 drop is only 0.0012 , and BLEU-1 increases slightly by 0.0008 .The effect differs by backend but remains small. On A-M EM , M EM MARK improves average Over-all F1 from 0.3141 to 0.3255 and BLEU-1 from 
+
+0.3420 to 0.3529 . On G RAPHITI , average Overall F1 decreases from 0.2490 to 0.2353 , and BLEU-1 decreases from 0.2718 to 0.2624 . Thus, the water-mark does not introduce a systematic utility col-lapse: the attribution signal is embedded in ordi-nary memory-evolution decisions while keeping task performance close to the native systems. The comparison with signed-metadata-only 
+
+is especially useful: signing explicit provenance fields leaves utility largely unchanged, but does not create a recoverable state-evolution signal. M EM -MARK remains in a comparable utility regime 
+
+> 1
+
+Attack definitions are in Appendix G. 0.0 0.5 1.0 1.5 2.0                             
+
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> Density
+> mean H=1.16
+> (a)
+> Update Target
+> 0.0 0.5 1.0 1.5 2.0
+> Entropy H(pt)
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5
+> mean H=1.14
+> Link Target
+> 0.0 0.5 1.0 1.5 2.0
+> 0.00
+> 0.25
+> 0.50
+> 0.75
+> 1.00
+> 1.25
+> 1.50
+> 1.75
+> 2.00 mean H=1.26
+> Semantic Realization
+> 025 50 75 100
+> Embedded bits (%)
+> (b)
+> 10 25 65
+> 13 38 49
+> 28 32 40
+> 14 14 71
+> 739 54
+> 12 12 75
+> Qwen3.6-
+> flash
+> A-Mem
+> Qwen3.6-
+> flash
+> Graphiti
+> GLM-5
+> A-Mem
+> GLM-5
+> Graphiti
+> Deepseek-
+> V4-pro
+> A-Mem
+> Deepseek-
+> V4-pro
+> Graphiti
+> Update Link Semantic
+
+Figure 2: RQ2 — Entropy and payload allocation across memory-evolution carriers. (a) Per-carrier en-tropy over the six LLM–backend configurations; labels show means. (b) Per-carrier share of embedded payload bits, normalized within each configuration. MemMark S.M. Wrong-K         
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Bit recovery rate
+> 1/ K
+> 1.00
+> 0.00
+> 0.15
+> (a) Snapshot only (R3)
+> 0.0 0.1 0.3 0.5 0.7 0.9
+> Keep ratio r
+> R3
+> (b) Partial external log (R2)
+> MemMark mean
+> min-max range
+> S.M.-Only
+> 0.08
+> 0.29
+> 0.51
+> 0.71
+> 0.90
+
+Figure 3: R3 snapshot verification and R2 partial-log degradation. Left: M EM MARK recovers all bits from the snapshot, while signed-metadata-only fails and the wrong-key control remains at chance level. Right: mean R2 recovery over six LLM–backend settings; shad-ing and error bars show the minimum–maximum range. 
+
+while moving the attribution evidence into the back-end’s own choices. 
+
+5.3 RQ2 — Capacity 
+
+Figure 2 shows non-trivial capacity across all three carriers. The mean per-decision entropies are 1.16 ,Single Hop (1) Temporal (2) Multi Hop (3) Open Domain (4) Adversarial (5) Overall                                                                                                                                                                                                                                                                                                                                                   
+
+> Model Backend Method F1 BLEU F1 BLEU F1 BLEU F1 BLEU F1 BLEU F1 BLEU
+> No-WM 0.1974 0.2373 0.3732 0.5360 0.1363 0.2333 0.4107 0.4265 0.1289 0.1234 0.2850 0.3322
+> S.M.-Only 0.2127 0.2682 0.4727 0.5676 0.1884 0.3295 0.4115 0.4278 0.2251 0.2072 0.3323 0.3696
+> Ran. 0.2305 0.3364 0.4309 0.5541 0.2595 0.3761 0.3479 0.3810 0.1980 0.1859 0.3033 0.3596 A-MEM
+> MemMark 0.2559 0.3197 0.4143 0.5248 0.1840 0.2922 0.4117 0.4434 0.1243 0.1114 0.3044 0.3504
+> No-WM 0.1903 0.2736 0.2867 0.3501 0.2905 0.3243 0.3543 0.3748 0.1257 0.1277 0.2572 0.2923
+> S.M.-Only 0.1524 0.2131 0.3022 0.3604 0.3507 0.4615 0.3570 0.4023 0.1257 0.1277 0.2589 0.3031
+> Ran. 0.1792 0.2587 0.3019 0.3658 0.3123 0.4231 0.3614 0.3839 0.0488 0.0426 0.2440 0.2823
+> KGMARK 0.1538 0.2365 0.2878 0.3536 0.3845 0.5556 0.3589 0.4088 0.0887 0.0798 0.2505 0.3027
+> Qwen3.6-flash
+> Graphiti
+> MemMark 0.1389 0.2319 0.4084 0.4865 0.1865 0.3189 0.3364 0.3719 0.0701 0.0638 0.2453 0.2945
+> No-WM 0.2340 0.2868 0.3562 0.3908 0.2319 0.2452 0.4677 0.4592 0.0520 0.0438 0.2958 0.3067
+> S.M.-Only 0.2342 0.3152 0.4144 0.4689 0.1927 0.2088 0.4463 0.4621 0.0408 0.0276 0.2939 0.3205
+> Ran. 0.1875 0.2714 0.4266 0.4428 0.1838 0.2001 0.4516 0.4571 0.0710 0.0643 0.2971 0.3150 A-MEM
+> MemMark 0.3067 0.3491 0.4139 0.4438 0.2774 0.2803 0.4489 0.4491 0.0670 0.0638 0.3181 0.3300
+> No-WM 0.1686 0.2731 0.2844 0.3033 0.1474 0.1611 0.3487 0.3492 0.0914 0.0851 0.2338 0.2538
+> S.M.-Only 0.1352 0.2203 0.2575 0.2713 0.1585 0.1519 0.3397 0.3633 0.0779 0.0673 0.2179 0.2395
+> Ran. 0.1180 0.2154 0.2696 0.3254 0.1567 0.1628 0.3390 0.3501 0.0488 0.0426 0.2101 0.2390
+> KGMARK 0.1473 0.2324 0.2436 0.2550 0.2237 0.2643 0.3674 0.3773 0.1126 0.1064 0.2394 0.2599
+> GLM-5
+> Graphiti
+> MemMark 0.1060 0.1901 0.2518 0.2725 0.1199 0.1203 0.3532 0.3580 0.0968 0.0946 0.2188 0.2374
+> No-WM 0.3275 0.3888 0.4571 0.5476 0.2639 0.2912 0.4899 0.4948 0.1458 0.1254 0.3616 0.3870
+> S.M.-Only 0.2768 0.3425 0.4769 0.5743 0.3052 0.3911 0.4873 0.4909 0.1632 0.1477 0.3630 0.3950
+> Ran. 0.2105 0.2315 0.4359 0.5108 0.2335 0.3049 0.4605 0.4620 0.2083 0.1883 0.3413 0.3591 A-MEM
+> MemMark 0.3333 0.3651 0.4279 0.4962 0.2597 0.3251 0.4679 0.4818 0.1667 0.1552 0.3541 0.3784
+> No-WM 0.1276 0.1448 0.3659 0.4108 0.2616 0.2865 0.3436 0.3588 0.1249 0.1048 0.2560 0.2694
+> S.M.-Only 0.1286 0.1769 0.2836 0.2998 0.2060 0.2105 0.3109 0.3162 0.1626 0.1323 0.2346 0.2404
+> Ran. 0.1653 0.1989 0.3575 0.4050 0.1775 0.1835 0.3585 0.3555 0.1266 0.1039 0.2606 0.2689
+> KGMARK 0.1304 0.1807 0.3213 0.3482 0.1815 0.2707 0.3470 0.3493 0.1432 0.1361 0.2484 0.2665
+> DeepSeek-V4-Pro
+> Graphiti
+> MemMark 0.1104 0.1366 0.3353 0.3579 0.2748 0.3334 0.3229 0.3330 0.1277 0.1176 0.2418 0.2552
+
+Table 2: RQ1 — Utility preservation on LoCoMo . Results are grouped by model and backend. No-WM , S.M.-Only ,
+
+Ran. , and KGMARK denote unwatermarked execution, signed-metadata-only, random replacement, and KGM ARK 
+
+(Graphiti only); MemMark is the full method. Bold and underlined entries mark the best and second-best scores within each backend block. Averaged over the six model–backend settings, M EM MARK changes Overall F1 from 
+
+0.2816 to 0.2804 , retaining 99 .6% of the unwatermarked baseline, and changes BLEU-1 from 0.3069 to 0.3077 ,improved by 0.2% .
+
+1.14 , and 1.26 bits for update-target, link-target, and semantic-realization decisions, respectively. Thus, each carrier exposes roughly one bit of usable decision entropy per eligible write, and semantic realization is the highest-capacity carrier average. Capacity follows backend structure rather than a fixed carrier recipe. For example, A-M EM 
+
+distributes payload more evenly across carriers: with Qwen3.6-flash, the payload split is 10% up-date, 25% link, and 65% semantic; with GLM-5, it becomes 28% , 32% , and 40% . By contrast, GRAPHITI places more payload on semantic real-ization: semantic decisions carry 49% –75% of em-bedded bits across the three LLM backbones. The signal is therefore distributed over natural backend choices rather than forced into one artifact. This distribution is important for portability. MEM MARK does not require two backends to ex-pose the same internal objects; it only requires each backend to present admissible choices at write time. The carrier mix can change while the sampling and verification logic remains the same. 
+
+5.4 RQ3 — Snapshot-Only / Partial-Log Verification 
+
+RQ3 compares full-log verification (R1), partial logs with keep ratios r ∈ { 0.1, 0.3, 0.5, 0.7, 0.9}
+
+(R2), and snapshot-only verification from in-record reveal evidence and the signed session anchor (R3). Figure 3 shows that R3 matches full-log verifi-cation in the benign setting. M EM MARK recov-ers the full 40-bit payload from the final snap-shot, giving a bit recovery rate of 1.00 . In con-trast, signed-metadata-only recovers 0.00 , and the wrong-key control recovers only 0.15 , near the 
+
+1/K chance level. Partial-log verification degrades smoothly with the amount of retained evidence. As the keep ratio increases from r = 0 .1 to 0.9,mean R2 bit recovery rises from 0.08 to 0.29 , 0.51 ,
+
+0.71 , and finally 0.90 . This monotonic trend shows that verification is not an all-or-nothing artifact of the complete log: even partial evidence provides proportional attribution signal. The gap to signed-metadata-only is the cen-tral RQ3 signal: metadata can authenticate a coop-erative writer, but it does not bind the final mem-ory state to latent evolution choices once the ex-Deepseek-V4-pro Qwen3.6-flash GLM-5 Family Attack Mode Rec ∆WK Rec ∆WK Rec ∆WK                                                                                                                                                                                                
+
+> Content Content-1 ComF 0.93 0.78 0.54 +0.73 +0.59 +0.34 0.95 0.60 0.45 +0.60 +0.25 +0.10 0.90 0.75 0.62 +0.75 +0.60 +0.47 Content-2 ComF 0.83 0.68 0.54 +0.63 +0.49 +0.34 0.80 0.57 0.45 +0.45 +0.22 +0.10 0.82 0.68 0.35 +0.67 +0.53 +0.20 Content-3 ComF 0.90 0.83 0.56 +0.71 +0.63 +0.37 0.90 0.72 0.50 +0.55 +0.38 +0.15 0.97 0.78 0.53 +0.82 +0.62 +0.38 Content-4 ComF 0.98 0.83 0.63 +0.78 +0.63 +0.44 0.90 0.82 0.62 +0.55 +0.47 +0.28 0.85 0.50 0.25 +0.70 +0.35 +0.10 Content-5 ComF 0.90 0.71 0.44 +0.71 +0.51 +0.24 0.90 0.53 0.35 +0.55 +0.18 +0.00 0.90 0.60 0.25 +0.75 +0.45 +0.10 Removal Removal-1 Miss 1.00 1.00 1.00 +0.80 +0.80 +0.80 1.00 1.00 1.00 +0.65 +0.65 +0.65 1.00 1.00 1.00 +0.85 +0.85 +0.85 Removal-2 Miss 1.00 1.00 1.00 +0.80 +0.80 +0.80 1.00 1.00 1.00 +0.65 +0.65 +0.65 1.00 1.00 1.00 +0.85 +0.85 +0.85 Synthesis Synth-1 ComF 0.88 0.61 0.51 +0.68 +0.41 +0.32 0.90 0.68 0.40 +0.55 +0.33 +0.05 0.90 0.78 0.53 +0.75 +0.62 +0.38 Synth-2 ComF 0.93 0.85 0.72 +0.74 +0.66 +0.52 0.93 0.80 0.71 +0.58 +0.45 +0.36 0.91 0.82 0.74 +0.76 +0.67 +0.59
+> 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5
+
+Table 3: RQ4 – Attack-specific recovery and wrong-key separation on A-M EM . Each row reports the attack family, a compact row alias that maps to Table 9 ( Content-1–5 → attacks 1–5, Removal-1–2 → attacks 6–7, and 
+
+Synth-1–2 → attacks 8–9), and the dominant verifier mode ( ComF = commitment_fail ; Miss = missing_leaves ). For each model, Rec is post-attack bit recovery and ∆WK = Rec − WrongKey compares recovery with that model’s wrong-key R3 baseline at attack strengths s ∈ { 0.1, 0.3, 0.5}. Positive ∆WK means the attacked snapshot retains more attribution signal than an incorrect key.                             
+
+> Backend Method Carrier Dist. Ev. Rec. Write Fail A-M EM
+> no-watermark 284:90:477 0.597 4
+> signed-metadata-only 251:135:462 0.560 3
+> random-replace 168:205:471 0.504 2
+> MEM MARK 237:143:465 0.533 3GRAPHITI
+> no-watermark 288:481:834 0.236 0
+> signed-metadata-only 274:422:917 0.198 4
+> random-replace 264:384:920 0.176 1
+> MEM MARK 278:386:938 0.230 5
+
+Table 4: RQ5 – Memory-integrity probes on Lo-CoMo. All rows use the Qwen backbone. Carrier Dist. gives update:link:semantic counts; Ev. Rec. is evidence-grounded retrieval recall; Write Fail counts write-path failures. 
+
+ternal log is gone. In-record reveal evidence and the signed session anchor preserve enough replay material for snapshot-only attribution. 
+
+5.5 RQ4 — Robustness 
+
+We stress-test nine lifecycle attacks at strengths 
+
+0.1, 0.3, and 0.5, spanning content edits, removals, and synthesis-style mutations. We report post-attack recovery (Rec), the dominant verifier mode (Mode), and wrong-key separation ( ∆WK =Rec − WrongKey ). Table 3 shows that non-removal attacks remain recoverable at mild strengths but diverge at strength 
+
+0.5. On A-M EM , content edits reduce average Rec from 0.896 to 0.472 as strength grows, while synthesis-style attacks are less destructive on av-erage, ending at Rec 0.602 . Additive poisoning is the mildest non-removal case at strength 0.5 (Rec 
+
+0.725 , ∆WK = +0 .493 ), whereas subgraph rean-choring is strongest, nearly reaching the wrong-key baseline (Rec 0.346 , ∆WK = +0 .115 ). Removal attacks behave differently: pruning and deduplica-tion preserve surviving authenticated records, keep-ing Rec at 1.00 and producing Miss , while edits, compaction, and poisoning trigger ComF .
+
+5.6 RQ5 — Memory Integrity 
+
+Finally, RQ5 checks whether watermarking ma-terially changes the memory write path. Table 4 reports three LoCoMo probes: carrier allocation, evidence-grounded retrieval recall, and write-path failures. Overall, M EM MARK remains within the normal write regime: A-M EM retrieval recall re-tains 89 .3% of the no-watermark baseline, with write failures changing from 4 to 3; G RAPHITI 
+
+recall retains 97 .5% , with only a small increase in write failures. Carrier use is also not concen-trated in one decision type: with Qwen, semantic carriers account for 55 .0% of carrier decisions on A-M EM and 58 .6% on G RAPHITI , consistent with RQ2. These probes suggest that M EM MARK pre-serves snapshot verifiability without large observ-able write-path disruptions. 
+
+6 Conclusion 
+
+MEM MARK watermarks the state-evolution layer of long-term agent memory, binding provenance to backend write, update, linking, and retention choices. The results show that durable memory attribution can survive beyond visible actions, final text, and trusted metadata when it is tied to utility-preserving state choices and authenticated reveal evidence. 7 Limitations 
+
+MEM MARK is evaluated on two memory backends and one auditable benchmark, leaving broader de-ployment settings to future work. In particular, longer memory lifecycles, backend-specific com-paction, migration, and periodic summarization may introduce new watermark carriers as well as new sources of drift. Future work should extend the adapter contract to cover these maintenance operations. The current attack study covers repre-sentative edits, deletions, and poisoning, but does not exhaust adaptive attempts to remove evidence while preserving utility. A natural next step is to study such attacks and build verification procedures that distinguish benign lifecycle changes from tar-geted tampering, making snapshot-only attribution more robust in production systems. 
+
+References 
+
+Tianyu Chen, Jian Lou, and Wenjie Wang. 2026. Safe-guarding multimodal knowledge copyright in the RAG-as-a-service environment. In The Fourteenth International Conference on Learning Representa-tions .Zhaorun Chen, Zhen Xiang, Chaowei Xiao, Dawn Song, and Bo Li. 2024. Agentpoison: Red-teaming LLM agents via poisoning memory or knowledge bases. In The Thirty-eighth Annual Conference on Neural Information Processing Systems .Prateek Chhikara, Dev Khant, Saket Aryan, Taranjeet Singh, and Deshraj Yadav. 2025. Mem0: Building production-ready ai agents with scalable long-term memory. arXiv preprint arXiv:2504.19413 .Sumanth Dathathri, Abigail See, Sumedh Ghaisas, Po-Sen Huang, Rob McAdam, Johannes Welbl, Vandana Bachani, Alex Kaskasoli, Robert Stanforth, Tatiana Matejovicova, and 1 others. 2024. Scalable water-marking for identifying large language model outputs. 
+
+Nature , 634(8035):818–823. DeepSeek-AI. 2026. Deepseek-v4: Towards highly efficient million-token context intelligence. GLM-5-Team, :, Aohan Zeng, Xin Lv, Zhenyu Hou, Zhengxiao Du, Qinkai Zheng, Bin Chen, Da Yin, Chendi Ge, Chenghua Huang, Chengxing Xie, Chenzheng Zhu, Congfeng Yin, Cunxiang Wang, Gengzheng Pan, Hao Zeng, Haoke Zhang, Hao-ran Wang, and 168 others. 2026. Glm-5: from vibe coding to agentic engineering. Preprint ,arXiv:2602.15763. Tsvetomir Hristov, Devri¸ s ˙ I¸ sler, Nikolaos Laoutaris, and Zekeriya Erkin. 2023. Graph database watermarking using pseudo-nodes. In Proceedings of the Second ACM Data Economy Workshop , pages 14–20. Yuanzhe Hu, Yu Wang, and Julian McAuley. 2025. Eval-uating memory in llm agents via incremental multi-turn interactions. arXiv preprint arXiv:2507.05257 .Kaibo Huang, Jin Tan, Yukun Wei, Wanling Li, Zipei Zhang, Hui Tian, Zhongliang Yang, and Linna Zhou. 2026. Agentmark: Utility-preserving be-havioral watermarking for agents. arXiv preprint arXiv:2601.03294 .Kaibo Huang, Zhongliang Yang, and Linna Zhou. 2025. Agent guide: A simple agent behavioral watermark-ing framework. arXiv preprint arXiv:2504.05871 .Nikola Jovanovi´ c, Robin Staab, Maximilian Baader, and Martin Vechev. 2025. Ward: Provable rag dataset inference via llm watermarks. In International Con-ference on Learning Representations , volume 2025, pages 93288–93314. John Kirchenbauer, Jonas Geiping, Yuxin Wen, Jonathan Katz, Ian Miers, and Tom Goldstein. 2023. A watermark for large language models. In Interna-tional conference on machine learning , pages 17061– 17084. PMLR. Ben Laurie, Adam Langley, and Emilia Kasper. 2013. Certificate transparency. RFC 6962 .Zhiyu Li, Shichao Song, Hanyu Wang, Simin Niu, Ding Chen, Jiawei Yang, Chenyang Xi, Huayi Lai, Jihao Zhao, Yezhaohui Wang, and 1 others. 2025. Memos: An operating system for memory-augmented genera-tion (mag) in large language models. arXiv preprint arXiv:2505.22101 .Zehao Lin, Chunyu Li, and Kai Chen. 2026. Asurvey on the security of long-term memory in llm agents: Toward mnemonic sovereignty. arXiv preprint arXiv:2604.16548 .Yepeng Liu, Xuandong Zhao, Dawn Song, and Yuheng Bu. 2025. Dataset protection via watermarked ca-naries in retrieval-augmented llms. arXiv preprint arXiv:2502.10673 .Peizhuo Lv, Mengjie Sun, Hao Wang, Xiaofeng Wang, Shengzhi Zhang, Yuxuan Chen, Kai Chen, and Limin Sun. 2025. Rag-wm: An efficient black-box water-marking approach for retrieval-augmented generation of large language models. In Proceedings of the 2025 ACM SIGSAC Conference on Computer and Commu-nications Security , pages 1709–1723. Xingjun Ma, Yifeng Gao, Yixu Wang, Ruofan Wang, Xin Wang, and 1 others. 2026. Safety at scale: A comprehensive survey of large model and agent safety. arXiv preprint arXiv:2502.05206 .Adyasha Maharana, Dong-Ho Lee, Sergey Tulyakov, Mohit Bansal, Francesco Barbieri, and Yuwei Fang. 2024. Evaluating very long-term conversational memory of LLM agents. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 13851– 13870, Bangkok, Thailand. Association for Compu-tational Linguistics. Minjia Mao, Dongjun Wei, Zeyu Chen, Xiao Fang, and Michael Chau. 2025. Watermarking large language models: An unbiased and low-risk method. In Pro-ceedings of the 63rd Annual Meeting of the Associa-tion for Computational Linguistics (Volume 1: Long Papers) , pages 7939–7960, Vienna, Austria. Associa-tion for Computational Linguistics. Wenlong Meng, Chen Gong, Terry Yue Zhuo, Fan Zhang, Kecen Li, Zheng Liu, Zhou Yang, Chengkun Wei, and Wenzhi Chen. 2026. Watermarking llm agent trajectories. arXiv preprint arXiv:2602.18700 .Ralph C. Merkle. 1987. A digital signature based on a conventional encryption function. In Advances in Cryptology – CRYPTO ’87 , pages 369–378. Springer. Charles Packer, Vivian Fang, Shishir G. Patil, Kevin Lin, Sarah Wooders, and Joseph E. Gonzalez. 2024. Memgpt: Towards llms as operating systems. In 
+
+Proceedings of the 41st International Conference on Machine Learning .Leyi Pan, Aiwei Liu, Zhiwei He, Zitian Gao, Xuan-dong Zhao, Yijian Lu, Binglin Zhou, Shuliang Liu, Xuming Hu, Lijie Wen, and 1 others. 2024. Mark-llm: An open-source toolkit for llm watermarking. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing: System Demonstrations , pages 61–71. Joon Sung Park, Joseph C. O’Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, and Michael S. Bernstein. 2023. Generative agents: Interactive simu-lacra of human behavior. In Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology . Association for Computing Machin-ery. Torben Pryds Pedersen. 1991. Non-interactive and information-theoretic secure verifiable secret sharing. In Advances in Cryptology – CRYPTO ’91 , pages 129–140. Springer. Hongrui Peng, Haolang Lu, Yuanlong Yu, WeiYe Fu, Kun Wang, and Guoshun Nan. 2025. KGMark: A diffusion watermark for knowledge graphs. In Forty-second International Conference on Machine Learn-ing .Qwen Team. 2026. Qwen3.6-35B-A3B: Agentic coding power, now open to all. Preston Rasmussen, Pavlo Paliychuk, Travis Beauvais, Jack Ryan, and Daniel Chalef. 2025. Zep: a tempo-ral knowledge graph architecture for agent memory. 
+
+arXiv preprint arXiv:2501.13956 .Saksham Sahai Srivastava and Haoyu He. 2025. Mem-orygraft: Persistent compromise of llm agents via poisoned experience retrieval. arXiv preprint arXiv:2512.16962 .Haoran Sun, Zekun Zhang, and Shaoning Zeng. 2025. Preference-aware memory update for long-term llm agents. arXiv preprint arXiv:2510.09720 .Liwen Wang, Zongjie Li, Yuchong Xie, Shuai Wang, Dongdong She, Wei Wang, and Juergen Rahmel. 2026a. On protecting agentic systems’ intellec-tual property via watermarking. arXiv preprint arXiv:2602.08401 .Shu Wang, Edwin Yu, Oscar Love, Tom Zhang, Tom Wong, Steve Scargall, and Charles Fan. 2026b. Mem-machine: A ground-truth-preserving memory sys-tem for personalized ai agents. arXiv preprint arXiv:2604.04853 .Qianshan Wei, Tengchao Yang, Yaochen Wang, Xin-feng Li, Lijun Li, Zhenfei Yin, Yi Zhan, Thorsten Holz, Zhiqiang Lin, and XiaoFeng Wang. 2025. A-memguard: A proactive defense framework for llm-based agent memory. arXiv preprint arXiv:2510.02373 .Di Wu, Hongwei Wang, Wenhao Yu, Yuwei Zhang, Kai-Wei Chang, and Dong Yu. 2025. Longmemeval: Benchmarking chat assistants on long-term interac-tive memory. In International Conference on Learn-ing Representations .Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Juntao Tan, and Yongfeng Zhang. 2026. A-mem: Agentic memory for llm agents. Advances in Neural Informa-tion Processing Systems , 38:17577–17604. Sikuan Yan, Xiufeng Yang, Zuchao Huang, Ercong Nie, Zifeng Ding, Zonggen Li, Xiaowen Ma, Jinhe Bi, Kristian Kersting, Jeff Z Pan, and 1 others. 2025. Memory-r1: Enhancing large language model agents to manage and utilize memories via reinforcement learning. arXiv preprint arXiv:2508.19828 .Guilin Zhang, Wei Jiang, Xiejiashan Wang, Aisha Behr, Kai Zhao, Jeffrey Friedman, Xu Chu, and Amine Anoun. 2026. Adaptive memory admission control for llm agents. arXiv preprint arXiv:2603.04549 .Yuxiang Zhang, Jiangming Shu, Ye Ma, Xueyuan Lin, Shangxi Wu, and Jitao Sang. 2025. Memory as ac-tion: Autonomous context curation for long-horizon agentic tasks. arXiv preprint arXiv:2510.12635 .Wanjun Zhong, Lianghong Guo, Qiqi Gao, He Ye Wang, and Yanlin Wang. 2024. Memorybank: Enhancing large language models with long-term memory. Pro-ceedings of the AAAI Conference on Artificial Intelli-gence , 38(17):19724–19731. Qiming Zhu, Shunian Chen, Rui Yu, Zhehao Wu, and Benyou Wang. 2026. From lossy to verified: Aprovenance-aware tiered memory for agents. arXiv preprint arXiv:2602.17913 .
+
+A Experiment Details 
+
+A.1 Data Statistics 
+
+We evaluate on the public LoCoMo benchmark, using the same fixed set of ten long-term multi-session conversations for all main model–backend configurations. This fixed-conversation protocol ensures that comparisons across methods, memory backends, and LLM backbones are made on the same evaluation instances rather than on backend-or model-specific subsets. LoCoMo contains 10 conversations. In the re-lease, each conversation contains an average of 27.2 sessions, 21.6 turns per session, and 16,618.1 tokens per conversation. The average dialogue turn contains 29.8 tokens. LoCoMo also provides de-rived memory artifacts: observations average 19.2 tokens each, and session summaries average 132.4 tokens. The benchmark is multimodal as well, with an average of 91.2 images per conversation, al-though our experiments use LoCoMo for memory-oriented QA evaluation rather than multimodal gen-eration. For the QA benchmark, LoCoMo provides 1,986 total questions across five reasoning categories. These include 841 single-hop questions (42.3%), 282 multi-hop questions (14.2%), 321 temporal-reasoning questions (16.1%), 96 open-domain knowledge questions (4.8%), and 446 adversarial questions (22.4%). Single-hop questions require evidence from one session, multi-hop questions require synthesizing information across multiple sessions, temporal questions require reasoning over time cues, open-domain questions require combin-ing dialogue information with general knowledge, and adversarial questions are designed to be unan-swerable or misleading. 
+
+A.2 Artifact Attribution and Licenses 
+
+We use these artifacts under their stated access con-ditions and licenses. The A-MEM reproduction repository is released under the MIT License, and GRAPHITI is released under the Apache License 2.0. For LoCoMo, we use the dataset and code for research evaluation according to the terms provided with the released repository. For model backbones, we access the models through their public model re-leases or APIs and follow the corresponding model licenses, platform terms, and usage policies. 
+
+A.3 Consistency with Intended Use 
+
+Our use of the artifacts is consistent with their in-tended research purposes. LoCoMo is used only as an evaluation benchmark for long-term conver-sational memory. We do not use LoCoMo-derived data for deployment, user profiling, or non-research applications. A-MEM and GRAPHITI are used as memory-system substrates, matching their in-tended role as agent-memory frameworks. The LLM backbones are used as controlled model com-ponents for candidate generation, memory writing, and memory-based QA; they are not fine-tuned on LoCoMo, and we do not redistribute model weights beyond the access conditions of the origi-nal providers. 
+
+A.4 Potential Risks 
+
+MEMMARK introduces a provenance mechanism for long-term agent memory, but it also creates risks that must be considered in deployment. First, watermark verification depends on secret keys, canonicalized reveal evidence, and cryptographic audit material. If keys are leaked, sidecars are mis-handled, or canonical serialization is inconsistent across systems, verification may become unreli-able. Second, successful watermark verification should not be interpreted as a guarantee that the memory content is true or safe. It only shows that the observed memory evolution is consistent with the keyed sampler and audit trace. 
+
+B Full Proofs 
+
+This appendix collects the technical material that supports the main paper’s central claims but would be too detailed for the main narrative. We begin with proof sketches for the sampler properties, then define the metrics and baselines before reporting the experimental appendix results referenced in the main text. 
+
+B.1 Proof of Lemma 1 
+
+Let Ct = {c1, . . . , c k} and write pi = πt(ci). The sampler uses the same integer-binning argument as A GENT MARK (Huang et al., 2026). Choose an audit precision N and represent the serialized distribution by non-negative integer masses ni with P 
+
+> i
+
+ni = N and ni/N = pi. In practice πt is the canonical, finite-precision distribution stored in the reveal record, so the equality is exact with respect to the audited distribution. Partition the cyclic group ZN into consecutive in-tervals Ii with |Ii| = ni, one interval per candidate. For any payload position x ∈ ZN , the keyed sam-pler draws a shift s = PRF( K, ctx t) mod N and selects the unique ci such that (x+s) mod N ∈ Ii.In the ideal experiment s is uniform on ZN ; under a secure PRF it is computationally indistinguishable from uniform to an observer without K. There-fore (x + s) mod N is uniform regardless of the payload point x, and 
+
+Pr[ˆ ct = ci] = Pr[( x + s) mod N ∈ Ii]= |Ii|
+
+N = pi.
+
+Thus the keyed pick has exactly the same marginal distribution as self-reported sampling from πt. The notation Pr[ · | K, ctx t]marg in the lemma should be read as the standard watermarking marginal over the PRF-key experiment, or equivalently over the pseudorandom shift that the hidden key induces. After a concrete key and context are fixed, the se-lector is of course deterministic and replayable by the verifier. 
+
+B.2 Proof of Lemma 2 
+
+Consider one memory event that triggers m in-ternal LLM calls. For call j, the adapter ex-poses (Ct,j , π t,j , ctx t,j ), where ctx t,j contains the round index, dialogue identifiers, prompt hash, and the previous commitment. These fields domain-separate the calls: except with negligible collision probability, ctx t,j ̸ = ctx t,ℓ for j̸ = ℓ.The backend may choose later contexts adaptively after observing earlier selected can-didates. PRF security covers such adap-tively chosen distinct inputs, so the sequence 
+
+PRF( K, ctx t, 1), . . . , PRF( K, ctx t,m ) is computa-tionally indistinguishable from independent uni-form draws. By Lemma 1, each individual keyed pick preserves its own marginal distribution: 
+
+Pr[ˆ ct,j = c | C t,j , π t,j , ctx t,j ] = πt,j (c).
+
+Independence of the PRF outputs then gives the product-form joint distribution conditioned on the exposed decision tuples. If Bt,j is the number of payload bits embedded at decision j, total capacity over the cascade is Bt = Pmj=1 Bt,j and hence 
+
+E[Bt] = Pmj=1 E[Bt,j ] by linearity of expectation. Since every stage is marginally distribution pre-serving, there is no accumulating sampling bias across the cascade; additional calls add evidence and capacity, not systematic drift. 
+
+B.3 Proof of Lemma 3 
+
+Fix any backend B that implements the adapter interface and emits a valid decision tuple 
+
+(Ct, π t, ctx t). The sampler receives only this tu-ple and the watermark secret. It does not in-spect whether the candidates are A-M EM notes, GRAPHITI entities, graph edges, or surface real-izations. Applying Lemma 1 to the emitted tuple therefore yields 
+
+Pr  
+
+> B
+
+[ˆ ct = ci | C t, π t, ctx t] = πt(ci),
+
+with no term depending on B beyond the tuple itself. If two backends expose the same (Ct, π t, ctx t), the keyed sampler induces the same marginal law and the same replay rule. This does not assert that all backends produce identical candidate distributions; rather, it states that once a backend has reduced its native write choice to the common adapter repre-sentation, the watermark layer supplies the same distribution-preservation guarantee. This is the in-variant used by the cross-backend comparisons in the main text. 
+
+C Metrics 
+
+Table 5 consolidates the definitions of all metrics used in this paper, grouped by the research ques-tion they address: utility (RQ1), capacity (RQ2), snapshot-only verification (RQ3), tamper detection (RQ4), and memory integrity (RQ5). For each met-ric we list its reporting unit and, where relevant, the carrier-level decomposition over update target, link target, and semantic realization. We refer the reader to this table throughout Sections 5.2–5.6 for precise definitions. 
+
+D Details of Baselines 
+
+This appendix clarifies the baseline definitions used in §5.1 and Table 2. 
+
+No-WM. No-WM is the unwatermarked execution path. The memory backend, agent harness, and evaluation pipeline are identical to the M EM MARK 
+
+runs; the only difference is that no attribution logic is applied during memory-state evolution. It is therefore the utility reference for RQ1 and RQ5. 
+
+S.M.-Only. S.M.-Only keeps the signed meta-data and audit-sidecar machinery but removes keyed selection over admissible candidates. This control tests whether attribution can be explained by explicit metadata alone rather than by hidden state-evolution choices. In R3, this baseline can validate that a sidecar was signed, but it carries no keyed payload and therefore cannot recover writer-specific state-evolution bits. Axis (RQ) Metric Definition / Reporting Unit Utility preservation (RQ1) LoCoMo F1 Precision and recall computed over predicted versus gold answer items, combined as their harmonic mean. BLEU-1 Unigram precision between the generated answer and the reference answer, measuring lexical overlap at the token level. 
+
+∆F1 vs. no-watermark Difference between the M EM MARK F1 and the correspond-ing no-watermark F1 under the same model, backend, and conversation. Capacity (RQ2) Per-carrier entropy H(π) Shannon entropy of the self-reported candidate distribution, reported by carrier and averaged over the evaluated model– backend settings. Per-carrier payload share Fraction of embedded payload bits carried by each memory-evolution carrier, normalized within each model–backend setting. bits/decision Realized watermark capacity in the hyperparameter sweep: recovered payload bits divided by the number of watermark-able decisions. Verification (RQ3) (in-record / snapshot-only) R1/R2/R3 bit recovery Fraction of embedded watermark bits correctly recovered from the available evidence under full-log R1, partial-log R2, and snapshot-only R3 verification. Wrong Key Observed bit-level recovery when verification is run with an incorrect key; for the default K=4 setting, the chance-level reference is 1/K =0 .25 .Robustness (RQ4) (nine memory-lifecycle attacks) Rec Post-attack bit recovery over the surviving verifiable records, reported per attack type and strength. Mode Dominant verifier signal triggered by the lifecycle attack: ComF for commitment_fail and Miss for 
+
+missing_leaves .
+
+∆WK Difference between post-attack recovery and the corre-sponding R3 wrong-key baseline: Rec − WrongKey . Pos-itive values indicate that the attacked snapshot still carries more attribution signal than an incorrect key. Memory integrity (RQ5) Carrier Dist. Counts of watermark-carrying decisions by carrier, reported as update:link:semantic. Ev. Rec. Fraction of QA-time gold evidence records successfully retrieved from memory. Write Fail Number or fraction of attempted memory writes that fail validation, storage, or commitment construction, as speci-fied by the table. 
+
+Table 5: Metric definitions across the five research questions.             
+
+> Baseline Selection rule Evidence retained Isolates Backend
+> No-WM Native backend execution; no keyed candidate selection. No watermark payload, reveal record, or watermark-specific Merkle leaf. Utility of the uninstrumented memory path. A-M EM
+> GRAPHITI
+> S.M.-Only Samples from the backend distribution without embedding payload bits. Signed metadata, in-record sidecar, commitments, and session anchor. Whether authenticated metadata alone can support attribution. A-M EM
+> GRAPHITI
+> Ran. Chooses randomly among the same ad-missible candidates, without the secret key. Candidate enumeration and ordinary evaluation artifacts, but no keyed pay-load. Perturbation from multi-candidate enu-meration independent of watermarking. A-M EM
+> GRAPHITI
+> KGMARK Applies the closest graph-watermark baseline to graph-native memory state. KG-level watermark evidence rather than M EM MARK state-evolution evi-dence. Comparison with a structured-memory watermark specialized to graphs. GRAPHITI
+> only
+
+Table 6: Baseline definitions . The controls separate native memory quality, signed provenance metadata, unkeyed candidate randomization, and a graph-specific watermark baseline. K Tenum bits/dec. ∆F1 R3 Recov. Wrong Key 2 0.7 0.0312 +0.004 1.000 0.492 4 0.5 0.0415 +0.009 1.000 0.221 4 0.7 0.0478 +0.006 1.000 0.205 4 1.0 0.0526 -0.014 1.000 0.236 8 0.7 0.0619 -0.019 1.000 0.119 
+
+Table 7: Hyperparameter sensitivity around the de-fault setting. We vary one parameter at a time around 
+
+K=4 , T enum =0 .7 on Qwen3.6-flash with the A-M EM 
+
+backend. Lower K reduces capacity and weakens wrong-key separation; higher K increases capacity but can perturb utility by admitting lower-quality candidates. Higher Tenum increases candidate diversity but also in-creases semantic drift. 
+
+Ran. Ran. replaces keyed sampling with random selection among the same admissible candidates. It therefore controls for the possibility that any ob-served utility change is caused by multi-candidate enumeration itself rather than by the secret-keyed selection rule. Since the choice is not reproducible from K, it is not expected to verify as M EM MARK 
+
+evidence. 
+
+KGMARK. KGMARK (Peng et al., 2025) is in-cluded only for G RAPHITI , where a knowledge-graph baseline is structurally meaningful. It is omitted for A-M EM because A-M EM does not expose graph-native edge operations of the kind assumed by KGM ARK . This baseline is intention-ally narrower than M EM MARK : it tests a graph-specialized watermark against a backend-invariant state-evolution watermark. 
+
+E Hyperparameter Sensitivity 
+
+We perform a default-centered one-factor sen-sitivity analysis on Qwen3.6-flash with the A-MEM backend. Starting from the default 
+
+K=4 , T enum =0 .7, we vary K ∈ {2, 4, 8}
+
+while holding Tenum =0 .7, and vary Tenum ∈{0.5, 0.7, 1.0} while holding K=4 . This iso-lates the two expected trade-offs: candidate count controls the capacity and wrong-key chance level, while enumeration temperature controls the diversity–utility balance. Table 7 shows that the default setting is a stable middle point rather than a tuned extreme. Reduc-ing K to 2 lowers the realized capacity and pushes wrong-key recovery toward the 1/2 chance-level reference. Increasing K to 8 improves bits per decision and separates wrong-key recovery more strongly, but the utility delta becomes more nega-tive, consistent with lower-quality candidates enter-ing the admissible set. Temperature has a similar but softer effect: Tenum =0 .5 is conservative and slightly improves utility, whereas Tenum =1 .0 in-creases capacity at the cost of a larger F1 drop. R3 recovery remains complete across the sweep, indicating that these settings affect capacity and perturbation more than benign snapshot verifiabil-ity. 
+
+F Overall and Per-Conversation Experimental Results MemMark     
+
+> Overall F1
+> Graphiti
+> NO_WM S.M._Only Ran. KGMark MemMark
+> A-MEM
+
+Figure 4: Overall F1 comparison . Overall F1 from Table 2 across three LLMs and two memory backends, comparing M EM MARK with baselines. 
+
+Figure 4 provides an appendix visualization of the main experimental table, focusing on overall F1 across the three LLMs and the two backends. We then provide the per-conversation breakdown for Qwen3.6-flash on all 10 LoCoMo conversations. This table is included only in the appendix because its role is diagnostic rather than conceptual: it shows that the aggregate trends in the main text are not driven by a single conversation outlier. The overall plot makes two points visible at once. First, M EM MARK tracks the main utility curve rather than collapsing it: across the three LLMs, the watermarked runs remain in the same regime as their unwatermarked counterparts. Second, the backend effect is larger than the watermark effect. A-M EM is generally more stable under the water-marking wrapper, while G RAPHITI shows a larger spread and a slightly stronger drop in the hard-est settings. That is exactly the pattern expected from a memory system whose candidate space is backend-dependent but still compatible with the same sampler. Table 8 shows the same story at the conversation level. The A-M EM deltas stay small, mostly within a few points, and are centered close to zero, with a mean gap of +0 .006 . G RAPHITI is more variable and more sensitive to conversation-specific struc-ture, but the mean gap remains modest at −0.038 
+
+over the all-conversation Qwen3.6-flash diagnos-tic. In other words, the watermark does not in-troduce a single brittle failure mode; it behaves like a mild shift on top of ordinary conversational variance. The verification columns remain stable across conversations: R1 and R3 recover the pay-load completely, R2 at r=0 .5 averages 0.556 , and the wrong-key control averages 0.205 , close to the 
+
+1/K =0 .25 chance reference. Thus, the capacity signal survives the same diversity that perturbs util-ity while remaining key-specific. 
+
+G Memory-lifecycle Attacks and Backend Diagnostics 
+
+We evaluate robustness (RQ4) under nine at-tacks that span the realistic lifecycle of an agent’s memory store. The attacks fall into three operational families. Content-tamper at-tacks (#1–#5) mutate the contents of an audit record — its probabilities field, decision con-text ctx_t , selected candidate, or candidate pay-load — while leaving the leaf set of the Merkle tree intact; such attacks should be caught by per-record commitment verification and surface as a 
+
+commitment_fail signal. Leaf-removal attacks (#6–#7) remove authenticated records and should surface as missing_leaves . Synthesis/restructur-ing attacks (#8–#9) collapse candidate sets or inject fabricated audit records, and should be caught by commitment verification when a leaf is altered or added. Together the nine attacks cover silent edits, semantics-preserving rewrites, fact supersession, knowledge-graph edge relabeling and subgraph reanchoring, pruning, deduplication, compaction, and poisoning. Each attack is parameterized by a strength level, and the operation, low-level verifier signal, and literature analogue are summarized in Table 9. The RQ4 robustness tables then report these attacks with Rec, Mode, and ∆WK to mea-sure both recoverable attribution and separation from the wrong-key baseline. 
+
+G.1 Graphiti Backend Robustness 
+
+Table 10 repeats the RQ4 robustness breakdown for the G RAPHITI backend using the same Rec, Mode, and ∆WK metrics as the A-M EM table. The Mode column keeps the low-level diagnosis: in-place edits and synthesis-style rewrites surface as ComF , while pruning and deduplication surface as 
+
+Miss . The ∆WK columns compare each attacked snapshot with the corresponding model’s wrong-key R3 baseline, so the table reports both recovery and key-specific attribution separation. The graph backend shows the same qualitative pattern as A-M EM but with backend-specific sen-sitivity. Content attacks have average Rec values of 0.911 , 0.694 , and 0.489 at strengths 0.1, 0.3,and 0.5, with average ∆WK values of +0 .629 ,
+
++0 .412 , and +0 .207 . Synthesis attacks recover 
+
+0.858 , 0.707 , and 0.583 , with ∆WK values of 
+
++0 .577 , +0 .426 , and +0 .301 . Compaction is the most damaging synthesis case at strength 0.5 (mean Rec 0.462 , ∆WK +0 .180 ), whereas poisoning remains more recoverable because it is additive (mean Rec 0.705 , ∆WK +0 .423 ). Removal attacks preserve a recovery rate of 
+
+1.00 over the surviving records and retain a strong wrong-key margin ( ∆WK = +0 .718 on average), while their Miss mode exposes the deletion-style lifecycle mutation. This is the desired behavior: authenticated surviving records remain replayable, but the verifier still identifies that evidence has dis-appeared from the anchored trace. A-M EM GRAPHITI Watermark Metrics Conv QAs F1 wm F1 nwm ∆ F1 wm F1 nwm ∆ R1 R2 r=0 .5 R3 Wrong Key 0 199 0.304 0.285 +0.019 0.245 0.257 -0.012 1.000 0.600 1.000 0.175 1 105 0.365 0.393 -0.028 0.303 0.388 -0.084 1.000 0.475 1.000 0.212 2 193 0.389 0.393 -0.004 0.274 0.268 +0.006 1.000 0.610 1.000 0.234 3 260 0.270 0.249 +0.021 0.181 0.257 -0.076 1.000 0.575 1.000 0.198 4 242 0.362 0.348 +0.014 0.162 0.260 -0.097 1.000 0.700 1.000 0.241 5 158 0.248 0.283 -0.035 0.250 0.255 -0.005 1.000 0.500 1.000 0.194 6 190 0.372 0.384 -0.012 0.259 0.247 +0.012 1.000 0.525 1.000 0.145 7 239 0.331 0.303 +0.027 0.212 0.216 -0.004 1.000 0.475 1.000 0.265 8 196 0.300 0.276 +0.024 0.252 0.313 -0.061 1.000 0.600 1.000 0.205 9 204 0.333 0.300 +0.033 0.211 0.273 -0.061 1.000 0.500 1.000 0.179 
+
+Mean 198.6 0.327 0.322 +0.006 0.235 0.273 -0.038 1.000 0.556 1.000 0.205 
+
+Table 8: Qwen3.6-flash per-conversation breakdown on all 10 LoCoMo samples . F1 wm / nwm = M EM MARK 
+
+vs no-watermark F1 (set formula). Watermark metrics use the A-M EM backend. Wrong Key reports observed bit-level recovery under an incorrect key; under the default K=4 setting, the chance-level reference is 1/K =0 .25 .Conversation 0 is from the standalone Qwen markdown summaries; conversations 1–9 are from the full-result JSON files. 
+
+# Attack Operation on the audit record Low-level signal Inspiration / analogue 
+
+Content-tamper attacks — modify committed record bytes in place. 
+
+1 manual_edits Silently mutate the probabilities field of a record while leaving all other fields and the leaf set intact. 
+
+commitment_fail MemoryGraft / generic record tampering. 2 para._rewrite Append a [PARAPHRASE] marker to ctx_t ,simulating a semantics-preserving rewrite of the context that produced the decision. 
+
+commitment_fail RAG-WM paraphrase attack. 3 supersession Replace selected_candidate_id with a sib-ling candidate from the same carrier, simulat-ing a newer fact overwriting an older one. 
+
+commitment_fail Graphiti native fact-invalidation chain. 4 edge_relabel 
+
+(KG) Append [RELABEL] to the selected candidate’s 
+
+payload.text , simulating relabeling of an entity–relation edge in the knowledge graph. 
+
+commitment_fail KGMark edge pertur-bation. 5 subgraph_reanch. 
+
+(KG) Append [REANCHOR] to ctx_t and rotate the candidate list, simulating a change of root an-chor for a subgraph. 
+
+commitment_fail KGMark anchor swap. 
+
+Leaf-removal attacks — remove authenticated leaves from the trace. 
+
+6 pruning Delete a fraction of audit-record leaves uni-formly at random, controlled by the attack strength. 
+
+missing_leaves Memory-lifecycle pruning / KGMark subgraph removal. 7 dedup Find records duplicated by selected payload text and remove secondary copies, retaining only the canonical leaf. 
+
+missing_leaves Memory-lifecycle deduplication. 
+
+Synthesis/restructuring attacks — rewrite or add records without valid openings. 
+
+8 compaction Collapse the candidate set by removing one candidate, simulating multiple memories be-ing merged into a single summary. 
+
+commitment_fail Memory-lifecycle com-paction. 9 poisoning Inject fabricated audit records into the leaf set (additive, not deletive). 
+
+commitment_fail A-MemGuard / KG-Mark node insertion. 
+
+Table 9: The nine memory-lifecycle attacks used in RQ4. They are grouped by lifecycle operation and list the concrete audit-record mutation, the expected low-level verifier signal, and the motivating analogue. Tables 3 and 10 then report Rec, Mode, and ∆WK for these attacks. Deepseek-V4-pro Qwen3.6-flash GLM-5 Family Attack Mode Rec ∆WK Rec ∆WK Rec ∆WK 
+
+Content Content-1 ComF 0.97 0.65 0.45 +0.68 +0.35 +0.15 0.82 0.65 0.55 +0.47 +0.30 +0.20 0.93 0.68 0.37 +0.73 +0.49 +0.17 Content-2 ComF 0.85 0.78 0.50 +0.55 +0.48 +0.20 0.90 0.70 0.50 +0.55 +0.35 +0.15 0.98 0.76 0.51 +0.78 +0.56 +0.32 Content-3 ComF 0.85 0.60 0.45 +0.55 +0.30 +0.15 0.90 0.62 0.47 +0.55 +0.28 +0.12 0.90 0.76 0.71 +0.71 +0.56 +0.51 Content-4 ComF 0.93 0.57 0.40 +0.62 +0.27 +0.10 0.88 0.65 0.42 +0.53 +0.30 +0.08 0.90 0.68 0.41 +0.71 +0.49 +0.22 Content-5 ComF 0.93 0.68 0.42 +0.62 +0.38 +0.12 0.95 0.90 0.60 +0.60 +0.55 +0.25 0.98 0.73 0.56 +0.78 +0.54 +0.37 Removal Removal-1 Miss 1.00 1.00 1.00 +0.70 +0.70 +0.70 1.00 1.00 1.00 +0.65 +0.65 +0.65 1.00 1.00 1.00 +0.80 +0.80 +0.80 Removal-2 Miss 1.00 1.00 1.00 +0.70 +0.70 +0.70 1.00 1.00 1.00 +0.65 +0.65 +0.65 1.00 1.00 1.00 +0.80 +0.80 +0.80 Synthesis Synth-1 ComF 0.72 0.42 0.35 +0.42 +0.12 +0.05 0.93 0.75 0.45 +0.58 +0.40 +0.10 0.78 0.68 0.59 +0.59 +0.49 +0.39 Synth-2 ComF 0.95 0.93 0.85 +0.65 +0.63 +0.55 0.93 0.67 0.56 +0.58 +0.32 +0.21 0.84 0.79 0.71 +0.64 +0.59 +0.51 
+
+0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 0.1 0.3 0.5 
+
+Table 10: RQ4 – Attack-specific recovery and wrong-key separation on G RAPHITI . Each row reports the attack family, a compact row alias that maps to Table 9 ( Content-1–5 → attacks 1–5, Removal-1–2 → attacks 6–7, and 
+
+Synth-1–2 → attacks 8–9), and the dominant verifier mode ( ComF = commitment_fail ; Miss = missing_leaves ). For each model, Rec is post-attack bit recovery and ∆WK = Rec − WrongKey compares recovery with that model’s wrong-key R3 baseline at attack strengths s ∈ { 0.1, 0.3, 0.5}. Positive ∆WK means the attacked snapshot retains more attribution signal than an incorrect key.
