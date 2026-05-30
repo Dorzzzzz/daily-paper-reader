@@ -1,0 +1,1957 @@
+Title: 4768_Long_RVOS_A_Comprehensive.pdf
+
+URL Source: https://openreview.net/pdf?id=txmJldjJUw
+
+Number of Pages: 20
+
+Markdown Content:
+# Long-RVOS: A Comprehensive Benchmark for Long-term Referring Video Object Segmentation 
+
+Anonymous Author(s) 
+
+Affiliation Address 
+
+email 
+
+## Abstract 
+
+Referring video object segmentation (RVOS) aims to identify, track and segment 1
+
+the objects in a video based on language descriptions, which has received great 2
+
+attention in recent years. However, existing datasets remain focus on short video 3
+
+clips within several seconds, with salient objects visible in most frames. To advance 4
+
+the task towards more practical scenarios, we introduce Long-RVOS , a large-scale 5
+
+benchmark for long-term referring video object segmentation. Long-RVOS con-6
+
+tains 2,000+ videos of an average duration exceeding 60 seconds, covering a variety 7
+
+of objects that undergo occlusion, disappearance-reappearance and shot changing. 8
+
+The objects are manually annotated with three different types of descriptions to 9
+
+individually evaluate the understanding of static attributes, motion patterns and spa-10 
+
+tiotemporal relationships. Moreover, unlike previous benchmarks that rely solely 11 
+
+on the per-frame spatial evaluation, we introduce two new metrics to assess the 12 
+
+temporal and spatiotemporal consistency. We benchmark 6 state-of-the-art methods 13 
+
+on Long-RVOS. The results show that current approaches struggle severely with 14 
+
+the long-video challenges. To address this, we further propose ReferMo, a promis-15 
+
+ing baseline method that integrates motion information to expand the temporal 16 
+
+receptive field, and employs a local-to-global architecture to capture both short-17 
+
+term dynamics and long-term dependencies. Despite simplicity, ReferMo achieves 18 
+
+significant improvements over current methods in long-term scenarios. We hope 19 
+
+that Long-RVOS and our baseline can drive future RVOS research towards tackling 20 
+
+more realistic and long-form videos. Our dataset and code will be released. 21 
+
+## 1 Introduction 22 0 10 15 55 60 65 
+
+> Average Duration (seconds)
+> 0
+> 5
+> 10
+> 35
+> 40
+> Total Hours
+> A2D-Sentences
+> JHMDB-Sentences
+> Ref-DAVIS17
+> Refer-YouTube-VOS
+> MeViS
+> Long-RVOS (Ours)
+
+Figure 1: Duration comparison of cur-rent RVOS datasets. The circle size indi-cates the number of frames. Referring Video Object Segmentation (RVOS) [ 2 , 7, 44 ]23 
+
+is an emerging task that aims to identify, track and seg-24 
+
+ment the object in the video based on a natural lan-25 
+
+guage description. Unlike traditional semi-supervised 26 
+
+VOS models that require first-frame masks as the object 27 
+
+prompt, RVOS models rely solely on text descriptions to 28 
+
+segment the target. Considering its potential applications 29 
+
+like video editing, growing efforts have been devoted 30 
+
+to this field [ 7, 15 , 25 , 30 , 33 ]. Recently, the advent of 31 
+
+multi-modal large language models [ 17 , 27 , 51 ] and seg-32 
+
+ment anything models [ 21 , 35 ] has further accelerated 33 
+
+this progress [1, 47, 50, 54]. 34 
+
+Despite these advances, current RVOS datasets [ 7, 11 , 20 ,35 
+
+36 ] remain limited to short video clips lasting only a few 36 
+
+Submitted to 39th Conference on Neural Information Processing Systems (NeurIPS 2025). Do not distribute. “At first , the person in  shirt  sat at the  back , but  later moved  to the  front .” Hybrid Type               
+
+> “A monkey -like toy.” Static Type
+> “The cat was chased by a black cat and jumped high later.” Dynamic Type
+> Occlusion Reappearance Disappearance Occlusion
+> t = 0 t = 250 t = 550 t = 1000 t = 1450
+
+···      
+
+> Disappearance Reappearance Occlusion
+> t = 50 t = 300 t = 350 t = 1170 t = 1650
+
+···       
+
+> Disappearance Reappearance Occlusion Occlusion
+> t = 80 t = 200 t = 300 t =620 t = 1120
+
+···Figure 2: Examples from Long-RVOS dataset, with frame indices displayed in the upper left, and selected objects masked in orange ■. Long-RVOS contains extensive long-term videos, where the objects always undergo occlusion, disappearance-reappearance and shot changing. In addition, the objects are annotated with three different types descriptions: static , dynamic and hybrid .seconds, with target objects clearly visible in most frames. For state-of-the-art (SOTA) methods, in 37 
+
+order to capture the target object effectively, it is inevitable to integrate the text and spatiotemporal 38 
+
+information throughout the video. However, when the video becomes longer, the number of distractors 39 
+
+also increase accordingly, making it more challenging to perform sufficient spatiotemporal reasoning 40 
+
+and capture the key information. Especially in RVOS, many text descriptions (e.g., “the cat jumps 41 
+
+down”) only refer to a brief fragment in the video. In addition, due to the GPU memory limitation, 42 
+
+existing methods typically sample 4 ∼8 frames per video for training, but use all the frames during 43 
+
+inference. As the video length increases, the gap between training and inference phases may become 44 
+
+more pronounced. Despite these concerns, due to the lack of a long-term RVOS dataset, the exact 45 
+
+challenges posed by longer videos remain unclear. 46 
+
+Another concern lies in the evaluation metrics. Existing RVOS benchmarks [ 7, 11 , 20 , 36 ] typi-47 
+
+cally evaluate performance by simply averaging the frame-wise segmentation metrics (e.g., J &F). 48 
+
+However, in real-world videos, the target objects do not appear in every frame, due to occlusion 49 
+
+and constrained camera views. Therefore, a robust RVOS model should exhibit a sound temporal 50 
+
+consistency. This means it should not only accurately segment the target when it is present, but also 51 
+
+be able to predict its absence by outputting an empty mask. However, this capability of temporal 52 
+
+consistency can not be adequately reflected by current metrics. 53 
+
+To address these gaps, this work proposes Long-RVOS , a large-scale benchmark for long-term video 54 
+
+object segmentation. Long-RVOS is the first minute-level dataset in RVOS field, designed to tackle 55 
+
+various realistic long-video challenges such as frequent occlusion, disappearance-reappearance and 56 
+
+shot changing, as shown in Figure 1 and Figure 2. Additionally, we introduce two new metrics 57 
+
+for better evaluation of temporal consistency: tIoU , which measures the temporal overlap between 58 
+
+predicted and ground-truth mask sequences; and vIoU , which further measures the spatiotemporal 59 
+
+volume overlap between them. We benchmark 6 state-of-the-art (SOTA) methods on Long-RVOS. The 60 
+
+results demonstrate that while notable progress has been achieved in existing short-term benchmarks, 61 
+
+these SOTA models still significantly struggle in realistic long-term scenarios, in both frame-level 62 
+
+segmentation and video-level temporal consistency. 63 
+
+To tackle the challenges posed by Long-RVOS, we present a baseline method ReferMo , which 64 
+
+integrates additional motion frames to expand the temporal receptive field during training, and 65 
+
+employs a local-to-global architecture to perceive both static attributes, short-term dynamics and 66 
+
+long-term dependencies. Specifically, ReferMo decomposes each video into a sequence of clips, 67 
+
+each consisting of a high-resolution keyframe and multiple low-resolution motion frames. Then, it 68 
+
+perceives the static appearance and short-term motion within local video clip, and captures the global 69 
+
+target in long-term context via inter-clip interactions. In this way, the temporal receptive field is 70 
+
+2Table 1: Statistical overview of representative RVOS datasets. Long-RVOS features the longest video duration and the most diverse object classes. Besides, Long-RVOS offers explicit text description types for finer-grained evaluation. Dataset Year Videos Mean duration Total duration Mean frames Masks Objects Object classes Text Text type A2D-Sentences [11] 2018 3,782 4.9s 5.2h 3.2 58k 4,825 6 6,656 ✗                                                   
+
+> JHMDB-Sentences [11] 2018 928 1.3s 0.3h 34.3 32k 928 1928 ✗
+> Ref-DAVIS17 [20] 2018 90 2.9s 0.1h 69.0 14k 205 78 1,544 ✗
+> Refer-YouTube-VOS [36] 2020 3,978 4.5s 5.0h 27.2 131k 7,451 94 15,009 ✗
+> MeViS [7] 2023 2,006 13.2s 7.3h 79.0 443k 8,171 36 28,570 ✗
+> Long-RVOS (ours) 2025 2,193 60.3s 36.7h 361.7 2.1M 6,703 163 24,689 ✓
+
+expanded from multiple frames to multiple clips, but the training cost does not increase significantly. 71 
+
+Despite simplicity, ReferMo achieves significant improvements over existing RVOS approaches, 72 
+
+serving a promising baseline for long-term referring video object segmentation. 73 
+
+Our contributions are summarized as follows: (i) We build Long-RVOS, the first large-scale bench-74 
+
+mark for long-term RVOS. In Long-RVOS, we provide explicit description types and introduce 75 
+
+new metrics to enable more comprehensive evaluation. (ii) We benchmark 6 state-of-the-art RVOS 76 
+
+approaches on Long-RVOS, and propose a promising baseline ReferMo to address the challenges in 77 
+
+long-video scenarios. These contributions establish a foundation for developing more robust RVOS 78 
+
+models to handle the realistic long-term videos. 79 
+
+## 2 Related Works 80 
+
+RVOS Benchmarks. Given an object description, RVOS aims to identify, tracking and segment 81 
+
+the referring object throughout the video. This task was initially introduced by Gavrilyuk et al. 82 
+
+[11] and Khoreva et al. [20] in 2018, and has gradually become a popular topic in vision-language 83 
+
+understanding. Gavrilyuk et al. [11] built A2D-Sentences and JHMDB-Sentences datasets, which 84 
+
+focus on distinguishing different actors in a video through the descriptions about appearance and 85 
+
+actions. Khoreva et al. [20] built Ref-DAVIS17 [ 20 ], which covers more diverse object types. Later, 86 
+
+Ref-Youtube-VOS [ 36 ] was developed to further expand the benchmark scale in this field. Recently, 87 
+
+MeViS [ 7] was proposed to highlight the importance of motion understanding in RVOS task. Despite 88 
+
+the efforts, these benchmarks remain limited to short video clips lasting only a few seconds, with 89 
+
+target objects clearly visible in most frames. Besides, they also lack sufficient evaluation mechanisms 90 
+
+to consider the models’ specific capabilities in various aspects. 91 
+
+RVOS Approaches. Recent RVOS approaches are mainly based on Transformer-based end-to-92 
+
+end architecture, represented by MTTR [ 2] and ReferFormer [ 44 ]. For an effective and consistent 93 
+
+object identification across the frames, follow-up works [ 14 , 15 , 30 , 39 ] focus on integrating more 94 
+
+object-level temporal information. ReferDINO [ 25 ] further improves the object-level visual-language 95 
+
+understanding by inheriting the object grounding capability of GroundingDINO [ 28 ]. Meanwhile, 96 
+
+the recent emergence of segment anything models, i.e., SAM [21] and SAM2 [35], provides unique 97 
+
+opportunity for downstream segmentation tasks. Some frontier studies [ 1, 5 , 26 , 47 , 50 ] explore 98 
+
+to incorporate SAM and SAM2 into RVOS approaches, achieving significant improvements on 99 
+
+existing benchmarks. For example, VideoLISA [ 1] incorporates large language models with SAM 100 
+
+for reasoning video segmentation. SAMWISE [ 5 ] integrate text prompts into SAM2 by inserting 101 
+
+trainable adapters. While these models achieve great progress in current short-video benchmarks, 102 
+
+their abilities and robustness in handling real-world long videos is still unclear. 103 
+
+Long-term Video Understanding. Real-world videos are always long, untrimmed, and involves 104 
+
+multiple events. To promote research into long-term video understanding, many large-scale bench-105 
+
+marks [ 3, 10 , 31 , 43 ] have been constructed. However, these benchmarks are mainly constructed 106 
+
+for video question answering and temporal action localization, containing only sparse annotations 107 
+
+such as timestamps, action labels and captions. To support object-level long-term understanding, 108 
+
+some datasets including VidOR [ 37 ] and LaSOT [ 9] also provide dense annotations of bounding 109 
+
+boxes. However, long-video datasets with pixel-level dense annotations are still very scarce. Recently, 110 
+
+LVOS [ 16 ] is built for long-term video object segmentation. However, it is limited in scale and lacks 111 
+
+text annotation. In this work, we build Long-RVOS, the first large-scale benchmark for long-term 112 
+
+video object segmentation, providing both pixel-wise annotations and diverse object descriptions. 113 
+
+33 Long-RVOS: A Comprehensive Benchmark for Long-term RVOS 114 
+
+3.1 Video Collection 115 Human  
+
+> 71.9% Animal
+> 12.7%
+> Instrument
+> 15.4%
+> Art Social
+> Sports
+> Daily
+> Marine
+> Animal Terrestrial
+> Animal
+> Commodity
+> painting
+> shooting
+> coach
+> Transportation
+> Kitchen
+> Music
+
+Figure 3: Overview of object categories and scenes in Long-RVOS. Previous RVOS datasets [ 7 , 11 , 20 , 36 ] were 116 
+
+typically constructed by providing text anno-117 
+
+tations on their corresponding VOS datasets 118 
+
+(e.g., DAVIS17 [ 34 ], YouTube-VOS-2019 [ 46 ]119 
+
+and MOSE [ 8]). However, the existing long-120 
+
+term VOS datasets like LVOS [ 16 ] are lim-121 
+
+ited in scale (containing only 720 videos), 122 
+
+and most videos feature only one object tar-123 
+
+get. Therefore, in order to establish a large-124 
+
+scale and diverse RVOS benchmark, we by-125 
+
+pass the existing VOS datasets and turn to inte-126 
+
+grate multi-source long video datasets. Specif-127 
+
+ically, we build Long-RVOS based on three 128 
+
+long-video datasets: TAO [ 6], VidOR [ 37 ], 129 
+
+and Ego-Exo4D [ 12 ]. Moreover, TAO is a 130 
+
+federated dataset combining multiple sources 131 
+
+like Charades [ 38 ], LaSOT [ 9], ArgoVerse [ 4], 132 
+
+AVA [ 13 ], YFCC100M [ 41 ], BDD-100K [ 49 ], 133 
+
+and HACS [ 53 ]. We select videos and objects 134 
+
+based on the following criteria: 135 
+
+• The video duration exceeds 20 seconds. 136 
+
+• Objects that belong to background, ambiguous or unknown categories are excluded. 137 
+
+• Each selected video must contain more than two valid objects, and at least one object is not 138 
+
+continuously visible. 139 
+
+With these criteria, we have initially collected over 3K videos and 8K objects as candidates. After 140 
+
+careful inspections on quality, we finally select 2,193 videos and 6,703 objects to build Long-RVOS. 141 
+
+3.2 Dataset Annotation. 142 
+
+Text Annotation. We develop an online platform for annotating object descriptions. This platform 143 
+
+randomly samples a video from our dataset and displays it, with all target objects highlighted by 144 
+
+bounding boxes. To ensure the diversity of annotations, each video can be sampled repeatedly at 145 
+
+most three times. The annotators consisting of 20 college students are asked to watch the videos and 146 
+
+provide the following three types of descriptions for each object: 147 
+
+• Static type includes appearance (e.g., colors and shapes), relative position (e.g., “the left cat”), and 148 
+
+environmental context (e.g., “on the grass”). 149 
+
+• Dynamic type includes motions, changes over time (e.g., in position or state) and interactions with 150 
+
+other entities (e.g., “the cat chasing a mouse”). 151 
+
+• Hybrid type integrates both static and dynamic attributes to provide comprehensive object cues. 152 
+
+The key annotation principle is that every single description, regardless of type, must clearly distin-153 
+
+guish the target object from others. For objects that cannot be distinguished by only static or dynamic 154 
+
+attributes, the corresponding type of annotation can be skipped. After this annotation phase, we have 155 
+
+collected over 30K text descriptions. These annotations and the corresponding videos are then sent 156 
+
+to a validation team formed by three experts for quality verification. Any descriptions that violate 157 
+
+our principle are directly removed. Besides, we do not use techniques like synonym replacement to 158 
+
+artificially scale up the text annotations, keeping the dataset clear and authentic to support reliable 159 
+
+RVOS training. Finally, we gather 24,689 high-quality descriptions for building Long-RVOS. 160 
+
+Mask Annotation. Our source datasets [ 6, 12 , 37 ] have provided sparse bounding-box annotations. 161 
+
+For each object, we segment the video into clips based on the annotated frames. Then, we utilize 162 
+
+SAM2 [ 35 ], the state-of-the-art VOS model, to track the objects within each clip and produce 163 
+
+high-quality masks, by regarding the annotated bounding box as the first-frame prompt. To ensure 164 
+
+4person 
+
+> dog
+> toy
+> cat
+> guitar
+> car
+> ball
+> elephant
+> horse
+> doll
+> phone
+> fish
+> boat
+> bicycle
+> cake
+> truck
+> tiger
+> bear
+> sheep
+> bird
+> lion
+> motorcycle
+> monkey
+> camera
+> duck
+> basketball
+> cow
+> giraffe
+> tank
+> mouse
+> cello
+> rabbit
+> parrot
+> panda
+> camel
+> refrigerator
+> squirrel
+> raft
+> pot
+> deer
+> hippo
+> violin
+> jeep
+> balloon
+> plane
+> pigeon
+> goldfish
+> bus
+> stroller
+> gorilla
+> 10 1
+> 10 2
+> 10 3
+> Frequency  Human
+> Animal
+> Instrument
+
+(a) Frequency distribution of the Top-50 object categories. 20 40 60 80 100 120 140 
+
+> Video duration (seconds)
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> Probability  Average: 60.3
+
+(b) Distribution of video duration. 0 20 40 60 80 100 120  
+
+> Object duration (seconds)
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> Probability  Average: 47.8
+
+(c) Distribution of object duration. 0 2 4 6 8 10 12 14  
+
+> Object number
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> Probability  Average: 3.4
+
+(d) Number of objects per video. 
+
+(e) Wordcloud of descriptions. 32.52%   
+
+> 35.03%
+> 32.45%
+> Static
+> Dynamic Hybrid
+
+(f) Distribution of description types. 1 2 3 4 5 6 7 8 9 
+
+> Description number
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> Probability  Average: 3.7
+
+(g) Description number per object. 
+
+Figure 4: Representative statistics of Long-RVOS. annotation quality, we conduct an iterative check–correct workflow. Specifically, the validation team 165 
+
+checks every object’s mask separately in the video, and marks the objects with inaccurate annotations. 166 
+
+To facilitate the correction process, we develop an interactive annotation tool based on SAM2. This 167 
+
+tool loads a marked object each time and visualizes its masks in the video. Nine annotators use our 168 
+
+tool to refine the masks with point or box prompts, and remove masks from object-absent frames. 169 
+
+The corrected results are then returned to the checking queue, and this check–correct loop repeats 170 
+
+until all mask annotations are qualified. 171 
+
+3.3 Dataset Statistics 172 
+
+A detailed comparison with five existing RVOS datasets is shown in Table 1. Notably, Long-173 
+
+RVOS offers significantly longer video duration than existing datasets. In addition, it contains the 174 
+
+largest number of object classes and mask annotations. The large scale of Long-RVOS supports 175 
+
+comprehensive training and evaluation of RVOS models. 176 
+
+Diverse Objects and Scenes. Long-RVOS is constructed by integrating multiple sources of video 177 
+
+datasets, achieving a wide variety of objects and scenes, as illustrated in Figure 3. These sources 178 
+
+include indoor videos from Charades [ 38 ], outdoor videos from LaSOT [ 9], movie scenes from 179 
+
+AVA [ 13 ], egocentric videos from Ego-Exo4D [ 12 ], and more diverse videos from other datasets [ 37 ,180 
+
+41 , 53 ]. In total, Long-RVOS contains 163 object categories, significantly surpassing the existing 181 
+
+RVOS datasets. As shown in Figure 4 (a), while Long-RVOS primarily focuses on human instances 182 
+
+(71.9%), it also covers a diverse range of animals (12.7%) and instruments (15.4%). In Figure 4 (b)-183 
+
+(d), we present further statistics on the videos and objects in Long-RVOS. Notably, the object number 184 
+
+of each video spans from 2 to 14, preventing over-reliance on the most salient object and highlighting 185 
+
+text-guided segmentation. With such extensive diversity, Long-RVOS can serve a comprehensive 186 
+
+benchmark for RVOS research, facilitating the development of more real-world applications. 187 
+
+5Diverse Descriptions. In real-world applications, user queries are always unpredictable. They might 188 
+
+refer to salient attributes or instantaneous actions. To enable more comprehensive evaluation of 189 
+
+model capabilities, Long-RVOS introduces three distinct types of text descriptions — static , dynamic ,190 
+
+and hybrid . By explicitly categorizing these types, Long-RVOS prevents evaluation bias toward 191 
+
+specific attribute cues (e.g., color or position), ensuring a fair and robust assessment. We present 192 
+
+the detailed statistics of text descriptions in Figure 4 (c)-(g). Critically, Long-RVOS maintains a 193 
+
+balanced distribution of text types, and the description number for each object can vary from 1 to 9. 194 
+
+These properties encourage comprehensive learning of diverse object attributes. With its explicit type 195 
+
+annotations and diverse object descriptions, Long-RVOS provides a comprehensive benchmark for 196 
+
+training and evaluating RVOS models in more realistic scenarios. 197 
+
+3.4 Evaluation Metrics 198 
+
+Previous RVOS benchmarks tend to evaluate model performance with the frame-wise spatial metrics, 199 
+
+such as J &F. Here, J denotes the Intersection-over-Union (IoU) between the predicted and 200 
+
+ground-truth masks, F measures the contour accuracy, and J &F is their average over all the frames. 201 
+
+However, these metrics focus solely on the per-frame segmentation quality, neglecting the temporal 202 
+
+consistency. A robust RVOS model should accurately segment the target when it is present and 203 
+
+correctly output an empty mask when it is absent. Inspired by the field of spatiotemporal video 204 
+
+grounding [ 40 , 52 ], we additionally introduce two new metrics, tIoU and vIoU , in Long-RVOS to 205 
+
+individually evaluate the temporal and spatiotemporal performance. 206 
+
+Formally, let ˆMt, M t ∈ { 0, 1}H×W denote the predicted and ground-truth masks at t-th frame, 207 
+
+respectively, where t ∈ [1 , T ]. The frame-index sets of non-empty masks are defined as ˆT = {t |208 
+
+∥ ˆMt∥0 > 0} (for predictions) and T = {t | ∥ Mt∥0 > 0} (for the ground-truth), where the ℓ0-norm 209 
+
+∥ · ∥ 0 denotes the count of non-zero elements. Then, tIoU is obtained by computing their IoU: 210 
+
+tIoU = Ti
+
+Tu
+
+, where Ti = ˆT ∩ T and Tu = ˆT ∪ T , (1) and vIoU computes the volume IoU between predicted and ground-truth mask sequences: 211 
+
+vIoU = 1
+
+Tu
+
+X
+
+> t∈Ti
+
+Jt, where Jt = ˆMt ∩ M t
+
+ˆMt ∪ M t
+
+. (2) By combining the spatial metric J &F, temporal metric tIoU and spatiotemporal metric vIoU ,212 
+
+Long-RVOS establishes a rigorous evaluation protocol for RVOS research. 213 
+
+## 4 ReferMo: A Baseline Approach 214 
+
+As illustrated in Figure 5, ReferMo decomposes the video into a sequence of clips, each consisting 215 
+
+of a high-resolution keyframe and subsequent low-resolution motion frames. Then, it perceives the 216 
+
+static appearance and short-term motion within local video clip, and captures the object target in 217 
+
+long-term context by integrating the cross-clip information. Critically, ReferMo only predicts target 218 
+
+masks over the keyframes, and the masks on the remain frames are generated by a pretrained object 219 
+
+tracker (e.g., SAM2 [ 35 ]). In this way, ReferMo achieves a trade-off between training costs and 220 
+
+long-term understanding without processing a large number of high-resolution frames. 221 
+
+4.1 Video Decomposition 222 
+
+Typically, a long-term video is composed of multiple shots, and the video frames within each shot 223 
+
+often show significant temporal redundancy. This redundancy can be efficiently described by motion 224 
+
+information to reduce the frame-by-frame computations. Inspired by Video-LaVIT [ 18 ], we employ 225 
+
+the MPEG-4 [ 23 ] compression technique to extract keyframe and motion information from the videos. 226 
+
+More sophisticated (but expensive) keyframe selection strategies [ 42 , 45 ] can also be explored, but 227 
+
+they are not the primary focus of this work. In MPEG-4, a video is decomposed into multiple clips, 228 
+
+where each clip consists of a keyframe I ∈ RH×W ×3 and the motion vectors M ∈ RT × H    
+
+> 16 ×W
+> 16 ×2
+
+of 229 
+
+its subsequent T frames. Unlike the dense optical flow, these motion vectors can be directly extracted 230 
+
+during the compressed video decoding process, making them well-suited for processing large-scale, 231 
+
+long-term videos. The details of motion extraction process are provided in the supplementary. 232 
+
+6Local Perception  Local Perception  Local Perception        
+
+> “A student watched two girls leave, then rushed to the bathroom, and finally started practicing boxing moves. ”
+> SAM 2❄️ SAM 2❄️ SAM 2❄️
+> Key Frame Motion Frames Key Frame Motion Frames Key Frame Motion Frames
+> Global Interaction
+
+Figure 5: Overview of ReferMo. A video is decomposed into clips (keyframe + motion frames). ReferMo perceives the static attributes and short-term motions within each clip, then aggregates inter-clip information capture the global target. Notably, ReferMo is supervised by only keyframe masks, and SAM2 is only used at inference for target tracking in subsequent frames. 
+
+4.2 From Local Perception to Global Interaction 233 Spatiotemporal   
+
+> Attention
+> Dual Attention
+> “A student watched
+> two girls leave...”
+> Text
+> Encoder
+> Object Decoder
+> Image
+> Encoder
+> Motion
+> Encoder
+> Multi -modal Fuser ×𝑵
+> Object
+> Embeddings
+
+Figure 6: Overview of local perceiver. Different from the previous RVOS methods [ 25 , 30 , 48 ]234 
+
+that perform vision-language fusion on each single frame, 235 
+
+we introduce motion representations to enable clip-level 236 
+
+vision-language fusion. For each video clip, as shown in 237 
+
+Figure 6, the local perceiver encodes the text, keyframe 238 
+
+and motion information through three separate encoders, 239 
+
+and then employs a multi-modal fuser to progressively ag-240 
+
+gregate these information for clip-level object extraction. 241 
+
+By collecting the objects across different video clips, we 242 
+
+perform global temporal interaction to enable consistent 243 
+
+object prediction and long-term temporal understanding. 244 
+
+Motion Encoder. The motion vectors are first embeded 245 
+
+into a d-dimensional space via a linear projector. Then, 246 
+
+the motion encoder performs self-attention separately 247 
+
+along the spatial and temporal dimensions to extract the 248 
+
+spatiotemporal motion features M ∈ RT × H   
+
+> 16 ×W
+> 16 ×d
+
+. No-249 
+
+tably, we implement the spatial attention as deformable 250 
+
+attention due to the large number of spatial tokens. 251 
+
+Image-Motion Fusion. Modern image encoders (e.g., Swin Transformer [ 29 ]) typically output 252 
+
+multi-scale feature maps Ii ∈ RHi×Wi×d, i ∈ [1 , 4] . To match these spatial resolutions, we adopt a 253 
+
+series of spatial convolutions with specific strides over the motion features M to produce multi-scale 254 
+
+motion features Mi ∈ RT ×Hi×Wi×d. At each scale i, we treat the keyframe feature Ii as query and 255 
+
+perform cross-attention along the temporal dimension to aggregate Mi into fMi ∈ RHi×Wi×d. To 256 
+
+avoid undesired motion noise, we fuse the keyframe and motion features via the spatial-aware and 257 
+
+channel-aware gating mechanisms: 258 
+
+M ∗ 
+
+> i
+
+= ( σ(Ii · W Idown )
+
+| {z }
+
+> Spatial Gate
+
+⊙( fMi · W Mdown )) · Wup , (3) 
+
+> 259
+
+Fi = Ii + γi
+
+> |{z}
+> Channel Gate
+
+⊙ max( M ∗ 
+
+> i
+
+, 0) 2, (4) where W Idown , W Mdown ∈ Rd×r indicate the low-rank projectors that compress the features to a lower 260 
+
+dimension r, and Wup ∈ Rr×d is a projector to resort the dimension. σ denotes Sigmoid function and 261 
+
+⊙ denotes Hadamard product. γ ∈ Rd is a learnable vector to modulate the channel-wise weights. 262 
+
+7Vision-Language Fusion. We use the dual cross-attention modules [ 24 , 28 ] for deep vision-language 263 
+
+fusion. Formally, given the clip-level vision features F ∈ RN ×d and the language features E ∈ RL×d,264 
+
+where N and L individually denote their token number, we derive the cross-modal enhanced vision 265 
+
+features eF and language features eE as follows: 266 
+
+A = F · E⊤
+
+√d , eF = Softmax( A) · E, eE = Softmax( A⊤) · F. (5) For simplicity, the linear projections for multi-head attentions are omitted. The output features eF267 
+
+and eE are then fed into the object decoder to extract object features. 268 
+
+Global Interaction. To enable consistent object prediction and long-term temporal understanding, 269 
+
+we collect the object features across video clips to perform global temporal interactions. Following 270 
+
+ReferDINO [ 25 ], we use the Hungarian algorithm [ 22 ] to align the objects clip-by-clip. Then, we 271 
+
+perform temporal self-attention over the aligned object features to achieve global modeling. For 272 
+
+better modality alignment, we also infuse the language information eE into the object features through 273 
+
+a cross-attention layer. Finally, the interacted object features are output to the segmentation head for 274 
+
+generating instance masks. Note that these masks are only predicted for the key frame within each 275 
+
+clip, serving as object anchors for SAM2’s mask propagation in subsequent frames. 276 
+
+## 5 Experiments 277 
+
+5.1 Experiment Setup 278 
+
+Dataset Split. Long-RVOS is a large-scale dataset containing 2,193 videos and 24,689 sentences, 279 
+
+which are split into three subsets: a training set of 1,855 videos and 20,722 sentences, a validation set 280 
+
+of 113 videos and 1,379 sentences, and a test set of 225 videos and 2,588 sentences. 281 
+
+Evaluation Metrics. We use three kinds of evaluation metrics: the spatial metric J &F, the temporal 282 
+
+metric tIoU and the spatiotemporal metric vIoU . Long-RVOS provides three types of descriptions: 283 
+
+static , temporal and hybrid . We report performance for each type separately and overall. Additionally, 284 
+
+we report the FPS for each competitor because efficiency is a major concern for long-video processing. 285 
+
+Implementation Details. We follow the default hyper-parameter settings of ReferDINO [ 25 ] and 286 
+
+use Swin-Tiny as the backbone. For SAM2 [ 35 ], we use the sam2 .1_hiera _large version. In 287 
+
+MPEG-4 [ 23 ], each video clip typically consists of a keyframe and the motion vectors for up to 11 288 
+
+subsequent frames. During training, we randomly sample 6 clips and use 3-frame motion vectors. 289 
+
+The input frames are resized to have the longest side of 640 pixels and the shortest side of 360 290 
+
+pixels during training and evaluation. Following the settings on MeViS [ 7 ], we do not use referring 291 
+
+image segmentation datasets (e.g., RefCOCO/+/g [ 19 , 32 ]) for pretraining. We train ReferMo on 292 
+
+Long-RVOS dataset for 6 epochs, which take 24 hours on 8 Nvidia A6000 GPUs. 293 
+
+5.2 Benchmark Results 294 
+
+Overall Comparison. We compare ReferMo with six recent RVOS methods on Long-RVOS. All 295 
+
+models in comparison are trained on Long-RVOS under consistent experimental settings for fairness. 296 
+
+As demonstrated in Table 2, realistic long-video scenarios remain a significant challenge for current 297 
+
+RVOS models. While the SAM2-based methods [ 5, 26 ] achieve SOTA performance on existing 298 
+
+short-term benchmarks [ 7, 20 , 36 ], they significantly struggle in Long-RVOS. This suggests that their 299 
+
+improvements may primarily stem from SAM2’s superior tracking and segmentation capabilities, 300 
+
+rather than better language-guided object understanding. As the videos grow longer and more 301 
+
+complex, it becomes more challenging to perform video-language reasoning and distinguish the 302 
+
+objects, which leads to their performance degradation. In contrast, our baseline ReferMo integrates 303 
+
+the static attributes, short-term dynamics and long-term dependencies to perform object-level visual-304 
+
+language reasoning, achieving significant improvements over existing methods. These findings 305 
+
+highlight the need for both frame-level segmentation precision and video-level visual-language 306 
+
+understanding to address the long-video challenges in Long-RVOS. 307 
+
+Fine-grained Evaluation. Long-RVOS provides three types of text descriptions to enable rigorous 308 
+
+evaluation. For most models, the performance for static and hybrid types is comparable and largely 309 
+
+better than that for dynamic type. This implies a strong bias in current RVOS models toward static 310 
+
+8Method Year Static Dynamic Hybrid Overall FPS                                                                                                                  
+
+> J&FtIoU vIoU J&FtIoU vIoU J&FtIoU vIoU J&FtIoU vIoU
+> Without SAM / SAM2
+> SOC [30] 2023 34.8 67.7 28.4 34.9 68.7 28.8 35.1 68.0 28.5 34.9 68.1 28.6 53.8 MUTR [48] 2024 43.0 70.1 36.7 40.2 70.8 34.8 43.2 70.3 37.2 42.2 70.4 36.2 20.4 ReferDINO [25] 2025 50.7 71.9 42.8 45.9 71.9 38.9 49.2 71.5 41.7 48.7 71.7 41.2 46.4
+> With SAM / SAM2
+> VideoLISA [1] 2024 34.3 69.6 28.9 31.0 69.7 26.9 33.9 69.4 28.6 33.1 69.6 28.2 6.6 GLUS [26] 2025 36.4 68.2 34.3 37.6 68.9 35.8 35.9 68.0 33.9 36.6 68.4 34.6 3.6 SAMWISE [5] 2025 36.6 68.4 29.2 34.3 68.6 28.1 33.8 69.4 28.4 35.6 68.4 28.6 7.0
+> ReferMo 2025 53.5 71.4 44.0 48.1 71.2 40.1 52.2 71.2 43.6 51.3 71.2 42.6 52.5
+
+Table 2: Comparison of state-of-the-art RVOS models on Long-RVOS test set. FPS is estimated at 360P on Nvidia A6000 GPUs, excluding the video loading time.               
+
+> Dataset Point Box Mask MeViS [7] Valid_u 77.3 80.0 80.6 Long-RVOS Valid 53.4 54.5 53.5 Test 52.8 53.9 53.3
+
+(a) Oracle analysis with SAM2.              
+
+> Model J&FJF
+> ReferDINO 49.1 47.6 50.6 ReferMo 49.6 48.0 51.2 -w/o motion 47.5 46.0 48.9
+
+(b) Results on the keyframes. 0 1 3 5 8 11  
+
+> Motion length
+> 49.5
+> 50.0
+> 51.0
+> 51.5
+> Performance
+
+(c) Different motion lengths. 
+
+Table 3: Oracle analysis and ablation studies. attributes. Across different models, while the J &F scores show significant variance, their tIoU 311 
+
+are relatively consistent. This reveals that existing RVOS models have little performance gap in 312 
+
+temporal consistency, highlighting the need for effective tracking mechanisms to handle frequent 313 
+
+target disappearance in long-term videos. ReferMo significantly outperforms other models across 314 
+
+various types and metrics, except for tIoU, where it is slightly inferior to ReferDINO. We speculate 315 
+
+that this is because ReferMo only performs language-guided reasoning on keyframes, resulting in 316 
+
+suboptimal object identification on motion frames. 317 
+
+Oracle Analysis. We provide SAM2 with first-frame ground-truth object prompts and evaluate 318 
+
+its tracking performance across different datasets. As shown in Table 3 (a), the oracle results for 319 
+
+Long-RVOS (52.8~54.5 J &F) are significantly lower than those for MeViS (77.3~80.6 J &F). The 320 
+
+notable performance gap of nearly 25% demonstrates the long-term challenges in Long-RVOS. 321 
+
+5.3 Ablation Studies 322 
+
+Results on Keyframes. In Table 3 (b), we compare the performance of ReferMo and ReferDINO [ 25 ]323 
+
+on the keyframes. We focus on the spatial metrics since the length of the keyframe sequence is 324 
+
+short. Note that ReferDINO is trained on all frames, while our ReferMo is only trained on keyframes. 325 
+
+However, ReferMo still outperforms ReferDINO by 0.5% in J &F, owing to the integration of 326 
+
+motion information. When ablating it, we see a significant 2.1% performance drop in J &F. These 327 
+
+results encourage further exploration of sparse-frame supervision for RVOS task. 328 
+
+Effect of Motion Information. We investigate the impact of varying the number of motion frames in 329 
+
+ReferMo. As shown in Table 3 (c), the performance without motions is only 49.7 J &F. However, 330 
+
+even using just one motion frame yields +1.6% J &F improvements. Increasing the motion length to 331 
+
+3 frames improves J &F to 51.3, but further increasing only leads to marginal gains. 332 
+
+## 6 Conclusion 333 
+
+In this work, we introduce Long-RVOS, a large-scale benchmark for long-term referring video object 334 
+
+segmentation, comprising over 2,000 videos averaging 60+ seconds to address the limitations of 335 
+
+existing short-term datasets. To enable comprehensive and rigorous evaluation, we provide three types 336 
+
+of descriptions and two novel metrics, tIoU and vIoU . Results on Long-RVOS indicate that current 337 
+
+RVOS methods struggle severely in long-video scenarios. Furthermore, we propose ReferMo, a 338 
+
+simple motion-enhanced baseline that significantly outperforms existing SOTA methods on long-term 339 
+
+videos. We believe that Long-RVOS and ReferMo will provide a foundation for future research to 340 
+
+develop robust RVOS models tackling real-world long-form videos. 341 
+
+9References 342 
+
+[1] Z. Bai, T. He, H. Mei, P. Wang, Z. Gao, J. Chen, Z. Zhang, and M. Z. Shou. One token to 343 
+
+seg them all: Language instructed reasoning segmentation in videos. Advances in Neural 344 
+
+Information Processing Systems , 37:6833–6859, 2024. 1, 3, 9 345 
+
+[2] A. Botach, E. Zheltonozhskii, and C. Baskin. End-to-end referring video object segmentation 346 
+
+with multimodal transformers. In Proceedings of the IEEE/CVF Conference on Computer 347 
+
+Vision and Pattern Recognition , pages 4985–4995, 2022. 1, 3 348 
+
+[3] F. Caba Heilbron, V. Escorcia, B. Ghanem, and J. Carlos Niebles. Activitynet: A large-scale 349 
+
+video benchmark for human activity understanding. In Proceedings of the ieee conference on 350 
+
+computer vision and pattern recognition , pages 961–970, 2015. 3 351 
+
+[4] M.-F. Chang, J. Lambert, P. Sangkloy, J. Singh, S. Bak, A. Hartnett, D. Wang, P. Carr, S. Lucey, 352 
+
+D. Ramanan, et al. Argoverse: 3d tracking and forecasting with rich maps. In Proceedings 353 
+
+of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 8748–8757, 354 
+
+2019. 4 355 
+
+[5] C. Cuttano, G. Trivigno, G. Rosi, C. Masone, and G. Averta. Samwise: Infusing wisdom in 356 
+
+sam2 for text-driven video segmentation. In Proceedings of the IEEE/CVF Conference on 357 
+
+Computer Vision and Pattern Recognition , 2025. 3, 8, 9 358 
+
+[6] A. Dave, T. Khurana, P. Tokmakov, C. Schmid, and D. Ramanan. Tao: A large-scale benchmark 359 
+
+for tracking any object. In Computer Vision–ECCV 2020: 16th European Conference, Glasgow, 360 
+
+UK, August 23–28, 2020, Proceedings, Part V 16 , pages 436–454. Springer, 2020. 4 361 
+
+[7] H. Ding, C. Liu, S. He, X. Jiang, and C. C. Loy. Mevis: A large-scale benchmark for 362 
+
+video segmentation with motion expressions. In Proceedings of the IEEE/CVF International 363 
+
+Conference on Computer Vision , pages 2694–2703, 2023. 1, 2, 3, 4, 8, 9 364 
+
+[8] H. Ding, C. Liu, S. He, X. Jiang, P. H. Torr, and S. Bai. Mose: A new dataset for video object 365 
+
+segmentation in complex scenes. In Proceedings of the IEEE/CVF international conference on 366 
+
+computer vision , pages 20224–20234, 2023. 4 367 
+
+[9] H. Fan, L. Lin, F. Yang, P. Chu, G. Deng, S. Yu, H. Bai, Y. Xu, C. Liao, and H. Ling. Lasot: A 368 
+
+high-quality benchmark for large-scale single object tracking. In Proceedings of the IEEE/CVF 369 
+
+conference on computer vision and pattern recognition , pages 5374–5383, 2019. 3, 4, 5 370 
+
+[10] C. Fu, Y. Dai, Y. Luo, L. Li, S. Ren, R. Zhang, Z. Wang, C. Zhou, Y. Shen, M. Zhang, et al. 371 
+
+Video-mme: The first-ever comprehensive evaluation benchmark of multi-modal llms in video 372 
+
+analysis. arXiv preprint arXiv:2405.21075 , 2024. 3 373 
+
+[11] K. Gavrilyuk, A. Ghodrati, Z. Li, and C. G. Snoek. Actor and action video segmentation from a 374 
+
+sentence. In Proceedings of the IEEE conference on computer vision and pattern recognition ,375 
+
+pages 5958–5966, 2018. 1, 2, 3, 4 376 
+
+[12] K. Grauman, A. Westbury, L. Torresani, K. Kitani, J. Malik, T. Afouras, K. Ashutosh, V. Baiyya, 377 
+
+S. Bansal, B. Boote, et al. Ego-exo4d: Understanding skilled human activity from first-and 378 
+
+third-person perspectives. In Proceedings of the IEEE/CVF Conference on Computer Vision 379 
+
+and Pattern Recognition , pages 19383–19400, 2024. 4, 5 380 
+
+[13] C. Gu, C. Sun, D. A. Ross, C. Vondrick, C. Pantofaru, Y. Li, S. Vijayanarasimhan, G. Toderici, 381 
+
+S. Ricco, R. Sukthankar, et al. Ava: A video dataset of spatio-temporally localized atomic visual 382 
+
+actions. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition ,383 
+
+pages 6047–6056, 2018. 4, 5 384 
+
+[14] M. Han, Y. Wang, Z. Li, L. Yao, X. Chang, and Y. Qiao. Html: Hybrid temporal-scale 385 
+
+multimodal learning framework for referring video object segmentation. In Proceedings of the 386 
+
+IEEE/CVF International Conference on Computer Vision , pages 13414–13423, 2023. 3 387 
+
+[15] S. He and H. Ding. Decoupling static and hierarchical motion perception for referring video 388 
+
+segmentation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern 389 
+
+Recognition , pages 13332–13341, 2024. 1, 3 390 
+
+10 [16] L. Hong, W. Chen, Z. Liu, W. Zhang, P. Guo, Z. Chen, and W. Zhang. Lvos: A benchmark for 391 
+
+long-term video object segmentation. In Proceedings of the IEEE/CVF International Conference 392 
+
+on Computer Vision , pages 13480–13492, 2023. 3, 4 393 
+
+[17] P. Jin, R. Takanobu, W. Zhang, X. Cao, and L. Yuan. Chat-univi: Unified visual representation 394 
+
+empowers large language models with image and video understanding. In Proceedings of the 395 
+
+IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 13700–13710, 2024. 396 
+
+1397 
+
+[18] Y. Jin, Z. Sun, K. Xu, L. Chen, H. Jiang, Q. Huang, C. Song, Y. Liu, D. Zhang, Y. Song, et al. 398 
+
+Video-lavit: Unified video-language pre-training with decoupled visual-motional tokenization. 399 
+
+arXiv preprint arXiv:2402.03161 , 2024. 6 400 
+
+[19] S. Kazemzadeh, V. Ordonez, M. Matten, and T. Berg. Referitgame: Referring to objects in 401 
+
+photographs of natural scenes. In Proceedings of the 2014 conference on empirical methods in 402 
+
+natural language processing (EMNLP) , pages 787–798, 2014. 8 403 
+
+[20] A. Khoreva, A. Rohrbach, and B. Schiele. Video object segmentation with language referring 404 
+
+expressions. In Computer Vision–ACCV 2018: 14th Asian Conference on Computer Vision, 405 
+
+Perth, Australia, December 2–6, 2018, Revised Selected Papers, Part IV 14 , pages 123–141. 406 
+
+Springer, 2019. 1, 2, 3, 4, 8 407 
+
+[21] A. Kirillov, E. Mintun, N. Ravi, H. Mao, C. Rolland, L. Gustafson, T. Xiao, S. Whitehead, 408 
+
+A. C. Berg, W.-Y. Lo, et al. Segment anything. In Proceedings of the IEEE/CVF International 409 
+
+Conference on Computer Vision , pages 4015–4026, 2023. 1, 3 410 
+
+[22] H. W. Kuhn. The hungarian method for the assignment problem. Naval research logistics 411 
+
+quarterly , 2(1-2):83–97, 1955. 8 412 
+
+[23] D. Le Gall. Mpeg: A video compression standard for multimedia applications. Communications 413 
+
+of the ACM , 34(4):46–58, 1991. 6, 8 414 
+
+[24] L. H. Li, P. Zhang, H. Zhang, J. Yang, C. Li, Y. Zhong, L. Wang, L. Yuan, L. Zhang, J.-N. Hwang, 415 
+
+et al. Grounded language-image pre-training. In Proceedings of the IEEE/CVF Conference on 416 
+
+Computer Vision and Pattern Recognition , pages 10965–10975, 2022. 8 417 
+
+[25] T. Liang, K.-Y. Lin, C. Tan, J. Zhang, W.-S. Zheng, and J.-F. Hu. Referdino: Referring video 418 
+
+object segmentation with visual grounding foundations. arXiv preprint arXiv:2501.14607 , 2025. 419 
+
+1, 3, 7, 8, 9 420 
+
+[26] L. Lin, X. Yu, Z. Pang, and Y.-X. Wang. Glus: Global-local reasoning unified into a single 421 
+
+large language model for video segmentation. In Proceedings of the IEEE/CVF Conference on 422 
+
+Computer Vision and Pattern Recognition , 2025. 3, 8, 9 423 
+
+[27] H. Liu, C. Li, Q. Wu, and Y. J. Lee. Visual instruction tuning. Advances in neural information 424 
+
+processing systems , 36:34892–34916, 2023. 1 425 
+
+[28] S. Liu, Z. Zeng, T. Ren, F. Li, H. Zhang, J. Yang, C. Li, J. Yang, H. Su, J. Zhu, et al. Grounding 426 
+
+dino: Marrying dino with grounded pre-training for open-set object detection. In European 427 
+
+Conference on Computer Vision , 2024. 3, 8 428 
+
+[29] Z. Liu, Y. Lin, Y. Cao, H. Hu, Y. Wei, Z. Zhang, S. Lin, and B. Guo. Swin transformer: 429 
+
+Hierarchical vision transformer using shifted windows. In Proceedings of the IEEE/CVF 430 
+
+international conference on computer vision , pages 10012–10022, 2021. 7 431 
+
+[30] Z. Luo, Y. Xiao, Y. Liu, S. Li, Y. Wang, Y. Tang, X. Li, and Y. Yang. Soc: semantic-assisted 432 
+
+object cluster for referring video object segmentation. In Proceedings of the 37th International 433 
+
+Conference on Neural Information Processing Systems , pages 26425–26437, 2023. 1, 3, 7, 9 434 
+
+[31] K. Mangalam, R. Akshulakov, and J. Malik. Egoschema: A diagnostic benchmark for very 435 
+
+long-form video language understanding. Advances in Neural Information Processing Systems ,436 
+
+36:46212–46244, 2023. 3 437 
+
+11 [32] J. Mao, J. Huang, A. Toshev, O. Camburu, A. L. Yuille, and K. Murphy. Generation and 438 
+
+comprehension of unambiguous object descriptions. In Proceedings of the IEEE conference on 439 
+
+computer vision and pattern recognition , pages 11–20, 2016. 8 440 
+
+[33] B. Miao, M. Bennamoun, Y. Gao, and A. Mian. Spectrum-guided multi-granularity referring 441 
+
+video object segmentation. In Proceedings of the IEEE/CVF International Conference on 442 
+
+Computer Vision , pages 920–930, 2023. 1 443 
+
+[34] J. Pont-Tuset, F. Perazzi, S. Caelles, P. Arbeláez, A. Sorkine-Hornung, and L. Van Gool. The 444 
+
+2017 davis challenge on video object segmentation. arXiv preprint arXiv:1704.00675 , 2017. 4 445 
+
+[35] N. Ravi, V. Gabeur, Y.-T. Hu, R. Hu, C. Ryali, T. Ma, H. Khedr, R. Rädle, C. Rolland, 446 
+
+L. Gustafson, E. Mintun, J. Pan, K. V. Alwala, N. Carion, C.-Y. Wu, R. Girshick, P. Dol-447 
+
+lár, and C. Feichtenhofer. Sam 2: Segment anything in images and videos. arXiv preprint 448 
+
+arXiv:2408.00714 , 2024. 1, 3, 4, 6, 8 449 
+
+[36] S. Seo, J.-Y. Lee, and B. Han. Urvos: Unified referring video object segmentation network 450 
+
+with a large-scale benchmark. In Computer Vision–ECCV 2020: 16th European Conference, 451 
+
+Glasgow, UK, August 23–28, 2020, Proceedings, Part XV 16 , pages 208–223. Springer, 2020. 1, 452 
+
+2, 3, 4, 8 453 
+
+[37] X. Shang, D. Di, J. Xiao, Y. Cao, X. Yang, and T.-S. Chua. Annotating objects and relations in 454 
+
+user-generated videos. In Proceedings of the 2019 on International Conference on Multimedia 455 
+
+Retrieval , pages 279–287. ACM, 2019. 3, 4, 5 456 
+
+[38] G. A. Sigurdsson, G. Varol, X. Wang, A. Farhadi, I. Laptev, and A. Gupta. Hollywood in homes: 457 
+
+Crowdsourcing data collection for activity understanding. In Computer Vision–ECCV 2016: 458 
+
+14th European Conference, Amsterdam, The Netherlands, October 11–14, 2016, Proceedings, 459 
+
+Part I 14 , pages 510–526. Springer, 2016. 4, 5 460 
+
+[39] J. Tang, G. Zheng, and S. Yang. Temporal collection and distribution for referring video object 461 
+
+segmentation. In Proceedings of the IEEE/CVF International Conference on Computer Vision ,462 
+
+pages 15466–15476, 2023. 3 463 
+
+[40] Z. Tang, Y. Liao, S. Liu, G. Li, X. Jin, H. Jiang, Q. Yu, and D. Xu. Human-centric spatio-464 
+
+temporal video grounding with visual transformers. IEEE Transactions on Circuits and Systems 465 
+
+for Video Technology , 32(12):8238–8249, 2021. 6 466 
+
+[41] B. Thomee, D. A. Shamma, G. Friedland, B. Elizalde, K. Ni, D. Poland, D. Borth, and L.-J. Li. 467 
+
+Yfcc100m: The new data in multimedia research. Communications of the ACM , 59(2):64–73, 468 
+
+2016. 4, 5 469 
+
+[42] X. Wang, Y. Zhang, O. Zohar, and S. Yeung-Levy. Videoagent: Long-form video understanding 470 
+
+with large language model as agent. In European Conference on Computer Vision , pages 58–76. 471 
+
+Springer, 2024. 6 472 
+
+[43] C.-Y. Wu and P. Krahenbuhl. Towards long-form video understanding. In Proceedings of the 473 
+
+IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 1884–1894, 2021. 3 474 
+
+[44] J. Wu, Y. Jiang, P. Sun, Z. Yuan, and P. Luo. Language as queries for referring video object 475 
+
+segmentation. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern 476 
+
+Recognition , pages 4974–4984, 2022. 1, 3 477 
+
+[45] Z. Wu, C. Xiong, C.-Y. Ma, R. Socher, and L. S. Davis. Adaframe: Adaptive frame selection 478 
+
+for fast video recognition. In Proceedings of the IEEE/CVF Conference on Computer Vision 479 
+
+and Pattern Recognition , pages 1278–1287, 2019. 6 480 
+
+[46] N. Xu, L. Yang, Y. Fan, D. Yue, Y. Liang, J. Yang, and T. Huang. Youtube-vos: A large-scale 481 
+
+video object segmentation benchmark. arXiv preprint arXiv:1809.03327 , 2018. 4 482 
+
+[47] C. Yan, H. Wang, S. Yan, X. Jiang, Y. Hu, G. Kang, W. Xie, and E. Gavves. Visa: Reasoning 483 
+
+video object segmentation via large language models. arXiv preprint arXiv:2407.11325 , 2024. 484 
+
+1, 3 485 
+
+12 [48] S. Yan, R. Zhang, Z. Guo, W. Chen, W. Zhang, H. Li, Y. Qiao, H. Dong, Z. He, and P. Gao. 486 
+
+Referred by multi-modality: A unified temporal transformer for video object segmentation. In 487 
+
+Proceedings of the AAAI Conference on Artificial Intelligence , volume 38, pages 6449–6457, 488 
+
+2024. 7, 9 489 
+
+[49] F. Yu, H. Chen, X. Wang, W. Xian, Y. Chen, F. Liu, V. Madhavan, and T. Darrell. Bdd100k: 490 
+
+A diverse driving dataset for heterogeneous multitask learning. Proceedings of the IEEE/CVF 491 
+
+Conference on Computer Vision and Pattern Recognition , pages 2636–2645, 2020. 4 492 
+
+[50] H. Yuan, X. Li, T. Zhang, Z. Huang, S. Xu, S. Ji, Y. Tong, L. Qi, J. Feng, and M.-H. Yang. 493 
+
+Sa2va: Marrying sam2 with llava for dense grounded understanding of images and videos. 494 
+
+arXiv , 2025. 1, 3 495 
+
+[51] H. Zhang, X. Li, and L. Bing. Video-llama: An instruction-tuned audio-visual language model 496 
+
+for video understanding. In Proceedings of the 2023 Conference on Empirical Methods in 497 
+
+Natural Language Processing: System Demonstrations , pages 543–553, 2023. 1 498 
+
+[52] Z. Zhang, Z. Zhao, Y. Zhao, Q. Wang, H. Liu, and L. Gao. Where does it exist: Spatio-temporal 499 
+
+video grounding for multi-form sentences. In Proceedings of the IEEE/CVF Conference on 500 
+
+Computer Vision and Pattern Recognition , pages 10668–10677, 2020. 6 501 
+
+[53] H. Zhao, A. Torralba, L. Torresani, and Z. Yan. Hacs: Human action clips and segments 502 
+
+dataset for recognition and temporal localization. Proceedings of the IEEE/CVF International 503 
+
+Conference on Computer Vision , pages 8668–8678, 2019. 4, 5 504 
+
+[54] R. Zheng, L. Qi, X. Chen, Y. Wang, K. Wang, Y. Qiao, and H. Zhao. Villa: Video reasoning 505 
+
+segmentation with large language model. arXiv preprint arXiv:2407.14500 , 2024. 1 506 
+
+13 NeurIPS Paper Checklist 507 
+
+1. Claims 508 
+
+Question: Do the main claims made in the abstract and introduction accurately reflect the 509 
+
+paper’s contributions and scope? 510 
+
+Answer: [Yes] 511 
+
+Justification: In this paper, we introduce Long-RVOS, a large-scale benchmark for long-term 512 
+
+referring video object segmentation with comprehensive evaluation. We further propose a 513 
+
+simple yet effective baseline ReferMo to address the long-term challenges. 514 
+
+Guidelines: 515 
+
+• The answer NA means that the abstract and introduction do not include the claims 516 
+
+made in the paper. 517 
+
+• The abstract and/or introduction should clearly state the claims made, including the 518 
+
+contributions made in the paper and important assumptions and limitations. A No or 519 
+
+NA answer to this question will not be perceived well by the reviewers. 520 
+
+• The claims made should match theoretical and experimental results, and reflect how 521 
+
+much the results can be expected to generalize to other settings. 522 
+
+• It is fine to include aspirational goals as motivation as long as it is clear that these goals 523 
+
+are not attained by the paper. 524 
+
+2. Limitations 525 
+
+Question: Does the paper discuss the limitations of the work performed by the authors? 526 
+
+Answer: [Yes] 527 
+
+Justification: We discuss the limitations of our ReferMo in Section 5.2. A separate “Limita-528 
+
+tions” section is provided in the Supplementary. 529 
+
+Guidelines: 530 
+
+• The answer NA means that the paper has no limitation while the answer No means that 531 
+
+the paper has limitations, but those are not discussed in the paper. 532 
+
+• The authors are encouraged to create a separate "Limitations" section in their paper. 533 
+
+• The paper should point out any strong assumptions and how robust the results are to 534 
+
+violations of these assumptions (e.g., independence assumptions, noiseless settings, 535 
+
+model well-specification, asymptotic approximations only holding locally). The authors 536 
+
+should reflect on how these assumptions might be violated in practice and what the 537 
+
+implications would be. 538 
+
+• The authors should reflect on the scope of the claims made, e.g., if the approach was 539 
+
+only tested on a few datasets or with a few runs. In general, empirical results often 540 
+
+depend on implicit assumptions, which should be articulated. 541 
+
+• The authors should reflect on the factors that influence the performance of the approach. 542 
+
+For example, a facial recognition algorithm may perform poorly when image resolution 543 
+
+is low or images are taken in low lighting. Or a speech-to-text system might not be 544 
+
+used reliably to provide closed captions for online lectures because it fails to handle 545 
+
+technical jargon. 546 
+
+• The authors should discuss the computational efficiency of the proposed algorithms 547 
+
+and how they scale with dataset size. 548 
+
+• If applicable, the authors should discuss possible limitations of their approach to 549 
+
+address problems of privacy and fairness. 550 
+
+• While the authors might fear that complete honesty about limitations might be used by 551 
+
+reviewers as grounds for rejection, a worse outcome might be that reviewers discover 552 
+
+limitations that aren’t acknowledged in the paper. The authors should use their best 553 
+
+judgment and recognize that individual actions in favor of transparency play an impor-554 
+
+tant role in developing norms that preserve the integrity of the community. Reviewers 555 
+
+will be specifically instructed to not penalize honesty concerning limitations. 556 
+
+3. Theory assumptions and proofs 557 
+
+Question: For each theoretical result, does the paper provide the full set of assumptions and 558 
+
+a complete (and correct) proof? 559 
+
+14 Answer: [NA] 560 
+
+Justification: The paper does not include theoretical results. 561 
+
+Guidelines: 562 
+
+• The answer NA means that the paper does not include theoretical results. 563 
+
+• All the theorems, formulas, and proofs in the paper should be numbered and cross-564 
+
+referenced. 565 
+
+• All assumptions should be clearly stated or referenced in the statement of any theorems. 566 
+
+• The proofs can either appear in the main paper or the supplemental material, but if 567 
+
+they appear in the supplemental material, the authors are encouraged to provide a short 568 
+
+proof sketch to provide intuition. 569 
+
+• Inversely, any informal proof provided in the core of the paper should be complemented 570 
+
+by formal proofs provided in appendix or supplemental material. 571 
+
+• Theorems and Lemmas that the proof relies upon should be properly referenced. 572 
+
+4. Experimental result reproducibility 573 
+
+Question: Does the paper fully disclose all the information needed to reproduce the main ex-574 
+
+perimental results of the paper to the extent that it affects the main claims and/or conclusions 575 
+
+of the paper (regardless of whether the code and data are provided or not)? 576 
+
+Answer: [Yes] 577 
+
+Justification: This paper provides comprehensive descriptions of the dataset construction in 578 
+
+Section 3 and the proposed baseline Section 4. The implementation details are present in 579 
+
+Section 5.1. 580 
+
+Guidelines: 581 
+
+• The answer NA means that the paper does not include experiments. 582 
+
+• If the paper includes experiments, a No answer to this question will not be perceived 583 
+
+well by the reviewers: Making the paper reproducible is important, regardless of 584 
+
+whether the code and data are provided or not. 585 
+
+• If the contribution is a dataset and/or model, the authors should describe the steps taken 586 
+
+to make their results reproducible or verifiable. 587 
+
+• Depending on the contribution, reproducibility can be accomplished in various ways. 588 
+
+For example, if the contribution is a novel architecture, describing the architecture fully 589 
+
+might suffice, or if the contribution is a specific model and empirical evaluation, it may 590 
+
+be necessary to either make it possible for others to replicate the model with the same 591 
+
+dataset, or provide access to the model. In general. releasing code and data is often 592 
+
+one good way to accomplish this, but reproducibility can also be provided via detailed 593 
+
+instructions for how to replicate the results, access to a hosted model (e.g., in the case 594 
+
+of a large language model), releasing of a model checkpoint, or other means that are 595 
+
+appropriate to the research performed. 596 
+
+• While NeurIPS does not require releasing code, the conference does require all submis-597 
+
+sions to provide some reasonable avenue for reproducibility, which may depend on the 598 
+
+nature of the contribution. For example 599 
+
+(a) If the contribution is primarily a new algorithm, the paper should make it clear how 600 
+
+to reproduce that algorithm. 601 
+
+(b) If the contribution is primarily a new model architecture, the paper should describe 602 
+
+the architecture clearly and fully. 603 
+
+(c) If the contribution is a new model (e.g., a large language model), then there should 604 
+
+either be a way to access this model for reproducing the results or a way to reproduce 605 
+
+the model (e.g., with an open-source dataset or instructions for how to construct 606 
+
+the dataset). 607 
+
+(d) We recognize that reproducibility may be tricky in some cases, in which case 608 
+
+authors are welcome to describe the particular way they provide for reproducibility. 609 
+
+In the case of closed-source models, it may be that access to the model is limited in 610 
+
+some way (e.g., to registered users), but it should be possible for other researchers 611 
+
+to have some path to reproducing or verifying the results. 612 
+
+15 5. Open access to data and code 613 
+
+Question: Does the paper provide open access to the data and code, with sufficient instruc-614 
+
+tions to faithfully reproduce the main experimental results, as described in supplemental 615 
+
+material? 616 
+
+Answer: [Yes] 617 
+
+Justification: We will release the new dataset Long-RVOS and the source code of our 618 
+
+baseline ReferMo. 619 
+
+Guidelines: 620 
+
+• The answer NA means that paper does not include experiments requiring code. 621 
+
+• Please see the NeurIPS code and data submission guidelines ( https://nips.cc/ 622 
+
+public/guides/CodeSubmissionPolicy ) for more details. 623 
+
+• While we encourage the release of code and data, we understand that this might not be 624 
+
+possible, so “No” is an acceptable answer. Papers cannot be rejected simply for not 625 
+
+including code, unless this is central to the contribution (e.g., for a new open-source 626 
+
+benchmark). 627 
+
+• The instructions should contain the exact command and environment needed to run to 628 
+
+reproduce the results. See the NeurIPS code and data submission guidelines ( https: 629 
+
+//nips.cc/public/guides/CodeSubmissionPolicy ) for more details. 630 
+
+• The authors should provide instructions on data access and preparation, including how 631 
+
+to access the raw data, preprocessed data, intermediate data, and generated data, etc. 632 
+
+• The authors should provide scripts to reproduce all experimental results for the new 633 
+
+proposed method and baselines. If only a subset of experiments are reproducible, they 634 
+
+should state which ones are omitted from the script and why. 635 
+
+• At submission time, to preserve anonymity, the authors should release anonymized 636 
+
+versions (if applicable). 637 
+
+• Providing as much information as possible in supplemental material (appended to the 638 
+
+paper) is recommended, but including URLs to data and code is permitted. 639 
+
+6. Experimental setting/details 640 
+
+Question: Does the paper specify all the training and test details (e.g., data splits, hyper-641 
+
+parameters, how they were chosen, type of optimizer, etc.) necessary to understand the 642 
+
+results? 643 
+
+Answer: [Yes] 644 
+
+Justification: See Section 5.1. 645 
+
+Guidelines: 646 
+
+• The answer NA means that the paper does not include experiments. 647 
+
+• The experimental setting should be presented in the core of the paper to a level of detail 648 
+
+that is necessary to appreciate the results and make sense of them. 649 
+
+• The full details can be provided either with the code, in appendix, or as supplemental 650 
+
+material. 651 
+
+7. Experiment statistical significance 652 
+
+Question: Does the paper report error bars suitably and correctly defined or other appropriate 653 
+
+information about the statistical significance of the experiments? 654 
+
+Answer: [Yes] 655 
+
+Justification: The dataset statistics are provided in Section 3.3 and other experimental 656 
+
+statistics are presented in Section 5. 657 
+
+Guidelines: 658 
+
+• The answer NA means that the paper does not include experiments. 659 
+
+• The authors should answer "Yes" if the results are accompanied by error bars, confi-660 
+
+dence intervals, or statistical significance tests, at least for the experiments that support 661 
+
+the main claims of the paper. 662 
+
+16 • The factors of variability that the error bars are capturing should be clearly stated (for 663 
+
+example, train/test split, initialization, random drawing of some parameter, or overall 664 
+
+run with given experimental conditions). 665 
+
+• The method for calculating the error bars should be explained (closed form formula, 666 
+
+call to a library function, bootstrap, etc.) 667 
+
+• The assumptions made should be given (e.g., Normally distributed errors). 668 
+
+• It should be clear whether the error bar is the standard deviation or the standard error 669 
+
+of the mean. 670 
+
+• It is OK to report 1-sigma error bars, but one should state it. The authors should 671 
+
+preferably report a 2-sigma error bar than state that they have a 96% CI, if the hypothesis 672 
+
+of Normality of errors is not verified. 673 
+
+• For asymmetric distributions, the authors should be careful not to show in tables or 674 
+
+figures symmetric error bars that would yield results that are out of range (e.g. negative 675 
+
+error rates). 676 
+
+• If error bars are reported in tables or plots, The authors should explain in the text how 677 
+
+they were calculated and reference the corresponding figures or tables in the text. 678 
+
+8. Experiments compute resources 679 
+
+Question: For each experiment, does the paper provide sufficient information on the com-680 
+
+puter resources (type of compute workers, memory, time of execution) needed to reproduce 681 
+
+the experiments? 682 
+
+Answer: [Yes] 683 
+
+Justification: See Section 5.1. 684 
+
+Guidelines: 685 
+
+• The answer NA means that the paper does not include experiments. 686 
+
+• The paper should indicate the type of compute workers CPU or GPU, internal cluster, 687 
+
+or cloud provider, including relevant memory and storage. 688 
+
+• The paper should provide the amount of compute required for each of the individual 689 
+
+experimental runs as well as estimate the total compute. 690 
+
+• The paper should disclose whether the full research project required more compute 691 
+
+than the experiments reported in the paper (e.g., preliminary or failed experiments that 692 
+
+didn’t make it into the paper). 693 
+
+9. Code of ethics 694 
+
+Question: Does the research conducted in the paper conform, in every respect, with the 695 
+
+NeurIPS Code of Ethics https://neurips.cc/public/EthicsGuidelines ?696 
+
+Answer: [Yes] , 697 
+
+Justification: We have made sure. 698 
+
+Guidelines: 699 
+
+• The answer NA means that the authors have not reviewed the NeurIPS Code of Ethics. 700 
+
+• If the authors answer No, they should explain the special circumstances that require a 701 
+
+deviation from the Code of Ethics. 702 
+
+• The authors should make sure to preserve anonymity (e.g., if there is a special consid-703 
+
+eration due to laws or regulations in their jurisdiction). 704 
+
+10. Broader impacts 705 
+
+Question: Does the paper discuss both potential positive societal impacts and negative 706 
+
+societal impacts of the work performed? 707 
+
+Answer: [Yes] 708 
+
+Justification: This paper establishes a foundation for long-term video object segmentation, 709 
+
+which potentially enhances the development of realistic video applications, such as video 710 
+
+editing and human-computer interaction. We have briefly discussed the positive impacts 711 
+
+in our abstract and conclusion. A separate “Broader Impacts” section is provided in the 712 
+
+Supplementary. 713 
+
+Guidelines: 714 
+
+17 • The answer NA means that there is no societal impact of the work performed. 715 
+
+• If the authors answer NA or No, they should explain why their work has no societal 716 
+
+impact or why the paper does not address societal impact. 717 
+
+• Examples of negative societal impacts include potential malicious or unintended uses 718 
+
+(e.g., disinformation, generating fake profiles, surveillance), fairness considerations 719 
+
+(e.g., deployment of technologies that could make decisions that unfairly impact specific 720 
+
+groups), privacy considerations, and security considerations. 721 
+
+• The conference expects that many papers will be foundational research and not tied 722 
+
+to particular applications, let alone deployments. However, if there is a direct path to 723 
+
+any negative applications, the authors should point it out. For example, it is legitimate 724 
+
+to point out that an improvement in the quality of generative models could be used to 725 
+
+generate deepfakes for disinformation. On the other hand, it is not needed to point out 726 
+
+that a generic algorithm for optimizing neural networks could enable people to train 727 
+
+models that generate Deepfakes faster. 728 
+
+• The authors should consider possible harms that could arise when the technology is 729 
+
+being used as intended and functioning correctly, harms that could arise when the 730 
+
+technology is being used as intended but gives incorrect results, and harms following 731 
+
+from (intentional or unintentional) misuse of the technology. 732 
+
+• If there are negative societal impacts, the authors could also discuss possible mitigation 733 
+
+strategies (e.g., gated release of models, providing defenses in addition to attacks, 734 
+
+mechanisms for monitoring misuse, mechanisms to monitor how a system learns from 735 
+
+feedback over time, improving the efficiency and accessibility of ML). 736 
+
+11. Safeguards 737 
+
+Question: Does the paper describe safeguards that have been put in place for responsible 738 
+
+release of data or models that have a high risk for misuse (e.g., pretrained language models, 739 
+
+image generators, or scraped datasets)? 740 
+
+Answer: [NA] 741 
+
+Justification: The paper poses no such risks. Our new benchmark is built upon existing, 742 
+
+publicly available datasets. 743 
+
+Guidelines: 744 
+
+• The answer NA means that the paper poses no such risks. 745 
+
+• Released models that have a high risk for misuse or dual-use should be released with 746 
+
+necessary safeguards to allow for controlled use of the model, for example by requiring 747 
+
+that users adhere to usage guidelines or restrictions to access the model or implementing 748 
+
+safety filters. 749 
+
+• Datasets that have been scraped from the Internet could pose safety risks. The authors 750 
+
+should describe how they avoided releasing unsafe images. 751 
+
+• We recognize that providing effective safeguards is challenging, and many papers do 752 
+
+not require this, but we encourage authors to take this into account and make a best 753 
+
+faith effort. 754 
+
+12. Licenses for existing assets 755 
+
+Question: Are the creators or original owners of assets (e.g., code, data, models), used in 756 
+
+the paper, properly credited and are the license and terms of use explicitly mentioned and 757 
+
+properly respected? 758 
+
+Answer: [Yes] 759 
+
+Justification: We use publicly available resources to build our dataset. 760 
+
+Guidelines: 761 
+
+• The answer NA means that the paper does not use existing assets. 762 
+
+• The authors should cite the original paper that produced the code package or dataset. 763 
+
+• The authors should state which version of the asset is used and, if possible, include a 764 
+
+URL. 765 
+
+• The name of the license (e.g., CC-BY 4.0) should be included for each asset. 766 
+
+18 • For scraped data from a particular source (e.g., website), the copyright and terms of 767 
+
+service of that source should be provided. 768 
+
+• If assets are released, the license, copyright information, and terms of use in the 769 
+
+package should be provided. For popular datasets, paperswithcode.com/datasets 770 
+
+has curated licenses for some datasets. Their licensing guide can help determine the 771 
+
+license of a dataset. 772 
+
+• For existing datasets that are re-packaged, both the original license and the license of 773 
+
+the derived asset (if it has changed) should be provided. 774 
+
+• If this information is not available online, the authors are encouraged to reach out to 775 
+
+the asset’s creators. 776 
+
+13. New assets 777 
+
+Question: Are new assets introduced in the paper well documented and is the documentation 778 
+
+provided alongside the assets? 779 
+
+Answer: [Yes] 780 
+
+Justification: We cite all the benchmarks and code repositories used. 781 
+
+Guidelines: 782 
+
+• The answer NA means that the paper does not release new assets. 783 
+
+• Researchers should communicate the details of the dataset/code/model as part of their 784 
+
+submissions via structured templates. This includes details about training, license, 785 
+
+limitations, etc. 786 
+
+• The paper should discuss whether and how consent was obtained from people whose 787 
+
+asset is used. 788 
+
+• At submission time, remember to anonymize your assets (if applicable). You can either 789 
+
+create an anonymized URL or include an anonymized zip file. 790 
+
+14. Crowdsourcing and research with human subjects 791 
+
+Question: For crowdsourcing experiments and research with human subjects, does the paper 792 
+
+include the full text of instructions given to participants and screenshots, if applicable, as 793 
+
+well as details about compensation (if any)? 794 
+
+Answer: [NA] 795 
+
+Justification: This paper does not involve crowdsourcing nor research with human subjects. 796 
+
+Guidelines: 797 
+
+• The answer NA means that the paper does not involve crowdsourcing nor research with 798 
+
+human subjects. 799 
+
+• Including this information in the supplemental material is fine, but if the main contribu-800 
+
+tion of the paper involves human subjects, then as much detail as possible should be 801 
+
+included in the main paper. 802 
+
+• According to the NeurIPS Code of Ethics, workers involved in data collection, curation, 803 
+
+or other labor should be paid at least the minimum wage in the country of the data 804 
+
+collector. 805 
+
+15. Institutional review board (IRB) approvals or equivalent for research with human 806 
+
+subjects 807 
+
+Question: Does the paper describe potential risks incurred by study participants, whether 808 
+
+such risks were disclosed to the subjects, and whether Institutional Review Board (IRB) 809 
+
+approvals (or an equivalent approval/review based on the requirements of your country or 810 
+
+institution) were obtained? 811 
+
+Answer: [NA] 812 
+
+Justification: This paper does not involve crowdsourcing nor research with human subjects. 813 
+
+Guidelines: 814 
+
+• The answer NA means that the paper does not involve crowdsourcing nor research with 815 
+
+human subjects. 816 
+
+19 • Depending on the country in which research is conducted, IRB approval (or equivalent) 817 
+
+may be required for any human subjects research. If you obtained IRB approval, you 818 
+
+should clearly state this in the paper. 819 
+
+• We recognize that the procedures for this may vary significantly between institutions 820 
+
+and locations, and we expect authors to adhere to the NeurIPS Code of Ethics and the 821 
+
+guidelines for their institution. 822 
+
+• For initial submissions, do not include any information that would break anonymity (if 823 
+
+applicable), such as the institution conducting the review. 824 
+
+16. Declaration of LLM usage 825 
+
+Question: Does the paper describe the usage of LLMs if it is an important, original, or 826 
+
+non-standard component of the core methods in this research? Note that if the LLM is used 827 
+
+only for writing, editing, or formatting purposes and does not impact the core methodology, 828 
+
+scientific rigorousness, or originality of the research, declaration is not required. 829 
+
+Answer: [NA] 830 
+
+Justification: The core method development in this research does not involve LLMs as any 831 
+
+important, original, or non-standard components. 832 
+
+Guidelines: 833 
+
+• The answer NA means that the core method development in this research does not 834 
+
+involve LLMs as any important, original, or non-standard components. 835 
+
+• Please refer to our LLM policy ( https://neurips.cc/Conferences/2025/LLM )836 
+
+for what should or should not be described. 837 
+
+20

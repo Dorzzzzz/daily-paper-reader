@@ -1,0 +1,3377 @@
+Title: 16408_Recurrent_Action_Transfo.pdf
+
+URL Source: https://openreview.net/pdf?id=xFDKphWWnD
+
+Number of Pages: 35
+
+Markdown Content:
+# Recurrent Action Transformer with Memory 
+
+Anonymous Author(s) 
+
+Affiliation Address 
+
+email 
+
+Abstract 
+
+Transformers have become increasingly popular in offline reinforcement learning 1
+
+(RL) due to their ability to treat agent trajectories as sequences, reframing policy 2
+
+learning as a sequence modeling task. However, in partially observable environ-3
+
+ments (POMDPs), effective decision-making depends on retaining information 4
+
+about past events – something that standard transformers struggle with due to 5
+
+the quadratic complexity of self-attention, which limits their context length. One 6
+
+solution to this problem is to extend transformers with memory mechanisms. We 7
+
+propose the Recurrent Action Transformer with Memory (RATE) , a novel 8
+
+transformer-based architecture for offline RL that incorporates a recurrent memory 9
+
+mechanism designed to regulate information retention. We evaluate RATE across a 10 
+
+diverse set of environments: memory-intensive tasks (ViZDoom-Two-Colors, T-11 
+
+Maze, Memory Maze, Minigrid-Memory, and POPGym), as well as standard Atari 12 
+
+and MuJoCo benchmarks. Our comprehensive experiments demonstrate that RATE 13 
+
+significantly improves performance in memory-dependent settings while remaining 14 
+
+competitive on standard tasks across a broad range of baselines. These findings 15 
+
+underscore the pivotal role of integrated memory mechanisms in offline RL and es-16 
+
+tablish RATE as a unified, high-capacity architecture for effective decision-making 17 
+
+over extended horizons. 18 
+
+1 Introduction 19 
+
+Originally developed for Natural Language Processing (NLP), transformers [ 50 ] have recently 20 
+
+demonstrated strong performance across a wide range of Reinforcement Learning (RL) settings [ 1, 30 ]. 21 
+
+They have been successfully applied to online [ 36 , 15 ], offline [ 10 , 23 , 52 ], model-based [ 9 , 42 ], 22 
+
+and in-context RL [ 40 , 17 , 43 ]. In particular, transformers show promise for tackling long-horizon 23 
+
+credit assignment and operating in memory-intensive environments [ 34 , 17 , 15 , 36 ], provided the 24 
+
+full trajectory fits within the model context. Despite their success, transformers face fundamental 25 
+
+limitations when applied to long sequences due to the quadratic complexity of self-attention [ 25 ], 26 
+
+which restricts their applicability in long-horizon inference tasks. While various techniques have 27 
+
+been proposed to extend the context window [ 13 , 7 ], these approaches often suffer from training 28 
+
+instability [ 54 ] or rely on task-specific sparse attention patterns that may not generalize well beyond 29 
+
+NLP [ 6, 53 ]. Memory-augmented transformers offer a promising alternative by enabling access to past 30 
+
+information without expanding the context length. Motivated by advances in memory mechanisms 31 
+
+for NLP models [ 13 , 7], we investigate how such approaches can be adapted to RL. Unlike NLP, 32 
+
+RL involves structured and modality-rich inputs – observations, actions, and rewards – that require 33 
+
+domain-specific encoding, and frequently exhibit high sparsity in both reward signal and observations. 34 
+
+In RL, memory usually refers either to using past information within an episode [ 27 , 34 ], or to 35 
+
+transferring experience across environments [ 24 , 48 ], aiding generalization, sample efficiency, and 36 
+
+Meta-RL [14, 51], and we focus on the former. 37 
+
+Submitted to 39th Conference on Neural Information Processing Systems (NeurIPS 2025). Do not distribute. Figure 1: Recurrent Action Transformer with Memory (RATE). The model processes trajectory divided into n segments Sn with memory embed-dings Mn, where R denotes returns-to-go (future rewards), o – observations, a – actions, and Mn –memory embeddings attached to each segment Sn
+
+to retain important historical information. We introduce the Recurrent Action Trans-38 
+
+former with Memory (RATE ; see Figure 1), 39 
+
+a memory-augmented transformer that incorpo-40 
+
+rates three complementary mechanisms: learned 41 
+
+memory embeddings, recurrent caching of past 42 
+
+hidden states, and a novel Memory Retention 43 
+
+Valve (MRV ) for selective information flow. We 44 
+
+empirically show that memory mechanisms ef-45 
+
+fectively preserve information from previous 46 
+
+steps, allowing the model to use past informa-47 
+
+tion when making decisions in the present. MRV 48 
+
+is designed to control the process of updating 49 
+
+memory embeddings and prevent the loss of 50 
+
+important information when processing long se-51 
+
+quences, thus enabling the processing of highly 52 
+
+sparse tasks. To assess the effectiveness of 53 
+
+our memory mechanisms, we conduct exten-54 
+
+sive experiments across a diverse set of memory-55 
+
+intensive environments, including ViZDoom-56 
+
+Two-Colors [ 46 ], Memory Maze [ 38 ], Minigrid-57 
+
+Memory [ 11 ], Passive T-Maze [ 34 ], and POP-58 
+
+Gym [ 32 ], as well as standard RL benchmarks such as Atari [ 5 ] and MuJoCo [ 16 ]. We also study the 59 
+
+impact of memory on the performance of the proposed model. RATE interpolates and extrapolates 60 
+
+well outside the transformer context and is able to retain important information for a long time when 61 
+
+operating in highly sparse environments. 62 
+
+Our main contributions are as follows: 63 
+
+1. We propose Recurrent Action Transformer with Memory (RATE), a new transformer 64 
+
+for offline RL that combines three complementary memory mechanisms: (i) memory 65 
+
+embeddings, (ii) caching of hidden states, and (iii) a Memory Retention Valve (MRV), 66 
+
+which uses cross-attention to retain key information over long horizons (see Section 3). 67 
+
+2. We conduct extensive evaluations on memory-intensive tasks – including ViZDoom Two-68 
+
+Colors, Memory Maze, Minigrid-Memory, POPGym, and Passive T-Maze – showing that 69 
+
+RATE consistently outperforms strong baselines (see Subsection 4.1). 70 
+
+3. We further show that RATE matches or surpasses standard baselines on the Atari and 71 
+
+MuJoCo benchmarks, demonstrating strong generalization across task types and highlighting 72 
+
+the model’s versatility (see Subsection 4.1). 73 
+
+2 Background 74 
+
+Offline RL. In RL [ 47 ], a task is formalized as a Markov Decision Process (MDP): ⟨S , A, P, R⟩ ,75 
+
+where s ∈ S are states, a ∈ A are actions, P(s′|s, a ) is a transition function, and r = R(s, a ) is a 76 
+
+reward function. States satisfy the Markov property: P(st+1 |st) = P(st+1 |s1, . . . , s t). A trajectory τ77 
+
+of length T is a sequence (s0, a 0, r 0, . . . , s T −1, a T −1, r T −1), where rt = R(st, a t) is the immediate 78 
+
+reward at the timestep t. The return-to-go [ 10 ] Rt = PT −1 
+
+> t′=t
+
+rt′ is the sum of future rewards from 79 
+
+t. The goal is to learn a policy π maximizing the expected return. While online RL iteratively 80 
+
+collects trajectories through environment interaction, offline RL uses a fixed dataset of trajectories, 81 
+
+making it suitable for scenarios where environment interaction is costly or risky. A popular offline RL 82 
+
+method, Decision Transformer (DT) [ 10 ], models return-conditioned trajectories with a GPT-style 83 
+
+architecture, avoiding value estimation. However, its fixed context window limits performance in 84 
+
+tasks with delayed rewards or long-term dependencies, motivating memory-augmented models. 85 
+
+POMDP. In real-world, agents often receive partial observations rather than full states, breaking the 86 
+
+Markov property. For instance, a robot using only camera input or an agent relying on past context. 87 
+
+Such cases are modeled as Partially Observable MDPs (POMDPs): ⟨S , A, O, P, R, Z⟩ , where o ∈ O 88 
+
+are observations and Zas′o = P (ot+1 |st+1 = s′, a t = a) defines the observation function. Since 89 
+
+single observations are insufficient, agents must use history to infer useful state representations. 90 
+
+2memory embeddings (read) memory embeddings (write)  
+
+> RATE Segment 1 RATE Segment 2 RATE Segment 3 DT
+
+Figure 2: Attention visualization of RATE and DT on the T-Maze [ 34 ] task with a corridor length of 
+
+T = 8 . DT is trained on full 8-step trajectories, while RATE processes the sequence in three segments of length 3 recurrently, passing information between segments through memory embeddings. 
+
+3 Recurrent Action Transformer with Memory 91 
+
+Algorithm 1 RATE 
+
+Require: R ∈ RT , o ∈ Rdo×T , a ∈ RT
+
+1: ˜R ← Encoder R(R)˜o ← Encoder o(o)˜a ← Encoder a(a)
+
+2: τ0: T −1 ← { ( ˜Rt, ˜ot, ˜at)}T −1
+
+> t=0
+
+3: Mn ← M0 ∼ N (0 , 1) 
+
+4: for n in [0 , T //K − 1] do 
+
+5: Sn ← τnK :( n+1) K
+
+6: ˜Sn ← concat (Mn, S n, M n)
+
+7: ˆan, M n+1 ← Transformer ( ˜Sn)
+
+8: Mn+1 ← MRV (Mn, M n+1 )
+
+Output: ˆan → L (an, ˆan), M n+1 
+
+9: end for Algorithm 2 Memory Retention Valve 
+
+Require: Mn, M n+1 ∈ Rm×d
+
+1: Qh ← MnWh T Q
+
+2: Kh ← Mn+1 Wh T K
+
+3: Vh ← Mn+1 Wh T V
+
+4: M hn+1 ← softmax 
+
+ QhKTh√d
+
+
+
+Vh
+
+5: Mn+1 ← concat (M 0
+
+> n+1
+
+, . . . , M hn+1 )
+
+6: Mn+1 ← Mn+1 WTM
+
+Output: Mn+1 
+
+Transformers excel at sequence modeling, including 92 
+
+offline RL [ 10 , 22 ], but struggle with long-horizon 93 
+
+tasks due to fixed context and quadratic attention cost. 94 
+
+In memory tasks, agents must recall information seen 95 
+
+thousands of steps earlier—something models like 96 
+
+DT cannot do once cues fall outside context. We pro-97 
+
+pose the Recurrent Action Transformer with Mem-98 
+
+ory (RATE) , which introduces segment-level recur-99 
+
+rence and dynamic memory control. RATE processes 100 
+
+trajectories in segments, using lightweight memory 101 
+
+and a learnable Memory Retention Valve (MRV) 102 
+
+to decide what to retain or discard. In T-Maze [ 34 ], 103 
+
+the agent receives a one-bit cue o0 at the first step 104 
+
+indicating whether to turn left or right at the end of 105 
+
+a maze. Solving the task requires remembering this 106 
+
+cue despite sparse rewards. DT fails once o0 leaves 107 
+
+the context, making retrieval at inference impossible. 108 
+
+Figure 2 shows this: DT attends to o0 only when it fits 109 
+
+the context, while RATE segments the input and prop-110 
+
+agates the memory embeddings, preserving the cue 111 
+
+to the end and enabling explicit memory retention. 112 
+
+RATE combines memory embeddings [ 7 ], cached 113 
+
+hidden states [ 13 ], and a novel MRV to handle long 114 
+
+and sparse sequences. The architecture is shown 115 
+
+in Figure 1. Let a trajectory τ0: T −1 of length T116 
+
+be represented by triplets (Rt, o t, a t), where Rt117 
+
+is the return-to-go, ot the observation, and at the 118 
+
+action. Each modality is encoded using modality-specific encoders (Algorithm 1): ˜Rt =119 
+
+Encoder R(Rt), ˜ot = Encoder o(ot), ˜at = Encoder a(at). The encoded sequence is split into 120 
+
+N = T //K non-overlapping segments Sn of length K. Thus, the effective context is Keff = N × K,121 
+
+well beyond standard attention limits. Each segment is prepended and appended with memory em-122 
+
+beddings Mn ∈ Rm×d, where m is the number of memory tokens and d the embedding dimension: 123 
+
+˜Sn = concat (Mn, S n, M n) ∈ R(3 K+2 m)×d Each segment is then processed by the transformer: 124 
+
+ˆan, M n+1 = Transformer ( ˜Sn) The output Mn+1 is then refined via MRV before being passed to 125 
+
+the next segment. 126 
+
+Naively forwarding memory embeddings leads to error accumulation or overwriting of relevant 127 
+
+information. To address this, we introduce the Memory Retention Valve (MRV) , a cross-attention 128 
+
+module that filters new memory tokens through the lens of the previous ones (Algorithm 2): 129 
+
+MRV (Mn, M n+1 ) = FFN (MultiHead (Query = Mn, Key = Mn+1 , Value = Mn+1 )) (1) This mechanism allows Mn to control what to retain or overwrite when updating to Mn+1 . Unlike 130 
+
+static recurrence, it preserves sparse, long-range information. RATE overcomes DT’s limits by 131 
+
+3extending context with recurrence, preserving early cues via MRV, and retaining key events in sparse 132 
+
+settings. As a result, RATE solves tasks where DT fails, generalizes beyond training, and remains 133 
+
+competitive on standard MDPs. 134 
+
+Attention pattern analysis. Figure 2 compares attention maps of RATE and DT on a T-Maze 135 
+
+sequence. DT (right) attends only within a fixed window, focusing on recent tokens while losing 136 
+
+early cues like o0. RATE (left) segments the input and uses memory tokens to propagate information 137 
+
+across segments. These tokens retain access to o0 even in later segments, demonstrating RATE’s 138 
+
+ability to model long-range dependencies beyond the context window through structured memory. 139 
+
+3.1 Preservation Properties of MRV 140 
+
+We formalize the intuition that the cross-attention–based MRV prevents catastrophic overwriting of 141 
+
+memory by preserving alignment between consecutive memory states. All vectors are row-vectors. 142 
+
+We use ∥ · ∥ F for the Frobenius norm and ∥ · ∥ 2 for the ℓ2 norm. 143 
+
+Let Mn ∈ Rm×d and ˜Mn+1 ∈ Rm×d denote the incoming and updated memory embeddings at 144 
+
+segment n, where m is the number of memory tokens and d is the model dimension. We assume that 145 
+
+each row i of Mn is ℓ2-normalized: ∥Mn,i ∥2 = 1 . The MRV computes the next memory state as: 146 
+
+Q = MnWQ, K = ˜Mn+1 WK , V = ˜Mn+1 WV , A = softmax 
+
+ QK ⊤
+
+> √d
+
+
+
+, M n+1 = AV W M .147 
+
+α-alignment condition. The memory embeddings are said to satisfy α-alignment if there exists a 148 
+
+constant α ∈ (0 , 1] such that for every row Mn,i , there exists a row Vj for which: ⟨Vj WM , M n,i ⟩ ≥ 149 
+
+α. This implies that the angle between Vj WM and Mn,i is at most arccos α. Empirically, this 150 
+
+condition holds in trained models, as the transformer tends to preserve useful memory content and 151 
+
+avoids orthogonal rotations between segments. 152 
+
+Theorem 1 (On memory loss bounds ). Let each memory row be ℓ2-normalized, the α-alignment 153 
+
+condition hold, and A = softmax 
+
+ QK ⊤
+
+> √d
+
+
+
+be the MRV attention matrix. Then: 154 
+
+∥Mn+1 − Mn∥F ≤
+
+r
+
+2
+
+
+
+1 − αm
+
+
+
+· ∥ Mn∥F , ∥Mn+1 ∥F ≥
+
+
+
+1 −
+
+r
+
+2
+
+
+
+1 − αm
+
+
+
+· ∥ Mn∥F . (2) 
+
+In words: at least a 
+
+
+
+1 −
+
+q
+
+2  1 − αm
+
+
+
+fraction of the initial memory is guaranteed to be preserved 155 
+
+after a single MRV update (2) (right), and the memory loss is upper bounded by (2) (left). 156 
+
+Proof. Since each row of the attention matrix A is a probability distribution, we have P 
+
+> j
+
+Aij = 1 157 
+
+for every i. By the pigeonhole principle, there exists an index j∗ such that Aij ∗ ≥ 1 
+
+> m
+
+.158 
+
+By assumption, for each Mn,i there exists a Vj such that ⟨Vj WM , M n,i ⟩ ≥ α. In particular, this 159 
+
+holds for j∗: ⟨Vj∗ WM , M n,i ⟩ ≥ α. Using the MRV definition Mn+1 ,i = P 
+
+> j
+
+Aij Vj WM , we write: 160 
+
+⟨Mn+1 ,i , M n,i ⟩ = X
+
+> j
+
+Aij ⟨Vj WM , M n,i ⟩ ≥ Aij ∗ ⟨Vj∗ WM , M n,i ⟩ ≥ αm . (3) Let θi be the angle between Mn+1 ,i and Mn,i . Since both vectors are ℓ2-normalized, we have: 161 
+
+cos θi = ⟨Mn+1 ,i ,M n,i ⟩∥Mn+1 ,i ∥2·∥ Mn,i ∥2 ≥ αm . Using the identity ∥u − v∥22 = 2(1 − cos θ) for unit vectors: 162 
+
+∥Mn+1 ,i − Mn,i ∥22 ≤ 2  1 − αm
+
+ , thus ∥Mn+1 ,i − Mn,i ∥2 ≤
+
+q
+
+2  1 − αm
+
+. Summing over all mem-163 
+
+ory tokens and applying the previous bound: ∥Mn+1 − Mn∥2 
+
+> F
+
+= Pmi=1 ∥Mn+1 ,i − Mn,i ∥22 ≤164 
+
+2m  1 − αm
+
+ , which simplifies to: ∥Mn+1 − Mn∥F ≤
+
+q
+
+2m  1 − αm
+
+. Consequently, since 165 
+
+∥Mn∥F = √m due to row normalization, we conclude: ∥Mn+1 − Mn∥F ≤
+
+q
+
+2  1 − αm
+
+ · ∥ Mn∥F .166 
+
+We now derive the lower bound (2) (left) using the reverse triangle inequality. For any matrices 167 
+
+Mn+1 , M n ∈ Rm×d, we have: ∥Mn+1 ∥F ≥ ∥ Mn∥F − ∥ Mn+1 − Mn∥F . Substituting the upper 168 
+
+bound from (2) (right): ∥Mn+1 − Mn∥F ≤
+
+q
+
+2  1 − αm
+
+ · ∥ Mn∥F , we obtain: ∥Mn+1 ∥F ≥169 
+
+
+
+1 −
+
+q
+
+2  1 − αm
+
+
+
+· ∥ Mn∥F , which completes the proof of (2). 170 
+
+4Figure 3: Comparison of RATE with transformer baselines (DT, RMT, TrXL) on ViZDoom-Two-Colors trained on the first Ttrain = 90 steps of the episode: with ( a) and without ( b) pillar in the first 45 steps of the episode; calculated at environment steps 0 – 89 (c) and 90 – 179 (d) with pillar in the first 45 steps; depending on the return-to-go ( e, f, g ). Episode timeout – 2100 steps. 
+
+4 Experimental Evaluation 171 0            
+
+> 25
+> 50
+> Average Return Total
+> Red Pillars
+> Green Pillars
+> RATE
+> RMT
+> CQL-LSTM
+> BC-LSTM
+> TrXL
+> DLSTM
+> DGRU
+> LSDT
+> DT
+> DMamba
+> CQL-MLP
+> BC-MLP
+> Random
+> 0
+> 1
+> 0.06 0.05 0.30 0.29 0.22 0.23 0.40
+> 1.34 1.07 0.59 0.37 0.30 0.30
+> Imbalance
+
+Figure 4: ViZDoom-Two-Colors results with 
+
+Ttrain =150 . The top plot shows average return across all episodes (yellow), and separately for red (red) and green (green) pillars. The bottom plot shows the imbalance metric—absolute differ-ence between red and green performance. Lower imbalance indicates more consistent behavior and is as important as average return. We designed our experiments to achieve two 172 
+
+main goals: (a) to showcase the strengths of 173 
+
+the RATE model in memory-intensive environ-174 
+
+ments (T-Maze, ViZDoom-Two-Colors, Mem-175 
+
+ory Maze, Minigrid-Memory, POPGym), and 176 
+
+(b) to assess its effectiveness in standard MDPs, 177 
+
+demonstrating its versatility across domains. 178 
+
+Baselines. To evaluate the performance 179 
+
+of RATE, we compare it against a diverse 180 
+
+set of baselines spanning several categories: 181 
+
+transformer-based models including Decision 182 
+
+Transformer (DT) [ 10 ], Recurrent Memory 183 
+
+Transformer (RMT) [ 7] and Transformer-XL 184 
+
+(TrXL) [ 13 ] specially adapted by us for offline 185 
+
+RL, and Long-Short Decision Transformer (LSDT) [ 52 ]; classic baselines such as Behavior Cloning 186 
+
+with an MLP backbone (BC-MLP) and Conservative Q-Learning [ 26 ] with an MLP backbone (CQL-187 
+
+MLP); recurrent models including Behavior Cloning with an LSTM backbone [ 21 ] (BC-LSTM), 188 
+
+CQL with LSTM (CQL-LSTM), Decision LSTM (DLSTM) [ 45 ], and its GRU-based variant [12 ]189 
+
+(DGRU); and a state space model baseline, Decision Mamba (DMamba) [35]. 190 
+
+Memory-intensive environments. We evaluate RATE in tasks that require agents to retain infor-191 
+
+mation over time Figure 9; full details are in Appendix C. ViZDoom-Two-Colors : the agent must 192 
+
+recall a briefly visible pillar color to collect matching items; T-Maze : a cue at the start indicates the 193 
+
+correct turn at the end, testing sparse long-term memory; Minigrid-Memory : like T-Maze, but the 194 
+
+clue must be located first, combining memory and credit assignment [ 34 ]; Memory Maze : the agent 195 
+
+searches for objects matching a changing target color, requiring spatial memory; POPGym : a suite 196 
+
+of 46 partially observable tasks [32] designed to probe different aspects of memory. 197 
+
+4.1 Experimental Results 198 10 1 10 2 10 3 10 4
+
+> T-Maze Inference Corridor Length
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Success Rate
+> RATE (Ours)
+> RMT
+> DGRU
+> CQL-LSTM
+> TrXL
+> DT
+> LSDT
+> DMamba
+> BC-LSTM
+> CQL-MLP
+> DLSTM
+> BC-MLP
+> Persistent Agent
+> Random Agent
+
+Figure 5: T-Maze generalization task. 
+
+ViZDoom-Two-Colors. Figure 4 shows train-199 
+
+ing with Ttrain =150 and inference up to 2100 200 
+
+steps, where the pillar disappears at step 90. 201 
+
+RATE achieves the highest return and lowest 202 
+
+imbalance between the red and green pillars, in-203 
+
+dicating strong and consistent memory use. Fig-204 
+
+ure 3 further tests transformer models trained 205 
+
+with Ttrain = 90 on their ability to retain early 206 
+
+cues. With the pillar present (a), RATE again 207 
+
+yields the highest and most stable return. DT 208 
+
+and TrXL underperform and show a higher imbalance. Removing the pillar (b) degrades all models, 209 
+
+confirming reliance on the initial cue. DT’s unchanged performance across (a) and (b) highlights its 210 
+
+failure to leverage long-term dependencies. 211 
+
+This limitation is clearer in Figure 3 (c, d), which separates performance within and beyond the 212 
+
+90-step context. DT’s return drops by nearly 50 % in red-pillar episodes once the cue leaves the 213 
+
+5Figure 6: Heatmaps of success rates on T-Maze tasks. The black dashed line separates in-distribution inference (with Tval ≤ Ttrain ) from 
+
+out-of-distribution inference (with Tval > T train ). Results for other baselines can be found in Ap-pendix, Figure 11. window, while memory models (RATE, RMT, 214 
+
+TrXL) remain stable, demonstrating their ability 215 
+
+to retain and use information over long horizons. 216 
+
+Figure 3 (e, f, g) shows model performance 217 
+
+across target reward levels. RATE consistently 218 
+
+outperforms all baselines overall (e), and this ad-219 
+
+vantage is even clearer when separating red (f) 220 
+
+and green (g) pillar episodes. While other mod-221 
+
+els show large disparities, RATE maintains sta-222 
+
+ble performance across both conditions, demon-223 
+
+strating effective use of initial cues and validat-224 
+
+ing the strength of its memory architecture. 225 
+
+T-Maze. Figure 5 shows the model general-226 
+
+ization in Passive T-Maze as inference length 227 
+
+grows from 9 to 9600 steps. All models were 228 
+
+trained on episodes up to 900 steps; extrapola-229 
+
+tion beyond this requires long-horizon general-230 
+
+ization. RATE achieves 100 % success across all 231 
+
+in-distribution lengths and performs well even 232 
+
+at 9600-step inference, corresponding to trajec-233 
+
+tories of 3 × 9600 = 28800 tokens due to the (R, o, a ) triplets. This highlights RATE’s ability to 234 
+
+retain and leverage sparse cues over extremely long horizons. Other transformers (e.g., DT, LSDT) 235 
+
+match RATE on training-length sequences but degrade sharply beyond. DT collapses to ∼ 50% even 236 
+
+at moderate lengths due to its lack of memory. Memory-augmented models like RMT generalize 237 
+
+slightly further but deteriorate. TrXL performs similarly to DT, suggesting hidden-state caching 238 
+
+alone is insufficient for long-range recall of sparse information. RNNs and SSMs (e.g., BC-LSTM, 239 
+
+DMamba) show flat curves and fail to learn from sparse long sequences. 240 
+
+RATE both interpolates within training and extrapolates well beyond, a key strength for solving sparse 241 
+
+POMDPs. Notably, poor performance of some memory baselines in Figure 5 is due to difficulty 242 
+
+modeling long sequences during training, not just generalization failure: even for Tval ≤ Ttrain , they 243 
+
+may fail. However, when trained on shorter sequences, some models learn generalizable behaviors. 244 
+
+Figure 6 visualizes inference performance for RATE (top), DT (middle), and BC-LSTM (bottom) 245 
+
+across training/validation lengths. The black dashed line separates in-distribution (Tval ≤ Ttrain ) from 246 
+
+out-of-distribution (Tval > T train ). From Figure 6 (bottom), BC-LSTM generalizes well when trained 247 
+
+on short sequences ( ≤ 150 ), but degrades as training lengths grow, reaching ∼0.5 when trained on 248 
+
+T ≥ 600 , likely due to vanishing gradients or limited capacity [ 37 , 49 ]. DT (Figure 6 (middle)) 249 
+
+handles long training sequences via attention, but fails on longer validation sequences due to fixed 250 
+
+context. In contrast, RATE (Figure 6 (top)) maintains high success across all validation lengths, 251 
+
+enabled by its combination of attention and recurrent memory, which overcomes the limitations of 252 
+
+both DT and RNNs. 253 RATE 
+
+> DT
+> RMT
+> TrXL
+> BC-LSTM
+> CQL-LSTM
+> DGRU
+> DMamba
+> LSDT
+> Random
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> Average Returns Across Grid Sizes 11x11-501x501
+
+Figure 7: Minigrid-Memory generalization task. 
+
+Minigrid-Memory. Figure 7 presents average 254 
+
+returns on Minigrid-Memory, where all models 255 
+
+were trained on grids of fixed size 41 × 41 and 256 
+
+evaluated on a wide range of unseen grid sizes 257 
+
+from 11 × 11 to 501 × 501 . RATE achieves 258 
+
+consistently high performance across the entire 259 
+
+spectrum, demonstrating both strong interpola-260 
+
+tion and extrapolation capabilities. While TrXL 261 
+
+also performs well on average, its variance is no-262 
+
+tably higher, indicating sensitivity to grid scale. 263 
+
+Table 1: Average return ± SEM in the Memory Maze ( 9 × 9) environment (ep. length: 1000 steps). 
+
+Method Random BC-LSTM CQL-LSTM DT RMT TrXL RATE Return 0.00 ±0.00 4.75 ±0.15 0.19 ±0.02 6.83 ±0.51 7.27 ±0.21 7.12 ±0.24 7.64 ±0.41 
+
+6Table 2: Aggregated average returns on 46 POP-Gym tasks, split into memory and reactive subsets. 
+
+Tasks Rand. BC-MLP DT BC-LSTM RATE 
+
+All (46) -12.2 -6.8 5.8 9.0 9.5 
+
+Memory (31)-14.6 -11.9 -3.5 -0.2 0.5 
+
+Reactive (15) 2.3 5.1 9.3 9.1 9.1 
+
+Memory Maze. Table 1 presents results on the 264 
+
+Memory Maze task. RATE achieves higher av-265 
+
+erage episode returns by effectively capturing 266 
+
+implicit structure, such as maze layout. For ref-267 
+
+erence, the dataset’s average return is 4.69. All 268 
+
+models were trained on 90-step trajectory sub-269 
+
+sequences, while full episodes span 1000 steps. 270 
+
+POPGym. To further assess generalization and memory capabilities, we evaluated models on all 46 271 
+
+tasks from the POPGym benchmark suite [ 32 ], which covers a wide range of partially observable 272 
+
+RL scenarios. The benchmark is split into 31 memory puzzle tasks and 15 reactive POMDP tasks .273 
+
+Table 2 reports average normalized scores across all tasks and subsets. RATE achieves the highest 274 
+
+overall score ( 9.54 ), outperforming all baselines. On the challenging memory tasks, RATE maintains 275 
+
+a positive average score ( 0.45 ), while all other models fall below zero – indicating a consistent 276 
+
+failure to exploit long-term dependencies. Notably, DT scores −3.49 and BC-MLP drops to −11 .91 ,277 
+
+highlighting the limitations of both context-limited transformers and non-recurrent policies. 278 
+
+On reactive tasks, all models perform better, but the gap between memory-based and non-memory 279 
+
+models narrows. RATE, DT, and BC-LSTM show almost the same results, suggesting that the greatest 280 
+
+performance gains from RATE’s memory mechanisms occur on memory puzzle tasks. For simpler 281 
+
+reactive POMDPs, lightweight memory mechanisms appear sufficient. These results also underscore 282 
+
+RATE’s ability to generalize across both puzzle and reactive settings, confirming that its memory 283 
+
+architecture does not hinder performance in simpler tasks while offering clear benefits in those with 284 
+
+temporal dependencies. More details are provided in Appendix, Table 9. 285 
+
+Table 3: Normalized scores on MuJoCo tasks from the D4RL benchmark [ 16 ]. Although RATE is designed for memory-intensive environments, it performs competitively – and often surpasses – methods tailored for standard MDP control. Top-1 and Top-2 results are highlighted.                                                                                        
+
+> Dataset Environment CQL DT TAP TT DMamba MambaDM RATE (ours)
+> ME HalfCheetah 91.6 86.8 ±1.3 91.8 ±0.8 95.0 ±0.2 91.9 ±0.6 86.5 ±1.2 87.4 ±0.1
+> ME Hopper 105.4 107.6 ±1.8 105.5 ±1.7 110.0 ±2.7 111.1 ±0.3 110.5 ±0.3 112.5 ±0.2
+> ME Walker2d 108.8 108.1 ±0.2 107.4 ±0.9 101.9 ±6.8 108.3 ±0.5 108.8 ±0.1 108.7 ±0.5
+> MHalfCheetah 44.4 42.6 ±0.1 45.0 ±0.1 46.9 ±0.4 42.8 ±0.1 42.8 ±0.1 43.5 ±0.3
+> MHopper 58.0 67.6 ±1.0 63.4 ±1.4 61.1 ±3.6 83.5 ±12.5 85.7 ±7.8 77.4 ±1.4
+> MWalker2d 72.5 74.0 ±1.4 64.9 ±2.1 79.0 ±2.8 78.2 ±0.6 78.2 ±0.6 80.7 ±0.7
+> MR HalfCheetah 45.5 36.6 ±0.8 40.8 ±0.6 41.9 ±2.5 39.6 ±0.1 39.1 ±0.1 39.0 ±0.6
+> MR Hopper 95.0 82.7 ±7.0 87.3 ±2.3 91.5 ±3.6 82.6 ±4.6 86.1 ±2.5 83.7 ±8.2
+> MR Walker2d 77.2 66.6 ±3.0 66.8 ±3.1 82.6 ±6.9 70.9 ±4.3 73.4 ±2.6 73.7 ±1.4
+> Average 77.6 74.7 74.8 78.9 78.8 79.0 78.5
+
+Atari and MuJoCo. We evaluate RATE on standard RL benchmarks: Atari games and MuJoCo 286 
+
+control tasks (Table 3, Table 4). For comparison, we include results from recent state-of-the-art meth-287 
+
+ods: Decision Mamba (DMamba) [ 35 ], Mamba as Decision Maker (MambaDM) [ 8], Conservative 288 
+
+Q-Learning (CQL) [ 26 ], Trajectory Transformer (TT) [ 22 ], and TAP [ 23 ], as reported in their original 289 
+
+papers. Results show that RATE matches or outperforms specialized offline RL algorithms across 290 
+
+both benchmarks. Combined with its strong performance on memory-intensive tasks, this highlights 291 
+
+RATE’s versatility as a general-purpose offline RL model. 292 
+
+See Appendix E for full training details and Table 10 for the evaluation protocol. 293 
+
+5 Ablation Study 294 
+
+We conduct a comprehensive ablation study to assess the contributions of individual components and 295 
+
+architectural choices in RATE, structured around three key research questions. 296 
+
+1. How do different components of RATE influence performance on memory tasks? (RQ1) 297 
+
+2. What is the upper-bound results RATE can achieve with access to perfect memory? (RQ2) 298 
+
+3. What role does the MRV play, and which configuration is most effective? (RQ3) 299 
+
+Further ablations exploring key transformer parameters, memory tokens number, and sequence 300 
+
+segmentation strategies are provided in Appendix F and Appendix G. 301 
+
+7Table 4: Raw scores on Atari games. RATE outperforms DT in 3 out of 4 environments. 
+
+Environment CQL BC DT DMamba MambaDM RATE (Ours) 
+
+Breakout 62.5 42.8 76.9 ±27.3 70.6 ±9.3 106.9 ±5.8 111.0 ±2.9 
+
+Qbert 14013.2 2862.0 2215.8 ±1523.7 5786.0 ±1295.2 10052.5 ±1116.5 12486.9 ±280.4 
+
+SeaQuest 782.2 992.1 1129.3 ±189.0 992.1 ±57.7 1286.0 ±42.0 1037.9 ±53.7 
+
+Pong 18.8 6.4 17.1 ±2.9 1.6 ±15.3 18.4 ±0.8 18.8 ±0.3 0 200 400 600 800 
+
+> Test corridor length
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Succes Rate
+> RATE-3 noised
+
+Figure 8: Effect of memory corruption on RATE at inference. (left) ViZDoom: performance drops when memory tokens or cached states are noised. 
+
+(right) T-Maze: SR degrades when memory em-beddings are corrupted. 
+
+RQ1: Impact of RATE components. To assess 302 
+
+the contribution of individual memory mecha-303 
+
+nisms in RATE, we conducted inference-time 304 
+
+ablations by replacing memory components with 305 
+
+random noise. In T-Maze ( K = 30 , N = 3 seg-306 
+
+ments), corrupting the memory embeddings M307 
+
+caused a sharp drop in performance to a 50 %308 
+
+success rate (see Figure 8, right). Notably, the 309 
+
+agent still reached the decision point but failed 310 
+
+to choose the correct direction—indicating that 311 
+
+while the model retained its navigation policy, 312 
+
+it lost access to the initial cue. This implies that 313 
+
+memory embeddings serve as dedicated storage 314 
+
+for task-relevant information, while transformer 315 
+
+layers encode general behavioral patterns. In 316 
+
+ViZDoom-Two-Colors (see Figure 8, left), we further disentangled the roles of memory compo-317 
+
+nents by selectively adding noise to memory embeddings and cached hidden states. The results 318 
+
+revealed that performance was more sensitive to the corruption of cached hidden states, underscor-319 
+
+ing their importance in environments with continuous rewards and extended dependency chains. 320 
+
+Together, these findings suggest a division of roles: memory embeddings are essential for sparse, 321 
+
+discrete decision points (e.g., in T-Maze), whereas cached representations are more critical in dense, 322 
+
+continuous-feedback environments like ViZDoom-Two-Colors. 323 
+
+Table 5: Performance comparison between DT, RATE, and OracleDT. OracleDT is an oracle-informed variant used solely to approximate the upper bound and is not a feasible baseline. 
+
+T-Maze Success Rate OracleDT DT RATE 
+
+T = 90 1.00 ±0.00 1.00 ±0.00 1.00 ±0.00 
+
+T = 480 1.00 ±0.00 0.50 ±0.00 0.90 ±0.07 
+
+T = 900 1.00 ±0.00 0.50 ±0.00 0.90 ±0.07 
+
+ViZDoom-Two-Colors Total Reward 56.5 ±0.8 24.8 ±1.4 41.5 ±1.0 
+
+Red Pillars 55.3 ±1.6 7.2 ±0.4 38.2 ±5.1 
+
+Green Pillars 57.2 ±0.5 42.3 ±3.3 44.7 ±5.8 
+
+RQ2: Performance upper-bound estimate. To 324 
+
+estimate the upper-bound performance achiev-325 
+
+able by RATE, we introduce OracleDT – a vari-326 
+
+ant of Decision Transformer augmented with 327 
+
+perfect prior knowledge about the environment. 328 
+
+Specifically, OracleDT receives an additional 329 
+
+input vector v ∈ R1×d_model prepended and 330 
+
+appended to the context sequence, i.e., S′ =331 
+
+concat (v, S, v ). This vector encodes one bit 332 
+
+of environment-critical information known in 333 
+
+advance. In T-Maze, v represents the initial clue 334 
+
+(vi = 0 if left, vi = 1 if right); in ViZDoom-335 
+
+Two-Colors, it encodes the pillar color ( vi = 0 336 
+
+for red, vi = 1 for green). This setup mirrors a 337 
+
+context augmented with perfectly trained mem-338 
+
+ory embeddings, i.e., concat (M, S, M ), where M encodes all relevant information. As a result, 339 
+
+OracleDT provides an empirical upper bound on achievable performance when key information is 340 
+
+available explicitly. In such settings, we expect the relation R[OracleDT ] ≥ R[RATE ] ≥ R[DT ]341 
+
+to hold (see Table 5). Since this privileged information is not generally accessible during training, 342 
+
+OracleDT is not a viable baseline but serves as a useful reference. The gap between OracleDT and 343 
+
+RATE quantifies the effectiveness of RATE’s memory mechanisms in autonomously discovering, 344 
+
+storing, and utilizing task-relevant information. 345 
+
+RQ 3. Memory Retention Valve scheme ablation. In the T-Maze environment, we observed that 346 
+
+without MRV, RATE’s performance deteriorates on long corridors ( L ≫ K), eventually reaching SR 347 
+
+= 50% (see Table 6). This degradation occurs because critical information to be remembered goes 348 
+
+into memory embeddings when processing the first segment of the sequence, and then it must be 349 
+
+retrieved when making decisions on the last segment. At the same time, due to the recurrent structure 350 
+
+of the architecture, memory embeddings continue to be updated during the processing of intermediate 351 
+
+segments when no new information needs to be memorized, causing important information from 352 
+
+8Table 6: Ablation of MRV configurations in T-Maze ( Keff =30 ×5=150 ). Baseline without MRV is marked †. Default: MRV-CA-2 .                                                    
+
+> Model 150 360 600 900
+> w/o MRV †1.00 ±0.00 0.66 ±0.08 0.65 ±0.07 0.61 ±0.07
+> MRV-CA-2 1.00 ±0.00 0.95 ±0.05 0.90 ±0.07 0.90 ±0.07
+> MRV-G 0.86 ±0.07 0.77 ±0.08 0.66 ±0.07 0.65 ±0.08
+> MRV-GRU 0.99 ±0.01 0.74 ±0.07 0.56 ±0.11 0.55 ±0.12
+> MRV-LSTM 0.85 ±0.06 0.64 ±0.10 0.51 ±0.11 0.47 ±0.11
+> MRV-CA-1 0.51 ±0.01 0.51 ±0.01 0.49 ±0.02 0.49 ±0.01
+
+memory embeddings to leak out. To address 353 
+
+this information loss, we introduced the Mem-354 
+
+ory Retention Valve (MRV) and evaluated five 355 
+
+variants: MRV-CA-1 : Cross-attention mecha-356 
+
+nism where updated embeddings ( Mn+1 ) query 357 
+
+incoming ones ( Mn); MRV-CA-2 : Reversed 358 
+
+variant where incoming embeddings ( Mn) query 359 
+
+updated ones ( Mn+1 ); MRV-G : Gating mech-360 
+
+anism inspired by GTrXL [ 36 ]; MRV-GRU :361 
+
+GRU-based [ 12 ] memory processing with hid-362 
+
+den states; MRV-LSTM : LSTM-based [21] memory processing with cell states. 363 
+
+Among all tested configurations, MRV-CA-2 demonstrated best performance (see Table 6). This 364 
+
+cross-attention scheme uses incoming memory tokens ( Mn) as queries and updated tokens ( Mn+1 )365 
+
+as keys and values. This configuration, referred to simply as MRV throughout the paper, effectively 366 
+
+controls information flow through memory. By allowing the model to selectively update its memory 367 
+
+based on the relevance of new information, it prevents loss of important context over long sequences. 368 
+
+6 Related Work 369 
+
+Transformers in RL. Transformers have been applied to online [ 36 , 27 , 33 , 43 , 28 ], offline [ 10 ,370 
+
+22 , 52 ], and model-based RL [ 9]. While prior work often relies on compact observations or known 371 
+
+dynamics [ 29 , 23 ], RATE targets long-horizon credit assignment and memory challenges in partially 372 
+
+observable environments, using DT [ 10 ] as a baseline. A recent extension, Long-Short Decision 373 
+
+Transformer (LSDT) [ 52 ], augments DT with two context windows but still lacks an explicit, learnable 374 
+
+memory. Retrieval-augmented variants, e.g. RA-DT [ 43 ], index external trajectories for in-context 375 
+
+planning, while Fast and Forgetful Memory (FFM) [ 33 ] and Stable Hadamard Memory (SHM) [ 28 ]376 
+
+explore lightweight recurrent memory slots with improved stability. 377 
+
+RNNs in RL. Recurrent models like LSTM [21] and GRU [12] have long been used for memory in 378 
+
+RL. DLSTM [ 45 ] replaces transformers with LSTM to support sequential decision-making. However, 379 
+
+RNNs often struggle with long-term dependencies, especially in sparse-reward settings [34]. 380 
+
+SSMs in RL. SSMs such as S4 [ 19 ] and Mamba [ 18 ] offer efficient alternatives to attention, showing 381 
+
+strong offline RL results [ 3, 35 , 8]. These models rely on linear dynamics and their ability to handle 382 
+
+memory-intensive generalization remains unclear. 383 
+
+Memory-Augmented Transformers. Memory extensions like T ransformer-XL [ 13 ], Compressive 384 
+
+Transformer [ 41 ], and RMT [ 7 ] improve context handling via caching or compression. RATE builds 385 
+
+on these ideas by combining token-level memory, hidden-state caching, and a novel MRV gate. 386 
+
+7 Limitations 387 
+
+While RATE is tailored for long-horizon, memory-intensive tasks, its complexity may be unnecessary 388 
+
+in fully observable or short-term settings where simpler recurrent models suffice. Nonetheless, RATE 389 
+
+matches or exceeds their performance across all tasks. Future work may explore adaptive variants 390 
+
+that scale memory based on task complexity. 391 
+
+8 Conclusion 392 
+
+We propose the Recurrent Action Transformer with Memory (RATE ), a transformer-based 393 
+
+architecture for offline RL that combines attention with recurrence for long-horizon decision-making. 394 
+
+RATE integrates memory embeddings, hidden state caching, and a Memory Retention Valve (MRV )395 
+
+to selectively retain critical information across segments. RATE achieves state-of-the-art results 396 
+
+on memory-intensive tasks such as T-Maze, Minigrid-Memory, ViZDoom-Two-Colors, Memory 397 
+
+Maze, and POPGym, generalizing up to 9600-step sequences and outperforming both recurrent and 398 
+
+transformer baselines. Theoretical analysis shows that MRV guarantees lower-bounded memory 399 
+
+preservation across updates, and ablation studies confirm its importance for long-horizon stability. 400 
+
+Despite its memory focus, RATE also performs competitively on standard benchmarks like Atari and 401 
+
+MuJoCo, demonstrating broad versatility. These results establish RATE as a unified, general-purpose 402 
+
+offline RL model that excels across both short and long temporal contexts. 403 
+
+9References 404 
+
+[1] Pranav Agarwal, Aamer Abdul Rahman, Pierre-Luc St-Charles, Simon JD Prince, and 405 
+
+Samira Ebrahimi Kahou. Transformers in reinforcement learning: a survey. arXiv preprint 406 
+
+arXiv:2307.05979 , 2023. 407 
+
+[2] Rishabh Agarwal, Dale Schuurmans, and Mohammad Norouzi. An optimistic perspective 408 
+
+on offline reinforcement learning. In International Conference on Machine Learning , pages 409 
+
+104–114. PMLR, 2020. 410 
+
+[3] Shmuel Bar-David, Itamar Zimerman, Eliya Nachmani, and Lior Wolf. Decision s4: Efficient 411 
+
+sequence-based rl via state spaces layers. arXiv preprint arXiv:2306.05167 , 2023. 412 
+
+[4] Edward Beeching, Christian Wolf, Jilles Dibangoye, and Olivier Simonin. Deep reinforcement 413 
+
+learning on a budget: 3d control and reasoning without a supercomputer. CoRR , abs/1904.01806, 414 
+
+2019. URL http://arxiv.org/abs/1904.01806 .415 
+
+[5] Marc G Bellemare, Yavar Naddaf, Joel Veness, and Michael Bowling. The arcade learning 416 
+
+environment: An evaluation platform for general agents. Journal of Artificial Intelligence 417 
+
+Research , 47:253–279, 2013. 418 
+
+[6] Iz Beltagy, Matthew E Peters, and Arman Cohan. Longformer: The long-document transformer. 419 
+
+arXiv preprint arXiv:2004.05150 , 2020. 420 
+
+[7] Aydar Bulatov, Yury Kuratov, and Mikhail Burtsev. Recurrent memory transformer. Advances 421 
+
+in Neural Information Processing Systems , 35:11079–11091, 2022. 422 
+
+[8] Jiahang Cao, Qiang Zhang, Ziqing Wang, Jiaxu Wang, Hao Cheng, Yecheng Shao, Wen Zhao, 423 
+
+Gang Han, Yijie Guo, and Renjing Xu. Mamba as decision maker: Exploring multi-scale 424 
+
+sequence modeling in offline reinforcement learning. arXiv preprint arXiv:2406.02013 , 2024. 425 
+
+[9] Chang Chen, Yi-Fu Wu, Jaesik Yoon, and Sungjin Ahn. Transdreamer: Reinforcement learning 426 
+
+with transformer world models. arXiv preprint arXiv:2202.09481 , 2022. 427 
+
+[10] Lili Chen, Kevin Lu, Aravind Rajeswaran, Kimin Lee, Aditya Grover, Misha Laskin, Pieter 428 
+
+Abbeel, Aravind Srinivas, and Igor Mordatch. Decision transformer: Reinforcement learning 429 
+
+via sequence modeling. Advances in neural information processing systems , 34:15084–15097, 430 
+
+2021. 431 
+
+[11] Maxime Chevalier-Boisvert, Bolun Dai, Mark Towers, Rodrigo de Lazcano, Lucas Willems, 432 
+
+Salem Lahlou, Suman Pal, Pablo Samuel Castro, and Jordan Terry. Minigrid & miniworld: 433 
+
+Modular & customizable reinforcement learning environments for goal-oriented tasks. CoRR ,434 
+
+abs/2306.13831, 2023. 435 
+
+[12] Junyoung Chung, Caglar Gulcehre, KyungHyun Cho, and Yoshua Bengio. Empirical evaluation 436 
+
+of gated recurrent neural networks on sequence modeling. arXiv preprint arXiv:1412.3555 ,437 
+
+2014. 438 
+
+[13] Zihang Dai, Zhilin Yang, Yiming Yang, Jaime Carbonell, Quoc V Le, and Ruslan Salakhutdinov. 439 
+
+Transformer-xl: Attentive language models beyond a fixed-length context. arXiv preprint 440 
+
+arXiv:1901.02860 , 2019. 441 
+
+[14] Yan Duan, John Schulman, Xi Chen, Peter L Bartlett, Ilya Sutskever, and Pieter Abbeel. Rl2: 442 
+
+Fast reinforcement learning via slow reinforcement learning. arXiv preprint arXiv:1611.02779 ,443 
+
+2016. 444 
+
+[15] Kevin Esslinger, Robert Platt, and Christopher Amato. Deep transformer q-networks for partially 445 
+
+observable reinforcement learning. arXiv preprint arXiv:2206.01078 , 2022. 446 
+
+[16] Justin Fu, Aviral Kumar, Ofir Nachum, George Tucker, and Sergey Levine. D4rl: Datasets for 447 
+
+deep data-driven reinforcement learning, 2021. 448 
+
+[17] Jake Grigsby, Linxi Fan, and Yuke Zhu. AMAGO: Scalable in-context reinforcement learning 449 
+
+for adaptive agents. In The Twelfth International Conference on Learning Representations ,450 
+
+2024. URL https://openreview.net/forum?id=M6XWoEdmwf .451 
+
+10 [18] Albert Gu and Tri Dao. Mamba: Linear-time sequence modeling with selective state spaces. 452 
+
+arXiv preprint arXiv:2312.00752 , 2023. 453 
+
+[19] Albert Gu, Karan Goel, and Christopher Ré. Efficiently modeling long sequences with structured 454 
+
+state spaces. arXiv preprint arXiv:2111.00396 , 2021. 455 
+
+[20] Danijar Hafner, Timothy Lillicrap, Jimmy Ba, and Mohammad Norouzi. Dream to control: 456 
+
+Learning behaviors by latent imagination. arXiv preprint arXiv:1912.01603 , 2019. 457 
+
+[21] Sepp Hochreiter and Jürgen Schmidhuber. Long short-term memory. Neural computation , 9(8): 458 
+
+1735–1780, 1997. 459 
+
+[22] Michael Janner, Qiyang Li, and Sergey Levine. Offline reinforcement learning as one big 460 
+
+sequence modeling problem. Advances in neural information processing systems , 34:1273– 461 
+
+1286, 2021. 462 
+
+[23] Zhengyao Jiang, Tianjun Zhang, Michael Janner, Yueying Li, Tim Rocktäschel, Edward 463 
+
+Grefenstette, and Yuandong Tian. Efficient planning in a compact latent action space. In 464 
+
+The Eleventh International Conference on Learning Representations , 2023. URL https: 465 
+
+//openreview.net/forum?id=cA77NrVEuqn .466 
+
+[24] Jikun Kang, Romain Laroche, Xindi Yuan, Adam Trischler, Xue Liu, and Jie Fu. Think before 467 
+
+you act: Decision transformers with internal working memory. arXiv preprint arXiv:2305.16338 ,468 
+
+2023. 469 
+
+[25] Feyza Duman Keles, Pruthuvi Mahesakya Wijewardena, and Chinmay Hegde. On the computa-470 
+
+tional complexity of self-attention. In International conference on algorithmic learning theory ,471 
+
+pages 597–619. PMLR, 2023. 472 
+
+[26] Aviral Kumar, Aurick Zhou, George Tucker, and Sergey Levine. Conservative q-learning 473 
+
+for offline reinforcement learning. Advances in Neural Information Processing Systems , 33: 474 
+
+1179–1191, 2020. 475 
+
+[27] Andrew Lampinen, Stephanie Chan, Andrea Banino, and Felix Hill. Towards mental time travel: 476 
+
+a hierarchical memory for reinforcement learning agents. Advances in Neural Information 477 
+
+Processing Systems , 34:28182–28195, 2021. 478 
+
+[28] Hung Le, Kien Do, Dung Nguyen, Sunil Gupta, and Svetha Venkatesh. Stable hadamard 479 
+
+memory: Revitalizing memory-augmented agents for reinforcement learning. arXiv preprint 480 
+
+arXiv:2410.10132 , 2024. 481 
+
+[29] Kuang-Huei Lee, Ofir Nachum, Mengjiao Sherry Yang, Lisa Lee, Daniel Freeman, Sergio 482 
+
+Guadarrama, Ian Fischer, Winnie Xu, Eric Jang, Henryk Michalewski, et al. Multi-game 483 
+
+decision transformers. Advances in Neural Information Processing Systems , 35:27921–27936, 484 
+
+2022. 485 
+
+[30] Wenzhe Li, Hao Luo, Zichuan Lin, Chongjie Zhang, Zongqing Lu, and Deheng Ye. A survey 486 
+
+on transformers in reinforcement learning. Transactions on Machine Learning Research ,487 
+
+2023. ISSN 2835-8856. URL https://openreview.net/forum?id=r30yuDPvf2 . Survey 488 
+
+Certification. 489 
+
+[31] Volodymyr Mnih. Playing atari with deep reinforcement learning. arXiv preprint 490 
+
+arXiv:1312.5602 , 2013. 491 
+
+[32] Steven Morad, Ryan Kortvelesy, Matteo Bettini, Stephan Liwicki, and Amanda Prorok. Popgym: 492 
+
+Benchmarking partially observable reinforcement learning. arXiv preprint arXiv:2303.01859 ,493 
+
+2023. 494 
+
+[33] Steven Morad, Ryan Kortvelesy, Stephan Liwicki, and Amanda Prorok. Reinforcement learning 495 
+
+with fast and forgetful memory. Advances in Neural Information Processing Systems , 36: 496 
+
+72008–72029, 2023. 497 
+
+11 [34] Tianwei Ni, Michel Ma, Benjamin Eysenbach, and Pierre-Luc Bacon. When do transformers 498 
+
+shine in RL? decoupling memory from credit assignment. In Thirty-seventh Conference on 499 
+
+Neural Information Processing Systems , 2023. URL https://openreview.net/forum?id= 500 
+
+APGXBNkt6h .501 
+
+[35] Toshihiro Ota. Decision mamba: Reinforcement learning via sequence modeling with selective 502 
+
+state spaces. arXiv preprint arXiv:2403.19925 , 2024. 503 
+
+[36] Emilio Parisotto, Francis Song, Jack Rae, Razvan Pascanu, Caglar Gulcehre, Siddhant Jayaku-504 
+
+mar, Max Jaderberg, Raphael Lopez Kaufman, Aidan Clark, Seb Noury, et al. Stabilizing 505 
+
+transformers for reinforcement learning. In International conference on machine learning ,506 
+
+pages 7487–7498. PMLR, 2020. 507 
+
+[37] Razvan Pascanu, Tomas Mikolov, and Yoshua Bengio. On the difficulty of training recurrent 508 
+
+neural networks. In International conference on machine learning , pages 1310–1318. Pmlr, 509 
+
+2013. 510 
+
+[38] Jurgis Pasukonis, Timothy Lillicrap, and Danijar Hafner. Evaluating long-term memory in 3d 511 
+
+mazes. arXiv preprint arXiv:2210.13383 , 2022. 512 
+
+[39] Marco Pleines, Matthias Pallasch, Frank Zimmer, and Mike Preuss. Transformerxl as episodic 513 
+
+memory in proximal policy optimization. Github Repository , 2023. URL https://github. 514 
+
+com/MarcoMeter/episodic-transformer-memory-ppo .515 
+
+[40] Andrey Polubarov, Nikita Lyubaykin, Alexander Derevyagin, Ilya Zisman, Denis Tarasov, 516 
+
+Alexander Nikulin, and Vladislav Kurenkov. Vintix: Action model via in-context reinforcement 517 
+
+learning. arXiv preprint arXiv:2501.19400 , 2025. 518 
+
+[41] Jack W Rae, Anna Potapenko, Siddhant M Jayakumar, and Timothy P Lillicrap. Compressive 519 
+
+transformers for long-range sequence modelling. arXiv preprint arXiv:1911.05507 , 2019. 520 
+
+[42] Jan Robine, Marc Höftmann, Tobias Uelwer, and Stefan Harmeling. Transformer-based world 521 
+
+models are happy with 100k interactions. In The Eleventh International Conference on Learning 522 
+
+Representations , 2023. URL https://openreview.net/forum?id=TdBaDGCpjly .523 
+
+[43] Thomas Schmied, Fabian Paischer, Vihang Patil, Markus Hofmarcher, Razvan Pascanu, and 524 
+
+Sepp Hochreiter. Retrieval-augmented decision transformer: External memory for in-context rl. 525 
+
+arXiv preprint arXiv:2410.07071 , 2024. 526 
+
+[44] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal 527 
+
+policy optimization algorithms. arXiv preprint arXiv:1707.06347 , 2017. 528 
+
+[45] Max Siebenborn, Boris Belousov, Junning Huang, and Jan Peters. How crucial is transformer in 529 
+
+decision transformer? arXiv preprint arXiv:2211.14655 , 2022. URL https://arxiv.org/ 530 
+
+abs/2211.14655 .531 
+
+[46] Artyom Sorokin, Nazar Buzun, Leonid Pugachev, and Mikhail Burtsev. Explain my surprise: 532 
+
+Learning efficient long-term memory by predicting uncertain outcomes. 07 2022. doi: 10. 533 
+
+48550/arXiv.2207.13649. 534 
+
+[47] R.S. Sutton and A.G. Barto. Reinforcement Learning, second edition: An Introduction . Adaptive 535 
+
+Computation and Machine Learning series. MIT Press, 2018. ISBN 9780262039246. 536 
+
+[48] Adaptive Agent Team, Jakob Bauer, Kate Baumli, Satinder Baveja, Feryal Behbahani, Avishkar 537 
+
+Bhoopchand, Nathalie Bradley-Schmieg, Michael Chang, Natalie Clay, Adrian Collister, et al. 538 
+
+Human-timescale adaptation in an open-ended task space. arXiv preprint arXiv:2301.07608 ,539 
+
+2023. 540 
+
+[49] Trieu Trinh, Andrew Dai, Thang Luong, and Quoc Le. Learning longer-term dependencies in 541 
+
+rnns with auxiliary losses. In International Conference on Machine Learning , pages 4965–4974. 542 
+
+PMLR, 2018. 543 
+
+[50] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, 544 
+
+Łukasz Kaiser, and Illia Polosukhin. Attention is all you need. Advances in neural information 545 
+
+processing systems , 30, 2017. 546 
+
+12 [51] Jane X Wang, Zeb Kurth-Nelson, Dhruva Tirumala, Hubert Soyer, Joel Z Leibo, Remi Munos, 547 
+
+Charles Blundell, Dharshan Kumaran, and Matt Botvinick. Learning to reinforcement learn. 548 
+
+arXiv preprint arXiv:1611.05763 , 2016. 549 
+
+[52] Jincheng Wang, Penny Karanasou, Pengyuan Wei, Elia Gatti, Diego Martinez Plasencia, and 550 
+
+Dimitrios Kanoulas. Long-short decision transformer: Bridging global and local dependencies 551 
+
+for generalized decision-making. In The Thirteenth International Conference on Learning 552 
+
+Representations , 2025. URL https://openreview.net/forum?id=NHMuM84tRT .553 
+
+[53] Manzil Zaheer, Guru Guruganesh, Kumar Avinava Dubey, Joshua Ainslie, Chris Alberti, 554 
+
+Santiago Ontanon, Philip Pham, Anirudh Ravula, Qifan Wang, Li Yang, et al. Big bird: 555 
+
+Transformers for longer sequences. Advances in neural information processing systems , 33: 556 
+
+17283–17297, 2020. 557 
+
+[54] Susan Zhang, Stephen Roller, Naman Goyal, Mikel Artetxe, Moya Chen, Shuohui Chen, 558 
+
+Christopher Dewan, Mona Diab, Xian Li, Xi Victoria Lin, et al. Opt: Open pre-trained 559 
+
+transformer language models. arXiv preprint arXiv:2205.01068 , 2022. 560 
+
+13 NeurIPS Paper Checklist 561 
+
+1. Claims 562 
+
+Question: Do the main claims made in the abstract and introduction accurately reflect the 563 
+
+paper’s contributions and scope? 564 
+
+Answer: [Yes] 565 
+
+Justification: We propose a novel offline RL model—RATE—with integrated memory 566 
+
+mechanisms, capable of solving memory-intensive tasks, as demonstrated in Section 3 and 567 
+
+validated in Section 4. 568 
+
+Guidelines: 569 
+
+• The answer NA means that the abstract and introduction do not include the claims 570 
+
+made in the paper. 571 
+
+• The abstract and/or introduction should clearly state the claims made, including the 572 
+
+contributions made in the paper and important assumptions and limitations. A No or 573 
+
+NA answer to this question will not be perceived well by the reviewers. 574 
+
+• The claims made should match theoretical and experimental results, and reflect how 575 
+
+much the results can be expected to generalize to other settings. 576 
+
+• It is fine to include aspirational goals as motivation as long as it is clear that these goals 577 
+
+are not attained by the paper. 578 
+
+2. Limitations 579 
+
+Question: Does the paper discuss the limitations of the work performed by the authors? 580 
+
+Answer: [Yes] 581 
+
+Justification: The limitation of the proposed model is that its architecture may be redundant 582 
+
+to solve simple problems. This limitation is stated in the Limitations section in Section 7. 583 
+
+Guidelines: 584 
+
+• The answer NA means that the paper has no limitation while the answer No means that 585 
+
+the paper has limitations, but those are not discussed in the paper. 586 
+
+• The authors are encouraged to create a separate "Limitations" section in their paper. 587 
+
+• The paper should point out any strong assumptions and how robust the results are to 588 
+
+violations of these assumptions (e.g., independence assumptions, noiseless settings, 589 
+
+model well-specification, asymptotic approximations only holding locally). The authors 590 
+
+should reflect on how these assumptions might be violated in practice and what the 591 
+
+implications would be. 592 
+
+• The authors should reflect on the scope of the claims made, e.g., if the approach was 593 
+
+only tested on a few datasets or with a few runs. In general, empirical results often 594 
+
+depend on implicit assumptions, which should be articulated. 595 
+
+• The authors should reflect on the factors that influence the performance of the approach. 596 
+
+For example, a facial recognition algorithm may perform poorly when image resolution 597 
+
+is low or images are taken in low lighting. Or a speech-to-text system might not be 598 
+
+used reliably to provide closed captions for online lectures because it fails to handle 599 
+
+technical jargon. 600 
+
+• The authors should discuss the computational efficiency of the proposed algorithms 601 
+
+and how they scale with dataset size. 602 
+
+• If applicable, the authors should discuss possible limitations of their approach to 603 
+
+address problems of privacy and fairness. 604 
+
+• While the authors might fear that complete honesty about limitations might be used by 605 
+
+reviewers as grounds for rejection, a worse outcome might be that reviewers discover 606 
+
+limitations that aren’t acknowledged in the paper. The authors should use their best 607 
+
+judgment and recognize that individual actions in favor of transparency play an impor-608 
+
+tant role in developing norms that preserve the integrity of the community. Reviewers 609 
+
+will be specifically instructed to not penalize honesty concerning limitations. 610 
+
+3. Theory assumptions and proofs 611 
+
+Question: For each theoretical result, does the paper provide the full set of assumptions and 612 
+
+a complete (and correct) proof? 613 
+
+14 Answer: [Yes] 614 
+
+Justification: Theorem 1 in Section 3 proves that Memory Retention Valve (MRV) main-615 
+
+tains a non-trivial lower bound on memory retention. The proof is complete with clear 616 
+
+assumptions, validated empirically in Section 4. 617 
+
+Guidelines: 618 
+
+• The answer NA means that the paper does not include theoretical results. 619 
+
+• All the theorems, formulas, and proofs in the paper should be numbered and cross-620 
+
+referenced. 621 
+
+• All assumptions should be clearly stated or referenced in the statement of any theorems. 622 
+
+• The proofs can either appear in the main paper or the supplemental material, but if 623 
+
+they appear in the supplemental material, the authors are encouraged to provide a short 624 
+
+proof sketch to provide intuition. 625 
+
+• Inversely, any informal proof provided in the core of the paper should be complemented 626 
+
+by formal proofs provided in appendix or supplemental material. 627 
+
+• Theorems and Lemmas that the proof relies upon should be properly referenced. 628 
+
+4. Experimental result reproducibility 629 
+
+Question: Does the paper fully disclose all the information needed to reproduce the main ex-630 
+
+perimental results of the paper to the extent that it affects the main claims and/or conclusions 631 
+
+of the paper (regardless of whether the code and data are provided or not)? 632 
+
+Answer: [Yes] 633 
+
+Justification: The paper provides all the information needed to reproduce the main ex-634 
+
+perimental results, including data collection procedures, hyperparameters, and optimizer 635 
+
+choices. 636 
+
+Guidelines: 637 
+
+• The answer NA means that the paper does not include experiments. 638 
+
+• If the paper includes experiments, a No answer to this question will not be perceived 639 
+
+well by the reviewers: Making the paper reproducible is important, regardless of 640 
+
+whether the code and data are provided or not. 641 
+
+• If the contribution is a dataset and/or model, the authors should describe the steps taken 642 
+
+to make their results reproducible or verifiable. 643 
+
+• Depending on the contribution, reproducibility can be accomplished in various ways. 644 
+
+For example, if the contribution is a novel architecture, describing the architecture fully 645 
+
+might suffice, or if the contribution is a specific model and empirical evaluation, it may 646 
+
+be necessary to either make it possible for others to replicate the model with the same 647 
+
+dataset, or provide access to the model. In general. releasing code and data is often 648 
+
+one good way to accomplish this, but reproducibility can also be provided via detailed 649 
+
+instructions for how to replicate the results, access to a hosted model (e.g., in the case 650 
+
+of a large language model), releasing of a model checkpoint, or other means that are 651 
+
+appropriate to the research performed. 652 
+
+• While NeurIPS does not require releasing code, the conference does require all submis-653 
+
+sions to provide some reasonable avenue for reproducibility, which may depend on the 654 
+
+nature of the contribution. For example 655 
+
+(a) If the contribution is primarily a new algorithm, the paper should make it clear how 656 
+
+to reproduce that algorithm. 657 
+
+(b) If the contribution is primarily a new model architecture, the paper should describe 658 
+
+the architecture clearly and fully. 659 
+
+(c) If the contribution is a new model (e.g., a large language model), then there should 660 
+
+either be a way to access this model for reproducing the results or a way to reproduce 661 
+
+the model (e.g., with an open-source dataset or instructions for how to construct 662 
+
+the dataset). 663 
+
+(d) We recognize that reproducibility may be tricky in some cases, in which case 664 
+
+authors are welcome to describe the particular way they provide for reproducibility. 665 
+
+In the case of closed-source models, it may be that access to the model is limited in 666 
+
+some way (e.g., to registered users), but it should be possible for other researchers 667 
+
+to have some path to reproducing or verifying the results. 668 
+
+15 5. Open access to data and code 669 
+
+Question: Does the paper provide open access to the data and code, with sufficient instruc-670 
+
+tions to faithfully reproduce the main experimental results, as described in supplemental 671 
+
+material? 672 
+
+Answer: [Yes] 673 
+
+Justification: The paper provides open access to the data and code, with sufficient instructions 674 
+
+to faithfully reproduce the main experimental results, as described in the Supplemental 675 
+
+Material .676 
+
+Guidelines: 677 
+
+• The answer NA means that paper does not include experiments requiring code. 678 
+
+• Please see the NeurIPS code and data submission guidelines ( https://nips.cc/ 679 
+
+public/guides/CodeSubmissionPolicy ) for more details. 680 
+
+• While we encourage the release of code and data, we understand that this might not be 681 
+
+possible, so “No” is an acceptable answer. Papers cannot be rejected simply for not 682 
+
+including code, unless this is central to the contribution (e.g., for a new open-source 683 
+
+benchmark). 684 
+
+• The instructions should contain the exact command and environment needed to run to 685 
+
+reproduce the results. See the NeurIPS code and data submission guidelines ( https: 686 
+
+//nips.cc/public/guides/CodeSubmissionPolicy ) for more details. 687 
+
+• The authors should provide instructions on data access and preparation, including how 688 
+
+to access the raw data, preprocessed data, intermediate data, and generated data, etc. 689 
+
+• The authors should provide scripts to reproduce all experimental results for the new 690 
+
+proposed method and baselines. If only a subset of experiments are reproducible, they 691 
+
+should state which ones are omitted from the script and why. 692 
+
+• At submission time, to preserve anonymity, the authors should release anonymized 693 
+
+versions (if applicable). 694 
+
+• Providing as much information as possible in supplemental material (appended to the 695 
+
+paper) is recommended, but including URLs to data and code is permitted. 696 
+
+6. Experimental setting/details 697 
+
+Question: Does the paper specify all the training and test details (e.g., data splits, hyper-698 
+
+parameters, how they were chosen, type of optimizer, etc.) necessary to understand the 699 
+
+results? 700 
+
+Answer: [Yes] 701 
+
+Justification: The paper specifies all the training and test details necessary to understand the 702 
+
+results, including data collection procedures, hyperparameters, and optimizer choices. 703 
+
+Guidelines: 704 
+
+• The answer NA means that the paper does not include experiments. 705 
+
+• The experimental setting should be presented in the core of the paper to a level of detail 706 
+
+that is necessary to appreciate the results and make sense of them. 707 
+
+• The full details can be provided either with the code, in appendix, or as supplemental 708 
+
+material. 709 
+
+7. Experiment statistical significance 710 
+
+Question: Does the paper report error bars suitably and correctly defined or other appropriate 711 
+
+information about the statistical significance of the experiments? 712 
+
+Answer: [Yes] 713 
+
+Justification: In ?? in the Supplementary Material, we provide detailed evaluation setup 714 
+
+with statistics for each experiment, including the number of model runs ( Nruns ), number of 715 
+
+inference episodes with different seeds ( Nseeds ), and appropriate error metrics (mean ±sem 716 
+
+or mean ±std) for each environment. 717 
+
+Guidelines: 718 
+
+• The answer NA means that the paper does not include experiments. 719 
+
+16 • The authors should answer "Yes" if the results are accompanied by error bars, confi-720 
+
+dence intervals, or statistical significance tests, at least for the experiments that support 721 
+
+the main claims of the paper. 722 
+
+• The factors of variability that the error bars are capturing should be clearly stated (for 723 
+
+example, train/test split, initialization, random drawing of some parameter, or overall 724 
+
+run with given experimental conditions). 725 
+
+• The method for calculating the error bars should be explained (closed form formula, 726 
+
+call to a library function, bootstrap, etc.) 727 
+
+• The assumptions made should be given (e.g., Normally distributed errors). 728 
+
+• It should be clear whether the error bar is the standard deviation or the standard error 729 
+
+of the mean. 730 
+
+• It is OK to report 1-sigma error bars, but one should state it. The authors should 731 
+
+preferably report a 2-sigma error bar than state that they have a 96% CI, if the hypothesis 732 
+
+of Normality of errors is not verified. 733 
+
+• For asymmetric distributions, the authors should be careful not to show in tables or 734 
+
+figures symmetric error bars that would yield results that are out of range (e.g. negative 735 
+
+error rates). 736 
+
+• If error bars are reported in tables or plots, The authors should explain in the text how 737 
+
+they were calculated and reference the corresponding figures or tables in the text. 738 
+
+8. Experiments compute resources 739 
+
+Question: For each experiment, does the paper provide sufficient information on the com-740 
+
+puter resources (type of compute workers, memory, time of execution) needed to reproduce 741 
+
+the experiments? 742 
+
+Answer: [Yes] 743 
+
+Justification: The paper provides detailed technical specifications in ?? in the Supplementary 744 
+
+Material including GPU memory usage, training time, and model parameter counts for each 745 
+
+environment and model variant. For example, RATE uses significantly less GPU memory 746 
+
+than DT. 747 
+
+Guidelines: 748 
+
+• The answer NA means that the paper does not include experiments. 749 
+
+• The paper should indicate the type of compute workers CPU or GPU, internal cluster, 750 
+
+or cloud provider, including relevant memory and storage. 751 
+
+• The paper should provide the amount of compute required for each of the individual 752 
+
+experimental runs as well as estimate the total compute. 753 
+
+• The paper should disclose whether the full research project required more compute 754 
+
+than the experiments reported in the paper (e.g., preliminary or failed experiments that 755 
+
+didn’t make it into the paper). 756 
+
+9. Code of ethics 757 
+
+Question: Does the research conducted in the paper conform, in every respect, with the 758 
+
+NeurIPS Code of Ethics https://neurips.cc/public/EthicsGuidelines ?759 
+
+Answer: [Yes] 760 
+
+Justification: The authors have reviewed the NeurIPS Code of Ethics and confirm that the 761 
+
+research conducted in this paper adheres to all ethical guidelines. The work focuses on 762 
+
+developing and evaluating reinforcement learning algorithms in simulated environments, 763 
+
+with no human subjects or sensitive data involved. All experiments are conducted in a 764 
+
+responsible manner with appropriate statistical analysis and reporting. 765 
+
+Guidelines: 766 
+
+• The answer NA means that the authors have not reviewed the NeurIPS Code of Ethics. 767 
+
+• If the authors answer No, they should explain the special circumstances that require a 768 
+
+deviation from the Code of Ethics. 769 
+
+• The authors should make sure to preserve anonymity (e.g., if there is a special consid-770 
+
+eration due to laws or regulations in their jurisdiction). 771 
+
+10. Broader impacts 772 
+
+17 Question: Does the paper discuss both potential positive societal impacts and negative 773 
+
+societal impacts of the work performed? 774 
+
+Answer: [NA] 775 
+
+Justification: There is no societal impact of the work performed. 776 
+
+Guidelines: 777 
+
+• The answer NA means that there is no societal impact of the work performed. 778 
+
+• If the authors answer NA or No, they should explain why their work has no societal 779 
+
+impact or why the paper does not address societal impact. 780 
+
+• Examples of negative societal impacts include potential malicious or unintended uses 781 
+
+(e.g., disinformation, generating fake profiles, surveillance), fairness considerations 782 
+
+(e.g., deployment of technologies that could make decisions that unfairly impact specific 783 
+
+groups), privacy considerations, and security considerations. 784 
+
+• The conference expects that many papers will be foundational research and not tied 785 
+
+to particular applications, let alone deployments. However, if there is a direct path to 786 
+
+any negative applications, the authors should point it out. For example, it is legitimate 787 
+
+to point out that an improvement in the quality of generative models could be used to 788 
+
+generate deepfakes for disinformation. On the other hand, it is not needed to point out 789 
+
+that a generic algorithm for optimizing neural networks could enable people to train 790 
+
+models that generate Deepfakes faster. 791 
+
+• The authors should consider possible harms that could arise when the technology is 792 
+
+being used as intended and functioning correctly, harms that could arise when the 793 
+
+technology is being used as intended but gives incorrect results, and harms following 794 
+
+from (intentional or unintentional) misuse of the technology. 795 
+
+• If there are negative societal impacts, the authors could also discuss possible mitigation 796 
+
+strategies (e.g., gated release of models, providing defenses in addition to attacks, 797 
+
+mechanisms for monitoring misuse, mechanisms to monitor how a system learns from 798 
+
+feedback over time, improving the efficiency and accessibility of ML). 799 
+
+11. Safeguards 800 
+
+Question: Does the paper describe safeguards that have been put in place for responsible 801 
+
+release of data or models that have a high risk for misuse (e.g., pretrained language models, 802 
+
+image generators, or scraped datasets)? 803 
+
+Answer: [NA] 804 
+
+Justification: There is no such risk for misuse. 805 
+
+Guidelines: 806 
+
+• The answer NA means that the paper poses no such risks. 807 
+
+• Released models that have a high risk for misuse or dual-use should be released with 808 
+
+necessary safeguards to allow for controlled use of the model, for example by requiring 809 
+
+that users adhere to usage guidelines or restrictions to access the model or implementing 810 
+
+safety filters. 811 
+
+• Datasets that have been scraped from the Internet could pose safety risks. The authors 812 
+
+should describe how they avoided releasing unsafe images. 813 
+
+• We recognize that providing effective safeguards is challenging, and many papers do 814 
+
+not require this, but we encourage authors to take this into account and make a best 815 
+
+faith effort. 816 
+
+12. Licenses for existing assets 817 
+
+Question: Are the creators or original owners of assets (e.g., code, data, models), used in 818 
+
+the paper, properly credited and are the license and terms of use explicitly mentioned and 819 
+
+properly respected? 820 
+
+Answer: [Yes] 821 
+
+Justification: All existing assets used in this paper are properly credited with appropriate 822 
+
+citations. All code and datasets used are from publicly available repositories with appropriate 823 
+
+open-source licenses. 824 
+
+Guidelines: 825 
+
+18 • The answer NA means that the paper does not use existing assets. 826 
+
+• The authors should cite the original paper that produced the code package or dataset. 827 
+
+• The authors should state which version of the asset is used and, if possible, include a 828 
+
+URL. 829 
+
+• The name of the license (e.g., CC-BY 4.0) should be included for each asset. 830 
+
+• For scraped data from a particular source (e.g., website), the copyright and terms of 831 
+
+service of that source should be provided. 832 
+
+• If assets are released, the license, copyright information, and terms of use in the 833 
+
+package should be provided. For popular datasets, paperswithcode.com/datasets 834 
+
+has curated licenses for some datasets. Their licensing guide can help determine the 835 
+
+license of a dataset. 836 
+
+• For existing datasets that are re-packaged, both the original license and the license of 837 
+
+the derived asset (if it has changed) should be provided. 838 
+
+• If this information is not available online, the authors are encouraged to reach out to 839 
+
+the asset’s creators. 840 
+
+13. New assets 841 
+
+Question: Are new assets introduced in the paper well documented and is the documentation 842 
+
+provided alongside the assets? 843 
+
+Answer: [Yes] 844 
+
+Justification: We have released our code implementation as an open-source repository, which 845 
+
+is referenced in the paper. The repository includes detailed documentation, installation 846 
+
+instructions, and usage examples. 847 
+
+Guidelines: 848 
+
+• The answer NA means that the paper does not release new assets. 849 
+
+• Researchers should communicate the details of the dataset/code/model as part of their 850 
+
+submissions via structured templates. This includes details about training, license, 851 
+
+limitations, etc. 852 
+
+• The paper should discuss whether and how consent was obtained from people whose 853 
+
+asset is used. 854 
+
+• At submission time, remember to anonymize your assets (if applicable). You can either 855 
+
+create an anonymized URL or include an anonymized zip file. 856 
+
+14. Crowdsourcing and research with human subjects 857 
+
+Question: For crowdsourcing experiments and research with human subjects, does the paper 858 
+
+include the full text of instructions given to participants and screenshots, if applicable, as 859 
+
+well as details about compensation (if any)? 860 
+
+Answer: [NA] 861 
+
+Justification: There is no crowdsourcing or research with human subjects in this paper. 862 
+
+Guidelines: 863 
+
+• The answer NA means that the paper does not involve crowdsourcing nor research with 864 
+
+human subjects. 865 
+
+• Including this information in the supplemental material is fine, but if the main contribu-866 
+
+tion of the paper involves human subjects, then as much detail as possible should be 867 
+
+included in the main paper. 868 
+
+• According to the NeurIPS Code of Ethics, workers involved in data collection, curation, 869 
+
+or other labor should be paid at least the minimum wage in the country of the data 870 
+
+collector. 871 
+
+15. Institutional review board (IRB) approvals or equivalent for research with human 872 
+
+subjects 873 
+
+Question: Does the paper describe potential risks incurred by study participants, whether 874 
+
+such risks were disclosed to the subjects, and whether Institutional Review Board (IRB) 875 
+
+approvals (or an equivalent approval/review based on the requirements of your country or 876 
+
+institution) were obtained? 877 
+
+19 Answer: [NA] 878 
+
+Justification: There is no research with human subjects in this paper. 879 
+
+Guidelines: 880 
+
+• The answer NA means that the paper does not involve crowdsourcing nor research with 881 
+
+human subjects. 882 
+
+• Depending on the country in which research is conducted, IRB approval (or equivalent) 883 
+
+may be required for any human subjects research. If you obtained IRB approval, you 884 
+
+should clearly state this in the paper. 885 
+
+• We recognize that the procedures for this may vary significantly between institutions 886 
+
+and locations, and we expect authors to adhere to the NeurIPS Code of Ethics and the 887 
+
+guidelines for their institution. 888 
+
+• For initial submissions, do not include any information that would break anonymity (if 889 
+
+applicable), such as the institution conducting the review. 890 
+
+16. Declaration of LLM usage 891 
+
+Question: Does the paper describe the usage of LLMs if it is an important, original, or 892 
+
+non-standard component of the core methods in this research? Note that if the LLM is used 893 
+
+only for writing, editing, or formatting purposes and does not impact the core methodology, 894 
+
+scientific rigorousness, or originality of the research, declaration is not required. 895 
+
+Answer: [NA] 896 
+
+Justification: The core method development in this research does not involve LLMs as any 897 
+
+important, original, or non-standard components. 898 
+
+Guidelines: 899 
+
+• The answer NA means that the core method development in this research does not 900 
+
+involve LLMs as any important, original, or non-standard components. 901 
+
+• Please refer to our LLM policy ( https://neurips.cc/Conferences/2025/LLM )902 
+
+for what should or should not be described. 903 
+
+20 904 Table of Contents 
+
+> 905 906
+
+A Discussion: Are RNNs Still Better for Memory? 21 907 
+
+B Decision Transformer 22 908 
+
+C Environments 22 909 
+
+C.1 Memory-intensive environments . . . . . . . . . . . . . . . . . . . . . . . . . . 22 910 
+
+C.2 Standard benchmarks . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 911 
+
+D Action Associative Retrieval 24 912 
+
+E Training 27 913 
+
+E.1 ViZDoom-Two-Colors . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 914 
+
+E.2 Passive T-Maze . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 915 
+
+E.3 Memory Maze . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 916 
+
+E.4 Minigrid-Memory . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27 917 
+
+E.5 POPGym Suite . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28 918 
+
+E.6 Atari and MuJoCo . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28 919 
+
+F Additional ablation studies 28 920 
+
+F.1 Additional ViZDoom-Two-Colors ablation . . . . . . . . . . . . . . . . . . . . 28 921 
+
+F.2 Curriculum Learning . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29 922 
+
+F.3 Supplemental MRV ablation . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31 923 
+
+F.4 Ablation on number of segments and segment length . . . . . . . . . . . . . . . 32 924 
+
+G Transformer Ablation Studies 32 925 
+
+H Recommendations for Hyperparameter Settings 32 926 
+
+I Technical details 34 927 928 929 930 
+
+A Discussion: Are RNNs Still Better for Memory? 931 
+
+Our experiments provide a systematic comparison between recurrent and transformer-based archi-932 
+
+tectures in memory-intensive tasks. When trained on short sequences, recurrent models such as 933 
+
+BC-LSTM perform competitively. For example, in the T-Maze environment, BC-LSTM achieves 934 
+
+perfect success rates when trained on sequences up to 150 steps, effectively capturing short-term 935 
+
+dependencies via its internal state dynamics. 936 
+
+However, this advantage quickly fades as training sequences grow longer. Increasing the training 937 
+
+horizon from 150 to 600 steps causes BC-LSTM’s performance to collapse to a 50% success rate 938 
+
+across all inference lengths—even those shorter than the training context—indicating difficulty with 939 
+
+gradient stability and information retention over long spans (Figure 6). In contrast, RATE maintains 940 
+
+consistently high performance under the same conditions, demonstrating stronger scalability with 941 
+
+sequence length. RATE generalizes robustly to inference horizons up to 9600 steps (28,800 tokens), 942 
+
+reflecting the effectiveness of its hybrid memory design. The architecture combines token-based 943 
+
+recurrence with gated memory updates via the Memory Retention Valve (MRV), enabling reliable 944 
+
+propagation of sparse information across long temporal distances. 945 
+
+These findings extend to more complex environments. In ViZDoom-Two-Colors and Memory Maze 946 
+
+(Figure 4, Table 1), RATE significantly outperforms BC-LSTM. In ViZDoom, RATE maintains 947 
+
+balanced performance across red and green cues, whereas BC-LSTM exhibits instability and higher 948 
+
+variance. In Memory Maze, RATE achieves substantially higher returns, benefiting from its capacity 949 
+
+to encode and retrieve spatial-temporal patterns over long episodes. 950 
+
+In conclusion, while RNNs remain effective for short-range temporal dependencies, their performance 951 
+
+degrades in long-horizon, sparse-reward, and generalization-critical settings. RATE bridges this gap 952 
+
+21 POPGym-46 ViZDoom-Two-Colors Minigrid-Memory T-Maze Memory-Maze Figure 9: Memory-intensive environments used to evaluate RATE memory mechanisms. by integrating attention with recurrence, offering a scalable and robust memory solution. These results 953 
+
+underscore the architectural promise of combining transformer attention with recurrent dynamics for 954 
+
+long-term tasks in RL. 955 
+
+B Decision Transformer 956 
+
+Algorithm 3 Decision Transformer 
+
+Require : R ∈ R1×T , o ∈ Rdo×T , a ∈ R1×T
+
+1: ˜R ∈ RT ×d ← Encoder R(R)˜o ∈ RT ×d ← Encoder o(o)˜a ∈ RT ×d ← Encoder a(a)
+
+2: τ0..T ← { ( ˜R0, ˜o0, ˜a0), . . . , ( ˜RT , ˜oT , ˜aT )}
+
+3: n = random (0 , T − K)
+
+4: ˆan ← Transformer (τn..n +K )
+
+Output : ˆan → L (an, ˆan)
+
+Decision Transformer (DT) [ 10 ] is an algorithm 957 
+
+for offline RL that reduces the RL task to a se-958 
+
+quence modeling task. In DT, the scheme of 959 
+
+which is presented in Algorithm 3, the trajec-960 
+
+tory τ is not divided into segments as in RATE. 961 
+
+Instead, random fragments of length K are sam-962 
+
+pled from the trajectory, since originally this 963 
+
+architecture was designed to work only with 964 
+
+MDP. The predicted actions ˆa are sampled au-965 
+
+toregressively. 966 
+
+C Environments 967 
+
+C.1 Memory-intensive environments 968 
+
+In this section, we provide an extended description of the environments used in this paper, as well as 969 
+
+the methodology used to collect the trajectories. Table 7 summarizes the observations type, rewards 970 
+
+type, and actions type for each of the environments considered in this paper. 971 
+
+C.1.1 ViZDoom-Two-Colors 972 
+
+We used a modified ViZDoom-Two-Colors environment from [ 46 ] to assess the model’s memory 973 
+
+abilities. The agent initially having 100 hit points (HP) is placed in a room without inner walls filled 974 
+
+with acid. At each step in the environment, the agent loses a fixed amount of health ( 10 /32 HP per 975 
+
+step). In the center of the environment, there is a pillar of either green or red color, which disappears 976 
+
+after 45 environment steps. Throughout the environment, objects of two colors (green and red) are 977 
+
+generated. When the agent interacts with an object of the same color as the pillar, it gains an increase 978 
+
+in health of +25 and a reward of +1 . When the agent interacts with an object of the opposite color, 979 
+
+it loses a similar amount of health. The agent receives an additional reward of +0 .02 for each step 980 
+
+it survives. The episode ends when the agent has zero health. Thus, the agent needs to remember 981 
+
+the color of the pillar to select items of the correct color, even if the pillar is out of sight or has 982 
+
+disappeared. The agent does not receive information about its current health or rewards, as these 983 
+
+observations essentially convey the same information as the color of the pillar but persist beyond step 984 
+
+45 .985 
+
+We collected a dataset of 5000 trajectories of 90 steps in length using a trained A2C [ 4] agent (an 986 
+
+agent trained with a non-disappearing pillar). The average reward for these 90 steps is 4.46 . When 987 
+
+collecting trajectories, to ensure that the agent saw the pillar before it disappeared, the agent always 988 
+
+appeared facing the pillar in the same place – midway between the pillar and the nearest wall. In 989 
+
+order to successfully complete this task, the agent needs to remember the color of the pillar. This 990 
+
+environment tests the long-term memory mechanism, since the agent needs to retain information about 991 
+
+the pillar for a time much longer than the pillar has been in the environment. Using only short-term 992 
+
+22 Table 7: Description of observations and reward functions for the considered environments.                                      
+
+> Environment Obs. Type Rew. Type Act. Space Obs. Details
+> ViZDoom-Two-Colors Image Continuous Discrete First-person view T-Maze Vector Sparse & Discrete Discrete Low-dimensional vector Memory Maze Image Sparse & Discrete Discrete First-person view Minigrid-Memory Image Sparse Discrete 3×3grid centered on agent POPGym Vector/Image Discrete/Continuous Discrete/Continuous Vector or 2D grid Action Assoc. Retrieval Vector Sparse & Discrete Discrete Symbolic vector input Atari Image Sparse & Discrete Discrete Full game screen MuJoCo Vector Continuous Continuous Low-dimensional state vector
+
+memory and, for example, collecting the next item of the same color as the previous collected item, 993 
+
+it will not be possible for the agent to survive for a long time, as this policy is extremely unstable. 994 
+
+This is due to the fact that in the training dataset the agent occasionally makes a mistake and picks up 995 
+
+an object of the opposite color. Thus, irrelevant information about the desired color may enter the 996 
+
+transformer context and the agent will start collecting items of an opposite color, which will quickly 997 
+
+lead to a failure. 998 
+
+C.1.2 T-Maze 999 
+
+To investigate agent’s long-term memory on very long environments (the inference trajectory length 1000 
+
+is much longer than the effective context length Kef f ) we used a modified version of the T-Maze 1001 
+
+environment [ 34 ]. The agent’s objective in this environment is to navigate from the beginning of 1002 
+
+the T-shaped maze to the junction and choose the correct direction, based on a signal given at the 1003 
+
+beginning of the trajectory using four possible actions a ∈ { lef t, up, right, down }. This signal, 1004 
+
+represented as the clue variable and equals to zero everywhere except the first observation, dictates 1005 
+
+whether the agent should turn up ( clue = 1 ) or down ( clue = −1). Additionally, a constraint on 1006 
+
+the episode duration T = L + 2 , where the maximum duration is determined by the length of the 1007 
+
+corridor L to the junction, adds complexity to the problem. To address this, a binary flag, represented 1008 
+
+as the f lag variable, which is equal to 1 one step before the junction and 0 otherwise, indicating 1009 
+
+the arrival of the agent at the junction, is included in the observation vector. Additionally, a noise 1010 
+
+channel is added to the observation vector, with random integer values from the set {− 1, 0, +1 }.1011 
+
+The observation vector is thus defined as o = [ y, clue, f lag, noise ], where y represents the vertical 1012 
+
+coordinate. The reward r is given only at the end of the episode and depends on the correctness of 1013 
+
+the agent’s turn at the junction, being 1 for a correct turn and 0 otherwise. This formulation deviates 1014 
+
+from the traditional Passive T-Maze environment [ 34 ] (different observations and reward functions) 1015 
+
+and presents a more intricate set of conditions for the agent to navigate and learn within the given 1016 
+
+time constraint. 1017 
+
+The dataset consists of 2000 of trajectories for each segment of length 30 (i.e. 6000 trajectories for 1018 
+
+the Kef f = 3 × 30 = 90 ) and consists only of successful episodes. An artificial oracle with a priori 1019 
+
+information about the environment was used to generate the dataset. 1020 
+
+C.1.3 Memory Maze 1021 
+
+In this first-person view 3D environment [ 38 ], the agent appears in a randomly generated maze 1022 
+
+containing several objects of different colors at random locations. The agent’s task is to find an object 1023 
+
+of the same color in the maze as the outline around its observation image. After the agent finds an 1024 
+
+object of the desired color and steps on it, the color of the outline changes and the agent must find 1025 
+
+another object. The agent receives a +1 reward for stepping on the correct object. Otherwise, it 1026 
+
+receives no reward. The duration of an episode is a fixed number and is equal to 1000 . Thus, the 1027 
+
+agent’s task is to find as many objects of the desired color as possible in a limited time. The agent’s 1028 
+
+effectiveness in this environment depends on its ability to memorize the structure of the maze and the 1029 
+
+location of objects in it in order to find the desired objects faster. Using the Dreamer model [ 20 ] to 1030 
+
+collect dataset of 5000 trajectories only achieved an average award of 4.7 per episode, i.e., a rather 1031 
+
+sparse dataset. 1032 
+
+23 C.1.4 Minigrid-Memory 1033 
+
+Minigrid-Memory [ 11 ] is a 2D grid environment designed to test an agent’s long-term memory and 1034 
+
+credit-assignment [ 34 ]. The environment map is a T-shaped maze with a small room with an object 1035 
+
+inside it at the beginning of the corridor. The agent appears at a random coordinate in the corridor. 1036 
+
+The agent’s task is to reach the room with the object and memorize it, then reach the junction at the 1037 
+
+end of the maze and make a turn in the direction where the same object is located as in the room 1038 
+
+at the beginning of the maze. A reward r = 1 − 0.9 × tT is given for success, and 0 for failure. 1039 
+
+The episode ends after any agent turns at a junction or after a limited amount of time (95 steps) has 1040 
+
+elapsed. The agent’s observations are limited to a 3 × 3 size frame. 10000 trajectories with grid size 1041 
+
+41 x41 were collected using PPO [ 44 ] with Transformer-XL (TrXL) [ 39 ] with a context length equal 1042 
+
+to the maximum episode duration. 1043 
+
+C.1.5 POPGym 1044 
+
+POPGym [ 32 ] is a benchmark suite consisting of 46 diverse partially observable environments 1045 
+
+designed to isolate different aspects of memory use and generalization in reinforcement learning. The 1046 
+
+tasks include both short-horizon reactive scenarios and long-horizon memory puzzles that require the 1047 
+
+agent to remember information across extended delays or infer hidden states from past observations. 1048 
+
+The environments vary in observation modality (image vs. vector), reward sparsity, and temporal 1049 
+
+dependencies. For our dataset, we followed the original POPGym evaluation protocol and used a 1050 
+
+PPO [ 44 ] agent with a GRU [ 12 ] backbone (PPO-GRU), which showed the best performance in the 1051 
+
+original benchmark. We collected trajectories using this policy for all 46 environments. The collected 1052 
+
+dataset reflects the diverse difficulty and memory requirements of the benchmark and serves as a 1053 
+
+challenging testbed for evaluating general-purpose memory architectures like RATE. 1054 
+
+C.2 Standard benchmarks 1055 
+
+C.2.1 Atari games 1056 
+
+For the Atari game environments [ 5 ], we used the same dataset as in DT, namely the DQN replay 1057 
+
+dataset with grayscale state images [ 2]. This dataset contains 500 thousand of the 50 million steps of 1058 
+
+an online DQN [ 31 ] agent for each game. We use the following set of games: SeaQuest, Breakout, 1059 
+
+Pong and Qbert. 1060 
+
+C.2.2 MuJoCo. 1061 
+
+Figure 10: Action Associative Retrieval. Despite the fact that memory is not required in decision 1062 
+
+making in control environments like MuJoCo [ 16 ], we 1063 
+
+conducted additional experiments in this environment to 1064 
+
+compare with DT. For the continuous control tasks, we 1065 
+
+selected a standard MuJoCo locomotion environment and 1066 
+
+a set of trajectories from the D4RL benchmark [ 16 ]. Since 1067 
+
+we chose DT and TAP as the main models for comparison 1068 
+
+on this data, we focused on the environments used in both 1069 
+
+works (HalfCheetah, Hopper, and Walker). We used three 1070 
+
+different dataset settings: 1) Medium – 1 million timesteps generated by a “medium” policy that 1071 
+
+achieves about a third of the score of an expert policy; 2) Medium-Replay – the replay buffer of 1072 
+
+an agent trained with the performance of a medium policy (about 200 k– 400 k timesteps in our envi-1073 
+
+ronments); 3) Medium-Expert – 1 million timesteps generated by the medium policy concatenated 1074 
+
+with 1 million timesteps generated by an expert policy. The scores for the MuJoCo experiments are 1075 
+
+normalized such that 100 represents an expert policy, following the benchmark protocol outlined 1076 
+
+in [ 16 ]. The performance metrics for Conservative Q-Learning (CQL) and Trajectory Autoencoding 1077 
+
+Planner (TAP) are reported from the TAP paper [ 23 ], and for DT from the DT paper [ 10 ], as they use 1078 
+
+the same dataset and evaluation protocol. 1079 
+
+D Action Associative Retrieval 1080 
+
+As shown in Figure 6, DT has a SR = 50% for inference at corridor lengths longer than the transformer 1081 
+
+context length. This is due to the fact that even a DT trained on balanced data has a slight bias in 1082 
+
+24 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300 600 900
+> Training Sequence Length
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.96±0.04 0.96±0.04 0.95±0.04 0.96±0.04 0.96±0.04 0.96±0.04 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.99±0.01 0.97±0.03 0.96±0.04 0.94±0.06 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.88±0.12 0.88±0.12 0.88±0.12 0.88±0.12 0.88±0.12 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.95±0.05 0.79±0.10 0.72±0.11 0.72±0.11 
+
+RATE Success Rate RATE 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300 600 900
+> Training Sequence Length
+
+1.00±0.00 0.50±0.00 0.53±0.02 0.52±0.03 0.50±0.01 0.53±0.02 0.51±0.01 0.53±0.01 0.50±0.01 0.51±0.02 0.49±0.02 
+
+1.00±0.00 1.00±0.00 0.51±0.00 0.50±0.01 0.53±0.02 0.51±0.01 0.50±0.00 0.52±0.01 0.50±0.01 0.50±0.00 0.52±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 0.51±0.01 0.50±0.01 0.48±0.01 0.49±0.01 0.49±0.01 0.49±0.01 0.49±0.01 0.49±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.50±0.01 0.49±0.00 0.49±0.01 0.51±0.01 0.50±0.01 0.50±0.01 0.50±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.49±0.01 0.50±0.00 0.50±0.01 0.49±0.01 0.50±0.01 0.50±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.49±0.00 0.49±0.01 0.49±0.00 0.48±0.02 0.50±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.48±0.01 0.49±0.00 0.50±0.01 0.49±0.01 
+
+DT Success Rate DT 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300 600 900
+> Training Sequence Length
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+0.88±0.12 0.87±0.13 0.90±0.10 0.85±0.15 0.86±0.14 0.88±0.12 0.86±0.14 0.89±0.12 0.91±0.10 0.89±0.11 0.74±0.15 
+
+0.77±0.14 0.74±0.15 0.76±0.14 0.74±0.15 0.76±0.14 0.74±0.15 0.73±0.15 0.75±0.15 0.72±0.16 0.77±0.14 0.67±0.15 
+
+0.75±0.14 0.74±0.15 0.76±0.14 0.76±0.14 0.75±0.14 0.74±0.15 0.76±0.14 0.75±0.14 0.75±0.14 0.75±0.14 0.74±0.15 
+
+CQL-LSTM Success Rate 
+
+CQL-LSTM 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150
+> Training Sequence Length
+
+0.52±0.02 0.48±0.04 0.51±0.02 0.49±0.04 0.53±0.01 0.50±0.01 0.52±0.01 0.47±0.02 0.52±0.02 0.48±0.01 0.53±0.02 
+
+0.50±0.01 0.51±0.02 0.49±0.02 0.50±0.02 0.47±0.02 0.48±0.01 0.48±0.01 0.48±0.01 0.47±0.02 0.50±0.01 0.51±0.01 
+
+0.45±0.04 0.52±0.01 0.50±0.01 0.49±0.01 0.50±0.01 0.48±0.02 0.51±0.02 0.52±0.03 0.52±0.01 0.54±0.04 0.52±0.01 
+
+0.54±0.04 0.49±0.00 0.50±0.01 0.48±0.02 0.49±0.01 0.52±0.02 0.51±0.01 0.49±0.02 0.50±0.03 0.52±0.01 0.51±0.01 
+
+CQL-MLP Success Rate CQL-MLP 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+1.00±0.00 1.00±0.00 1.00±0.00 0.75±0.14 0.62±0.13 0.50±0.00 0.50±0.00 0.49±0.01 0.50±0.00 0.51±0.00 0.50±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.87±0.13 0.87±0.13 0.76±0.14 0.62±0.12 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+0.74±0.15 0.73±0.15 0.74±0.15 0.76±0.14 0.76±0.14 0.72±0.16 0.77±0.13 0.76±0.14 0.76±0.14 0.77±0.13 0.76±0.14 
+
+DGRU Success Rate 
+
+DGRU 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+0.88±0.12 0.88±0.12 0.88±0.12 0.87±0.13 0.88±0.12 0.87±0.13 0.88±0.12 0.87±0.13 0.88±0.12 0.88±0.12 0.88±0.12 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+0.86±0.14 0.88±0.12 0.85±0.13 0.78±0.13 0.74±0.15 0.74±0.15 0.76±0.14 0.76±0.14 0.76±0.14 0.76±0.14 0.79±0.13 
+
+0.49±0.02 0.52±0.02 0.49±0.02 0.49±0.00 0.49±0.01 0.47±0.02 0.51±0.01 0.52±0.02 0.49±0.01 0.49±0.01 0.53±0.02 
+
+DLSTM Success Rate DLSTM 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+1.00±0.00 0.49±0.01 0.48±0.01 0.51±0.03 0.51±0.01 0.49±0.02 0.51±0.01 0.48±0.01 0.48±0.01 0.49±0.01 0.51±0.00 
+
+1.00±0.00 1.00±0.00 0.49±0.02 0.49±0.00 0.50±0.00 0.50±0.02 0.50±0.00 0.49±0.01 0.49±0.02 0.49±0.02 0.50±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 0.51±0.01 0.50±0.00 0.50±0.00 0.50±0.00 0.50±0.00 0.51±0.01 0.49±0.00 0.50±0.00 
+
+0.64±0.12 0.65±0.12 0.62±0.13 0.61±0.13 0.50±0.01 0.48±0.01 0.51±0.01 0.49±0.01 0.46±0.01 0.52±0.02 0.50±0.00 
+
+0.52±0.02 0.47±0.01 0.53±0.02 0.50±0.02 0.54±0.02 0.49±0.03 0.50±0.02 0.52±0.02 0.49±0.02 0.49±0.02 0.52±0.01 
+
+> Hard  Easy
+
+Easy Hard 
+
+DMamba Model Success Rate in Passive T-Maze (mean±sem) 
+
+0.4 
+
+0.5 
+
+0.6 
+
+0.7 
+
+0.8 
+
+0.9 
+
+1.0 
+
+> Success Rate
+
+DMamba 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+0.46±0.03 0.51±0.04 0.46±0.01 0.52±0.01 0.52±0.03 0.52±0.02 0.52±0.02 0.55±0.04 0.46±0.02 0.52±0.01 0.48±0.02 
+
+0.53±0.01 0.50±0.01 0.54±0.04 0.48±0.01 0.47±0.02 0.49±0.02 0.47±0.02 0.48±0.03 0.49±0.04 0.47±0.01 0.47±0.02 
+
+0.51±0.02 0.50±0.01 0.50±0.01 0.52±0.01 0.52±0.01 0.52±0.01 0.49±0.01 0.52±0.01 0.49±0.01 0.49±0.01 0.54±0.03 
+
+0.48±0.01 0.52±0.03 0.49±0.02 0.48±0.00 0.51±0.02 0.51±0.01 0.51±0.03 0.50±0.03 0.52±0.01 0.52±0.02 0.49±0.01 
+
+0.47±0.02 0.48±0.01 0.50±0.02 0.48±0.01 0.49±0.01 0.48±0.02 0.48±0.01 0.48±0.01 0.49±0.01 0.51±0.02 0.48±0.01 
+
+BC-MLP Success Rate BC-MLP 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+1.00±0.00 0.55±0.04 0.51±0.00 0.50±0.02 0.48±0.03 0.43±0.05 0.34±0.08 0.28±0.09 0.21±0.10 0.19±0.11 0.15±0.12 
+
+1.00±0.00 1.00±0.00 0.50±0.01 0.54±0.02 0.48±0.01 0.47±0.02 0.40±0.07 0.36±0.08 0.32±0.10 0.29±0.12 0.26±0.14 
+
+1.00±0.00 1.00±0.00 1.00±0.00 0.50±0.01 0.52±0.01 0.49±0.01 0.50±0.00 0.49±0.00 0.51±0.00 0.49±0.00 0.49±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.51±0.02 0.49±0.00 0.48±0.02 0.46±0.03 0.45±0.05 0.42±0.08 0.38±0.11 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.49±0.00 0.49±0.00 0.49±0.00 0.49±0.00 0.50±0.00 0.49±0.01 
+
+LSDT Success Rate 
+
+LSDT 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300 600 900
+> Training Sequence Length
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+0.87±0.12 0.87±0.13 0.86±0.14 0.87±0.13 0.89±0.12 0.87±0.13 0.89±0.12 0.88±0.12 0.89±0.11 0.87±0.13 0.90±0.10 
+
+0.51±0.06 0.49±0.04 0.44±0.02 0.47±0.00 0.47±0.03 0.54±0.03 0.54±0.02 0.47±0.03 0.51±0.01 0.55±0.05 0.49±0.04 
+
+0.52±0.02 0.51±0.02 0.51±0.03 0.53±0.02 0.48±0.00 0.47±0.01 0.50±0.01 0.49±0.00 0.53±0.02 0.50±0.01 0.51±0.01 
+
+BC-LSTM Success Rate BC-LSTM 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 
+
+1.00±0.00 0.98±0.01 0.81±0.13 0.83±0.12 0.84±0.12 0.83±0.12 0.84±0.12 0.82±0.12 0.83±0.12 0.82±0.12 0.86±0.11 
+
+1.00±0.00 1.00±0.00 0.90±0.10 0.78±0.13 0.68±0.12 0.68±0.13 0.71±0.11 0.66±0.12 0.68±0.12 0.69±0.12 0.72±0.10 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.84±0.12 0.81±0.13 0.80±0.14 0.81±0.14 0.80±0.14 0.80±0.14 0.80±0.14 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.99±0.01 0.96±0.03 0.66±0.09 0.61±0.07 0.50±0.01 0.50±0.01 0.50±0.01 
+
+RMT Success Rate 
+
+RMT 9 30 90 150 300 600 900 1200 2400 4800 9600 
+
+Validation Sequence Length 
+
+> 930 90 150 300
+> Training Sequence Length
+
+1.00±0.00 0.88±0.12 0.49±0.01 0.50±0.00 0.50±0.00 0.50±0.00 0.50±0.01 0.50±0.01 0.50±0.01 0.49±0.01 0.51±0.01 
+
+1.00±0.00 1.00±0.00 0.57±0.07 0.50±0.00 0.50±0.01 0.51±0.01 0.49±0.00 0.51±0.00 0.50±0.01 0.51±0.01 0.51±0.01 
+
+1.00±0.00 1.00±0.00 1.00±0.00 0.48±0.01 0.50±0.00 0.50±0.01 0.49±0.01 0.48±0.00 0.49±0.01 0.50±0.01 0.51±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.97±0.03 0.51±0.00 0.51±0.00 0.51±0.00 0.49±0.01 0.52±0.01 0.50±0.00 
+
+1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 1.00±0.00 0.50±0.00 0.50±0.00 0.50±0.00 0.50±0.00 0.50±0.00 0.50±0.00 
+
+TrXL Success Rate TrXL 
+
+Figure 11: Results for all models in the T-Maze generalization task. the predicted probability towards one of the two required actions, which leads to the fact that when 1083 
+
+t > K the agent constantly produces only one action: up or down. In turn, the presence of memory 1084 
+
+in the agent allows us to combat this problem. 1085 
+
+To check how the agent’s performance changes during training, we design an Action Associative 1086 
+
+Retrieval (AAR ) Figure 10 environment. 1087 
+
+There are two states in this environment: S0 and S1. The agent appears in state S0 and by performing 1088 
+
+the action a0 ∈ { 0, 1} moves to state S1. Next, the agent must take N − 2 steps to move from state 1089 
+
+25 Figure 12: Experimental results with RATE and DT in the AAR environment. The graphs show the 10-runs average results of training on trajectories of length T = 90 and validation on trajectories of length T = 180 , for RATE with Kef f = 3 × 30 = 90 and for DT with K = 90 .
+
+S1 to state S1 by performing action a = 2 (no op.). At the end of the episode, the agent must perform 1090 
+
+the same action that moved it from state S0 to state S1 in order to move from state S1 to state S0.1091 
+
+Thus, the action a ∈ { 0, 1, 2}. Agent observations o = [ state, f lag, noise ], where state ∈ { 0, 1}1092 
+
+is the index of the current state, f lag ∈ { 0, 1} is a flag equal to 1 in case the next step requires 1093 
+
+returning to the initial state and equal to 0 otherwise, noise ∈ {− 1, 0, +1 } is the noise channel. The 1094 
+
+agent receives a +1 reward if it returns to the initial state S0 by performing the action that took it out 1095 
+
+from the S0 to the S1, and −1 in other cases. The training dataset consists of oracle-generated 6000 1096 
+
+trajectories with positive reward. 1097 
+
+More formally, we can talk about the presence of memory in an agent when solving AAR (T-Maze-1098 
+
+like) tasks under the condition that: 1099 
+
+∀t > K : 1
+
+N0
+
+> N0
+
+X
+
+> i=1
+
+pi(at = a0|a0 = a0) + 1
+
+N1
+
+> N1
+
+X
+
+> i=1
+
+pi(at = a1|a0 = a1) > 1 (4) This condition means that if the agent has memory, the sum of the average conditional probabilities 1100 
+
+over all experiments will be greater than one, i.e., these probabilities are independent of each other. 1101 
+
+Provided that the sum of these probabilities is less than or equal to one, the agent will choose at best 1102 
+
+the same target action in most experiments, even if another action is required. 1103 
+
+where a0, a 1 ∈ A – two mutually exclusive actions leading to a reward; t is the step at which the 1104 
+
+final action is required; N0, N 1 are the number of experiments in environments where target action 1105 
+
+at = a0 and at = a1, respectively. 1106 
+
+26 In the results Figure 12, the first 1% of training steps was removed because it corresponds to the 1107 
+
+beginning of the training and is unrepresentative. Blue dots correspond to the beginning of training, 1108 
+
+red dots to the end of training. As can be seen from Figure 12, during training, the probabilities 1109 
+
+pi(at = a0|a0 = a0) and pi(at = a1|a0 = a1) on the training trajectories have a strong positive 1110 
+
+correlation ( RDT train = 1 .00 and RRAT E train = 0 .97 ), where R – correlation coefficient. This indicates 1111 
+
+that within-context (effective context) DT and RATE models are able to predict both a0 and a1 actions 1112 
+
+equally well. 1113 
+
+At the same time, during validation, for the RATE model this pattern is preserved – the red points 1114 
+
+corresponding to the probabilities of choosing actions a0 and a1 are in the upper right part of the 1115 
+
+graph, positive correlation persists ( RRAT E val = 0 .80 ). On the other hand, in the DT case, the cluster 1116 
+
+of red dots is skewed toward choosing action a1 and action a0 with equal probabilities equal to 0.5.1117 
+
+Thus, in sum, these probabilities are less or equal to one, as evidenced by a strong negative correlation 1118 
+
+(RDT val = −0.97 ). The results confirm the inability of DT to generalize on trajectories whose lengths 1119 
+
+exceed the context length and the ability of RATE to handle such tasks. 1120 
+
+E Training 1121 
+
+This section provides additional details on the training process of the baselines considered in the 1122 
+
+paper. We treated the inclusion of the feed-forward network (FFN) block in RATE’s transformer 1123 
+
+decoder as a hyperparameter, as RATE performed slightly better without FFN in some environments. 1124 
+
+In contrast, other transformer-based baselines were trained with the standard transformer decoder 1125 
+
+including FFN. 1126 
+
+E.1 ViZDoom-Two-Colors 1127 
+
+Since the pillar disappears at time t=45 , all trajectories span from t=0 to t=90 to ensure that the 1128 
+
+cue remains available during training. In this setting, we compare DT with context length K=90 to 1129 
+
+RATE, RMT, and TrXL models using K=30 and N =3 segments. Thus, RATE processes sequences 1130 
+
+of the same total length Keff =N ×K=90 but accesses only K=30 tokens at a time. Additionally, we 1131 
+
+ran experiments with N =3 , K=50 , and T =150 to validate model robustness under longer and more 1132 
+
+complex configurations. 1133 
+
+E.2 Passive T-Maze 1134 
+
+We trained models on sequences of length Ttrain ∈ { 9, 30 , 90 , 150 , 300 , 600 , 900 } and evaluated 1135 
+
+them on Tval ∈ { 9, 30 , 90 , 150 , 300 , 600 , 900 , 1200 , 2400 , 4800 , 9600 }. For RATE, each 1136 
+
+sequence was split into N = 3 segments, yielding a context length of K = Ttrain /3. All training 1137 
+
+trajectories started from t = 0 , ensuring the cue was always included. In what follows, we adopt the 1138 
+
+notation MODEL-N , where N = 3 indicates segmentation into three recurrent blocks (e.g., RATE-3 1139 
+
+is trained on full sequences of length T = 90 with K = 30 ). This convention is used throughout the 1140 
+
+ablation studies. 1141 
+
+E.3 Memory Maze 1142 
+
+To train RATE, DT, RMT, and TrXL on Memory Maze, we used the same approach as for ViZDoom-1143 
+
+Two-Colors environment, but instead of using fixed trajectories starting at t = 0 , we sampled 1144 
+
+consecutive 90-step subsequences from the original 1000-step trajectories. Each subsequence was 1145 
+
+sampled with a stride of 90 steps, resulting in approximately 11 training sequences per original 1146 
+
+trajectory. As in the ViZDoom-Two-Colors case, training for DT was performed with a context length 1147 
+
+of K = 90 and for RATE, RMT, and TrXL with a context length of K = 30 and number of segments 1148 
+
+N = 3 , i.e., effective context length Kef f = N × K = 3 × 30 = 90 .1149 
+
+E.4 Minigrid-Memory 1150 
+
+To train baselines in this environment, we used only mazes of fixed size 41 × 41 , ensuring a consistent 1151 
+
+corridor length during training. For evaluation, models were validated on mazes ranging from 11 × 11 1152 
+
+to 501 × 501 , where corridor lengths vary within each grid, enabling assessment of both interpolation 1153 
+
+and extrapolation capabilities. All training trajectories used an episode timeout of 96 steps, while 1154 
+
+27 validation trajectories across all maze sizes used a longer timeout of 500 steps. As in T-Maze, each 1155 
+
+trajectory began at t = 0 , ensuring the cue was always observed. During training, RATE used a 1156 
+
+context length of K = 30 with N = 3 segments, while other baselines (except RMT and TrXL) used 1157 
+
+K = 90 .1158 
+
+E.5 POPGym Suite 1159 
+
+POPGym [ 32 ] comprises 46 tasks of varying memory complexity, including both memory puzzles 1160 
+
+and reactive POMDPs. Since episode lengths vary widely across tasks – from as short as 12 steps 1161 
+
+to as long as 1000 – we ensured a consistent and fair memory evaluation for RATE by setting the 1162 
+
+context length K = T / 3 and using N = 3 segments for every environment, where T denotes the 1163 
+
+maximum episode length of each task. This uniform configuration allowed RATE to process full 1164 
+
+trajectories with recurrent segmentation, ensuring its memory capacity was equally tested across 1165 
+
+tasks of different lengths and difficulties. 1166 
+
+E.6 Atari and MuJoCo 1167 
+
+When training RATE on Atari games and MuJoCo control tasks, sequences of length T = 90 (Atari) 1168 
+
+and T = 60 (MuJoCo) were sampled randomly from the original trajectories in the dataset. These 1169 
+
+trajectories were then divided into N = 3 segments of length K = 30 (Atari) and K = 20 (MuJoCo), 1170 
+
+forming an effective context of length Kef f = N × K = 90 (60 for MuJoCo). 1171 
+
+For Atari, we used the identical experimental design described in the DT paper [ 10 ]. It is worth 1172 
+
+noting that we presented raw scores for Atari, rather than gamer-normalized scores as described in 1173 
+
+the DT paper. Table 4 shows the results for Atari environments. RATE outperforms DT significantly 1174 
+
+in environments like Breakout and Qbert. We attribute this to the observation that, although these 1175 
+
+environments do not explicitly demand memory, intricate dynamics from the past exert a greater 1176 
+
+influence on agent behavior than in environments such as SeaQuest. Actions executed in the past 1177 
+
+notably alter the present state of the environment in Breakout and Qbert, whereas in SeaQuest, such 1178 
+
+actions hold little significance. For instance, the emergence of enemies and divers in SeaQuest is 1179 
+
+entirely independent of the agent’s prior actions. 1180 
+
+For MuJoCo, our findings suggest that the conventional strategy of utilizing return is not suitable 1181 
+
+for our segment-based scheme. The issue arises during the trajectory, where the agent’s return 1182 
+
+persistently diminishes. However, the true value of the agent’s state at the onset and conclusion of the 1183 
+
+episode could remain unchanged, provided the agent’s policy performs consistently well. To rectify 1184 
+
+this discrepancy, we propose a novel evaluation strategy for MuJoCo tasks. In this approach, each 1185 
+
+segment commences with the maximum return, simulating the scenario where the agent initiates the 1186 
+
+trajectory anew. This method effectively mitigates the aforementioned issue, enhancing the accuracy 1187 
+
+of our evaluation process. Our MuJoCo experiments in Table 3 show that this benefits performance 1188 
+
+significantly for some environments. Thus, using RATE allowed us to obtain the best metrics for 1189 
+
+MuJoCo in 4/9 cases compared to the other baselines. RATE also outperforms DT in 9/9 tasks. 1190 
+
+F Additional ablation studies 1191 
+
+To determine the optimal hyperparameters associated with memory mechanisms, additional ablation 1192 
+
+studies were performed in ViZDoom-Two-Colors and T-Maze environments, and the results are 1193 
+
+presented in Figure 14 and Figure 13 (right). From the ablation studies results, it was found that 1194 
+
+for environments like ViZDoom-Two-Colors with continuous reward signal and image observations, 1195 
+
+the best results can be obtained using number of cached memory tokens mem_len = ( K × 3 + 2 ×1196 
+
+num_mem_tokens ) × N , where K – context length and N – number of segments. 1197 
+
+On the other hand, for environments with sparse events like T-Maze, it has been found that us-1198 
+
+ing caching of hidden states of previous tokens ( mem_len > 0) prevents remembering important 1199 
+
+information. 1200 
+
+F.1 Additional ViZDoom-Two-Colors ablation 1201 
+
+The effect of combining of memory tokens with noise is shown in Figure 13 (left). The noise was 1202 
+
+applied as a convex combination: memory_tokens = (1 − α) × memory_tokens + α × noise .1203 
+
+28 Table 8: RATE hyperparameters for different experiments. ‡ – Leaky ReLU used in Atari.Pong. The listed hyperparameters for ViZDoom-Two-Colors and T-Maze correspond to the experiments with 
+
+Ttrain = 150 , while for POPGym, they reflect the settings used in the POPGym-Concentration task.                                                                                                                                                                   
+
+> Hyperparameter ViZDoom2C Memory Maze T-Maze Minigrid-Memory POPGym Atari MuJoCo
+> Memory-specific parameters
+> Number of memory tokens 15 15 10 10 30 15 5Number of cached tokens 100 360 0180 100 360 60 Number of MRV heads 2024211MRV activation ReLU ReLU ReLU ReLU ReLU ReLU ‡ReLU
+> Transformer architecture
+> Number of layers 668410 63Number of attention heads 8884281Embedding dimension 64 64 64 128 32 128 128 Context length K50 30 50 30 18 30 20 Number of segments 3333333Skip dec FFN False True True False True True True
+> Regularization
+> Hidden dropout 0.2 0.5 0.2 0.3 0.1 0.2 0.2 Attention dropout 0.05 0.2 0.1 0.1 0.05 0.05 0.05 Weight decay 0.001 0.1 0.001 0.001 0.001 0.1 0.1
+> Training configuration
+> Max epochs 150 80 200 500 200 10 10 Batch size 128 64 64 64 32 128 4096 Loss function CE CE CE CE CE CE MSE Optimizer AdamW AdamW AdamW AdamW AdamW AdamW AdamW Learning rate 3e-4 3e-4 1e-4 1e-4 3e-4 3e-4 6e-5 Grad norm clip 5.0 1.0 1.0 5.0 5.0 1.0 1.0 Cosine decay False True False False False True False Linear warmup True True True True True True True
+> (β1, β 2)(0.9, 0.999) (0.9, 0.95) (0.9, 0.999) (0.9, 0.999) (0.9, 0.999) (0.9, 0.95) (0.9, 0.95)
+
+Figure 13: ( left ) Investigating the RATE memory tokens noise effect in the ViZDoom-Two-Colors. (right ) Results of RATE-3 (trained on corridor lengths ≤ 90 ) ablation studies in the T-Maze envi-ronment. n_head_ca – number of MRV attention heads, num_mem_tokens – number of memory tokens. With unchanged caching of hidden states from previous steps at growth of the noise parameter α, at 1204 
+
+first there is a decrease of performance at inference on green pillars (up to α = 0 .5), and only then a 1205 
+
+decrease of performance at inference on red pillars. This phenomenon can be explained by the fact 1206 
+
+that memory embeddings is trained to record mostly information about red pillars, which helps to 1207 
+
+combat bias in the training data. 1208 
+
+F.2 Curriculum Learning 1209 
+
+Since in the T-Maze environment, the number of actions at the junction relates to the number of actions 1210 
+
+when moving straight along the corridor as 1 
+
+> L
+
+and tends to 0 as L increases, there is a significant 1211 
+
+imbalance in the agent’s action distribution, which can cause problems when performing rare class 1212 
+
+(turning actions) prediction. Theoretically, this situation can be remedied through curriculum learning. 1213 
+
+Curriculum learning (CL) is a technique in which a model is trained on examples of increasing 1214 
+
+difficulty. In this approach, the model is first trained on the set of trajectories Q1 = q1 of length 1215 
+
+K × 1, then the trained model is re-trained on the set of trajectories Q2 = q1 ∪ q2, where the set 1216 
+
+29 Table 9: Performance on POPGym tasks (mean ±sem over three runs, 100 seeds each). 
+
+Environment RATE DT Random BC-MLP BC-LSTM Dataset Average Return 
+
+AutoencodeEasy-v0 −0.29 ± 0.00 −0.47 ± 0.00 −0.50 ± 0.00 −0.47 ± 0.00 −0.32 ± 0.00 −0.26 
+
+AutoencodeMedium-v0 −0.47 ± 0.00 −0.49 ± 0.00 −0.50 ± 0.00 −0.49 ± 0.00 −0.47 ± 0.00 −0.48 
+
+AutoencodeHard-v0 −0.46 ± 0.00 −0.49 ± 0.00 −0.50 ± 0.01 −0.50 ± 0.00 −0.44 ± 0.00 −0.43 
+
+BattleshipEasy-v0 −0.81 ± 0.02 −0.93 ± 0.03 −0.46 ± 0.01 −1.00 ± 0.00 −0.49 ± 0.01 −0.35 
+
+BattleshipMedium-v0 −0.91 ± 0.02 −0.91 ± 0.03 −0.39 ± 0.01 −1.00 ± 0.00 −0.81 ± 0.02 −0.43 
+
+BattleshipHard-v0 −0.92 ± 0.01 −0.97 ± 0.01 −0.41 ± 0.00 −1.00 ± 0.00 −0.67 ± 0.01 −0.40 
+
+ConcentrationEasy-v0 −0.06 ± 0.02 −0.05 ± 0.01 −0.19 ± 0.01 −0.92 ± 0.00 −0.14 ± 0.00 −0.12 
+
+ConcentrationMedium-v0 −0.84 ± 0.00 −0.84 ± 0.00 −0.84 ± 0.00 −0.88 ± 0.00 −0.84 ± 0.00 −0.87 
+
+ConcentrationHard-v0 −0.25 ± 0.00 −0.25 ± 0.01 −0.19 ± 0.00 −0.92 ± 0.00 −0.19 ± 0.01 −0.44 
+
+CountRecallEasy-v0 0.07 ± 0.01 −0.46 ± 0.01 −0.93 ± 0.00 −0.92 ± 0.00 0.05 ± 0.00 0.22 
+
+CountRecallMedium-v0 −0.47 ± 0.01 −0.75 ± 0.03 −0.88 ± 0.00 −0.88 ± 0.00 −0.47 ± 0.00 −0.48 
+
+CountRecallHard-v0 −0.54 ± 0.00 −0.81 ± 0.02 −0.93 ± 0.00 −0.92 ± 0.00 −0.56 ± 0.00 −0.55 
+
+HigherLowerEasy-v0 0.50 ± 0.00 0.50 ± 0.00 0.00 ± 0.01 0.47 ± 0.00 0.50 ± 0.00 0.51 
+
+HigherLowerMedium-v0 0.50 ± 0.00 0.50 ± 0.00 −0.01 ± 0.00 0.49 ± 0.00 0.50 ± 0.00 0.49 
+
+HigherLowerHard-v0 0.52 ± 0.00 0.51 ± 0.00 0.01 ± 0.01 0.50 ± 0.00 0.51 ± 0.01 0.49 
+
+LabyrinthEscapeEasy-v0 0.95 ± 0.00 0.80 ± 0.01 −0.39 ± 0.00 0.72 ± 0.05 0.92 ± 0.01 0.95 
+
+LabyrinthEscapeMedium-v0 −0.81 ± 0.01 −0.82 ± 0.01 −0.94 ± 0.01 −0.89 ± 0.01 −0.86 ± 0.00 −0.94 
+
+LabyrinthEscapeHard-v0 −0.56 ± 0.01 −0.67 ± 0.04 −0.84 ± 0.04 −0.71 ± 0.03 −0.69 ± 0.02 −0.49 
+
+LabyrinthExploreEasy-v0 0.95 ± 0.00 0.88 ± 0.06 −0.34 ± 0.01 0.87 ± 0.01 0.93 ± 0.00 0.96 
+
+LabyrinthExploreMedium-v0 0.79 ± 0.00 0.77 ± 0.01 −0.73 ± 0.00 0.26 ± 0.01 0.71 ± 0.01 0.79 
+
+LabyrinthExploreHard-v0 0.88 ± 0.00 0.86 ± 0.01 −0.61 ± 0.00 0.45 ± 0.01 0.82 ± 0.01 0.87 
+
+MineSweeperEasy-v0 0.15 ± 0.03 −0.33 ± 0.04 −0.26 ± 0.03 −0.47 ± 0.01 0.20 ± 0.00 0.28 
+
+MineSweeperMedium-v0 −0.44 ± 0.00 −0.40 ± 0.01 −0.43 ± 0.00 −0.49 ± 0.00 −0.35 ± 0.01 −0.27 
+
+MineSweeperHard-v0 −0.20 ± 0.00 −0.37 ± 0.02 −0.39 ± 0.01 −0.48 ± 0.00 −0.16 ± 0.00 −0.10 
+
+MultiarmedBanditEasy-v0 0.37 ± 0.01 0.27 ± 0.01 0.02 ± 0.00 0.05 ± 0.00 0.17 ± 0.02 0.62 
+
+MultiarmedBanditMedium-v0 0.22 ± 0.03 0.27 ± 0.01 0.01 ± 0.00 0.01 ± 0.00 0.17 ± 0.01 0.43 
+
+MultiarmedBanditHard-v0 0.32 ± 0.01 0.35 ± 0.01 0.01 ± 0.00 0.21 ± 0.01 0.14 ± 0.00 0.59 
+
+NoisyPositionOnlyCartPoleEasy-v0 0.88 ± 0.03 0.87 ± 0.02 0.11 ± 0.00 0.23 ± 0.00 0.44 ± 0.01 0.98 
+
+NoisyPositionOnlyCartPoleMedium-v0 0.18 ± 0.01 0.17 ± 0.01 0.11 ± 0.00 0.16 ± 0.00 0.22 ± 0.01 0.36 
+
+NoisyPositionOnlyCartPoleHard-v0 0.33 ± 0.01 0.34 ± 0.00 0.12 ± 0.01 0.18 ± 0.00 0.25 ± 0.01 0.57 
+
+NoisyPositionOnlyPendulumEasy-v0 0.87 ± 0.00 0.84 ± 0.01 0.27 ± 0.01 0.31 ± 0.00 0.88 ± 0.00 0.90 
+
+NoisyPositionOnlyPendulumMedium-v0 0.60 ± 0.01 0.56 ± 0.01 0.26 ± 0.00 0.28 ± 0.00 0.66 ± 0.00 0.67 
+
+NoisyPositionOnlyPendulumHard-v0 0.68 ± 0.00 0.63 ± 0.01 0.27 ± 0.01 0.30 ± 0.00 0.72 ± 0.00 0.73 
+
+PositionOnlyCartPoleEasy-v0 0.93 ± 0.03 1.00 ± 0.00 0.12 ± 0.00 0.15 ± 0.00 0.17 ± 0.00 1.00 
+
+PositionOnlyCartPoleMedium-v0 0.05 ± 0.01 0.03 ± 0.00 0.04 ± 0.00 0.05 ± 0.00 0.06 ± 0.00 1.00 
+
+PositionOnlyCartPoleHard-v0 0.07 ± 0.00 0.34 ± 0.08 0.05 ± 0.00 0.09 ± 0.00 0.12 ± 0.00 1.00 
+
+PositionOnlyPendulumEasy-v0 0.54 ± 0.02 0.51 ± 0.03 0.27 ± 0.00 0.29 ± 0.00 0.91 ± 0.00 0.92 
+
+PositionOnlyPendulumMedium-v0 0.47 ± 0.01 0.49 ± 0.01 0.26 ± 0.00 0.28 ± 0.00 0.82 ± 0.00 0.82 
+
+PositionOnlyPendulumHard-v0 0.49 ± 0.01 0.55 ± 0.01 0.26 ± 0.00 0.30 ± 0.00 0.89 ± 0.00 0.88 
+
+RepeatFirstEasy-v0 1.00 ± 0.00 0.45 ± 0.16 −0.49 ± 0.01 −0.50 ± 0.00 1.00 ± 0.00 1.00 
+
+RepeatFirstMedium-v0 0.10 ± 0.02 0.42 ± 0.14 −0.50 ± 0.00 −0.50 ± 0.00 −0.50 ± 0.00 0.99 
+
+RepeatFirstHard-v0 0.99 ± 0.01 −0.21 ± 0.18 −0.50 ± 0.00 −0.50 ± 0.00 0.99 ± 0.01 1.00 
+
+RepeatPreviousEasy-v0 1.00 ± 0.00 1.00 ± 0.00 −0.49 ± 0.01 −0.52 ± 0.00 1.00 ± 0.00 1.00 
+
+RepeatPreviousMedium-v0 −0.46 ± 0.00 −0.47 ± 0.00 −0.51 ± 0.00 −0.48 ± 0.00 −0.45 ± 0.00 −0.48 
+
+RepeatPreviousHard-v0 −0.38 ± 0.01 −0.38 ± 0.00 −0.50 ± 0.01 −0.50 ± 0.00 −0.38 ± 0.00 −0.39 
+
+VelocityOnlyCartPoleEasy-v0 1.00 ± 0.00 1.00 ± 0.00 0.11 ± 0.00 0.99 ± 0.00 1.00 ± 0.00 1.00 
+
+VelocityOnlyCartPoleMedium-v0 1.00 ± 0.00 0.96 ± 0.02 0.04 ± 0.00 0.63 ± 0.00 1.00 ± 0.00 0.99 
+
+VelocityOnlyCartPoleHard-v0 1.00 ± 0.00 1.00 ± 0.00 0.06 ± 0.00 0.83 ± 0.01 1.00 ± 0.00 1.00 
+
+q2 is formed by trajectories of length K × 2, and so on (in order of increasing complexity of the 1217 
+
+trajectories). Thus, for the N segments considered during training, the set QN = SNi=1 qi is used. 1218 
+
+In the T-Maze environment, DT, RATE, RMT, and TrXL were trained with and without curriculum 1219 
+
+learning because this approach theoretically produces better results. However, it is important to note 1220 
+
+that the T-Maze task is successfully solved by the RATE model without using curriculum learning, 1221 
+
+and even vice versa – its use slightly degraded performance on long corridors. However, with respect 1222 
+
+to TrXL, the use of CL yielded slightly better results. The work showed that using CL does not 1223 
+
+achieve significantly better performance on the T-Maze task. The results of using the CL on the 1224 
+
+T-Maze environment are presented in Figure 16 (left), and the results of applying noise to memory 1225 
+
+embeddings to assess its importance are presented in Figure 16 (right). 1226 
+
+30 Table 10: Experimental setup and evaluation metrics across different environments. Nruns denotes the number of model runs; Nseeds denotes the number of inference episodes with different seeds; sem denotes standard error of the mean, and std denotes standard deviation. 
+
+Environment Experiment Setup Results 
+
+Nruns Nseeds Metric Notation 
+
+Memory-intensive environments 
+
+ViZDoom-Two-Colors 6 100 Return mean ±sem T-Maze 4 100 Success Rate mean ±sem Memory Maze 3 100 Return mean ±sem Minigrid-Memory 3 100 Return mean ±sem POPGym 3 100 Return mean ±sem 
+
+Diagnostic environment 
+
+Action Associative Retrieval 10 — Success Rate mean ±sem 
+
+Figure 14: Results of RATE ablation studies in the ViZDoom-Two-Colors environment. 
+
+F.3 Supplemental MRV ablation 1227 
+
+One of the options for implementing the memory tokenization gating mechanism was an approach 1228 
+
+similar to the one proposed in Gated Transforer-XL (GTrXL) [ 36 ] work. Thus, the MRV-G scheme 1229 
+
+was inspired by the gating mechanism from GTrXL and implemented as follows: 1230 
+
+r = σ(MnWr + Mn+1 Ur ) (5) 
+
+> 1231
+
+z = σ(MnWz + Mn+1 Uz − bias ) (6) 
+
+> 1232
+
+h = tanh (MnWg + ( Mn+1 × r)Ur ) (7) 
+
+> 1233
+
+˜Mn+1 = σ(Mn(1 − z) + z × h) (8) The results of the RATE (trained on corridor lengths of ≤ 150 ) inference on the T-Maze environment 1234 
+
+with these MRV configurations are shown in Figure 17 and in Table 6. The results presented 1235 
+
+in Figure 17 confirm the high stability of RATE when using cross-attention-based MRV (MRV-CA-2), 1236 
+
+as well as the model’s ability to hold important information in memory embeddings when inference 1237 
+
+on long tasks. 1238 
+
+31 Table 11: RATE encoders for each part of (R, o, a ) triplets. We use an Embedding layer for encoding discrete actions and a Linear layer for continuous ones. ‡ – channels / kernel sizes / padding. For POPGym tasks with grid-based observations (e.g., MineSweeper and Battleship), we encoded the grid using a token dictionary followed by a linear encoder to produce a fixed-length vector. Actions were encoded using an embedding layer for all discrete control tasks, while a linear layer was used for continuous control environments (e.g., PositionOnlyPendulum). 
+
+Environment Encoder Configuration Return Observation Conv. params ‡ Action 
+
+Image-based environments 
+
+ViZDoom-Two-Colors Linear Conv2D × 3 (32, 64, 64) / (8, 4, 3) / 0 Embedding Memory Maze Linear Conv2D × 3 (32, 64, 64) / (8, 4, 3) / 2 Embedding Minigrid-Memory Linear Conv2D × 3 (32, 64, 64) / (8, 4, 3) / 0 Embedding Atari Linear Conv2D × 3 (32, 64, 64) / (8, 4, 3) / 0 Embedding 
+
+Vector-based environments 
+
+T-Maze Linear Linear — Embedding MuJoCo Linear Linear — Linear Action Associative Retrieval Linear Linear — Embedding POPGym Linear Linear — Embedding / Linear 
+
+F.4 Ablation on number of segments and segment length 1239 
+
+Partitioning the trajectories into fixed-length segments allows the RATE model to train on long 1240 
+
+trajectories without increasing the context size, which makes the parameters N (the number of 1241 
+
+segments into which the training trajectories are divided) and K (the context length, i.e., the size of a 1242 
+
+single segment) critical because they determine the length of the effective context Kef f = K × N .1243 
+
+Figure 18 presents the results of ablation studies for parameters N and K at fixed Kef f = 90 .1244 
+
+G Transformer Ablation Studies 1245 
+
+Transformer core hyperparameters. This section presents the results of ablation studies on the 1246 
+
+main hyperparameters of the RATE transformer. The RATE configuration for the T-Maze environment 1247 
+
+specified in Table 8 was chosen for the ablation studies. The ablation studies focus on understanding 1248 
+
+the impact of key hyperparameters by systematically varying one parameter while keeping others 1249 
+
+constant. The results are shown in Figure 20, Figure 21, and Figure 22. 1250 
+
+Feed-Forward Network. For RATE, the inclusion of the decoder feed-forward block is treated 1251 
+
+as a tunable hyperparameter. In most environments, we disable it, as doing so often leads to better 1252 
+
+performance Figure 19. However, for ViZDoom-Two-Colors and Minigrid-Memory, we found that 1253 
+
+retaining the feed-forward block yields slightly improved results, and thus it is enabled in those 1254 
+
+settings. 1255 
+
+H Recommendations for Hyperparameter Settings 1256 
+
+Transformer-based models require careful hyperparameter tuning, and the addition of memory 1257 
+
+mechanisms in RATE introduces a few more components. However, configuring RATE remains 1258 
+
+largely similar to tuning a standard transformer . Based on extensive empirical evaluation, we 1259 
+
+provide the following practical guidelines to simplify the setup process. 1260 
+
+Step-by-step configuration: 1261 
+
+1. Segment setup. Divide each trajectory into N = 3 segments. For a trajectory of length T ,1262 
+
+set the context length to K = T // 3.1263 
+
+2. Memory configuration. Use the following default parameters for RATE’s memory mecha-1264 
+
+nisms: 1265 
+
+32 Figure 15: Memory Retention Valve configurations used in the ablation study. MRV-CA-2 : cross-attention-based MRV which uses an attention mechanism to control the updating of memory embed-dings and which is used in the work as the main mechanism. MRV-CA-1 : uses the same mechanism as MRV-CA-2 but the updated memory embeddings Mn+1 are fed to Query, and the incoming memory embeddings Mn are fed to Key and Value. MRV-G : gated MRV which uses a gating mechanism similar to the one used in Gated Transformer-XL [ 36 ]. MRV-GRU : uses a GRU [ 12 ]block to process updated memory embeddings with hidden states. MRV-LSTM : uses a LSTM [ 21 ]block to process updated memory embeddings with cached states. 
+
+Figure 16: ( left ). Results with and without the use of curriculum learning and ( right ) results of replacing RATE memory tokens with white noise at inference in T-Maze. • num_mem_tokens = 5 1266 
+
+• n_head_ca = 1 1267 
+
+• mrv_act = ReLU 1268 
+
+• mem_len =1269 
+
+– (3 × K + 2 × num_mem_tokens ) × N for dense reward environments (e.g., 1270 
+
+ViZDoom-Two-Colors, Minigrid-Memory) 1271 
+
+– 0 for sparse reward environments (e.g., T-Maze) 1272 
+
+33 Figure 17: Results of RATE inference with different MRV configurations on the T-Maze environment. Training was performed with the number of segments N = 5 and context length K = 30 , i.e. on trajectories of length ≤ 150 . MRV-CA-2 is the final MRV configuration that is used throughout the work and is designated as MRV. 
+
+Figure 18: Ablation of segment size K and segment count N with fixed effective context 
+
+Keff = K↑ × N ↓ = 90 .
+
+Figure 19: Ablation of feed-forward block usage in the decoder. 3. Transformer core. Set the standard architecture parameters (number of layers, atten-1273 
+
+tion heads, embedding dimension, etc.) based on the task complexity and computational 1274 
+
+constraints. 1275 
+
+4. Memory tuning. After adjust, fine-tune memory-related parameters if needed (e.g., 1276 
+
+num_mem_tokens , mem_len , dropout rates). 1277 
+
+This configuration provides a strong default setup and has consistently performed well across all 1278 
+
+evaluated tasks. 1279 
+
+I Technical details 1280 
+
+Table 12 and Table 13 shows the technical parameters of the training models. Note that the difference 1281 
+
+between the number of DT and RATE parameters is small. Training RATE with trajectory splitting 1282 
+
+into N segments allows ∼ N smaller GPU memory size usage than for DT. The training was 1283 
+
+conducted using a single NVIDIA A100 80 Gb graphics card. 1284 1285 
+
+34 Figure 20: Results of ablation by the number of layers of the RATE model in T-Maze environ-ment. 
+
+Figure 21: Results of ablation by the number of attention heads of the RATE model in T-Maze environment. 
+
+Figure 22: Results of ablation by the features sizes of the RATE model in T-Maze environment. Table 12: Comparison of RATE and DT Model Parameters. RATE has 1.0-7.7% less parameters compared to DT due to the fact that RATE does not use feed-forward network in the transformer decoder by default. 
+
+Environment RATE DT diff, % 
+
+T-Maze 1,723,840 1,775,488 -2.91 ViZDoom-Two-Colors 4,537,504 4,672,032 -2.88 Minigrid-Memory 2,000,864 2,051,872 -2.49 Memory Maze 1,639,840 1,673,696 -2.02 POPGym 6,760,192 6,827,008 -0.98 MIKASA-Robo 1,412,520 1,529,896 -7.67 Table 13: Computational efficiency comparison between RATE and DT models across different memory-intensive environments. We report three key metrics: (1) training time per epoch (mean±std, in seconds), (2) inference latency per step (mean±sem, in milliseconds), and (3) GPU memory footprint (in MiB). Lower values indicate better efficiency.                                            
+
+> RATE DT Environment Train (s) Test (ms) Size (MiB) Train (s) Test (ms) Size (MiB) T-Maze 16.17±2.75 7.20±0.31 3,148 95.75±0.49 10.69±0.14 8,608 ViZDoom-Two-Colors 77.44±3.56 10.35±0.52 7,750 68.18±1.56 10.45±0.41 14,046 Minigrid-Memory 33.74±2.65 9.94±2.24 4,102 16.77±1.37 10.43±2.84 4,298 Memory Maze 110.26±2.97 38.98±0.62 6,638 82.69±1.56 40.36±0.46 10,386 POPGym 3.37±0.25 8.91±0.37 5,948 3.64±0.53 8.98±0.32 10,696 MIKASA-Robo 71.30±8.08 485.67±8.75 10,396 44.90±6.16 473.29±5.97 29,902
+
+35
