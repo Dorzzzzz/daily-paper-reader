@@ -25,3 +25,68 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: long-video
+      description: 请为我检索长视频理解领域的论文
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: long video understanding
+          keyword_cn: 长视频理解
+          query: long video understanding
+        - keyword: video question answering
+          keyword_cn: 视频问答
+          query: question answering on long videos
+      intent_queries:
+        - query: understanding long videos
+          query_cn: 理解长视频
+          enabled: true
+          source: manual
+          note: ''
+        - query: long video analysis methods
+          query_cn: 长视频分析方法
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-05-30T16:27:17.656Z'
+    - tag: agent-memory
+      description: 请为我查询Agent Memory系统设计的有关论文
+      enabled: true
+      paper_sources:
+        - arxiv
+      keywords:
+        - keyword: agent memory
+          keyword_cn: 智能体记忆
+          query: agent memory system design
+        - keyword: long-term memory
+          keyword_cn: 长期记忆
+          query: long term memory in agents
+        - keyword: memory architecture
+          keyword_cn: 记忆架构
+          query: memory architecture for intelligent agents
+        - keyword: agent architecture
+          keyword_cn: 智能体架构
+          query: agent architecture with memory systems
+      intent_queries:
+        - query: research papers on agent memory system design
+          query_cn: 关于智能体记忆系统设计的研究论文
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-05-30T16:28:03.625Z'
+source_backends:
+  arxiv:
+    papers_table: arxiv_papers
+    use_vector_rpc: true
+    vector_rpc: match_arxiv_papers
+    vector_rpc_exact: match_arxiv_papers_exact
+    use_bm25_rpc: true
+    bm25_rpc: match_arxiv_papers_bm25
+    sync_table: arxiv_sync_status
+    sync_success_value: success
+    schema: public
+    kind: supabase
+    enabled: true
+    url: https://lyucdwgefyfbmaiopjbk.supabase.co
+    anon_key: sb_publishable_lX-oi64Uxyd7SIVv3_w2Uw_MTOojeKq
