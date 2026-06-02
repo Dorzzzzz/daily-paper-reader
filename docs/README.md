@@ -6,65 +6,79 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-01
-- 运行时间：2026-06-01 23:09:22 UTC
+- 最新运行日期：2026-06-02
+- 运行时间：2026-06-02 22:32:22 UTC
 - 运行状态：成功
-- 本次总论文数：15
+- 本次总论文数：19
 - 精读区：7
-- 速读区：8
+- 速读区：12
 
 ### 今日简报（AI）
-今日精读《Linear Scaling Video VLMs》与《AgentIR》，速读《Towards Consistent Video Geometry Estimation》等三篇，聚焦长视频理解与长对话记忆检索。建议优先关注视频VLMs的线性扩展方案及LLM智能体的弹性记忆技术。
-- 详情：[/202606/01/README](/202606/01/README)
+今日研究聚焦智能体长期记忆与推理，共筛选19篇论文，精读7篇、速读12篇。  
+最值得关注的两篇高分论文（均为9.0/10）分别提出智能体记忆进化门控机制和面向Text-to-SQL的双级长期记忆检索方法，直指智能体持续学习与知识复用痛点。  
+建议普通读者优先精读这两篇论文，并跟进速读列表中CASTLE2026等8分工作，共同勾勒智能体记忆与证据推理的前沿技术路径。
+- 详情：[/202606/02/README](/202606/02/README)
 
 ### 精读区论文标签
-1. [Linear Scaling Video VLMs for Long Video Understanding](/202606/01/2605.31598v1-linear-scaling-video-vlms-for-long-video-understanding)  
-   标签：评分：10.0/10、query:long-video
-   evidence：长视频VLMs的线性时间视频预填充
-2. [AgentIR: A Workload-Adaptive Cascade Retrieval Substrate for Long-Term Conversational Memory](/202606/01/2605.25092v1-agentir-a-workload-adaptive-cascade-retrieval-substrate-for-long-term-conversational-memory)  
+1. [SAGE: A Novelty Gate for Efficient Memory Evolution in Agentic LLMs](/202606/02/2605.30711v1-sage-a-novelty-gate-for-efficient-memory-evolution-in-agentic-llms)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：面向智能体的长期对话记忆检索基础架构
-3. [SAGE: A Novelty Gate for Efficient Memory Evolution in Agentic LLMs](/202606/01/2605.30711v1-sage-a-novelty-gate-for-efficient-memory-evolution-in-agentic-llms)  
+   evidence：面向智能体LLM的高效内存演化的新颖性门控
+2. [Learning to Retrieve: Dual-Level Long-Term Memory for Text-to-SQL Agents](/202606/02/2606.00547v1-learning-to-retrieve-dual-level-long-term-memory-for-text-to-sql-agents)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：提出新颖性门控用于智能体LLM的高效记忆演化，直接与智能体记忆系统设计相关
-4. [ExpGraph: Model-Agnostic Experience Learning with Graph-Structured Memory for LLM Agents](/202606/01/2605.30712v1-expgraph-model-agnostic-experience-learning-with-graph-structured-memory-for-llm-agents)  
+   evidence：面向文本到SQL代理的双层级长时记忆
+3. [MemPro: Agentic Memory Systems as Evolvable Programs](/202606/02/2606.00619v1-mempro-agentic-memory-systems-as-evolvable-programs)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：提出图结构记忆用于LLM智能体经验重用，直接与智能体记忆系统设计相关
-5. [Eywa: Provenance-Grounded Long-Term Memory for AI Agents](/202606/01/2605.30771v1-eywa-provenance-grounded-long-term-memory-for-ai-agents)  
+   evidence：面向智能体记忆系统的可演化程序框架
+4. [CoMIC: Collaborative Memory and Insights Circulation for Long-Horizon LLM Agents in Cloud-Edge Systems](/202606/02/2606.00756v1-comic-collaborative-memory-and-insights-circulation-for-long-horizon-llm-agents-in-cloud-edge-systems)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：基于溯源的人工智能智能体长期记忆架构
-6. [CoMem: Context Management with A Decoupled Long-Context Model](/202606/01/2605.30842v1-comem-context-management-with-a-decoupled-long-context-model)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：解耦的上下文管理用于代理记忆系统
-7. [Towards Effective Long-Video Event Prediction via Multi-Level Event Semantics Mining](/202606/01/2605.31069v1-towards-effective-long-video-event-prediction-via-multi-level-event-semantics-mining)  
+   evidence：面向长时LLM代理的协同记忆框架
+5. [SuperMemory-VQA: An Egocentric Visual Question-Answering Benchmark for Long-Horizon Memory](/202606/02/2606.00825v1-supermemory-vqa-an-egocentric-visual-question-answering-benchmark-for-long-horizon-memory)  
    标签：评分：9.0/10、query:long-video
-   evidence：通过多级事件语义挖掘进行长视频事件预测和理解
+   evidence：面向长视域记忆的自我中心VQA基准
+6. [3rd Place at CVPR 2026 CASTLE Challenge: Agentic Multi-View Long-Context Video Understanding via Hierarchical Knowledge Graph Retrieval](/202606/02/2606.01933v1-3rd-place-at-cvpr-2026-castle-challenge-agentic-multi-view-long-context-video-understanding-via-hierarchical-knowledge-graph-retrieval)  
+   标签：评分：9.0/10、query:long-video
+   evidence：面向多视角长视频理解和问答的智能体框架
+7. [AMP: A Vendor-Neutral Wire Format for Agent Memory Operations](/202606/02/2606.01138v1-amp-a-vendor-neutral-wire-format-for-agent-memory-operations)  
+   标签：评分：8.0/10、query:agent-memory
+   evidence：代理记忆操作的厂商无关线格式
 
 ### 速读区论文标签
-1. [Towards Consistent Video Geometry Estimation](/202606/01/2605.30060v2-towards-consistent-video-geometry-estimation)  
+1. [CASTLE2026 Team WDL Technical Report](/202606/02/2606.00712v1-castle2026-team-wdl-technical-report)  
    标签：评分：8.0/10、query:long-video
-   evidence：面向长视频的一致几何估计方法
-2. [ElasticMem: Latent Memory as a Learnable Resource for LLM Agents](/202606/01/2605.30690v1-elasticmem-latent-memory-as-a-learnable-resource-for-llm-agents)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：为LLM代理设计可学习的隐式记忆
-3. [PEEK: Picking Essential frames via Efficient Knowledge distillation](/202606/01/2605.31029v1-peek-picking-essential-frames-via-efficient-knowledge-distillation)  
+   evidence：面向CASTLE挑战的长时第一人称视频问答系统
+2. [Adaptive Dense Evidence Refinement for Video Relational Reasoning for VRR-QA Challenge](/202606/02/2606.01104v1-adaptive-dense-evidence-refinement-for-video-relational-reasoning-for-vrr-qa-challenge)  
    标签：评分：8.0/10、query:long-video
-   evidence：用于视频字幕的高效动态帧采样
-4. [Task-Focused Memorization for Multimodal Agents](/202606/01/2605.31075v1-task-focused-memorization-for-multimodal-agents)  
+   evidence：自适应密集证据精炼用于视频关系推理问答
+3. [Temporal Evidence Routing with Structured Visual Evidence for TimeLogicQA](/202606/02/2606.01106v1-temporal-evidence-routing-with-structured-visual-evidence-for-timelogicqa)  
+   标签：评分：8.0/10、query:long-video
+   evidence：长视频问答中的时序推理
+4. [Joint Agent Memory and Exploration Learning via Novelty Signals](/202606/02/2606.01528v1-joint-agent-memory-and-exploration-learning-via-novelty-signals)  
    标签：评分：8.0/10、query:agent-memory
-   evidence：面向多模态智能体的任务聚焦记忆策略
-5. [Teaching Video Generators to Remember: Eliciting Dynamic Memory for Out-of-Sight State Evolution](/202606/01/2605.25333v1-teaching-video-generators-to-remember-eliciting-dynamic-memory-for-out-of-sight-state-evolution)  
+   evidence：基于新颖性信号的代理记忆与探索联合训练
+5. [Honest Lying: Understanding Memory Confabulation in Reflexive Agents](/202606/02/2605.29463v2-honest-lying-understanding-memory-confabulation-in-reflexive-agents)  
+   标签：评分：7.0/10、query:agent-memory
+   evidence：对反射式代理中记忆虚构现象的研究
+6. [MOSAIC: Modular Orchestration for Structured Agentic Intelligence and Composition](/202606/02/2606.00708v1-mosaic-modular-orchestration-for-structured-agentic-intelligence-and-composition)  
+   标签：评分：7.0/10、query:agent-memory
+   evidence：通过记忆导向的模型选择实现智能体记忆架构
+7. [Momento: Evaluating Persistent Memory and Reasoning with Multi-Session Agentic Conversations](/202606/02/2606.00832v1-momento-evaluating-persistent-memory-and-reasoning-with-multi-session-agentic-conversations)  
+   标签：评分：7.0/10、query:agent-memory
+   evidence：引入Momento基准，用于评估多会话代理对话中的持久记忆
+8. [CoSTL: Comprehensive Spatial-Temporal Representation Learning for Moment Retrieval and Highlight Detection](/202606/02/2606.01149v1-costl-comprehensive-spatial-temporal-representation-learning-for-moment-retrieval-and-highlight-detection)  
+   标签：评分：7.0/10、query:long-video
+   evidence：视频时刻检索与高亮检测，需要整段时间理解
+9. [OmniMem: Scalable and Adaptive Memory Retrieval for Long Video Generation](/202606/02/2605.30519v1-omnimem-scalable-and-adaptive-memory-retrieval-for-long-video-generation)  
    标签：评分：6.0/10、query:long-video
-   evidence：在视频生成中激发用于状态演化的动态记忆
-6. [Learning Agent-Compatible Context Management for Long-Horizon Tasks](/202606/01/2605.30785v1-learning-agent-compatible-context-management-for-long-horizon-tasks)  
+   evidence：提出OmniMem用于长视频生成中的显式记忆检索，支持长视频分析
+10. [The Right Inference Strategy Is All You Need: Nearly Training-Free Domain-Wise Inference for EgoCross Challenge](/202606/02/2606.00829v1-the-right-inference-strategy-is-all-you-need-nearly-training-free-domain-wise-inference-for-egocross-challenge)  
+   标签：评分：6.0/10、query:long-video
+   evidence：第一人称视频问答方法
+11. [Self-Healing Agentic Orchestrators for Reliable Tool-Augmented Large Language Model Systems](/202606/02/2606.01416v1-self-healing-agentic-orchestrators-for-reliable-tool-augmented-large-language-model-systems)  
    标签：评分：6.0/10、query:agent-memory
-   evidence：面向长时任务的智能体上下文管理
-7. [LVSA: Training-Free Sparse Attention for Long Video Diffusion](/202606/01/2605.31057v1-lvsa-training-free-sparse-attention-for-long-video-diffusion)  
+   evidence：自愈编排器协调智能体的内存、规划与恢复
+12. [Retrieve What's Missing: Coverage-Maximizing Retrieval for Consistent Long Video Generation](/202606/02/2606.02479v1-retrieve-whats-missing-coverage-maximizing-retrieval-for-consistent-long-video-generation)  
    标签：评分：6.0/10、query:long-video
-   evidence：提出面向长视频扩散的稀疏注意力，与长视频分析方法相关
-8. [Learning Global Motion with Compact Gaussians for Feed-Forward 4D Reconstruction](/202606/01/2605.31595v1-learning-global-motion-with-compact-gaussians-for-feed-forward-4d-reconstruction)  
-   标签：评分：6.0/10、query:long-video
-   evidence：基于视频的4D重建与时间建模
+   evidence：用于一致长视频生成的内存检索方法
 
 
 <div class="dpr-home-promo-card">

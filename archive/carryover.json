@@ -1,17 +1,103 @@
 {
-  "generated_at": "2026-06-01T22:58:18.882241+00:00",
-  "updated_date": "20260601",
+  "generated_at": "2026-06-02T22:22:48.793985+00:00",
+  "updated_date": "20260602",
   "carryover_days": 9,
   "tag_states": {
     "long-video": {
-      "updated_date": "20260601",
+      "updated_date": "20260602",
       "carryover_days": 9,
-      "items": []
+      "items": [
+        {
+          "id": "2606.02161v1",
+          "source": "arxiv",
+          "title": "InfoMerge: Information-aware Token Compression for Efficient Video Large Language Models",
+          "abstract": "Video Large Language Models (Video-LLMs) achieve strong performance in video understanding, but their excessive visual tokens bring substantial computational overhead. Existing training-free compression methods improve inference efficiency by reducing visual tokens, yet they often rely on local adjacent-frame similarity for temporal redundancy estimation or allocate token budgets mainly according to segment length. Such designs are sensitive to frame-level noise and fail to capture the non-uniform information distribution of real-world videos. To address these challenges, we propose InfoMerge, a training-free visual token compression method that improves token utilization through robust redundancy estimation and content-aware budget allocation. Specifically, we propose the Temporal Fingerprint Difference: a segment-level second-order temporal redundancy estimation strategy, which models the temporal similarity structure of tokens at the same spatial positions within each segment. We further introduce Content-Aware Budget Allocation (CABA), which dynamically allocates segment-level token budgets based on segment uniqueness and spectral-entropy-based representational richness. By reducing repeated preservation of redundant static regions and allocating more tokens to informative segments, InfoMerge makes better use of the limited token budget while maintaining strong performance. Extensive experiments show that InfoMerge achieves strong efficiency--accuracy trade-offs across multiple benchmarks and backbones, with more pronounced advantages under aggressive compression. On LLaVA-OneVision-7B, InfoMerge retains 98.8\\% of the original average performance while reducing 85\\% of visual tokens and achieving a 4.24-fold speedup in the prefill stage.",
+          "authors": [
+            "Xinxin Liu",
+            "Shiwei Gan",
+            "Xiao Liu",
+            "Yafeng Yin",
+            "Lei Xie",
+            "Sanglu Lu"
+          ],
+          "primary_category": "cs.CV",
+          "categories": [
+            "cs.CV",
+            "cs.CL"
+          ],
+          "published": "2026-06-01T12:24:24+00:00",
+          "link": "https://arxiv.org/pdf/2606.02161v1",
+          "tags": [
+            "keyword:long-video",
+            "query:long-video"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "token compression for efficient video understanding in Video-LLMs",
+          "llm_evidence_cn": "面向视频大语言模型的高效令牌压缩方法，提升长视频理解效率",
+          "llm_evidence": "面向视频大语言模型的高效令牌压缩方法，提升长视频理解效率",
+          "canonical_evidence": "面向视频大语言模型的高效令牌压缩方法，提升长视频理解效率",
+          "llm_tldr_en": "InfoMerge proposes information-aware token compression for Video-LLMs, improving efficiency by robust redundancy estimation and content-aware budget allocation.",
+          "llm_tldr_cn": "视频大语言模型在处理长视频时面临视觉令牌过多导致的计算瓶颈。现有压缩方法基于局部相邻帧相似性估计冗余，难以应对真实视频的非均匀信息分布。本文提出InfoMerge，一种免训练的令牌压缩方法，通过鲁棒的冗余估计和内容感知的预算分配优化令牌利用率。实验证明该方法在不牺牲性能的前提下显著降低计算开销，为长视频理解提供了高效的令牌压缩方案。",
+          "llm_tldr": "视频大语言模型在处理长视频时面临视觉令牌过多导致的计算瓶颈。现有压缩方法基于局部相邻帧相似性估计冗余，难以应对真实视频的非均匀信息分布。本文提出InfoMerge，一种免训练的令牌压缩方法，通过鲁棒的冗余估计和内容感知的预算分配优化令牌利用率。实验证明该方法在不牺牲性能的前提下显著降低计算开销，为长视频理解提供了高效的令牌压缩方案。",
+          "llm_tags": [
+            "query:long-video"
+          ],
+          "matched_query_tag": "query:long-video",
+          "matched_query_text": "long video understanding",
+          "matched_requirement_id": "req-1",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.02161v1",
+          "carry_days": 1
+        }
+      ]
     },
     "agent-memory": {
-      "updated_date": "20260601",
+      "updated_date": "20260602",
       "carryover_days": 9,
-      "items": []
+      "items": [
+        {
+          "id": "2606.02304v1",
+          "source": "arxiv",
+          "title": "Unified Context Evolution for LLM Agents",
+          "abstract": "LLM-based agents can solve multi-step interactive tasks by combining reasoning with environment feedback, yet each episode starts from the same fixed context and any useful strategy discovered along the way is lost once the task ends. Existing approaches either limit learning to the current task or pool all experience into a single untyped store, without distinguishing knowledge types, tracking quality through use, or balancing what the library still lacks. We introduce Unified Context Evolution (UCE), a gradient-free framework that externalizes agent experience into an evolving library of typed Evolvable Context Units (ECUs). UCE decomposes experience into four complementary types (Memory, Strategy, Workflow, and Skill), each generated from trajectories under type-specific conditions, retrieved at decision time, scored through repeated usage outcomes, and pruned when no longer valuable. A scheduling module allocates each cycle's generation budget toward the types where the library is weakest. Across two interactive benchmarks, UCE raises ALFWorld success from 75.4% to 96.3% and WebShop task score from 45.1% to 61.3%, and the accumulated library transfers to alternative actor backbones without retraining.",
+          "authors": [
+            "Zixuan Zhu",
+            "Yitong Hu",
+            "Yong Dai",
+            "Junfeng Fang",
+            "Chunyang Jiang",
+            "Senkang Hu",
+            "Yuzhi Zhao"
+          ],
+          "primary_category": "cs.CL",
+          "categories": [
+            "cs.CL"
+          ],
+          "published": "2026-06-01T14:25:29+00:00",
+          "link": "https://arxiv.org/pdf/2606.02304v1",
+          "tags": [
+            "keyword:agent-memory",
+            "query:agent-memory"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "externalizing agent experience into typed memory units for context evolution",
+          "llm_evidence_cn": "将代理经验外部化为类型化记忆单元以进化上下文",
+          "llm_evidence": "将代理经验外部化为类型化记忆单元以进化上下文",
+          "canonical_evidence": "将代理经验外部化为类型化记忆单元以进化上下文",
+          "llm_tldr_en": "Unified Context Evolution (UCE) externalizes agent experience into Evolvable Context Units of four types (Memory, Strategy, Workflow, Skill), enabling cross-task learning and adaptive context.",
+          "llm_tldr_cn": "LLM代理在任务结束后丢失已发现的策略，现有方法缺乏知识类型区分和质量管理。UCE框架将代理经验分解为可进化上下文单元（ECU），包括记忆、策略、工作流和技能四种类型，并动态更新库，实现了跨任务的知识积累和自适应上下文。",
+          "llm_tldr": "LLM代理在任务结束后丢失已发现的策略，现有方法缺乏知识类型区分和质量管理。UCE框架将代理经验分解为可进化上下文单元（ECU），包括记忆、策略、工作流和技能四种类型，并动态更新库，实现了跨任务的知识积累和自适应上下文。",
+          "llm_tags": [
+            "query:agent-memory"
+          ],
+          "matched_query_tag": "query:agent-memory",
+          "matched_query_text": "agent memory system design",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.02304v1",
+          "carry_days": 1
+        }
+      ]
     }
   }
 }
