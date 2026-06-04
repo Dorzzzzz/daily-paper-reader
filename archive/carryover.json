@@ -1,17 +1,229 @@
 {
-  "generated_at": "2026-06-03T22:45:40.080935+00:00",
-  "updated_date": "20260603",
+  "generated_at": "2026-06-04T21:44:21.876594+00:00",
+  "updated_date": "20260604",
   "carryover_days": 9,
   "tag_states": {
     "long-video": {
-      "updated_date": "20260603",
+      "updated_date": "20260604",
       "carryover_days": 9,
-      "items": []
+      "items": [
+        {
+          "id": "2606.04351v1",
+          "source": "arxiv",
+          "title": "Video2LoRA: Parametric Video Internalization for Vision-Language Models",
+          "abstract": "Processing video in vision-language models is expensive: each frame occupies hundreds of tokens, and inference cost scales with every frame and every repeated query. We introduce Video2LoRA, a method for parametric video internalization. A perceiver hypernetwork reads the intermediate representations produced layer-by-layer as a frozen VLM encodes a video, and generates a Low-Rank Adaptation (LoRA) adapter in a single forward pass. Unlike standard LoRA fine-tuning, which requires iterative gradient updates, Video2LoRA predicts these weights directly from the video. Trained for SmolVLM2 500M and 2.2B on video summarization and captioning, Video2LoRA enables the same frozen VLM to answer queries from the adapter alone, with zero visual tokens in its context at query time. Video2LoRA is statistically non-inferior and equivalent to direct video-in-context inference across all five captioning benchmarks at both model scales, and across seven of eight video question answering benchmark-scale pairings. Although trained only on 12 frames at 384px, it remains stable up to 1,024 frames and 1024px, where direct video-in-context inference often degenerates. Across this sweep, it reduces answer-time visual-token load by up to 1,500x and query TTFT by 6-80x, while preserving video-faithful outputs. We also find that independently generated adapters for non-overlapping video segments can compose in rank space, suggesting a path toward chunked long-video internalization.",
+          "authors": [
+            "Manan Suri",
+            "Sarvesh Baskar",
+            "Dinesh Manocha"
+          ],
+          "primary_category": "cs.CV",
+          "categories": [
+            "cs.CV",
+            "cs.CL"
+          ],
+          "published": "2026-06-03T02:07:35+00:00",
+          "link": "https://arxiv.org/pdf/2606.04351v1",
+          "tags": [
+            "keyword:long-video",
+            "query:long-video"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "method to internalize video into LoRA adapters, reducing token cost for multiple queries",
+          "llm_evidence_cn": "将视频内化为LoRA适配器的方法，降低多查询令牌成本",
+          "llm_evidence": "将视频内化为LoRA适配器的方法，降低多查询令牌成本",
+          "canonical_evidence": "将视频内化为LoRA适配器的方法，降低多查询令牌成本",
+          "llm_tldr_en": "Video2LoRA predicts LoRA weights from video in one forward pass, enabling querying without visual tokens, reducing cost for repeated queries on long videos.",
+          "llm_tldr_cn": "处理长视频时每帧占用大量令牌，重复查询成本高昂。本文提出Video2LoRA，通过感知器超网络在单次前向传播中从视频层表示生成LoRA适配器，使冻结的VLM仅从适配器回答查询，无需视觉令牌。在SmolVLM2上训练后，该方法显著降低推理成本，尤其适用于对同一视频的多次查询。",
+          "llm_tldr": "处理长视频时每帧占用大量令牌，重复查询成本高昂。本文提出Video2LoRA，通过感知器超网络在单次前向传播中从视频层表示生成LoRA适配器，使冻结的VLM仅从适配器回答查询，无需视觉令牌。在SmolVLM2上训练后，该方法显著降低推理成本，尤其适用于对同一视频的多次查询。",
+          "llm_tags": [
+            "query:long-video"
+          ],
+          "matched_query_tag": "query:long-video",
+          "matched_query_text": "long video analysis methods",
+          "matched_requirement_id": "req-4",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.04351v1",
+          "carry_days": 1
+        }
+      ]
     },
     "agent-memory": {
-      "updated_date": "20260603",
+      "updated_date": "20260604",
       "carryover_days": 9,
-      "items": []
+      "items": [
+        {
+          "id": "2606.04555v1",
+          "source": "arxiv",
+          "title": "Temporal Order Matters for Agentic Memory: Segment Trees for Long-Horizon Agents",
+          "abstract": "Long-horizon conversational agents need to interact with users through evolving events, tasks, and goals. Such histories are naturally temporal, yet many existing memory systems organize information primarily by topical similarity and may ignore the order in which events occur. We introduce Segment Tree Memory, or SegTreeMem, a memory architecture that represents conversation history as a temporally ordered Segment Tree over utterances. SegTreeMem incrementally inserts new utterances through an online rightmost-frontier update rule, preserving chronological order while forming hierarchical memory segments. For retrieval, SegTreeMem propagates relevance scores through the tree to combine local semantic matching with hierarchical temporal context. Across three long-horizon memory benchmarks and two LLM backbones, SegTreeMem improves answer quality over flat retrieval, graph-structured memory, and tree-structured memory baselines. Additional temporal-order permutation analysis shows that the performance gain depends on preserving temporal order during memory construction, supporting the claim that temporal order is a key structure for agentic memory.",
+          "authors": [
+            "Yifan Simon Liu",
+            "Liam Gallagher",
+            "Faeze Moradi Kalarde",
+            "Jiazhou Liang",
+            "Armin Toroghi",
+            "Scott Sanner"
+          ],
+          "primary_category": "cs.CL",
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ],
+          "published": "2026-06-03T07:42:15+00:00",
+          "link": "https://arxiv.org/pdf/2606.04555v1",
+          "tags": [
+            "keyword:agent-memory",
+            "keyword:long-video",
+            "query:agent-memory"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "proposes Segment Tree Memory architecture that preserves temporal order for agentic memory",
+          "llm_evidence_cn": "提出保留时序的段树记忆架构用于代理记忆",
+          "llm_evidence": "提出保留时序的段树记忆架构用于代理记忆",
+          "canonical_evidence": "提出保留时序的段树记忆架构用于代理记忆",
+          "llm_tldr_en": "SegTreeMem represents conversation history as a temporally ordered Segment Tree, combining local semantic matching with hierarchical temporal context for retrieval.",
+          "llm_tldr_cn": "长时对话代理需要处理随时间演变的事件和任务，但现有记忆系统多基于主题相似性组织，忽略时序。本文提出段树记忆（SegTreeMem），将对话历史组织为时序段树，通过在线右边界插入规则保持时间顺序，并通过分层相关性传播实现语义与时序的联合检索。",
+          "llm_tldr": "长时对话代理需要处理随时间演变的事件和任务，但现有记忆系统多基于主题相似性组织，忽略时序。本文提出段树记忆（SegTreeMem），将对话历史组织为时序段树，通过在线右边界插入规则保持时间顺序，并通过分层相关性传播实现语义与时序的联合检索。",
+          "llm_tags": [
+            "query:agent-memory"
+          ],
+          "matched_query_tag": "query:agent-memory",
+          "matched_query_text": "agent memory system design",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.04555v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2606.04628v1",
+          "source": "arxiv",
+          "title": "RAMPART: Registry-based Agentic Memory with Priority-Aware Runtime Transformation",
+          "abstract": "RAMPART is a compile-time memory model and pure in-RAM block registry for LLM-based agents. Context assembly is a programmable runtime operation where content is compiled from a structured registry under explicit policy for ordering, inclusion, and eviction. Five composable primitives (promote, gate, write, evict, rollback) act on named addressable blocks before compilation at zero prompt-token cost. Provenance tags and non-evictable authorship flags implement a permissioned memory model with block-level ownership. Controlled probes with Qwen3-8B Q4 show that compile-time placement and the structural relationship between blocks and the task query affect task success, with the cliff falling at roughly the seventh block position when the task follows the registry and the twelfth when it precedes. Grouping the critical block with content-adjacent neighbours and promoting the group as a unit lifts task success by tens of percentage points at positions where single-block placement fails. Cross-model replication on Qwen2.5-7B, Llama-3.1-8B, Mistral-7B-v0.3, and Qwen3-14B shows the content-priming effect appears at the same absolute positions across families, with magnitude varying with model strength. Block grouping raises Mistral's mean pass rate roughly fivefold at the hardest registry size, and a smaller model with the intervention can outperform a larger model without it in the mid-registry zone. Relevance gating reduces prompt cost by 67.8\\% while recovering 83% of the promoted-condition success rate. Schema eviction produces 0% invocations against 100% with the schema present, a property policy-based approaches cannot guarantee by construction. Shared-registry coordination reduces inter-agent communication to a method call at zero coordination token cost.",
+          "authors": [
+            "Nikodem Tomczak"
+          ],
+          "primary_category": "cs.CL",
+          "categories": [
+            "cs.CL",
+            "cs.MA"
+          ],
+          "published": "2026-06-03T09:01:46+00:00",
+          "link": "https://arxiv.org/pdf/2606.04628v1",
+          "tags": [
+            "keyword:agent-memory",
+            "query:agent-memory"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "proposes registry-based agentic memory model with priority-aware runtime transformation",
+          "llm_evidence_cn": "提出基于注册表的代理记忆模型，具有优先级感知运行时变换",
+          "llm_evidence": "提出基于注册表的代理记忆模型，具有优先级感知运行时变换",
+          "canonical_evidence": "提出基于注册表的代理记忆模型，具有优先级感知运行时变换",
+          "llm_tldr_en": "RAMPART is a compile-time memory model using an in-RAM block registry with composable primitives for context assembly, enabling priority-aware memory management at zero prompt-token cost.",
+          "llm_tldr_cn": "LLM代理的上下文组装需要显式策略，但现有方法固定且昂贵。本文提出RAMPART，一个编译时内存模型和纯RAM块注册表，通过五个组合原语（提升、门控、写入、驱逐、回滚）实现可编程上下文组装，且不消耗提示词token。实验表明编译时放置和块结构关系影响任务成功率，为代理记忆系统提供了灵活高效的设计范式。",
+          "llm_tldr": "LLM代理的上下文组装需要显式策略，但现有方法固定且昂贵。本文提出RAMPART，一个编译时内存模型和纯RAM块注册表，通过五个组合原语（提升、门控、写入、驱逐、回滚）实现可编程上下文组装，且不消耗提示词token。实验表明编译时放置和块结构关系影响任务成功率，为代理记忆系统提供了灵活高效的设计范式。",
+          "llm_tags": [
+            "query:agent-memory"
+          ],
+          "matched_query_tag": "query:agent-memory",
+          "matched_query_text": "agent memory system design",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.04628v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2606.04120v1",
+          "source": "arxiv",
+          "title": "SaliMory: Orchestrating Cognitive Memory for Conversational Agents",
+          "abstract": "Conversational agents that serve as lifelong companions must maintain persistent memory across all interactions. However, simply expanding context windows with raw retrieval degrades reasoning quality, while training memory agents via standard reinforcement learning creates a severe credit assignment bottleneck in a multi-stage pipeline. To solve this, we introduce SALIMORY, a framework that trains a single language model to manage a cognitively-structured memory-spanning user facts, preferences, and working memory. By introducing a hierarchical stage-wise process reward and reward-decomposed contrastive refinement, SALIMORY provides isolated supervision for distinct memory operations (selective filtering, consolidation, and cue-driven recall) end-to-end. SALIMORY cuts memory-attributed failures by one-third, outperforms the state-of-the-art by over 10% in end-to-end accuracy, and more than doubles the Good Personalization rate.",
+          "authors": [
+            "Kai Zhang",
+            "Xinyuan Zhang",
+            "Hongda Jiang",
+            "Shiun-Zu Kuo",
+            "Hyokun Yun",
+            "Ejaz Ahmed",
+            "Shereen Oraby",
+            "Ziyun Li",
+            "Sanat Sharma",
+            "Ann Lee",
+            "Ahmed A Aly",
+            "Anuj Kumar",
+            "Raffay Hamid",
+            "Xin Luna Dong"
+          ],
+          "primary_category": "cs.CL",
+          "categories": [
+            "cs.CL",
+            "cs.AI"
+          ],
+          "published": "2026-06-02T18:31:50+00:00",
+          "link": "https://arxiv.org/pdf/2606.04120v1",
+          "tags": [
+            "keyword:agent-memory",
+            "query:agent-memory"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "orchestrates cognitive memory for conversational agents, relevant to agent memory system design",
+          "llm_evidence_cn": "为对话智能体编排认知记忆，与智能体记忆系统设计相关",
+          "llm_evidence": "为对话智能体编排认知记忆，与智能体记忆系统设计相关",
+          "canonical_evidence": "为对话智能体编排认知记忆，与智能体记忆系统设计相关",
+          "llm_tldr_en": "SALIMORY trains a single language model to manage cognitively-structured memory for conversational agents, using hierarchical process rewards.",
+          "llm_tldr_cn": "针对对话智能体长期记忆管理中信用分配瓶颈问题，提出SALIMORY框架，训练单一语言模型管理事实、偏好和工作记忆，通过层级阶段过程奖励和奖励分解对比优化实现端到端监督。",
+          "llm_tldr": "针对对话智能体长期记忆管理中信用分配瓶颈问题，提出SALIMORY框架，训练单一语言模型管理事实、偏好和工作记忆，通过层级阶段过程奖励和奖励分解对比优化实现端到端监督。",
+          "llm_tags": [
+            "query:agent-memory"
+          ],
+          "matched_query_tag": "query:agent-memory",
+          "matched_query_text": "agent memory system design",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.04120v1",
+          "carry_days": 1
+        },
+        {
+          "id": "2606.04329v1",
+          "source": "arxiv",
+          "title": "From Untrusted Input to Trusted Memory: A Systematic Study of Memory Poisoning Attacks in LLM Agents",
+          "abstract": "Memory is a core component of AI agents, enabling them to accumulate knowledge across interactions and improve performance. However, persistent memory introduces the risk of memory poisoning, where a single adversarial memory write can exert long-term influence over agent behavior. We present a systematic study of memory poisoning in LLM-based agents. We identify four memory write channels and nine structural vulnerabilities in model capabilities, system prompt design, and agent system architecture that make these channels exploitable. Based on these vulnerabilities, we develop a taxonomy of six classes of memory poisoning attacks. Furthermore, we design MPBench -- a benchmark for evaluating memory poisoning attacks, and show that agents designed to write and retrieve memory more aggressively are more exploitable. We also show that existing prompt injection defenses fail to cover memory poisoning attacks. Our findings provide a foundation for understanding and mitigating memory poisoning attacks against AI agents.",
+          "authors": [
+            "Pritam Dash",
+            "Tongyu Ge",
+            "Aditi Jain",
+            "Tanmay Shah",
+            "Zhiwei Shang"
+          ],
+          "primary_category": "cs.CR",
+          "categories": [
+            "cs.CR",
+            "cs.AI"
+          ],
+          "published": "2026-06-03T01:04:13+00:00",
+          "link": "https://arxiv.org/pdf/2606.04329v1",
+          "tags": [
+            "keyword:agent-memory",
+            "query:agent-memory"
+          ],
+          "llm_score": 8.0,
+          "llm_evidence_en": "systematic study of memory poisoning attacks on LLM agents memory",
+          "llm_evidence_cn": "针对LLM智能体记忆的中毒攻击的系统研究",
+          "llm_evidence": "针对LLM智能体记忆的中毒攻击的系统研究",
+          "canonical_evidence": "针对LLM智能体记忆的中毒攻击的系统研究",
+          "llm_tldr_en": "Identifies vulnerabilities and attack taxonomy for memory poisoning in LLM agents, and introduces MPBench benchmark.",
+          "llm_tldr_cn": "本文对LLM智能体中的记忆中毒攻击进行了系统研究，识别了四种记忆写入通道和九种结构性漏洞，据此提出六类攻击的 taxonomy，并构建了评估基准 MPBench。研究揭示了记忆系统在设计时需考虑的安全威胁，为构建可信记忆架构提供了重要指导。",
+          "llm_tldr": "本文对LLM智能体中的记忆中毒攻击进行了系统研究，识别了四种记忆写入通道和九种结构性漏洞，据此提出六类攻击的 taxonomy，并构建了评估基准 MPBench。研究揭示了记忆系统在设计时需考虑的安全威胁，为构建可信记忆架构提供了重要指导。",
+          "llm_tags": [
+            "query:agent-memory"
+          ],
+          "matched_query_tag": "query:agent-memory",
+          "matched_query_text": "agent memory system design",
+          "matched_requirement_id": "req-5",
+          "selection_source": "carryover_cache",
+          "paper_id": "2606.04329v1",
+          "carry_days": 1
+        }
+      ]
     }
   }
 }
