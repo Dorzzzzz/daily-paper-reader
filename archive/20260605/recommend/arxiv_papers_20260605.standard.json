@@ -1,0 +1,872 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-05T21:50:39.118856+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 19,
+    "deep_cap": 7,
+    "deep_selected": 9,
+    "quick_candidates": 13,
+    "quick_skim_target": 12,
+    "quick_selected": 12
+  },
+  "deep_dive": [
+    {
+      "id": "2606.04120v1",
+      "source": "arxiv",
+      "title": "SaliMory: Orchestrating Cognitive Memory for Conversational Agents",
+      "abstract": "Conversational agents that serve as lifelong companions must maintain persistent memory across all interactions. However, simply expanding context windows with raw retrieval degrades reasoning quality, while training memory agents via standard reinforcement learning creates a severe credit assignment bottleneck in a multi-stage pipeline. To solve this, we introduce SALIMORY, a framework that trains a single language model to manage a cognitively-structured memory-spanning user facts, preferences, and working memory. By introducing a hierarchical stage-wise process reward and reward-decomposed contrastive refinement, SALIMORY provides isolated supervision for distinct memory operations (selective filtering, consolidation, and cue-driven recall) end-to-end. SALIMORY cuts memory-attributed failures by one-third, outperforms the state-of-the-art by over 10% in end-to-end accuracy, and more than doubles the Good Personalization rate.",
+      "authors": [
+        "Kai Zhang",
+        "Xinyuan Zhang",
+        "Hongda Jiang",
+        "Shiun-Zu Kuo",
+        "Hyokun Yun",
+        "Ejaz Ahmed",
+        "Shereen Oraby",
+        "Ziyun Li",
+        "Sanat Sharma",
+        "Ann Lee",
+        "Ahmed A Aly",
+        "Anuj Kumar",
+        "Raffay Hamid",
+        "Xin Luna Dong"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-02T18:31:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.04120v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "cognitive memory system for conversational agents",
+      "llm_evidence_cn": "面向对话代理的认知记忆系统",
+      "llm_evidence": "面向对话代理的认知记忆系统",
+      "canonical_evidence": "面向对话代理的认知记忆系统",
+      "llm_tldr_en": "SALIMORY trains a single language model to manage hierarchical cognitive memory spanning user facts, preferences, and working memory using stage-wise reward and contrastive refinement.",
+      "llm_tldr_cn": "对话代理需要持久记忆但现有方法存在推理退化与信用分配瓶颈。本文提出SALIMORY，训练单个语言模型管理用户事实、偏好和工作记忆的认知结构记忆。通过层次化阶段奖励和奖励分解对比细化，为选择性过滤、巩固和线索驱动回忆等操作提供端到端隔离监督。实验表明该方法有效提升了多会话推理质量。",
+      "llm_tldr": "对话代理需要持久记忆但现有方法存在推理退化与信用分配瓶颈。本文提出SALIMORY，训练单个语言模型管理用户事实、偏好和工作记忆的认知结构记忆。通过层次化阶段奖励和奖励分解对比细化，为选择性过滤、巩固和线索驱动回忆等操作提供端到端隔离监督。实验表明该方法有效提升了多会话推理质量。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.04315v1",
+      "source": "arxiv",
+      "title": "Exploring Cross-Scenario Generality of Agentic Memory Systems: Diagnostics and a Strong Baseline",
+      "abstract": "LLM agents accumulate histories that outgrow their context windows, motivating a growing literature on memory systems. Yet most existing designs are tuned to a single scenario (multi-session chat or a single trajectory format), and there is little evidence that they generalize across the heterogeneous trajectories agents encounter in deployment. We revisit eight memory systems plus an agentic harness for search problems, on five scenarios: single-turn QA, multi-session chat, agentic-trajectory QA, memory stress tests, and long-horizon agentic tasks. The harness, which self-manages flat text-file storage via tool calls, achieves the best cross-task ranking, suggesting that memory performance hinges on giving the agent active control over storage and retrieval rather than on a passive store behind a fixed pipeline. We instantiate this insight in AutoMEM, an agentic memory harness with a self-managed tool interface that achieves the best cross-scenario generality among the systems we evaluate.",
+      "authors": [
+        "Zhikai Chen",
+        "Jialiang Gu",
+        "Junyu Yin",
+        "Xianxuan Long",
+        "Shenglai Zeng",
+        "Xiaoze Liu",
+        "Kai Guo",
+        "Keren Zhou",
+        "Jiliang Tang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-03T00:42:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.04315v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "agent memory system cross-scenario evaluation and baseline",
+      "llm_evidence_cn": "智能体记忆系统跨场景评估与强基线",
+      "llm_evidence": "智能体记忆系统跨场景评估与强基线",
+      "canonical_evidence": "智能体记忆系统跨场景评估与强基线",
+      "llm_tldr_en": "Revisits eight memory systems and an agentic harness across five scenarios; shows that a simple harness with flat text-file storage achieves best cross-task ranking, highlighting the importance of active control for memory.",
+      "llm_tldr_cn": "现有智能体记忆系统多针对单一场景设计，缺乏跨场景泛化能力。本文在五个场景（单轮问答、多轮对话、智能体轨迹问答、记忆压力测试、长周期任务）上系统评估了八种记忆系统，并提出一个自管理扁平文本文件存储的智能体框架作为强基线。实验表明该基线取得最佳跨任务排名，暗示记忆性能的关键在于赋予智能体对存储的主动控制能力。",
+      "llm_tldr": "现有智能体记忆系统多针对单一场景设计，缺乏跨场景泛化能力。本文在五个场景（单轮问答、多轮对话、智能体轨迹问答、记忆压力测试、长周期任务）上系统评估了八种记忆系统，并提出一个自管理扁平文本文件存储的智能体框架作为强基线。实验表明该基线取得最佳跨任务排名，暗示记忆性能的关键在于赋予智能体对存储的主动控制能力。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.04555v1",
+      "source": "arxiv",
+      "title": "Temporal Order Matters for Agentic Memory: Segment Trees for Long-Horizon Agents",
+      "abstract": "Long-horizon conversational agents need to interact with users through evolving events, tasks, and goals. Such histories are naturally temporal, yet many existing memory systems organize information primarily by topical similarity and may ignore the order in which events occur. We introduce Segment Tree Memory, or SegTreeMem, a memory architecture that represents conversation history as a temporally ordered Segment Tree over utterances. SegTreeMem incrementally inserts new utterances through an online rightmost-frontier update rule, preserving chronological order while forming hierarchical memory segments. For retrieval, SegTreeMem propagates relevance scores through the tree to combine local semantic matching with hierarchical temporal context. Across three long-horizon memory benchmarks and two LLM backbones, SegTreeMem improves answer quality over flat retrieval, graph-structured memory, and tree-structured memory baselines. Additional temporal-order permutation analysis shows that the performance gain depends on preserving temporal order during memory construction, supporting the claim that temporal order is a key structure for agentic memory.",
+      "authors": [
+        "Yifan Simon Liu",
+        "Liam Gallagher",
+        "Faeze Moradi Kalarde",
+        "Jiazhou Liang",
+        "Armin Toroghi",
+        "Scott Sanner"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-03T07:42:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.04555v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "temporal memory architecture for long-horizon agents",
+      "llm_evidence_cn": "面向长时间跨度代理的时间记忆架构",
+      "llm_evidence": "面向长时间跨度代理的时间记忆架构",
+      "canonical_evidence": "面向长时间跨度代理的时间记忆架构",
+      "llm_tldr_en": "Introduces Segment Tree Memory (SegTreeMem), a novel memory architecture that preserves chronological order via online rightmost-frontier insertion and hierarchical temporal segments, enabling temporally-aware retrieval for long-horizon conversational agents.",
+      "llm_tldr_cn": "长期对话代理需要按时间顺序管理历史事件，但现有记忆系统多按主题相似性组织，忽视时间顺序。本文提出分段树记忆（SegTreeMem），采用在线最右前沿插入规则保持时间顺序，并形成层次化时间分段。检索时通过树传播相关分数，结合局部语义与时间上下文。实验表明该方法在长时任务上显著提升记忆检索精度和下游任务性能。",
+      "llm_tldr": "长期对话代理需要按时间顺序管理历史事件，但现有记忆系统多按主题相似性组织，忽视时间顺序。本文提出分段树记忆（SegTreeMem），采用在线最右前沿插入规则保持时间顺序，并形成层次化时间分段。检索时通过树传播相关分数，结合局部语义与时间上下文。实验表明该方法在长时任务上显著提升记忆检索精度和下游任务性能。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.05259v1",
+      "source": "arxiv",
+      "title": "VideoKR: Towards Knowledge- and Reasoning-Intensive Video Understanding",
+      "abstract": "We introduce VideoKR, the first large-scale training corpus specifically designed to strengthen knowledge- and reasoning-intensive video understanding. It comprises 315K video reasoning examples over 145K newly collected, CC-licensed, expert-domain videos. We develop a human-in-the-loop, skill-oriented example generation pipeline that targets progressively deeper video reasoning capabilities while ensuring the difficulty, diversity, and reliability of both the examples and their CoT rationales. We also curate VideoKR-Eval, a new expert-annotated benchmark where questions require genuine video understanding and knowledge-intensive reasoning rather than textual shortcuts. Our experiments show that, under a standard SFT$\\rightarrow$GRPO pipeline, models post-trained on VideoKR outperform prior post-training approaches on knowledge-intensive video reasoning while remaining competitive on general video reasoning, highlighting data design as a key driver of progress in video reasoning. We further conduct comprehensive ablations to isolate the contributions of VideoKR, providing actionable insights for future work.",
+      "authors": [
+        "Lin Fu",
+        "Zheyuan Yang",
+        "Yang Wang",
+        "Tingyu Song",
+        "Arman Cohan",
+        "Yilun Zhao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-03T16:14:20+00:00",
+      "link": "https://arxiv.org/pdf/2606.05259v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "directly addresses knowledge- and reasoning-intensive video understanding with large-scale corpus",
+      "llm_evidence_cn": "直接针对知识密集型视频理解，提供大规模语料和基准",
+      "llm_evidence": "直接针对知识密集型视频理解，提供大规模语料和基准",
+      "canonical_evidence": "直接针对知识密集型视频理解，提供大规模语料和基准",
+      "llm_tldr_en": "VideoKR introduces a large-scale training corpus (315K examples over 145K expert-domain videos) and an annotated benchmark for knowledge-intensive video understanding, boosting model reasoning.",
+      "llm_tldr_cn": "针对现有视频理解数据缺乏知识密集型推理的问题，构建VideoKR，包含315K视频推理示例和145K专家领域视频，通过人在环的技能导向生成流程保证质量。同时推出VideoKR-Eval基准，避免文本捷径。实验表明在该语料上微调并配合GRPO能显著提升模型的知识推理能力。",
+      "llm_tldr": "针对现有视频理解数据缺乏知识密集型推理的问题，构建VideoKR，包含315K视频推理示例和145K专家领域视频，通过人在环的技能导向生成流程保证质量。同时推出VideoKR-Eval基准，避免文本捷径。实验表明在该语料上微调并配合GRPO能显著提升模型的知识推理能力。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.05684v1",
+      "source": "arxiv",
+      "title": "AdaMEM: Test-Time Adaptive Memory for Language Agents",
+      "abstract": "A central challenge for language agents is utilizing past experience to adapt to dynamic test-time conditions. While recent work demonstrates the promise of agentic memory mechanisms, most systems restrict retrieval to episode initiation. Consequently, agents are forced to rely on static guidance that becomes increasingly misaligned as long-horizon tasks unfold. To address this rigidity, we propose the Adaptive Memory Agent (AdaMEM), a novel framework for agent test-time adaptation. Without updating model parameters online, AdaMEM adapts agent behavior via a hybrid memory architecture: it maintains a long-term trajectory memory of raw experiences collected offline while generating dynamic short-term strategy memory on-the-fly to guide decision-making. This mechanism enables the trade-off between token efficiency and adaptability across varying inference-time compute levels. Empirically, AdaMEM significantly outperforms static memory baselines, achieving relative gains of up to 13% on ALFWorld and 11% on WebShop, with consistent leading performance extending to agentic search on HotpotQA. To further enhance this adaptation, we develop STEP-MFT, a Step-wise Memory Fine-Tuning technique that trains the policy to synthesize high-quality strategies from retrieved experiences, yielding additional performance gains. Our work establishes a new scaling dimension for agentic memory, supporting continuous reasoning and self-evolution post-deployment in real-world environments. Our code is available at https://github.com/yunx-z/AdaMEM.",
+      "authors": [
+        "Yunxiang Zhang",
+        "Yiheng Li",
+        "Ali Payani",
+        "Lu Wang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-04T04:06:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.05684v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes test-time adaptive memory for language agents",
+      "llm_evidence_cn": "提出面向语言智能体的测试时自适应记忆机制",
+      "llm_evidence": "提出面向语言智能体的测试时自适应记忆机制",
+      "canonical_evidence": "提出面向语言智能体的测试时自适应记忆机制",
+      "llm_tldr_en": "AdaMEM equips language agents with a hybrid memory architecture (long-term trajectory memory and dynamic short-term strategy memory) for online adaptation without parameter updates.",
+      "llm_tldr_cn": "针对语言智能体在长时任务中静态记忆指导易过时的问题，提出AdaMEM框架，采用混合记忆架构：长期轨迹记忆存储离线经验，短期策略记忆在线动态生成，指导决策。无需更新模型参数即可实现测试时自适应，在长时推理任务中表现优异。",
+      "llm_tldr": "针对语言智能体在长时任务中静态记忆指导易过时的问题，提出AdaMEM框架，采用混合记忆架构：长期轨迹记忆存储离线经验，短期策略记忆在线动态生成，指导决策。无需更新模型参数即可实现测试时自适应，在长时推理任务中表现优异。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.05917v1",
+      "source": "arxiv",
+      "title": "MemoryCard: Topic-Aware Multi-Modal Clue Compression for Long-Video Question Answering",
+      "abstract": "Long-video question answering remains challenging for Vision-Language Models (VLMs), as answer-relevant evidence is often sparse, transient, and temporally dispersed across lengthy video contexts. Existing frame-centric approaches improve efficiency through uniform sampling, query-aware frame selection, visual-token compression, and adaptive resolution strategies. However, they still rely on isolated and fragmented frames as the fundamental evidence units, limiting VLMs' ability to effectively capture coherent event-level semantics. To address this limitation, we propose MemoryCard, a video-memory-based augmentation framework that organizes long videos into self-contained Memory Cards. Specifically, MemoryCard first performs a self-reading process over videos and aligned utterances to segment the video into semantically coherent units, each corresponding to a distinct topic or event. For each unit, it generates an event-level video gist and selects representative visual moments, which are then rendered into unified Memory Cards for retrieval and question answering. Experimental results demonstrate that MemoryCard consistently improves long-video QA performance under comparable visual-token budgets, achieving up to a 21.8% relative improvement in accuracy. All code is available at https://github.com/NEUIR/MemoryCard.",
+      "authors": [
+        "Qing Yang",
+        "Pengcheng Huang",
+        "Xinze Li",
+        "Zhenghao Liu",
+        "Yukun Yan",
+        "Yu Gu",
+        "Ge Yu",
+        "Gang Li",
+        "Maosong Sun"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-06-04T09:23:31+00:00",
+      "link": "https://arxiv.org/pdf/2606.05917v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "directly addresses long-video question answering",
+      "llm_evidence_cn": "直接针对长视频问答问题",
+      "llm_evidence": "直接针对长视频问答问题",
+      "canonical_evidence": "直接针对长视频问答问题",
+      "llm_tldr_en": "MemoryCard organizes long videos into Memory Cards for topic-aware multi-modal clue compression, enabling VLMs to capture event-level semantics for long-video QA.",
+      "llm_tldr_cn": "针对长视频问答中答案证据稀疏分散的问题，提出MemoryCard框架，通过将长视频组织为自包含的记忆卡（Memory Cards），实现主题感知的多模态线索压缩，帮助视觉语言模型捕捉事件级语义，从而提升长视频问答性能。实验表明该方法在多个基准上有效。",
+      "llm_tldr": "针对长视频问答中答案证据稀疏分散的问题，提出MemoryCard框架，通过将长视频组织为自包含的记忆卡（Memory Cards），实现主题感知的多模态线索压缩，帮助视觉语言模型捕捉事件级语义，从而提升长视频问答性能。实验表明该方法在多个基准上有效。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06036v1",
+      "source": "arxiv",
+      "title": "Memory is Reconstructed, Not Retrieved: Graph Memory for LLM Agents",
+      "abstract": "Despite recent progress, LLM agents still struggle with reasoning over long interaction histories. While current memory-augmented agents rely on a static retrieve-then-reason paradigm, this rigid pipeline design prevents them from dynamically adapting memory access to intermediate evidence discovered during inference. To bridge this gap, we propose MRAgent, a framework that combines an associative memory graph with an active reconstruction mechanism. We represent memory as a Cue-Tag-Content graph, where associative tags serve as semantic bridges connecting fine-grained cues to memory contents. Operating on this structure, our active reconstruction mechanism integrates LLM reasoning directly into memory access, allowing the agent to iteratively explore and prune retrieval paths based on accumulated evidence. This ensures that memory retrieval is dynamically adapted to the reasoning context while avoiding combinatorial explosion caused by unconstrained expansion. Experiments on the LoCoMo benchmark and LongMemEval benchmark demonstrate significant improvements over strong baselines (up to 23%), while substantially reducing token and runtime cost, highlighting the effectiveness of active and associative reconstruction for long-horizon memory reasoning.",
+      "authors": [
+        "Shuo Ji",
+        "Yibo Li",
+        "Bryan Hooi"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.IR"
+      ],
+      "published": "2026-06-04T11:29:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.06036v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "graph memory with active reconstruction for LLM agents",
+      "llm_evidence_cn": "面向LLM智能体的图记忆与主动重构机制",
+      "llm_evidence": "面向LLM智能体的图记忆与主动重构机制",
+      "canonical_evidence": "面向LLM智能体的图记忆与主动重构机制",
+      "llm_tldr_en": "MRAgent combines an associative memory graph with an active reconstruction mechanism that integrates LLM reasoning into memory access, enabling dynamic adaptation for long interaction histories.",
+      "llm_tldr_cn": "针对LLM智能体在长交互历史中推理困难的问题，提出MRAgent框架，将记忆表示为提示-标签-内容图，并引入主动重构机制，使智能体能在推理过程中动态调整记忆访问，从而克服静态检索-推理范式的局限。",
+      "llm_tldr": "针对LLM智能体在长交互历史中推理困难的问题，提出MRAgent框架，将记忆表示为提示-标签-内容图，并引入主动重构机制，使智能体能在推理过程中动态调整记忆访问，从而克服静态检索-推理范式的局限。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06055v1",
+      "source": "arxiv",
+      "title": "When Should Memory Stay Silent: Measuring Memory-Use Boundaries in Memory-Augmented Conversational Agents",
+      "abstract": "Long-term memory enables language model agents to support personalized interactions, but it remains unclear when available memories warrant integration into responses. Existing memory evaluations emphasize retrieval accuracy and downstream task utility, while overlooking whether retrieved sensitive memory content is warranted in the current turn. We introduce RBI-Eval, a controlled measurement study built around a probe set that compares model behavior with and without access to sensitive memory under identical benign prompts. We evaluate four base LLMs against a matched no-memory reference across four memory-access settings: full-context exposure and three retrieval systems. Our results reveal substantial behavioral divergence. With memory available, the separation score for sensitive-memory integration decreases by 8.9\\%--26.6\\% relative to the matched no-memory reference for GPT-5.4-mini, but by 51.1\\%--82.9\\% for Claude-Sonnet-4.6, DeepSeek-V4-Flash, and Qwen3.5-9B. Control experiments on DeepSeek and GPT-5.4-mini show this effect is specific to sensitive content, rather than general personalization. Retrieval systems reduce exposure but do not eliminate integration once sensitive memory reaches the generator. These findings suggest safe personalization requires memory-aware decisions at both retrieval and generation time.",
+      "authors": [
+        "Lingxiang Xu",
+        "Jiaoyun Yang",
+        "Min Hu",
+        "Hongtu Chen",
+        "Ning An"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-04T11:54:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.06055v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "memory-use boundaries in conversational agents",
+      "llm_evidence_cn": "对话智能体记忆使用边界测量",
+      "llm_evidence": "对话智能体记忆使用边界测量",
+      "canonical_evidence": "对话智能体记忆使用边界测量",
+      "llm_tldr_en": "RBI-Eval measures when sensitive memories should remain silent in memory-augmented conversational agents, revealing substantial behavioral overuse.",
+      "llm_tldr_cn": "长时记忆使对话智能体个性化，但何时不应使用记忆仍未知。RBI-Eval通过对比有无敏感记忆的模型行为，系统评估了记忆使用边界。在四种记忆设置下，发现模型倾向于在不恰当的场合引入敏感记忆，导致隐私风险。该研究强调了记忆使用规范性评估的重要性，为构建负责任的记忆增强智能体提供了指导。",
+      "llm_tldr": "长时记忆使对话智能体个性化，但何时不应使用记忆仍未知。RBI-Eval通过对比有无敏感记忆的模型行为，系统评估了记忆使用边界。在四种记忆设置下，发现模型倾向于在不恰当的场合引入敏感记忆，导致隐私风险。该研究强调了记忆使用规范性评估的重要性，为构建负责任的记忆增强智能体提供了指导。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06448v1",
+      "source": "arxiv",
+      "title": "Agent Memory: Characterization and System Implications of Stateful Long-Horizon Workloads",
+      "abstract": "LLM agents are increasingly deployed on long-horizon tasks requiring sustained reasoning over extended interaction histories. Realizing this at scale requires agents to persistently store, retrieve, and update their own memory across sessions. A rich ecosystem of agent memory systems has emerged spanning flat retrieval, LLM-mediated extraction, consolidating fact stores, and agentic control flows. Yet, their system-level behavior remains uncharacterized. We present the first systems characterization of agent memory. First, we introduce a system-oriented taxonomy classifying agent memory systems along four axes. Second, we build a phase-aware profiling harness attributing cost to construction, retrieval, and generation. Third, we characterize ten representative systems across two benchmark suites, uncovering how design choices shift cost across the write and read paths. Finally, we derive 10 system recommendations covering construction scheduling, capability floors, amortization via query volume, freshness-latency tradeoffs, and fleet-scale management.",
+      "authors": [
+        "Yasmine Omri",
+        "Ziyu Gan",
+        "Zachary Broveak",
+        "Robin Geens",
+        "Zexue He",
+        "Alex Pentland",
+        "Marian Verhelst",
+        "Tsachy Weissman",
+        "Thierry Tambe"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-04T17:44:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.06448v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "systems characterization of agent memory architectures",
+      "llm_evidence_cn": "代理记忆架构的系统级表征",
+      "llm_evidence": "代理记忆架构的系统级表征",
+      "canonical_evidence": "代理记忆架构的系统级表征",
+      "llm_tldr_en": "Presents the first systems characterization of agent memory, introducing a taxonomy, a phase-aware profiling harness, and a characterization of cost across construction, retrieval, and generation phases for diverse memory systems.",
+      "llm_tldr_cn": "LLM代理在长时任务中需要持久存储和检索记忆，但现有系统行为缺乏系统级分析。本文首次对代理记忆系统进行系统表征：提出面向系统的四轴分类法；构建阶段感知的性能分析工具，归因构建、检索和生成阶段的成本；并对多种记忆系统进行特征刻画。该工作为设计高效代理记忆系统提供了重要参考。",
+      "llm_tldr": "LLM代理在长时任务中需要持久存储和检索记忆，但现有系统行为缺乏系统级分析。本文首次对代理记忆系统进行系统表征：提出面向系统的四轴分类法；构建阶段感知的性能分析工具，归因构建、检索和生成阶段的成本；并对多种记忆系统进行特征刻画。该工作为设计高效代理记忆系统提供了重要参考。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.02479v1",
+      "source": "arxiv",
+      "title": "Retrieve What's Missing: Coverage-Maximizing Retrieval for Consistent Long Video Generation",
+      "abstract": "Maintaining long-term geometric consistency remains challenging for long-horizon autoregressive video generation. Memory-augmented generative models address this by retrieving historical frames, but their effectiveness depends on two key design choices: what 3D-geometric evidence should represent past observations, and how memory frames should be selected from this evidence. Existing methods often rely on camera poses or field-of-view overlap, which are lightweight but too coarse to reason about pixel-wise visibility, or use explicit 3D reconstruction, which provides fine-grained evidence but is costly to maintain over long rollouts. We propose Coverage-Maximizing Retrieval-Augmented Generation (COVRAG), a depth-based memory retrieval framework that uses pretrained 3D priors to construct a target-view coverage map as lightweight 3D memory evidence. For frame selection, COVRAG maximizes residual coverage gain, iteratively retrieving frames that explain target-view regions not covered by the current context or previously selected memories. To improve scalability in long-video generation, we introduce sliding-window depth caching for efficient geometry estimation. Experiments on RealEstate10K and DL3DV10K show that COVRAG improves long-horizon geometric consistency while maintaining low latency compared to baselines.",
+      "authors": [
+        "Minseok Joo",
+        "Dogyun Park",
+        "Taehoon Lee",
+        "Kyujin Lee",
+        "Hyunwoo J. Kim"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-01T16:49:58+00:00",
+      "link": "https://arxiv.org/pdf/2606.02479v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "proposes a memory retrieval method for long video generation directly relevant to agent memory system design",
+      "llm_evidence_cn": "提出用于长视频生成的记忆检索方法，与智能体记忆系统设计直接相关",
+      "llm_evidence": "提出用于长视频生成的记忆检索方法，与智能体记忆系统设计直接相关",
+      "canonical_evidence": "提出用于长视频生成的记忆检索方法，与智能体记忆系统设计直接相关",
+      "llm_tldr_en": "Proposes COVRAG a depth-based memory retrieval method for long video generation that selects historical frames maximizing coverage to maintain geometric consistency outperforming pose-based and 3D reconstruction approaches",
+      "llm_tldr_cn": "长程自回归视频生成面临几何一致性挑战，现有记忆增强模型在选取历史帧时要么依赖粗糙的相机位姿，要么采用昂贵的三维重建。本文提出COVRAG，一种基于深度图的覆盖率最大化检索方法，在像素级可见性和计算开销之间取得平衡。实验证明，COVRAG在长视频生成任务中有效减少了几何漂移，显著优于现有基线。该工作为记忆增强生成模型的帧选择提供了新思路，对长视频理解和生成均有启发。",
+      "llm_tldr": "长程自回归视频生成面临几何一致性挑战，现有记忆增强模型在选取历史帧时要么依赖粗糙的相机位姿，要么采用昂贵的三维重建。本文提出COVRAG，一种基于深度图的覆盖率最大化检索方法，在像素级可见性和计算开销之间取得平衡。实验证明，COVRAG在长视频生成任务中有效减少了几何漂移，显著优于现有基线。该工作为记忆增强生成模型的帧选择提供了新思路，对长视频理解和生成均有启发。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.04896v1",
+      "source": "arxiv",
+      "title": "Channel Fracture: Architectural Blind Spots in Scheduled Cross-Agent Memory Injection for Multi-Agent Orchestration Systems",
+      "abstract": "Multi-agent AI orchestration systems increasingly rely on persistent memory to maintain context across sessions, agents, and tasks. When one agent must inject knowledge into another agent's memory -- a common requirement in hierarchical team architectures -- the delivery mechanism must be architecturally sound. We report the discovery of a systematic failure mode we term channel fracture: a condition where scheduled (cron) agents in orchestration frameworks are silently unable to write to the target agent's persistent memory due to hardcoded memory isolation guards. Through experiments on a production Hermes Agent deployment with five specialized profiles, we tested three injection channels: (A) direct SQLite database writes, (B) target-agent self-writes via memory tools, and (C) cron-delegated writes. Channel C failed completely due to two architectural constraints: skip_memory=True hardcoded at the scheduler layer and dynamic registration of memory tools contingent on _memory_manager initialization, which is bypassed in cron execution contexts. We propose CADVP (Cross-Agent Delivery Verification Protocol) v1.1, a 13-dimension verification framework with a veto-level channel confirmation check (CC-0) that prevents false-positive delivery assurance. We articulate two design principles: the inverse verification principle and the channel matching principle.",
+      "authors": [
+        "Levent Liu"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA"
+      ],
+      "published": "2026-06-03T13:55:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.04896v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "identifies channel fracture failure in cross-agent memory injection",
+      "llm_evidence_cn": "发现跨智能体记忆注入中的通道断裂故障",
+      "llm_evidence": "发现跨智能体记忆注入中的通道断裂故障",
+      "canonical_evidence": "发现跨智能体记忆注入中的通道断裂故障",
+      "llm_tldr_en": "This paper discovers channel fracture, a systematic failure mode in multi-agent systems where scheduled agents cannot write to target memory due to isolation guards, tested on Hermes Agent deployment.",
+      "llm_tldr_cn": "在多智能体编排系统中发现一种系统级故障模式——通道断裂，即计划性智能体因内存隔离保护无法写入目标智能体持久记忆，在Hermes Agent生产部署上通过三种注入通道实验验证，揭示了架构设计中的盲点，对构建可靠的多智能体记忆系统具有重要启示。",
+      "llm_tldr": "在多智能体编排系统中发现一种系统级故障模式——通道断裂，即计划性智能体因内存隔离保护无法写入目标智能体持久记忆，在Hermes Agent生产部署上通过三种注入通道实验验证，揭示了架构设计中的盲点，对构建可靠的多智能体记忆系统具有重要启示。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.00793v1",
+      "source": "arxiv",
+      "title": "MBench: A Comprehensive Benchmark on Memory Capability for Video World Models",
+      "abstract": "Recent advancements in video-based world models have demonstrated an unprecedented ability to synthesize high-fidelity visual sequences. However, a fundamental gap persists between visually plausible video generation and the functional requirements of a world model, particularly in maintaining a stable and reasonable internal state over extended temporal horizons. While existing benchmarks primarily emphasize visual quality, motion coherence, and text-video alignment, they largely overlook memory, the core capability of a world model to preserve consistency across long-term horizons and complex interactions. To address this gap, we present \\textbf{MBench}, a comprehensive benchmark dedicated to quantifying and evaluating the memory capability of video world models. We systematically decompose the memory capability of video world models into three hierarchical and complementary core dimensions: entity consistency, environment consistency, and causal consistency, which are further refined into 12 quantifiable sub-dimensions for comprehensive characterization of long-term memory. Our benchmark is built upon rigorously curated real-captured long videos, and evaluated by rule-based quantitative matrices and VLM to enable objective and comprehensive consistency assessment. Extensive evaluations of mainstream state-of-the-art video world models reveal critical systemic limitations of existing methods in long-term state retention, providing a standardized benchmark and clear research direction to advance the field.",
+      "authors": [
+        "Shengjun Zhang",
+        "Zhang Zhang",
+        "Simin Huang",
+        "Zhenyu Tang",
+        "Hanyang Wang",
+        "Chensheng Dai",
+        "Min Chen",
+        "Yifan Li",
+        "Yuxin Li",
+        "Yingjie Chen",
+        "Hao Liu",
+        "Chen Li",
+        "Yueqi Duan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-05-30T16:17:33+00:00",
+      "link": "https://arxiv.org/pdf/2606.00793v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "memory benchmark for video world models enabling long video understanding",
+      "llm_evidence_cn": "视频世界模型记忆基准助力长视频理解",
+      "llm_evidence": "视频世界模型记忆基准助力长视频理解",
+      "canonical_evidence": "视频世界模型记忆基准助力长视频理解",
+      "llm_tldr_en": "Proposes MBench, a comprehensive benchmark for evaluating memory capability of video world models across long-term consistency.",
+      "llm_tldr_cn": "视频世界模型虽能生成高保真序列，但其内部状态在长时间跨度下的稳定性缺乏评估。现有基准忽视记忆能力，MBench专门设计用于衡量世界模型在长时交互中的一致性。该基准为视频理解与生成模型的记忆研究提供了关键测试平台。",
+      "llm_tldr": "视频世界模型虽能生成高保真序列，但其内部状态在长时间跨度下的稳定性缺乏评估。现有基准忽视记忆能力，MBench专门设计用于衡量世界模型在长时交互中的一致性。该基准为视频理解与生成模型的记忆研究提供了关键测试平台。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.02522v1",
+      "source": "arxiv",
+      "title": "Moment-Video: Diagnosing Temporal Fidelity of Video MLLMs on Momentary Visual Events",
+      "abstract": "Video multimodal large language models (MLLMs) have made rapid progress on general and long-form video understanding, yet their ability to preserve brief answer-critical visual evidence remains underexplored. Many practical questions are determined by momentary visual events: localized actions or state transitions that may last only a few frames. Such evidence can be skipped by sparse frame sampling, suppressed by visual-token compression, or diluted by coarse temporal aggregation, causing failures that language-side reasoning cannot reliably recover. We introduce Moment-Video, a benchmark for diagnosing the temporal fidelity of video MLLMs through momentary visual event understanding. Each question is grounded in a localized, visually observable, and sampling-sensitive event, requiring models to notice, count, describe, or reason about transient evidence rather than rely on persistent objects, global scene context, or language priors. Moment-Video contains 1,000 human-verified video-QA pairs across 7 domains and 25 fine-grained subcategories, covering four task types: Temporal Occurrence, Temporal Counting, Action Description, and Temporal Reasoning. We evaluate 33 proprietary and open-source MLLMs on Moment-Video. The best-performing model, Seed-2.0-Pro, achieves only 39.6% overall accuracy, while most open-source models remain below 25%, revealing a substantial gap in momentary visual event understanding. Diagnostic analyses show that denser frame sampling improves some models but does not eliminate the bottleneck, and longer videos introduce stronger temporal-localization challenges. These findings suggest that current video MLLMs still lack temporally faithful representations for capturing, preserving, and using brief but decisive visual evidence.",
+      "authors": [
+        "Xiaolin Liu",
+        "Yilun Zhu",
+        "Xiangyu Zhao",
+        "Xuehui Wang",
+        "Yan Li",
+        "Xin Li",
+        "Haoyu Cao",
+        "Xing Sun",
+        "Shaofeng Zhang",
+        "Xu Yang",
+        "Zhihang Zhong",
+        "Xue Yang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-01T17:32:20+00:00",
+      "link": "https://arxiv.org/pdf/2606.02522v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "benchmark for temporal fidelity in long video understanding",
+      "llm_evidence_cn": "长视频理解的时间保真度基准",
+      "llm_evidence": "长视频理解的时间保真度基准",
+      "canonical_evidence": "长视频理解的时间保真度基准",
+      "llm_tldr_en": "Moment-Video diagnoses video MLLMs' ability to preserve momentary visual evidence in long-form video understanding, revealing failures due to sampling and compression.",
+      "llm_tldr_cn": "视频大模型在长视频理解中常遗漏短暂的视觉证据，但缺乏专门诊断工具。Moment-Video基准聚焦于瞬时视觉事件理解，每个问题均基于仅持续几帧的视觉线索。实验发现，即使强模型也因稀疏帧采样和视觉令牌压缩而失败。该基准为长视频理解模型的时间保真度提供了系统评估，揭示了当前模型的关键短板。",
+      "llm_tldr": "视频大模型在长视频理解中常遗漏短暂的视觉证据，但缺乏专门诊断工具。Moment-Video基准聚焦于瞬时视觉事件理解，每个问题均基于仅持续几帧的视觉线索。实验发现，即使强模型也因稀疏帧采样和视觉令牌压缩而失败。该基准为长视频理解模型的时间保真度提供了系统评估，揭示了当前模型的关键短板。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.04329v1",
+      "source": "arxiv",
+      "title": "From Untrusted Input to Trusted Memory: A Systematic Study of Memory Poisoning Attacks in LLM Agents",
+      "abstract": "Memory is a core component of AI agents, enabling them to accumulate knowledge across interactions and improve performance. However, persistent memory introduces the risk of memory poisoning, where a single adversarial memory write can exert long-term influence over agent behavior. We present a systematic study of memory poisoning in LLM-based agents. We identify four memory write channels and nine structural vulnerabilities in model capabilities, system prompt design, and agent system architecture that make these channels exploitable. Based on these vulnerabilities, we develop a taxonomy of six classes of memory poisoning attacks. Furthermore, we design MPBench -- a benchmark for evaluating memory poisoning attacks, and show that agents designed to write and retrieve memory more aggressively are more exploitable. We also show that existing prompt injection defenses fail to cover memory poisoning attacks. Our findings provide a foundation for understanding and mitigating memory poisoning attacks against AI agents.",
+      "authors": [
+        "Pritam Dash",
+        "Tongyu Ge",
+        "Aditi Jain",
+        "Tanmay Shah",
+        "Zhiwei Shang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-03T01:04:13+00:00",
+      "link": "https://arxiv.org/pdf/2606.04329v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "memory poisoning attacks study on agent architecture",
+      "llm_evidence_cn": "代理架构中的记忆投毒攻击研究",
+      "llm_evidence": "代理架构中的记忆投毒攻击研究",
+      "canonical_evidence": "代理架构中的记忆投毒攻击研究",
+      "llm_tldr_en": "Systematic study of memory poisoning in LLM agents, identifying vulnerabilities and developing a taxonomy and benchmark for attacks.",
+      "llm_tldr_cn": "持久记忆使代理面临记忆投毒风险。本文系统研究了LLM代理中的记忆投毒攻击，识别了四种写入通道和九类架构漏洞，基于此建立了六类攻击的 taxonomy，并设计了MPBench基准。实验揭示了现有代理在记忆安全性方面的不足，为设计更安全的记忆系统提供了重要指导。",
+      "llm_tldr": "持久记忆使代理面临记忆投毒风险。本文系统研究了LLM代理中的记忆投毒攻击，识别了四种写入通道和九类架构漏洞，基于此建立了六类攻击的 taxonomy，并设计了MPBench基准。实验揭示了现有代理在记忆安全性方面的不足，为设计更安全的记忆系统提供了重要指导。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.04351v1",
+      "source": "arxiv",
+      "title": "Video2LoRA: Parametric Video Internalization for Vision-Language Models",
+      "abstract": "Processing video in vision-language models is expensive: each frame occupies hundreds of tokens, and inference cost scales with every frame and every repeated query. We introduce Video2LoRA, a method for parametric video internalization. A perceiver hypernetwork reads the intermediate representations produced layer-by-layer as a frozen VLM encodes a video, and generates a Low-Rank Adaptation (LoRA) adapter in a single forward pass. Unlike standard LoRA fine-tuning, which requires iterative gradient updates, Video2LoRA predicts these weights directly from the video. Trained for SmolVLM2 500M and 2.2B on video summarization and captioning, Video2LoRA enables the same frozen VLM to answer queries from the adapter alone, with zero visual tokens in its context at query time. Video2LoRA is statistically non-inferior and equivalent to direct video-in-context inference across all five captioning benchmarks at both model scales, and across seven of eight video question answering benchmark-scale pairings. Although trained only on 12 frames at 384px, it remains stable up to 1,024 frames and 1024px, where direct video-in-context inference often degenerates. Across this sweep, it reduces answer-time visual-token load by up to 1,500x and query TTFT by 6-80x, while preserving video-faithful outputs. We also find that independently generated adapters for non-overlapping video segments can compose in rank space, suggesting a path toward chunked long-video internalization.",
+      "authors": [
+        "Manan Suri",
+        "Sarvesh Baskar",
+        "Dinesh Manocha"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-06-03T02:07:35+00:00",
+      "link": "https://arxiv.org/pdf/2606.04351v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "parametric video internalization for vision-language models",
+      "llm_evidence_cn": "用于视觉语言模型的参数化视频内化",
+      "llm_evidence": "用于视觉语言模型的参数化视频内化",
+      "canonical_evidence": "用于视觉语言模型的参数化视频内化",
+      "llm_tldr_en": "Proposes Video2LoRA, a method that internalizes video into a LoRA adapter via a perceiver hypernetwork, enabling a frozen VLM to answer queries without visual tokens, significantly reducing inference cost for video understanding tasks.",
+      "llm_tldr_cn": "视频语言模型处理视频时每帧占用大量token，推理成本随帧数和查询次数线性增长。本文提出Video2LoRA，通过感知器超网络将视频编码为低秩适应（LoRA）适配器，使冻结的VLM仅凭适配器即可回答查询，无需输入视觉token。在视频摘要和字幕任务上验证了有效性，大幅降低了推理成本。该方法为长视频高效理解提供了新思路。",
+      "llm_tldr": "视频语言模型处理视频时每帧占用大量token，推理成本随帧数和查询次数线性增长。本文提出Video2LoRA，通过感知器超网络将视频编码为低秩适应（LoRA）适配器，使冻结的VLM仅凭适配器即可回答查询，无需输入视觉token。在视频摘要和字幕任务上验证了有效性，大幅降低了推理成本。该方法为长视频高效理解提供了新思路。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.04628v1",
+      "source": "arxiv",
+      "title": "RAMPART: Registry-based Agentic Memory with Priority-Aware Runtime Transformation",
+      "abstract": "RAMPART is a compile-time memory model and pure in-RAM block registry for LLM-based agents. Context assembly is a programmable runtime operation where content is compiled from a structured registry under explicit policy for ordering, inclusion, and eviction. Five composable primitives (promote, gate, write, evict, rollback) act on named addressable blocks before compilation at zero prompt-token cost. Provenance tags and non-evictable authorship flags implement a permissioned memory model with block-level ownership. Controlled probes with Qwen3-8B Q4 show that compile-time placement and the structural relationship between blocks and the task query affect task success, with the cliff falling at roughly the seventh block position when the task follows the registry and the twelfth when it precedes. Grouping the critical block with content-adjacent neighbours and promoting the group as a unit lifts task success by tens of percentage points at positions where single-block placement fails. Cross-model replication on Qwen2.5-7B, Llama-3.1-8B, Mistral-7B-v0.3, and Qwen3-14B shows the content-priming effect appears at the same absolute positions across families, with magnitude varying with model strength. Block grouping raises Mistral's mean pass rate roughly fivefold at the hardest registry size, and a smaller model with the intervention can outperform a larger model without it in the mid-registry zone. Relevance gating reduces prompt cost by 67.8\\% while recovering 83% of the promoted-condition success rate. Schema eviction produces 0% invocations against 100% with the schema present, a property policy-based approaches cannot guarantee by construction. Shared-registry coordination reduces inter-agent communication to a method call at zero coordination token cost.",
+      "authors": [
+        "Nikodem Tomczak"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.MA"
+      ],
+      "published": "2026-06-03T09:01:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.04628v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "proposes registry-based agentic memory model with priority-aware runtime transformation",
+      "llm_evidence_cn": "提出基于注册表的代理记忆模型，具有优先级感知运行时变换",
+      "llm_evidence": "提出基于注册表的代理记忆模型，具有优先级感知运行时变换",
+      "canonical_evidence": "提出基于注册表的代理记忆模型，具有优先级感知运行时变换",
+      "llm_tldr_en": "RAMPART is a compile-time memory model using an in-RAM block registry with composable primitives for context assembly, enabling priority-aware memory management at zero prompt-token cost.",
+      "llm_tldr_cn": "LLM代理的上下文组装需要显式策略，但现有方法固定且昂贵。本文提出RAMPART，一个编译时内存模型和纯RAM块注册表，通过五个组合原语（提升、门控、写入、驱逐、回滚）实现可编程上下文组装，且不消耗提示词token。实验表明编译时放置和块结构关系影响任务成功率，为代理记忆系统提供了灵活高效的设计范式。",
+      "llm_tldr": "LLM代理的上下文组装需要显式策略，但现有方法固定且昂贵。本文提出RAMPART，一个编译时内存模型和纯RAM块注册表，通过五个组合原语（提升、门控、写入、驱逐、回滚）实现可编程上下文组装，且不消耗提示词token。实验表明编译时放置和块结构关系影响任务成功率，为代理记忆系统提供了灵活高效的设计范式。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "carryover_cache",
+      "paper_id": "2606.04628v1",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.04896v2",
+      "source": "arxiv",
+      "title": "Channel Fracture: Architectural Blind Spots in Scheduled Cross-Agent Memory Injection for Multi-Agent Orchestration Systems",
+      "abstract": "Multi-agent AI orchestration systems increasingly rely on persistent memory to maintain context across sessions, agents, and tasks. When one agent must inject knowledge into another agent's memory -- a common requirement in hierarchical team architectures -- the delivery mechanism must be architecturally sound. We report the discovery of a systematic failure mode we term channel fracture: a condition where scheduled (cron) agents in orchestration frameworks are silently unable to write to the target agent's persistent memory due to hardcoded memory isolation guards. Through experiments on a production Hermes Agent deployment with five specialized profiles, we tested three injection channels: (A) direct SQLite database writes, (B) target-agent self-writes via memory tools, and (C) cron-delegated writes. Channel C failed completely due to two architectural constraints: skip_memory=True hardcoded at the scheduler layer and dynamic registration of memory tools contingent on _memory_manager initialization, which is bypassed in cron execution contexts. We propose CADVP (Cross-Agent Delivery Verification Protocol) v1.1, a 13-dimension verification framework with a veto-level channel confirmation check (CC-0) that prevents false-positive delivery assurance. We articulate two design principles: the inverse verification principle and the channel matching principle.",
+      "authors": [
+        "Dexing Liu"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA"
+      ],
+      "published": "2026-06-03T13:55:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.04896v2",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Identifies systematic failure in cross-agent memory injection for multi-agent orchestration",
+      "llm_evidence_cn": "发现多代理编排中跨代理记忆注入的系统性缺陷",
+      "llm_evidence": "发现多代理编排中跨代理记忆注入的系统性缺陷",
+      "canonical_evidence": "发现多代理编排中跨代理记忆注入的系统性缺陷",
+      "llm_tldr_en": "This paper reports channel fracture, a failure mode where scheduled agents cannot write to target agent memory due to isolation guards, with experiments on Hermes Agent deployment.",
+      "llm_tldr_cn": "多代理AI编排系统依赖持久记忆维护上下文，但发现一种系统性缺陷——通道断裂：定时代理因硬编码隔离保护无法向目标代理记忆写入。在Hermes Agent生产部署上通过五种专业配置验证该问题。该发现揭示了当前多代理记忆架构的设计盲点，为构建健壮的跨代理记忆注入机制提供了关键警示。",
+      "llm_tldr": "多代理AI编排系统依赖持久记忆维护上下文，但发现一种系统性缺陷——通道断裂：定时代理因硬编码隔离保护无法向目标代理记忆写入。在Hermes Agent生产部署上通过五种专业配置验证该问题。该发现揭示了当前多代理记忆架构的设计盲点，为构建健壮的跨代理记忆注入机制提供了关键警示。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.05250v1",
+      "source": "arxiv",
+      "title": "Towards Persistent Case-Based Memory for Autonomous Data Science: A CBR-Augmented R&D-Agent with a Locally Deployable Small Language Model",
+      "abstract": "Most top-performing autonomous data-science agents rely on frontier cloud models and lack persistent, cross-session memory. This paper addresses two open gaps: (1) the underexplored use of formally structured, quality-controlled Case-Based Reasoning (CBR) case bases coupling symbolic case records with executable code artefacts; and (2) the untested viability of Small Language Models (SLMs) as locally deployable agent backbones. We present CBR-augmented R&D-Agent, integrating a persistent CBR layer into Microsoft's R&D-Agent framework with a custom backend for Gemma 4 31B Dense -- the first published end-to-end evaluation of Gemma 4 as an autonomous data-science agent backbone. The CBR layer overrides three R&D loop phases via a surgical subclass toggled by a single environment variable. Cases are stored as structured records with executable code snapshots and quality metadata; a five-gate quality filter and a heuristic reuse-detection mechanism assess knowledge transfer by combining embedding similarity, code-fingerprint overlap, and injection provenance. Evaluated on two Kaggle competitions (NOMAD 2018, Spaceship Titanic) with four seeds over eight improvement loops each, CBR achieves directionally higher accuracy than the CBR-disabled baseline on Spaceship Titanic (0.8147 vs. 0.8098, d = -1.41) with substantially lower variance. Heuristic reuse detection across 108 retrieval events shows high semantic relevance (mean embedding similarity 0.882) alongside variable structural proximity (mean code-fingerprint similarity 0.305), consistent with conceptual guidance rather than verbatim code copying.",
+      "authors": [
+        "Felix Stocker"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-06-03T12:56:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.05250v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "persistent case-based memory for autonomous agents",
+      "llm_evidence_cn": "自主代理的持久案例推理记忆",
+      "llm_evidence": "自主代理的持久案例推理记忆",
+      "canonical_evidence": "自主代理的持久案例推理记忆",
+      "llm_tldr_en": "CBR-augmented R&D-Agent integrates a persistent case-based reasoning layer into an autonomous data-science agent, enabling cross-session memory with small language models.",
+      "llm_tldr_cn": "自主数据科学代理缺乏持久跨会话记忆。本文通过将形式化案例推理（CBR）层集成到微软R&D-Agent框架中，并首次评估Gemma 4作为骨干，实现了持久记忆。CBR案例库耦合符号记录与代码制品，支持质量控制和知识复用。在数据科学任务上展示了优于无记忆代理的性能，验证了小语言模型在本地部署的可行性。",
+      "llm_tldr": "自主数据科学代理缺乏持久跨会话记忆。本文通过将形式化案例推理（CBR）层集成到微软R&D-Agent框架中，并首次评估Gemma 4作为骨干，实现了持久记忆。CBR案例库耦合符号记录与代码制品，支持质量控制和知识复用。在数据科学任务上展示了优于无记忆代理的性能，验证了小语言模型在本地部署的可行性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.05677v1",
+      "source": "arxiv",
+      "title": "LongSpace: Exploring Long-Horizon Spatial Memory from Perception to Recall in Video",
+      "abstract": "Multimodal Large Language Models (MLLMs) have advanced image and video understanding and can increasingly handle longer visual inputs. Long-horizon tasks such as autonomous driving and robotic navigation require more than recognizing the current view, as models must remember and retrieve previously observed spatial layouts, routes, viewpoint changes, and object states. To evaluate this capability, we introduce LongSpace-Bench, a room-tour video benchmark for long-horizon spatial memory, covering scene perception, spatial relations, and spatial memory. In this work, we further propose LongSpace, a memory framework for long-video spatial reasoning. LongSpace models long videos as sequential chunks, incorporates 3D structural cues into early decoder layers, and constructs layer-aware memory for question-guided retrieval. Experiments on multiple spatial reasoning benchmarks show that LongSpace improves long-video spatial understanding, further demonstrating explicit spatial memory as a key capability for long-horizon video MLLMs.",
+      "authors": [
+        "Shiqiang Lang",
+        "Jing Liu",
+        "Haoyang He",
+        "Peiwen Sun",
+        "Yuanteng Chen",
+        "Tao Liu",
+        "Lan Yang",
+        "Longteng Guo",
+        "Honggang Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-04T04:00:12+00:00",
+      "link": "https://arxiv.org/pdf/2606.05677v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "long-horizon spatial memory in video, benchmark LongSpace-Bench",
+      "llm_evidence_cn": "视频中的长时空间记忆，提出LongSpace-Bench基准和LongSpace框架",
+      "llm_evidence": "视频中的长时空间记忆，提出LongSpace-Bench基准和LongSpace框架",
+      "canonical_evidence": "视频中的长时空间记忆，提出LongSpace-Bench基准和LongSpace框架",
+      "llm_tldr_en": "Introduces LongSpace-Bench for long-horizon spatial memory in video and LongSpace framework integrating 3D cues for long-video spatial reasoning.",
+      "llm_tldr_cn": "长视频理解不仅需要识别当前画面，还需回溯之前观察的空间布局。本文提出LongSpace-Bench，一个包含房间漫游视频的长时空间记忆基准，覆盖场景感知、空间关系和记忆。同时提出LongSpace框架，将长视频建模为连续块，并融入3D结构线索进行空间推理。实验表明该方法在多项空间任务上优于现有MLLM。该工作推动了长视频从简单识别到空间记忆理解的进展。",
+      "llm_tldr": "长视频理解不仅需要识别当前画面，还需回溯之前观察的空间布局。本文提出LongSpace-Bench，一个包含房间漫游视频的长时空间记忆基准，覆盖场景感知、空间关系和记忆。同时提出LongSpace框架，将长视频建模为连续块，并融入3D结构线索进行空间推理。实验表明该方法在多项空间任务上优于现有MLLM。该工作推动了长视频从简单识别到空间记忆理解的进展。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.05761v1",
+      "source": "arxiv",
+      "title": "SubtleMemory: A Benchmark for Fine-Grained Relational Memory Discrimination in Long-Horizon AI Agents",
+      "abstract": "Persistent AI assistants, such as OpenClaw, accumulate large collections of related memories over long-term interactions. As these memories grow, they may reinforce one another, diverge across contexts, or directly conflict, making correct assistance depend on memory relations rather than isolated recall. Existing long-term memory benchmarks rarely probe how agents preserve and utilize such relations during downstream tasks. To address this gap, we introduce SubtleMemory, a benchmark for fine-grained relational memory discrimination in long-running AI agents. SubtleMemory constructs relation-controlled latent semantic artifacts whose variants instantiate complementary, nuanced, or contradictory relations, and embeds them into realistic user-agent histories, requiring agents to recover distributed relational structures during later queries and instructions. The benchmark contains 1,522 evaluation instances over 10 long histories, grounded in 1,090 relation-controlled memory-variant sets and spanning user-related and non-user-related queries. Evaluating six standalone memory systems, two Claw-style agents with native memory modules, and three Claw-style agents with plugin memory modules, we find that current systems remain weak on fine-grained relational memory discrimination. We further introduce diagnostic protocols that reveal distinct capability profiles across memory preservation, retrieval, and downstream reasoning stages.",
+      "authors": [
+        "Wenxuan Wang",
+        "Haoyu Sun",
+        "Fukuan Hou",
+        "Mingyang Song",
+        "Weinan Zhang",
+        "Yu Cheng",
+        "Yang Yang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-04T06:43:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.05761v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "benchmark for fine-grained relational memory discrimination in long-horizon agents",
+      "llm_evidence_cn": "针对长时智能体细粒度关系记忆辨别的基准",
+      "llm_evidence": "针对长时智能体细粒度关系记忆辨别的基准",
+      "canonical_evidence": "针对长时智能体细粒度关系记忆辨别的基准",
+      "llm_tldr_en": "SubtleMemory evaluates agents' ability to preserve and utilize complex memory relations in long-horizon tasks, using relation-controlled semantic artifacts.",
+      "llm_tldr_cn": "针对现有长期记忆基准缺乏对记忆关系辨别的评估，提出SubtleMemory基准，通过构建关系受控的潜在语义伪影，考察智能体在长时交互中处理互补、细微差异或矛盾关系的能力。实验显示当前智能体在关系判别上存在明显不足。",
+      "llm_tldr": "针对现有长期记忆基准缺乏对记忆关系辨别的评估，提出SubtleMemory基准，通过构建关系受控的潜在语义伪影，考察智能体在长时交互中处理互补、细微差异或矛盾关系的能力。实验显示当前智能体在关系判别上存在明显不足。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.06054v1",
+      "source": "arxiv",
+      "title": "Beyond Similarity: Trustworthy Memory Search for Personal AI Agents",
+      "abstract": "Personal AI agents increasingly rely on long-term memory to provide persistent personalization across sessions. However, existing memory pipelines are largely driven by semantic similarity: memory data close to the current query is retrieved and injected into the model context. This creates a critical trustworthiness gap, since a semantically related memory may still be contextually inappropriate, leading to threats such as cross-domain leakage, sycophancy, tool-call drift, or memory-induced jailbreaks.   In this paper, we study memory search as a trust boundary in personal AI agents. We evaluate representative agentic memory frameworks, including A-Mem, Mem0, and MemOS, together with OpenClaw, a real-world personal-agent environment with persistent state and tool-use capability. Our results show that long-term memory is not merely a utility layer, but a durable control channel that can reshape how agents interpret tasks and execute actions, leaving them highly susceptible to the aforementioned threats. To mitigate these vulnerabilities, we propose MemGate, a lightweight and deployable memory plug-in for trustworthy memory search, with only 9M parameters and a 35.1MB footprint. MemGate is inserted between the vector memory store and the backbone LLM, requiring no LLM modification, memory-database rewriting, or inference-time LLM judge. It applies a query-conditioned neural gate to candidate memory representations, turning raw similarity search into task-conditioned memory admission. Across multiple mainstream memory frameworks, real-world agent settings, and diverse LLM backbones, MemGate reduces memory-induced threats while preserving long-term memory utility.",
+      "authors": [
+        "Jiawen Zhang",
+        "Kejia Chen",
+        "Jiachen Ma",
+        "Yangfan Hu",
+        "Lipeng He",
+        "Yechao Zhang",
+        "Jian Liu",
+        "Xiaohu Yang",
+        "Tianwei Zhang",
+        "Ruoxi Jia"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-04T11:54:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.06054v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "research on trustworthy memory search for personal AI agents",
+      "llm_evidence_cn": "个人AI智能体可信记忆搜索研究",
+      "llm_evidence": "个人AI智能体可信记忆搜索研究",
+      "canonical_evidence": "个人AI智能体可信记忆搜索研究",
+      "llm_tldr_en": "Studies memory search as a trust boundary in personal AI agents, evaluating A-Mem, Mem0, MemOS on OpenClaw; identifies trust gaps.",
+      "llm_tldr_cn": "个人AI智能体依赖长期记忆但存在信任风险，如跨域泄漏和诱导。本文将记忆搜索视为信任边界，在真实个人智能体环境OpenClaw上评估了多个记忆框架。发现语义相似性检索可能导致不适当地记忆使用，提出需要更可信的记忆搜索机制。",
+      "llm_tldr": "个人AI智能体依赖长期记忆但存在信任风险，如跨域泄漏和诱导。本文将记忆搜索视为信任边界，在真实个人智能体环境OpenClaw上评估了多个记忆框架。发现语义相似性检索可能导致不适当地记忆使用，提出需要更可信的记忆搜索机制。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "research papers on agent memory system design",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}
