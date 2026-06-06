@@ -1,68 +1,17 @@
 {
-  "generated_at": "2026-06-05T21:50:39.120648+00:00",
-  "updated_date": "20260605",
+  "generated_at": "2026-06-06T21:13:47.618666+00:00",
+  "updated_date": "20260606",
   "carryover_days": 9,
   "tag_states": {
     "long-video": {
-      "updated_date": "20260605",
+      "updated_date": "20260606",
       "carryover_days": 9,
       "items": []
     },
     "agent-memory": {
-      "updated_date": "20260605",
+      "updated_date": "20260606",
       "carryover_days": 9,
-      "items": [
-        {
-          "id": "2606.06090v1",
-          "source": "arxiv",
-          "title": "Beyond Semantic Organization: Memory as Execution State Management for Long-Horizon Agents",
-          "abstract": "LLM-based agents increasingly tackle long-horizon tasks with interdependent decisions, where each action reshapes future constraints and intermediate errors can cascade. Existing RAG and agent memory systems organize histories by semantic similarity, retrieving content-relevant entries at decision time. We argue that this design mismatches execution-state dependencies: it fragments decision trajectories and mixes valid and erroneous traces, hindering coherent state reconstruction and error isolation. We propose MAGE (Memory as Agent-Guided Exploration), an active execution-state manager that stores interactions in a hierarchical state tree. The agent derives its state from the active root-to-current path, combining subgoal summaries, recent traces, and hints from prior branches. Four coupled operations maintain the tree: Grow records new traces, Compress summarizes completed subgoals, Maintain validates summaries, and Revise restores a target boundary and resumes on a new branch. This design bounds context growth while preserving state integrity and isolating flawed segments from the active path. Experiments on MemoryArena show that MAGE improves the average task success rate by 7.8--20.4 pp over baselines, while reducing token consumption by 55.1%.",
-          "authors": [
-            "Yaoqi Chen",
-            "Haibin Lai",
-            "Yuru Feng",
-            "Chuyu Han",
-            "Qianxi Zhang",
-            "Baotong Lu",
-            "Menghao Li",
-            "Xinjiang Wang",
-            "Zhirui Wang",
-            "Shusen Xu",
-            "Zengzhong Li",
-            "Zewen Jin",
-            "Hao Wu",
-            "Cheng Li",
-            "Qi Chen"
-          ],
-          "primary_category": "cs.AI",
-          "categories": [
-            "cs.AI"
-          ],
-          "published": "2026-06-04T12:26:42+00:00",
-          "link": "https://arxiv.org/pdf/2606.06090v1",
-          "tags": [
-            "keyword:agent-memory",
-            "query:agent-memory"
-          ],
-          "llm_score": 8.0,
-          "llm_evidence_en": "proposes MAGE, memory as execution-state manager for long-horizon agents",
-          "llm_evidence_cn": "提出MAGE，将记忆作为长时任务代理的执行状态管理器",
-          "llm_evidence": "提出MAGE，将记忆作为长时任务代理的执行状态管理器",
-          "canonical_evidence": "提出MAGE，将记忆作为长时任务代理的执行状态管理器",
-          "llm_tldr_en": "Argues semantic memory organization mismatches execution-state dependencies; proposes MAGE with hierarchical state tree for coherent state reconstruction.",
-          "llm_tldr_cn": "现有RAG和代理记忆系统按语义相似性组织历史，但本文指出这忽略了执行状态依赖，混合了有效和错误的轨迹。作者提出MAGE，一种主动的执行状态管理器，将交互存储在层次状态树中。代理从活动的根到当前路径推导状态，结合子目标摘要。实验表明MAGE在长时任务上的成功率显著优于语义记忆方法。该工作重新定义了代理记忆系统应关注执行状态而非语义相似性。",
-          "llm_tldr": "现有RAG和代理记忆系统按语义相似性组织历史，但本文指出这忽略了执行状态依赖，混合了有效和错误的轨迹。作者提出MAGE，一种主动的执行状态管理器，将交互存储在层次状态树中。代理从活动的根到当前路径推导状态，结合子目标摘要。实验表明MAGE在长时任务上的成功率显著优于语义记忆方法。该工作重新定义了代理记忆系统应关注执行状态而非语义相似性。",
-          "llm_tags": [
-            "query:agent-memory"
-          ],
-          "matched_query_tag": "query:agent-memory",
-          "matched_query_text": "agent architecture with memory systems",
-          "matched_requirement_id": "req-8",
-          "selection_source": "carryover_cache",
-          "paper_id": "2606.06090v1",
-          "carry_days": 1
-        }
-      ]
+      "items": []
     }
   }
 }
