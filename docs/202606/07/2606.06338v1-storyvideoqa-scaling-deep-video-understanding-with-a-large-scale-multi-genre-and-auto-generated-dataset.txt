@@ -1,0 +1,2631 @@
+Title: StoryVideoQA: Scaling Deep Video Understanding with a Large-Scale, Multi-Genre and Auto-Generated Dataset
+
+URL Source: https://arxiv.org/pdf/2606.06338v1
+
+Published Time: Fri, 05 Jun 2026 01:36:58 GMT
+
+Number of Pages: 42
+
+Markdown Content:
+# StoryVideoQA: Scaling Deep Video Understanding with a Large-Scale, Multi-Genre and Auto-Generated Dataset 
+
+Zhengqian Wu 1,2,3 , Zhixian Liu 1, Aodong Chen 1, Jingyang Zhang 1, Ruizhe Li 1,2,3 ,Hanlin Ge 1, Zhongyuan Wang 1,2,3 , Chunxia Xiao 1,2,3 , Chao Liang 1,2,3* 
+
+> 1
+
+School of Computer Science, Wuhan University, Wuhan, 430072, Hubei, China. 
+
+> 2
+
+National Engineering Research Center for Multimedia Software, China. 
+
+> 3
+
+Hubei Key Laboratory of Multimedia and Network Communication Engineering, China. *Corresponding author(s). E-mail(s): cliang@whu.edu.cn; Contributing authors: 2023202110068@whu.edu.cn; 2020300004016@whu.edu.cn; gehanlin@whu.edu.cn; wzy hope@163.com; cxxiao@whu.edu.cn; 
+
+Abstract 
+
+Video question answering (VideoQA) aims to answer questions about given videos. While existing approaches excel on factoid VideoQA, they struggle with deep video understanding (DVU), which requires the comprehension of complex storylines. This challenge arises from the inherent long-range video content, multi-faceted question types, and instance-level story elements, all of which constrain the scale and diversity of manually constructed DVU datasets. These difficulties constrain the scale and diversity of manually-constructed DVU dataset. To address these, we previously introduced Sto-ryMind to automatically construct DVU datasets with balanced fine-grained topics. Though it can generate high-quality question-answer pairs (QAs) for TV series, it suffers significant performance degradation when handling longer and more complex movies. In this paper, we further design Sto-ryMindv2, an enhanced multi-agent collaboration framework to generate high-quality DVU datasets for both TV series and movies. By integrating a novel supervisor-guided generation mechanism and a refined multi-reviewer voting strategy, the framework is utilized to construct StoryVideoQA, the largest DVU dataset to date, featuring over 363K QAs on 393.2 hours diverse story videos includ-ing TV series (avg. 1,635 seconds) and movies (avg. 7,878 seconds). Comprehensive evaluations of 20 state-of-the-art VideoQA methods on this large-scale benchmark reveal that they cannot fully maintain long-range character associations or construct a coherent understanding of complex sto-rylines. To bridge this gap, we propose PlotTree, a novel video understanding agent, re-organizing long-range video content into a hierarchical plot structure, enabling efficient storyline reasoning on StoryVideoQA. Project page: https://github.com/nercms-mmap/StoryVideoQA/ 
+
+Keywords: Deep Video Understanding, Large Language Models, Multimodal Large Language Models, Agent 
+
+## 1 Introduction 
+
+Video question answering (VideoQA) aims to answer questions about given videos, supporting advanced applications like video grounding [1– 3], video summarization [4–6], interactive video recommendation system [7–9], and video chat-bots [10–12]. Early researches mainly focus on 1       
+
+> arXiv:2606.06338v1 [cs.CV] 4 Jun 2026 Question types: ,Perception (P) Inference (I) Story elements :,,Character (C) Action (A) Location (L)
+
+(b) DVU (StoryVideoQA )
+
+Q1 : what is the woman doing? 
+
+A. cycling B. squatting C. playing instrument 
+
+D.drinking soup E. skiing 
+
+(a) Factoid VideoQA (NExT -QA)  
+
+> 02:32:22
+> 00:16 00:00
+> A woman is cycling on a road with grass growing on both sides.
+> 00:00:00
+> Harry Potter, an orphan mistreated by his relatives, receives a letter for Hogwarts School of Witchcraft and
+> Wizardry. He learns about his magical heritage and that his parents died fighting the dark wizard Voldemort.
+> Question type: P
+
+Q1 : What action does Hermione perform to protect Harry, and which character does 
+
+this action affect? 
+
+A. She uses magic to help him, Voldemort. 
+
+B. She casts a spell, Snape. 
+
+C. She casts a spell on Snape's cloak, Snape. 
+
+D. She yells for help, Hagrid. 
+
+E. She casts a spell, Voldemort. 
+
+Q2 : How can the actions of Voldemort, Harry, and Voldemort's tone be combined with the 
+
+setting of Forbidden Forest to understand the movie and its power? 
+
+A. It is a comedic one. 
+
+B. It is a peaceful one. 
+
+C. It is a dangerous one. 
+
+D. It is a normal one. 
+
+E. It is a journey where they find love. 
+
+Q3 : what does the woman do when a man passes her? 
+
+A. pick up ball 
+
+B. slow down and look behind 
+
+C. let the baby play with her 
+
+D. to climb on the man s back 
+
+E. spinning around 
+
+Q2 : how many people did the woman pass by while cycling? 
+
+A. one 
+
+B. two 
+
+C. four 
+
+D. six 
+
+E. three Question type: P       
+
+> Question type: P
+> Story element combination:
+> Question type: P
+> Related time: 01:21:35-01:21:37
+> Story element combination:
+> CA
+> Question type: I
+> Related time: 01:44:09-01:44:11
+> ALC
+
+Fig. 1 : Comparisons of factoid VideoQA and DVU. SeViLA VideoChat2 Video-XL 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100     
+
+> ACC (%)  73.8 78.6 77.2
+> 24.9
+> 56.4
+> 64.9
+> -48.9%
+> -22.2% -12.3%
+> NExT-QA (Factoid VideoQA) StoryVideoQA (DVU)
+
+Fig. 2 : VideoQA methods’ performance declines from factoid VideoQA (NExT-QA [14]) to DVU Dataset (StoryVideoQA). factoid VideoQA, which involves answering ques-tions about observable elements such as objects or actions within a short video clip [13] (Figure 1). However, as the field evolves to more com-plex deep video understanding (DVU) tasks that require comprehending complex storylines in long story videos, the performance of existing methods significantly declines (Figure 2). The performance degradation stems from the complexity of understanding storylines in DVU but absent in factoid VideoQA. Firstly, storylines are inherently long-range. As illustrated in Figure 1(b), DVU requires reasoning over hours of video content, a stark contrast to the short clips (e.g., 16 seconds in Figure 1(a)) in factoid VideoQA. Con-sequently, methods must connect events across vast temporal spans to grasp the storyline’s devel-opment. Secondly, storylines are built upon vari-ous story elements at the instance level [15, 16], involving specific characters (C), their actions (A) and locations (L). For example, question-answer pairs (QAs) in DVU often use specific names like ‘Hermione’ in Figure 1(b), rather than ‘Woman’ in Figure 1(a). Thirdly, comprehending storylines requires moving from perception (P) to complex inference (I). As shown in Figure 1, unlike factoid VideoQA’s perception QAs that ask about observ-able facts (e.g., “What is the woman doing?”), DVU includes inference QAs of reasoning about abstract relationships and causality (e.g., “How can ... be combined to understand the movie?”). This leap from perceiving events to inferring their meaning poses a challenge for current methods. The inherent complexity of storylines, as men-tioned above, poses a significant challenge to the manual construction of DVU datasets, which in turn leads to two primary shortcomings in exist-ing DVU datasets. Firstly, the long-range nature of story videos makes the generation of QAs about storyline laborious and time-consuming, result-ing in datasets that are typically small in scale (Table A1). Secondly, the various story elements and question types inherent in storylines make it difficult for human constructors to ensure a balanced distribution. As shown in Figure 3, we introduce a storyline taxonomy of 14 fine-grained 2MovieQA (14.9K) DVU 22&23 (455) TVQA+ (29.4K) MovieChat-1K (19.0K) TVQA (144.9K) P-C P-A P-L P-CA P-CL P-AL P-CAL I-C I-A I-L I-CA I-CL I-AL I-CAL P I
+
+> Fine-grained topics
+> 2 question types
+
+⊗  
+
+> 7 story element combinations
+> C , A, L C A, C L , A L C A L
+
+Fig. 3 : The distribution of 5 datasets QAs across the 14 fine-grained topics, based on 2 question types (perception (P) and inference (I)) and 7 story element combinations (character (C), action (A), location (L) and their combinations) topics by combining 2 question types (perception and inference) with 7 story element combinations (character, action, location, and their combina-tions). We find most DVU datasets are highly imbalanced across 14 fine-grained topics, hin-dering a comprehensive evaluation of method’s capabilities. To overcome the limitations of manual design of QAs on complex storyline, we previously pro-posed StoryMind [17], a multi-agent collabora-tion framework designed to automatically con-struct DVU datasets, which enables the creation of FriendsQA, a large-scale DVU dataset with balanced distribution across fine-grained topics (Table A1). However, StoryMind is primarily applied to episodic TV shows. As shown in Figure 4, the accuracy of the automatically generated QAs show a notable decline when applied to longer, more intricate movies. It reveals the new challenge of scaling automated data generation to handle more complex storylines and longer-range video content. In this paper, we design StoryMindv2, an enhanced multi-agent collaboration framework designed to enhance the quality of QAs genera-tion for long-range story videos including both TV series and movies. Specifically, it builds on its pre-decessor’s architecture by introducing three key innovations. Firstly, to mitigate accuracy degrada-tion of QA generation from complex storylines, we integrate a novel supervisor-guided mechanism. Equipped with an fault archive, the supervisor TV: Friends Movie: Harry Potter 
+
+> 0
+> 2000
+> 4000
+> 6000
+> 8000
+> 10000
+> Video Length (s)
+> 1358s
+> 9142s
+> Average Length (s)
+> StoryMind
+> StoryMindv2
+> 70
+> 80
+> 90
+> 100
+> ACC (%)
+> 91.57%
+> 77.37%
+> 93.64%
+> 85.96%
+
+Fig. 4 : Comparison of the accuracy in automatic QAs generation between StoryMind and Story-Mindv2. can actively identify and rectify generation fail-ures, subsequently providing targeted feedback to the generator. This allows the generator to learn from past faults and enhance its accuracy (Table 2). Secondly, to overcome the dataset scale con-strains caused by StoryMind’s strict consistency filtration strategy, we implement a refined multi-reviewer voting strategy. Under this strategy, a QA pair is accepted if it passes a majority vote. This approach ensures high-quality QAs filtration while simultaneously enabling the construction of a large-scale dataset (Table 3). Lastly, we intro-duce a novel difficulty measure to evaluate ques-tion complexity, candidate answer divergence, and question-answer concordance. On this basis, we build the largest DVU dataset to date, StoryVideoQA, featuring over 363K QAs on 393.2 hours of diverse, long-range story videos with balanced coverage across 14 fine-grained topics. Compared to FriendsQA, Sto-ryVideoQA significantly broadens video sources, including 3 TV series ( Friends, The Big Bang Theory, Game of Thrones ) and 78 top-rated movies like The Shawshank Redemption from the IMDB 1 and Douban 2 Top 250 lists, with average video lengths of 1,635s and 7,878s, respectively. With this new benchmark, we comprehensively evaluate the DVU capbility of 20 state-of-the-art (SOTA) VideoQA methods, encompassing video language models (VLMs)-based methods, mul-timodal large language models (MLLMs)-based 
+
+> 1https://www.imdb.com/
+> 2https://www.douban.com/
+
+3Table 1 : Comparisons of existing DVU datasets. Scale compares the number of QAs (# QAs), the total length (Len.(h)) of all videos, the average duration (Dur.(s)) of videos, QAs density (Den.(h −1)) in terms of (# QAs)/(Len.) and dataset scale (Sca.(h)) in terms of (# QAs) ×(Len.). Fine-grained topic considers the number of fine-grained topics exceeding 5% of the dataset (# Fin.) and the balance degree of fine-grained topic distribution. The Gini index (Gin.) and entropy (Ent.) are employed to measure the distribution’s balance. The figures around the “/” corresponds to TV series and movies, respectively.                                                                                                                                      
+
+> Dataset Venue Scale Fine-grained topic Type Difficulty Measure Len. (h) # QAs Dur. (s) Den.(h −1)Sca. (h) # Fin. Gin. Ent.
+> MovieQA [18] CVPR’16 381.0 14.9K 202.7 39.11 5.68M 60.819 2.713 Movie ✗
+> TVQA [19] EMNLP’18 461.2 144.9K 76.2 314.18 66.83M 80.821 2.873 TV ✗
+> TVQA+ [20] ACL’20 71.7 29.4K 61.5 410.04 2.11M 50.789 2.660 TV ✗
+> HLVU (DVU 22&23) [21] ICMR’20 24.8 455 106/4,907 18.35 0.01M 60.773 2.548 Movie ✗
+> DramaQA [22] AAAI’21 20.5 17.9K 3.6/91.8 873.17 0.37M ---TV ✓
+> DeepMovieQA [23] EACL’23 41.3 1K 3,102 24.21 0.04M ---Movie ✗
+> CinePile [24] CVPRW’24 417.6 305K 160 730.36 127.37M ---Movie ✗
+> MovieChat-1K [25] CVPR’24 156.7 19.0K 564 121.25 2.98M 40.701 2.203 Movie ✗
+> LvBench [26] IJCV’25 209.5 20.0K 948 95.76 4.20M ---Movie ✗
+> FriendsQA [17] AAAI’25 89.6 44.6K 1,358 497.77 4.00M 14 0.927 3.794 TV ✓
+> StoryVideoQA Ours 393.2 363K 1,635/7,878 923.19 142.73M 14 0.927 3.795 TV/Movie ✓
+> Note: For a comprehensive comparison involving broader general-purpose long video understanding benchmarks [27–31], e.g., Video-MME [27], LVBench [32], LongVideoBench [28], please refer to Table A1 and Section A in the Appendix.
+
+methods and video understanding agents meth-ods. Our evaluation on this new benchmark reveals existing VideoQA methods cannot fully maintain long-range character associations and construct a coherent understanding of storylines. To bridge this gap, we devise PlotTree, a novel large lan-guage models (LLMs)-driven video understanding agents. It first converts a video into textual plot nodes, and then, recursively organizes them into a hierarchical PlotTree via node clustering and plot condensation, with the root node encapsulat-ing the entire storyline. This transforms the DVU task into efficient reasoning upon the most rele-vant nodes across multiple abstraction levels in the tree structure, enabling PlotTree to achieve supe-rior performance in comprehending the long-range evolution of storylines. Compared to the previous conference version [17], this journal version represents a significant expansion in methodological depth, data scale, and evaluative breadth: (1) a enhanced multi-agent framework StoryMindv2 (Section 3); (2) the StoryVideoQA dataset, which scales the volume to 363K QAs and broadens the genre diversity (Section 4); (3) a novel PlotTree method that recursively organizes long videos into hierarchi-cal plot structures for deep reasoning (Section 5); and (4) a more comprehensive evaluation on 20 VideoQA methods to reveal the structural limitations of current paradigms (Section 6). In summary, our contributions are as follows: 
+
+• We design StoryMindv2, an enhanced multi-agent collaboration framework, featuring anovel supervisor-guided generation mechanism and a refined multi-reviewer voting strategy to enable high-quality, large-scale QAs generation for complex story videos. 
+
+• We construct StoryVideoQA, the largest and most diverse dataset for DVU to date. It fea-tures over 363K QAs on 393.2 hours diverse, long-range story videos (3 TV series and 78 top-rated movies) with balanced coverage across 14 fine-grained topics. We use this as a new bench-mark to provide a comprehensive analysis of 20 SOTA methods. 
+
+• We propose a novel video understanding agents PlotTree. It re-organizes video content into a hierarchical plot structure for efficient reason-ing, achieves superior performance in compre-hending the long-range evolution of storylines. 
+
+## 2 Related Work 
+
+This section reviews related work in VideoQA, with a focus on datasets and methods. The former surveys existing VideoQA benchmarks, including factoid VideoQA and DVU datasets. The latter discusses recent VideoQA methods, categorizing them into video language models, multimodal large language models and the emerging paradigm 4of video understanding agents. For a more compre-hensive survey of VideoQA studies, we recommend [33–36] to the readers. 
+
+2.1 VideoQA Datasets 
+
+Factoid VideoQA Datasets . Early Factoid VideoQA datasets [13, 37–43] primarily focus on simple visual facts within short-range video clips, such as object recognition [14, 39, 40], action recognition [13, 39, 41], and spatial-temporal understanding [14, 41–43]. For instance, ActivityNet-QA [13] centers on recognizing actions and their temporal relationships, while NEXT-QA [14] delves into videos featuring object interactions. MVBench [44] constructs a unified benchmark for video understanding from existing VideoQA datasets, categorizing its tasks into spa-tial understanding and temporal understanding. Recently, factoid datasets begin to incorpo-rate longer videos. EgoSchema [43] consists of over 5,000 multiple-choice QAs, each QAs corresponds to a 180 seconds daily-life video clip from Ego4D [45]. However, their primary limitation remains: they do not focus on the long-range evolvement of a complex storyline. The QA pair rarely require a method to track and understand specific charac-ters, actions, and locations with specific name as they develop within an complex storyline, which is the core requirement of DVU. This is a major factor contributing to the significant performance gap between factoid VideoQA and DVU. 
+
+DVU Datasets . Story videos, including TV series and movies, are characterized by intricate interactions and long-range evolvement of story elements in storyline [46–48]. It requires methods to achieve a deep understanding of the evolvement of storyline (i.e., DVU). However, these unique characteristics of DVU present significant chal-lenges for manual design of QAs, which gives rise to two primary shortcomings, i.e., limited scale and imbalanced fine-grained topic distribution. Firstly, manual design of QAs for long story video are laborious and time-consuming. Different from constructing DVU datasets for short video clips [18–20, 22, 24–26], constructing DVU dataset for long story videos is particularly challenging. Therefore, most of the DVU dataset for TV series and movies are relatively small in scale [21, 23]. For example, HLVU [21] include only 455 QAs across the DVU 2022 [49] and DVU 2023 [50] grand challenges 3. Even recently proposed bench-marks like LvBench [26] are limited to 20K QAs due to the heavy reliance on manual annotation, hindering comprehensive evaluations of complex storylines. Secondly, as illustrated in Figure 3, the majority of current DVU datasets [18–21, 25] lack a balanced distribution of fine-grained topics. Most of the QAs are focused on perception QAs, particularly regarding the perception of character and action story elements. This is mainly due to early DVU tasks limiting QAs to the prediction of interactions and relations [21, 50–52]. While recent LvBench categorize questions into six ques-tion types that evaluate various perceptual and cognitive capabilities, they still lack a specialized focus on the story elements inherent in movies. This phenomenon indicates existing datasets are difficult to provide a thorough and detailed analysis of the VideoQA methods’ capability in DVU. Recently, leveraging the powerful compre-hension and generation capabilities of LLMs, Sto-ryMinds [17] introduces a multi-agent collabora-tion framework with a generator and two reviewers to automatically construct the FriendsQA dataset. However, StoryMind primarily focuses on the TV series Friends , and suffers a significant perfor-mance degradation when applied to longer movies (Figure 4). To this end, we propose a upgraded StoryMindv2 framework with a novel supervisor-guided generation mechanism and a refined multi-reviewer voting strategy to ensure high-quality automated QAs generation and filtration for both TV series and movies. On this basis, we construct StoryVideoQA, the largest DVU dataset to date with over 363K QAs on 393.2 hours diverse and long-range story videos including both TV series and movies. 
+
+2.2 VideoQA Methods 
+
+Video Language Models . Before the advent of LLMs, VLMs is the primary foundation for VideoQA approaches [35, 53–57]. Their shared process usually involves two steps: firstly, achiev-ing robust video-text alignment, and secondly, feeding the aligned video and text features into a text decoder for text generation training. ALPRO 
+
+> 3https://sites.google.com/view/dvuchallenge2023/home
+
+5[53] proposes a video-and-language pre-training framework that utilizes a video-text contrastive loss and prompting entity modeling to facilitate effective cross-modal alignment, enabling the pre-trained model to achieve excellent performance on VideoQA. mPLUG2 [55] introduces a multi-module composition network to address modal-ity entanglement during multi-modal pretraining. VIOLETv2 [57] introduces masked visual mod-eling during pre-training to enhance cross-modal alignment on video and text by randomly masking video frames and predicting target features. Despite these advances, a significant limitation behind these VLMs-based methods is that their text generation capabilities require extensive pre-training on large-scale video-text datasets. This makes it challenging for these methods to handle open-ended QAs effectively. 
+
+Multimodal Large Language Models . The recent emergence of LLMs [58–65] has revolution-ized this landscape by replacing the traditional text decoder, evolving VLMs into MLLMs [66]. It first achieves remarkable success in visual question answering [67–69] and subsequently extends to the VideoQA [1, 10–12, 44, 70–73]. A typical approach Video-LLaVA [71] maps the visual representations of video frames into the language feature space of an LLMs, allowing the LLMs to comprehend video content. However, the inherent context limitations of LLMs pose a significant challenge for long-range videos [74, 75]. To mitigate this, a common strategy is to compress visual tokens [25, 76–79]. ViLAMP [78] introduces a differential distillation to preserve task-relevant information. Similarly, AdaCM 2 [77] employs a cross-modality attention module and layer-wise video memory reduction to decrease the memory footprint of the key-value (KV) cache. Despite their powerful video comprehension capabilities, MLLMs struggle to follow the narra-tive development within story videos. A critical weakness is their difficulty in identifying specific characters by name [16] and tracking their evo-lution throughout a storyline. Therefore, directly applying MLLMs to DVU tasks still faces signifi-cant challenges and difficulties. 
+
+Video Understanding Agents . Besides MLLMs that directly fuse modalities, another emerging paradigm utilizes LLMs-driven agents [35, 80–83] for video understanding. Early works like LLoVi [84] first employs VLMs, e.g. LaViLa [85] or BLIP2 [67], as captioners to generate tex-tual captions, which are then fed into an LLMs for VideoQA tasks. MM-VID [86] utilizes pow-erful vision models like GPT-4V [61] to achieve superior performance. Recent researches focus on developing more sophisticated and efficient agentic workflows. DoraemonGPT [87] employs the MCTS planner to decompose a question into an action sequence to guides the reasoning process, while OmAgent [88] introduces a divide-and-conquer loop to tackle complex problems. To enhance detail perception, VideoAgent [81] inte-grates an object detector for explicit object data. To improve efficiency on long videos, VideoTree [89] transforms the Retrieval-Augmented Genera-tion (RAG) process for captions into a three-layer tree node retrieval. However, these agents methods essentially optimize RAG over a flat collection of video cap-tions. It is misaligned with the primary challenge of DVU: understanding the long-range evolvement of a complex storyline. This makes it difficult for existing RAG-based video understanding agents to adapt to the unique challenges of DVU. 
+
+## 3 StoryMindv2 
+
+In this paper, we propose StoryMindv2, an enhanced multi-agent collaboration framework designed to automatically generate large-scale, high-quality QAs with balanced fine-grained top-ics for long-range videos. As shown in Figure 5, our framework consists of four main stages: data preparation, QAs generation, QAs filtration, and difficulty measure. 
+
+3.1 Data Preparation 
+
+The foundation of StoryMindv2 is a large-scale, high-quality corpus of time-aligned scripts and subtitles. The data is repared through a meticu-lous two-stage process: data collection and script-subtitle alignment. 
+
+Data Collection . Our data collection is centered on creating aligned script-subtitle pairs that lever-age the complementary strengths of each source. Scripts provide the rich contextual details essen-tial for generating high-quality, context-aware QAs, such as scene locations, character names, and action descriptions (Figure 6(a)). In contrast, 6Retrieval 
+
+> result
+
+Data Preparation QAs Generation 
+
+Script 
+
+Video Description 
+
+QAs Filtration  
+
+> Reviewer 1 Reviewer 2
+
+Difficulty Measure 
+
+Question Difficulty 
+
+Question-Answer 
+
+Difficulty 
+
+Difficulty Score 
+
+N
+
+Drop 
+
+Correctness 
+
+Answer Voting 
+
+N
+
+Retain 
+
+Y
+
+Y
+
+Data Collection 
+
+Script-Subtitle 
+
+Alignment 
+
+> Reviewer 3
+
+Subtitle Supervisor Fault Archive 
+
+> Generator QAs
+> Database
+> Delete
+> Deleted
+> QAs
+> Feedback
+> QAs
+
+Answer Difficulty 
+
+> QAs
+
+Fig. 5 : The workflow diagram of the enhanced multi-agent collaboration framework StoryMindv2. subtitles supply the precise temporal backbone, offering dialogue timestamps crucial for generat-ing QAs time spans and evaluating QA’s difficulty (Figure 6(b)). To build such a resource, we collect both scripts and subtitles, which complement each other by providing contextual richness and precise temporal information. Our raw data is sourced from two main chan-nels. One is public PAINS dataset [90], which provides automatically aligned and manually veri-fied script-subtitle pairs for all episodes of Friends 
+
+and the first eight seasons of The Big Bang The-ory . The other is from online sources, comprising all 73 episodes of Game of Thrones 4 and 78 top-rated movies 5 like The Shawshank Redemption 
+
+from the IMDB and Douban Top 250 lists. For more details on data source, please refer to Section B.1 and Table A2 of the Appendix. 
+
+Script-Subtitle Alignment . To ensure the quality of the scripts and subtitles collected from the internet, we first apply the dynamic time warping (DTW) algorithm, used in PAINS dataset [90], to align the script with the subtitle (Figure 6(b)). Subsequently, each aligned script-subtitle pair would be manually verified to correct any mismatched content (Refer to Appendix B.2 for manual alignment details.). To account for devi-ations between scripts and final video content [91, 92], script material (e.g., scene description or dialogue) is discarded during manual verifica-tion if inconsistent with the released product. This ensures high fidelity to the source. Through this meticulous process of collection, alignment, and verification, StoryMindv2 obtains 
+
+> 4
+
+https://genius.com/artists/Game-of-thrones 
+
+> 5
+
+https://screenplays.io/ Scene: 1, Location: PRIVET DRIVE       
+
+> …Dumbledore puts away the device and a cat meows. Dumbledore looks down at the cat.
+> (00:01:22 - 00:01:24) Dumbledore: I should have known that you would be here...
+> (00:01:25 - 00:01:27) Dumbledore: Professor McGonagall.
+> The cat silently looks at him, and the camera turns towards a wall. The cat's shadow turns
+> into a woman with a tall hat and emerald robes….
+> (00:01:38-00:01:40) McGonagall: Good evening, Professor Dumbledore. …
+
+(c) Video Description  
+
+> 00:01:24 00:01:25 00:01:22
+
+(a) Script (b) Subtitle    
+
+> 00:01:38 00:01:40
+> Scene: 1, Location: PRIVET DRIVE
+> …Dumbledore puts away the device and a cat
+> meows. Dumbledore looks down at the cat.
+> Dumbledore: I should have known that you would
+> be here...Professor McGonagall.
+> The cat silently looks at him, and the camera turns
+> towards a wall. The cat's shadow turns into a woman
+> with a tall hat and emerald robes….
+> McGonagall: Good evening, Professor Dumbledore.
+> Are the rumors true, Albus?
+> …
+> 1
+> 00:01:22 --> 00:01:24
+> I should've known that
+> you would be here,
+> 2
+> 00:01:25 --> 00:01:27
+> Professor McGonagall.
+> 3
+> 00:01:38 --> 00:01:40
+> Good evening, Professor
+> Dumbledore....
+
+Fig. 6 : The flowchart of data preparation. a large-scale corpus of high-fidelity, time-aligned scripts for a diverse range of story videos. As shown in Figure 6(c), this becomes a crucial foun-dation for the QAs generation prompts, which we refer to as the video description .
+
+3.2 QAs Generation 
+
+StoryMindv2 introduces a two-agent collaboration mechanism (Figure 7(a)) powered by Gemini-2.0-flash 6 to produce a large-scale and high-quality QAs covering all 14 fine-grained topics in balance. 
+
+> 6
+
+https://aistudio.google.com/ 
+
+7Question: Analyzing the actions of Voldemort and 
+
+Quirrell and the locations they inhabit, … 
+
+Choices : [A. It suggests that evil is …, B. It reveals 
+
+that evil is…, C. It emphasizes the importance …, D. It 
+
+shows that evil is, E. It reveals the destructive nature…] 
+
+GT : It reveals the destructive nature… 
+
+Related times: 02:12:39-02:12:41 
+
+Related characters: Voldemort, Quirrell, Harry 
+
+Related locations: The last chamber I-CAL Tool Calling 
+
+(d) Example of Generated QAs 
+
+Generated QAs 
+
+Supervisor 
+
+Fault Archive 
+
+Retrieved results 
+
+(b) Prompt for Generator 
+
+Video description: 
+
+{video description} 
+
+Fine-grained topics description: 
+
+QAs for story video 
+
+comprehension is divided into 2 
+
+question types, 7 story element 
+
+combinations. 
+
+Question type: P, I. 
+
+Description: For QAs of type P, 
+
+it can be obtained from the 
+
+appearance of video… 
+
+Story element combinations :
+
+C, A, L, CA, CL, AL, CAL 
+
+Description: We focus on 7 
+
+story element of storylines …
+
+QAs requirements: 
+
+(1) Video-only answerability: The 
+
+generated questions must be answerable 
+
+after watching video.... 
+
+(2) Scope & detail: Relevant segments 
+
+should cover long-term video 
+
+understanding... 
+
+(3) Tool & format compliance: follow the 
+
+instructions of the tool ['Tools of P-C', 
+
+'Tools of P-A',...] to generate question... 
+
+System: You are an expert in 
+
+long story video comprehension... 
+
+(e) Prompt for Supervisor 
+
+Video description: 
+
+{video description} 
+
+Fine-grained topics description: 
+
+QAs for story video 
+
+comprehension is divided into 2 
+
+question types, 7 story element 
+
+combinations. 
+
+Question type: P, I. 
+
+Description: For QAs of type P, 
+
+it can be obtained from the 
+
+appearance of video… 
+
+Story element combinations: C, 
+
+A, L, CA, CL, AL, CAL 
+
+Description: We focus on 7 
+
+story element of storylines …
+
+Generated QAs: 
+
+[csv format] 
+
+Index, Questions, …, Fine-grained topic; 
+
+1,What’s name of…, …, P-C; 
+
+2,What’s action of…, …,P-A; 
+
+…
+
+System: You are an expert in 
+
+supervising the question answer 
+
+pair (QAs) 
+
+Task: 
+
+You need to delete invalid QAs… 
+
+You can retrieve similar QAs from 
+
+fault archive to find out similar fault… 
+
+Give your feedback about the quality 
+
+of these QAs for the improvements … 
+
+Feedback from your supervisor: 
+
+Areas for improvement: (1) Please 
+
+generate more perception-based QAs… 
+
+Mistakes to avoid: (1) Avoid generate too 
+
+many simple QAs only about character… 
+
+Generator QAs Database 
+
+Delete 
+
+invalid QAs 
+
+(a) Two-agent Collaboration Mechanism 
+
+Retrieve similar QAs 
+
+P-CA 
+
+P-C P-A 
+
+P-L 
+
+I-CAL …
+
+Tool Status Threshold 𝐀 
+
+… 
+
+> Threshold 𝐀
+
+… 
+
+> P-C
+> P-A
+> P-L
+> P-CA
+> I-CAL
+> P-C
+> P-A
+> P-L
+> P-CA I-CAL
+
+Fine-grained Topics Distribution 
+
+> Deactivate
+> P-C Tool
+> Retrieved similar invalid QAs:
+
+{Retrieved results }
+
+ Generated 
+
+QAs 
+
+
+
+
+
+
+
+
+
+Feedback 
+
+Deleted QAs 
+
+Tool name: I-CAL Tool 
+
+Description: Follow the requirements of ... 
+
+save questions whose question type is I and 
+
+story elements combination is CAL ! 
+
+Input Schema: 
+
+Questions: List[str], description=“questions 
+
+list you want to save.” 
+
+Choices: List[List[str]],description=“choices 
+
+list (5 choices) for each question”… 
+
+(c) Example of specialized tool Fig. 7 : The flowchart of QAs generation, red workflows details the tool deactivation for topics balance. It includes a generator with a QAs database and a superior with fault archive. 
+
+Generator . Following the approach of StoryMind [17], StoryMindv2 provides the generator with comprehensive context (Figure 7(b)), including the video description as prepared in Section 3.1 and fine-grained topics description .The latter contains descriptions for the 14 fine-grained topics, where each is a combination of one of 2 question types (P, I) and one of 7 story element combinations (C, A, L, CA, CL, AL and CAL). It’s used to prompt the generator to gen-erate QAs that are relevant to the specific story video and aligned with different fine-grained top-ics and save to QAs database (Refer to Appendix B.3 for the prompt of generator). To ensure a balanced distribution across all fine-grained topics, StoryMindv2 designs adynamic control mechanism that leverages a suite of specific tools for each fine-grained topic. Unlike the single-tool approach in StoryMind, Story-Mindv2 designs a specialized tool (Figure 7(c)) for each fine-grained topic’s QAs generation (e.g., the generated multiple-choice QA example with 
+
+Table 2 : Comparison of QAs generation quality and mean time cost per QA pair without (w/o) and with (w/) supervisor. 
+
+Quality StoryMind (w/o supervisor) StoryMindv2 (w/ supervisor) ACC (%) ↑ 49.50 62.30 Self-BLEU-2 (%) ↓ 80.10 79.30 Self-BLEU-4 (%) ↓ 50.10 48.90 Time (min) ↓ 0.081 0.365 
+
+five options shown in Figure 7(d)), which allows for individual moderation. The system tracks the QAs count for each fine-grained topic and deac-tivates the corresponding tool upon reaching a threshold T , forcing the generator to select from the remaining active tools and thus preventing overproduction (red workflows in Figure 7(a)). This control mechanism prevents the generator from overproducing QAs belonging to specific fine-grained topics and is crucial for achieving a balanced final dataset. 
+
+Supervisor . Unlike StoryMind, StoryMindv2 introduces a supervisor whose purpose is to 8inspect the generator’s output, delete erroneous QAs, and provide targeted feedback. As shown in Figure 7(e), the supervisor is prompted with the same context as the generator, along with the full set of generated QAs (Figure 7(d)) just pro-duced by the generator (Refer to Appendix B.4 for the prompt of supervisor). It then performs a comprehensive check on quality and validity and deletes any QAs it deems incorrect. These flawed QAs are then stored in fault archive to serve as an fault archive. Crucially, to gener-ate targeted feedback, the supervisor employs a RAG step powered by Multilingual-E5 model [93] to retrieve top-10 similar QAs from this story video’s fault archive and synthesize similar past mistakes from this memory. This process allows it to provide targeted guidance on the genera-tor’s weaknesses, thus improving generated QAs’ quality even before the final filtration stage. To enhance generation efficiency, both the generator’s QAs generation and the supervisor’s QAs checking are performed in batches. To demonstrate the effectiveness of this improvement, we design a comparative experi-ment on 2,000 QAs generation by manual verifi-cation. We compare the quality of QAs generated by the generator with and without a supervisor, as shown in Table 2. The supervisor significantly improves both the accuracy (ACC ↑) and diver-sity (Self-BLEU-2 ↓ and Self-BLEU-4 ↓) of the generated QAs. This suggests that the supervi-sor, by inspecting faults, deleting invalid QAs, and providing targeted feedback, effectively prevents the accumulation of faults, thereby continuously enhancing QAs quality and balance. Meanwhile, the generation time per QA pair increases to 0.365 minutes. Nevertheless, this cost remains far lower than manually QAs construction ( > 2 minutes). 
+
+3.3 QAs Filtration 
+
+As the final quality control step, the QAs filtration stage employs three reviewers to independently assess each QA’s correctness (Figure 8). Their col-lective voting removes flawed items, ensuring high dataset accuracy and reliability. 
+
+Reviewers . StoryMindv2 incorporates three independent reviewers engined by GPT-4.1 7,  
+
+> 7https://chatgpt.com/ Reviewer 1 Reviewer 2 Reviewer 3
+> Y
+
+(b) 
+
+> Correctness
+> Judgement
+> Majority Answer
+> Voting
+
+(c)   
+
+> YN
+> N
+> (a) Prompt for Reviewers
+> System: You are very good at reviewing …
+> Video Description:
+> {video description}
+> Generated QAs:
+> {generated QAs}
+> Correctness Requirements:
+> (1) Correctness: The answer must be correct
+> based solely on given video description.
+> (2) No prior knowledge: Do not use any prior
+> knowledge.
+> (3) Example of ‘True’: ... Example of
+> ‘False’: ...
+> Answer Requirements:
+> You need to select an answer from choices… Retain Drop
+
+Fig. 8 : The flowchart of QAs filtration. Claude-3.7-Sonnet 8 and Gemini-2.0-flash to fil-ter incorrect QAs. To provide each reviewer with sufficient context, StoryMindv2 prompts it with the complete video description in Section 3.1 and the generated QAs in Section 3.2 (Refer to Appendix B.5 for the prompt of reviewer). As shown in Figure 8(a), StoryMindv2 then tasks each reviewer with two primary requirements. The former is correctness requirement, where the reviewer must judge if a QA pair is logically sound, answerable from the given video context, and does not require external prior knowledge. It’s used for correctness judgement. The latter is answer requirement which prompt the reviewer to select a correct answer for majority answer voting. Based on these, each reviewer outputs its assessment. 
+
+Filtration Process . Firstly, each reviewer out-put a binary judgment: ‘True’ for a correct QA pair and ‘False’ otherwise. Secondly, for all QAs marked ‘True’, each reviewer independently selects the correct answer from the candidate choices, a selection crucial for the final answer voting stage. The outputs from the three review-ers are aggregated by a rigorous two-step voting process to ensure the final dataset’s fidelity: 
+
+• Correctness judgement . Following Story-Mind [17], a QA pair is retained only if it receives a unanimous ‘True’ judgment for cor-rectness from all three reviewers (Figure 8(b)). 
+
+• Majority answer voting . For the QAs that pass the first check, StoryMindv2 introduces an majority answer voting mechanism, by compar-ing the answers selected by the three reviewers 
+
+> 8https://www.anthropic.com/claude
+
+9Table 3 : Comparison of QAs filtration quality between consistency strategy and answer voting strategy.          
+
+> Quality StoryMind (Consistency) StoryMindv2 (Answer Voting) Precision (%) ↑91.05 90.12 Recall (%) ↑54.15 67.02 F1 score (%) ↑67.91 76.87
+
+against the original ground-truth answer pro-vided by the generator (Figure 8(c)). To demonstrate the effectiveness of our multi-reviewer voting strategy, we design a comparative experiment. By comparing the quality of QAs fil-tered by a strict consistency in StoryMind [17] versus refined answer voting strategy (as shown in Table 3), we observe that the answer voting mech-anism achieves significantly higher Recall (54.15 
+
+→ 67.02%) while maintaining comparable Preci-sion (90.12%). This indicates that the traditional consistency strategy, which demands unanimous agreement, leads to a considerable number of valid QAs being discarded. Such a loss becomes partic-ularly pronounced when constructing large-scale datasets. Therefore, by employing a majority vot-ing approach, StoryMindv2 can effectively ensure high QAs quality while simultaneously enabling the construction of extensive DVU datasets. 
+
+3.4 Difficulty Measure 
+
+StoryMindv2 evaluates the difficulty of each gen-erated QA pair by measuring question complexity, candidate answer divergence, and question-answer concordance, respectively. 
+
+Question Difficulty . Following StoryMind [17], question difficulty is measured from two dimen-sions, including the length of the relevant video segment and the number of involved story ele-ments (e.g., characters and locations). 
+
+• Segment length. Shorter segments provide fewer temporal cues, making it harder for mod-els to correctly localize and understand the video content [1, 94, 95]. 
+
+• Story elements. Fewer relevant instances reduce semantic grounding. Although LLMs/M-LLMs can leverage prior knowledge to infer answers from partial information, such sparsity still increases reasoning difficulty. Thus, questions associated with shorter seg-ments and fewer story elements are regarded as more difficult. For each QA pair, we consider the length of its relevant video segment |L| and the number of relevant semantic instances |S|. Both features are normalized by z-score [96] within QAs with the same video: 
+
+zl = |L| − | L|
+
+σL
+
+, zs = |S| − | S|
+
+σS
+
+(1) where |L| and |S| denote the mean length and the mean number of semantic instances within the video, and σL and σS are their corresponding stan-dard deviations. To obtain a standardized score in (0,1), we use a sigmoid-based mapping: 
+
+Dq = 1 − sigmoid( zl)2 + 1 − sigmoid( zs)2 (2) 
+
+Answer Difficulty . Answer difficulty measures how easily models can distinguish the correct answer from distractors. Empirically, both high and low similarity between the correct answer and distractors correspond to greater difficulty: high similarity implies distractors are semantically close to the correct answer, while low similarity prevents the model from using effective exclusion-ary reasoning. This non-monotonic relationship can be naturally captured by an entropy [97–99] formulation. Specifically, for the correct answer 
+
+ag (g ∈ { 1, 2, .., 5}) in QA pair, we compute the BERTScore similarity [100] between ag and each distractor ai (i̸ = g), and average them as: 
+
+Ba = 14
+
+> 5
+
+X
+
+> i=1 ,i ̸=g
+
+BERTScore( ag , a i) (3) Similarly, we apply z-score normalization with-ine all QAs in StoryVideoQA and sigmoid scaling to normalize Ba into ˆBa ∈ (0 , 1). Finally, the entropy-based difficulty score is defined as: 
+
+Da = 1 −
+
+h
+
+− ˆBa log( ˆBa)−(1 − ˆBa) log(1 − ˆBa)
+
+i
+
+(4) where larger Da indicates higher answer difficulty. 10 Sampling 
+
+> StoryVideoQA -Z
+> (605K)
+> Automated Filtration
+> StoryVideoQA -R
+> (12,805)
+> StoryVideoQA -M
+> (10,336)
+> StoryVideoQA -A
+> (7,686)
+> StoryVideoQA -G
+> (6,927)
+> Manual Filtraion
+> Intersection
+
+Fig. 9 : The validation process of StoryVideoQA. 
+
+Question-Answer Difficulty . This factor eval-uates the semantic gap between the question and its correct answer. A larger semantic gap indi-cates higher difficulty, as the model must perform deeper reasoning rather than relying on surface-level associations. For each QA pair, we compute the BERTScore similarity between the question q
+
+and its correct answer ag
+
+Bqa = BERTScore( q, a g ) (5) Since Bqa are distinctly differentiated in the dataset, StoryMindv2 directly applies min-max normalization to ensure comparability across all QA pairs, and define question-choice difficulty as: 
+
+Dqa = 1 − Bqa − min( Bqa )max( Bqa ) − min( Bqa ) (6) 
+
+Overall Difficulty . The overall difficulty is the sum of three equally weighted factors: 
+
+D({q, {ai}5
+
+> i=1
+
+}) = Dq + Da + Dqa 
+
+3 (7) Figure 12(a) presents a statistical analysis of the difficulty distribution of questions and answers across the entire dataset. 
+
+## 4 StoryVideoQA 
+
+This section begins by evaluating the quality of the auto-constructed StoryVideoQA via a manual assessment of a sampled subset, followed by a sta-tistical analysis of the dataset’s scale, composition, and characteristics. 
+
+Table 4 : Ablation study of StoryMindv2 on generation accuracy (%). ‘Cor.’ indicates the correctness judgement, and ‘Vot.’ indi-cates the answer voting.                 
+
+> Cor. Vot. TV Movie Total
+> QAs Generation Stage
+> ✗✗85.94 68.35 80.71
+> QAs Filtration Stage
+> ✓✗90.03 77.70 86.16
+> ✓✓91.98 85.87 90.12
+
+4.1 Dataset Quality 
+
+To validate the generation quality of our Story-Mindv2 framework, we conduct manual verifica-tion at both the QAs generation and filtration stages, demonstrating its effectiveness and ulti-mately leading to the construction of the largest DVU dataset to date, StoryVideoQA. 
+
+Validation Process . As illustrated in Figure 9, we design a systematic validation process to evaluate both the QAs generation (Section 3.2) and QAs filtration (Section 3.3) stages of Sto-ryMindv2. Initially, during the QAs generation phase, StoryMindv2 automatically constructs the StoryVideoQA-Z dataset, comprising 605K QAs. We first sample a raw subset StoryVideoQA-R (12,805 QAs) for detailed validation. This subset is then processed along two parallel branches: 
+
+• Manual Filtration . Through rigorous man-ual review on StoryVideoQA-R, we filter out StoryVideoQA-M, a high-quality dataset of 10,336 QAs. This subset represents the manu-ally annotated QAs and serves as the primary reference for evaluating filtration strategy. 
+
+• Automated Filtration . We apply our pro-posed automated QAs filtration approach on StoryVideoQA-R, generating automated sub-set StoryVideoQA-A, containing 7,686 QAs. This subset provides the automatically filtered results, allowing us to quantify the performance. Finally, the intersection of the two subsets yields a gold-standard subset, StoryVideoQA-G (6,927 QAs). It’s used as the benchmark for video understanding agents in Section 6.2.2 to reduce the high API cost for full dataset on external 11 Table 5: Performance difference on accuracy (%) between StoryMind-A and StoryMind-G.                                           
+
+> StoryVideoQA Method AG|∆|
+> SINGULARITY [54] 20.47 20.44 0.03 VIOLETv2 [57] 15.86 15.78 0.08 Vid-TLDR [56] 22.21 22.39 0.18 SeViLA [101] 23.72 23.66 0.06 VideoLLaMA2 [72] 69.52 70.13 0.61 VideoChat2 [44] 58.51 59.23 0.72 Chat-UniVi [10] 30.39 30.71 0.32 MA-LMM [76] 64.22 64.69 0.47 TimeChat [1] 36.79 37.36 0.57 Video-ChatGPT [11] 18.79 18.95 0.16 VideoLLaMA3 [73] 79.35 80.09 0.74 ViLAMP [78] 76.75 77.34 0.59 Video-XL [79] 67.89 68.50 0.61
+
+LLMs. Notably, even the smallest StoryVideoQA-G still surpasses existing DVU datasets, e.g., HLVU [21] and DeepMovieQA [23], with movie-length story videos in both scale and quality. 
+
+Manual vs. Automated . Using manually anno-tated StoryVideoQA-M as the ground truth, we first examine StoryVideoQA-R, obtaining the result of QAs generation stage without any filtra-tion (The first data line in Table 4). It reveals that the initial QAs generation accuracy for com-plex movie QAs is only 68.35%, significantly lower than 85.94% for TV series. Then we inspect StoryVideoQA-A to evaluate the utilities of cor-rection judgement and answer voting steps in QAs filtration (Last two lines in Table 4). The combi-nation of them achieves the best results (90.12%) and the generation accuracy for movie increases to 85.87%. It confirms StoryMindv2’s effectiveness. Furthermore, We also compare the perfor-mance of 13 SOTA methods (Refer to Section 6.1 for more details) on automated subset StoryVideoQA-A and golden standard subset StoryVideoQA-G (Table 5), observing a maximum performance difference of only 0.8%. This minimal discrepancy indicates StoryMindv2’s QA genera-tion and QA filtration successfully generates and filters a high-quality DVU dataset automatically. Based on the above validation, StoryMindv2 applies the complete QAs filtration process to the initial 605K QAs (StoryVideoQA-Z) and yield the 
+
+Table 6 : Detailed statistics of our proposed Sto-ryVideoQA dataset.                             
+
+> Dataset TV Movie Total
+> Sitcom Drama
+> Full Set
+> StoryVideoQA-Z 328K 107K 168K 605K StoryVideoQA 202K 65K 95K 363K
+> Subset
+> StoryVideoQA-R 6,000 3,000 3,805 12,805 StoryVideoQA-M 5,128 2,607 2,601 10,336 StoryVideoQA-A 3,663 1,686 2,337 7,686 StoryVideoQA-G 3,346 1,574 2,007 6,927
+
+final high-quality StoryVideoQA dataset, which comprises 363K QAs (Table 6). 
+
+4.2 Dataset Statistics 
+
+Dataset statistics include dataset scale and com-position, topic distribution and QA difficulty. 
+
+Dataset Scale and Composition . By apply-ing our StoryMindv2 framework to a range of TV series (2 sitcoms series Friends and The Big Bang Theory , and 1 drama series Game of Thrones )and movies, we construct StoryVideoQA, a mas-sive DVU dataset containing over 363K QAs. The dataset is built upon 412 TV episodes, with an average length of 1,635s, and 78 top-rated movies from the IMDB and Douban Top 250 lists, which feature a longer average duration of 7,878s. To better demonstrate the dataset scale, we report two complementary indicators in Table A1: QAs density (Den.), which measures the average number of QAs per hour of video (923.19 QAs/h in our dataset), and dataset scale (Sca.), defined as the product of the total number of QAs and the total video duration (142.73M in our dataset). It is worthy noting that such unprecedented density and scale would be nearly impossible to achieve without the automated StoryMindv2 framework. For more statistics and examples, please refer to Section C and Figure A4 of the Appendix. Furthermore, recognizing that current VideoQA methods struggle to identify characters [17] in story videos, we also construct a com-prehensive characer library for the TV series and movies in StoryVideoQA to facilitate future research. As detailed in Table 7 and Figure 10, this library includes: 12 …
+
+63 characters, 471 portrait 38 characters, 548 portrait 1,623 characters, 1,224 portraits 
+
+## ……TV: Sitcoms TV: Drama …Movies Fig. 10 : Characers library of StoryVideoQA. 54.9% 45.1%  
+
+> C14.4% CL 13.8% L14.7% CA 14.7% AL 13.4% A15.5% CAL 13.5% C16.5% A 16.2% L14.8% CA 14.5% CL 12.7% AL 13.1% CAL 12.4%
+
+P I
+
+Fig. 11 : The ditsribution of fine-grained topics in StoryVideoQA. 
+
+• TV . For Friends and The Big Bang Theory 2sitcoms series, the characer library is derived from the PAINS dataset [90], encompassing 38 characters with 548 portrait photos. For Game of Thrones drama series, we manually crop a library of 471 portrait photos for the 63 main characters directly from the videos. 
+
+• Movie . For the movie collection, we gather pho-tos of actors corresponding to their movie roles from IMDB 9, resulting in a library of 1,623 char-acters represented by 1,224 actor portraits as actors may appear in multiple movies.. 
+
+Topic Distribution . As illustrated in Figure 11, the QAs in StoryVideoQA are distributed between the 2 question types (perception (P) and infer-ence (I)) and 7 story element combinations (C, A, L, and their combinations). Though it’s generally easier to construct perception QAs, the split shows that percetion QAs (54.9%) are only slightly more numerous than inference QAs (45.1%). In addi-tion, It is evident that the fine-grained topics are relatively balanced within both the perception 
+
+> 9https://www.imdb.com/
+
+Table 7 : Detailed character statistics of our proposed StoryVideoQA dataset.             
+
+> Dataset TV Movie Total
+> Sitcom Drama # Character 38 63 1,623 1,724 # Portrait 548 471 1,224 2,243
+
+and inference, ensuring that our dataset provides comprehensive coverage for evaluating deep video understanding capabilities. 
+
+QA Difficulty . As shown in Figure 12(a), we analyze the distribution of different difficulty mea-sures ( DQ, DA, and DQA ) and overall difficulty 
+
+D in StoryVideoQA. The DQ distribution is cen-tered around a higher difficulty of 0 .60, in contrast to DA, which is concentrated at 0 .35. Both DQA 
+
+and the overall difficulty D are approximately nor-mally distributed, with peaks centered at 0 .45. This suggests that the overall difficulty of the Sto-ryVideoQA dataset is well-balanced, providing a sufficient range of challenging and easy questions. We also analyze the overall difficulty D
+
+across 14 fine-grained topics (Figure 12(b)). The observed difficulty aligns with our difficulty mea-sure design: Perception QAs, which involve fewer segments and story elements, are generally more difficult than inference QAs. Similarly, QAs on single story element (C, A, or L) tend to exhibit higher difficulty compared to those on compos-ite story elements (e.g., CAL) within perception QAs. However, in inference QAs, the difficulty 13 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> Difficulty Score
+
+0
+
+5
+
+10 
+
+15 
+
+> Density
+
+Dq
+
+Da
+
+Dqa 
+
+D(a) Distributions of QA difficulties. C A L CA CL AL CAL 
+
+Story element combination  
+
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> D
+> Question type
+> P
+> I
+
+(b) Difficulty on fine-grained topics. TV Movie  
+
+> Video Type
+> 0.35
+> 0.40
+> 0.45
+> 0.50
+> 0.55
+> 0.60
+> D
+> Question Type
+> P
+> I
+
+(c) Difficulty on video type. 
+
+Fig. 12 : Analysis of QA difficulties from distribution, fine-grained topic and video type. …eventually overwhelming the Dursleys, who try       
+
+> desperately to stop them. Hagrid arrives, reveals
+> Harry's true identity as a wizard
+> Uncle Vernon and Aunt Petunia
+> Dursley are shocked by their nephew's
+> true identity and refuse to let him go .
+> Hagrid…is seen
+> holding a red umbrella
+> in a dimly lit room,…
+> After the death of Harry Potter's parents,
+> wizards leave the infant Harry on the
+> doorstep of his aunt and uncle,
+> At Hogwarts,
+> a troll’s
+> appearance…
+> …with Uncle Vernon looking
+> at the camera and Aunt
+> Petunia looking concerned
+
+(a) PlotTree Construction [Question q] : Considering the numerous attempts by Vernon to prevent   
+
+> Harry from receiving his Hogwarts letters, what can be inferred about the
+> underlying motivation driving his actions and the broader theme of
+> controlling one's destiny?
+
+Level 2 
+
+Level 1 
+
+Root Root 
+
+(b) PlotTree QA 
+
+K-means Cluster Plot Condensation 
+
+Level 0 
+
+(Leaf) 
+
+Retrieved Node 
+
+𝐀 3 
+
+> 1
+
+𝐀 24
+
+> 1
+
+…
+
+𝐀 0 
+
+> 2
+> [PlotTree 𝐀 ]
+
+LLMs 
+
+RAG 
+
+Stage1: Node Retrieval 
+
+[Question q]
+
+Stage2: QA 
+
+𝐀 24
+
+> 1
+
+𝐀 5 
+
+> 2
+
+… 
+
+> Retrieved node set 𝐀 ret:
+
+Answer 
+
+𝐀 𝐀 
+
+> 𝐀
+
+𝐀 1086 
+
+> 0
+
+𝐀 1091
+
+> 0
+
+Plot Captioning  
+
+> Prompt: You are presented
+> with a textual description
+> of a video clip…. Please
+> provide the answer with a
+> single-letter (A, B, C, D, E)
+
+QA pair 
+
+> …
+
+𝐀 6
+
+> 2
+
+… 𝐀 5
+
+> 2
+
+𝐀 263
+
+> 1
+
+𝐀 2 
+
+> 1
+
+𝐀 23
+
+> 1
+
+𝐀 1109
+
+> 0
+
+…
+
+… …… 𝐀 244
+
+> 1
+
+…
+
+Fig. 13 : The workflows of our proposed video understanding agents PlotTree ( Bold texts track to difference abstract level of Nodes in PlotTree). across different story elements does not show significant variance. This is likely because the segments length and the number of story ele-ments involved in inference questions consistently maintain a relatively large and stable size. For different video types, we observe contrast-ing patterns in the mean and standard deviation of difficulty (Figure 12(c)). Perception QAs are eas-ier in movies compared to TV series, likely due to movies offering longer story segments for context. Conversely, inference QAs in movies are more dif-ficult than their TV counterparts, reflecting the increased complexity and longer-range storylines in movies. 
+
+## 5 PlotTree 
+
+Existing video understanding approaches often represent a video as a flat sequence of discrete events, which struggle to capture the plot’s long-range evolution and hierarchical structure. To address this, we propose PlotTree, a novel video understanding method including two phrases: PlotTree construction and PlotTree QA. The for-mer constructs a multi-level representation that organizes plots into a tree structure. The latter effectively converts the DVU task into a RAG problem over the PlotTree to answer questions about story videos (Figure 13). 14 Prompt:  
+
+> Please generate a brief caption of this image (Describe
+> 'Who' is doing 'What' in 'Where’)
+> Characters: Recognized faces are annotated by
+> boundingbox with color: Aunt Petunia Dursley ( Orange ),
+> Uncle Vernon Dursley ( Green ) .
+> Dialogue: I will not pay to have a crackpot old fool teach
+> him magic tricks
+
+𝐀 𝐀        
+
+> 0
+> Leaf Node
+> Plot Summary (𝐀 𝐀
+> 0):
+> …Uncle Vernon and Aunt
+> Petunia are standing in a dark
+> room, with Uncle Vernon
+> looking surprised and Aunt
+> Petunia looking concerned…
+> Dialogue (𝐀 𝐀
+> 0):
+> I will not pay to
+> have a crackpot
+> old fool teach
+> him magic tricks.
+> Characters () :
+> Uncle Vernon Dursley,
+> Aunt Petunia Dursley
+> Time (𝐀 𝐀
+> 0):
+> 𝐀 𝐀
+> 0=𝐀
+
+Fig. 14 : Leaf node generation in PlotTree. 
+
+5.1 PlotTree Construction 
+
+PlotTree construction consists of 2 steps, i.e., leaf node generation and hierarchical condensation. 
+
+Leaf Node Generation . This initial step aims to generate plot summary for video frames, explic-itly grounding them with character identities and dialogues. Recognizing that MLLMs exhibits lim-ited ability to consistently link specific characters to their actions and dialogue [102–104], our pro-cess begins with explicit character identification. Following prior works [88, 105], we evenly sam-ple F keyframes and leverage InsightFace 10 for face recognition, tagging characters by matching them against character library of StoryVideoQA (Figure 10). Each character from set P0 
+
+> i
+
+, identified at the i-th keyframe ( i ∈ { 1, 2, ..., F }) on level 0 of the PlotTree, is annotated with a colored bound-ing box. Each annotated keyframe, along with its dialogue d0 
+
+> i
+
+and a character-to-color map text (e.g.,‘Aunt Petunia Dursley (Orange)’), are then used to prompt LLaVA-1.6 11 for plot caption-ing, generating a plot summary s0 
+
+> i
+
+with specific character name, as illustrated in Figure 14. The resulting data unit is a leaf node, denoted as a quadruple n0 
+
+> i
+
+= (P0 
+
+> i
+
+, d 0 
+
+> i
+
+, s 0 
+
+> i
+
+, t 0 
+
+> i
+
+), where P0
+
+> i
+
+represents character recognition results, d0 
+
+> i
+
+is the dialogue from the subtitle, and s0 
+
+> i
+
+is the generated plot summary. Crucially, t0 
+
+> i
+
+is the corresponding time, defined by the sequential keyframe index i.This structure provides a much richer description than simple captions. By explicitly binding char-acter identity within P0 
+
+> i
+
+to dialogue in d0 
+
+> i
+
+and 
+
+> 10 https://github.com/deepinsight/insightface
+> 11 https://huggingface.co/liuhaotian/llava-v1.6-vicuna-7b
+
+0 1 2 3 4 5 6
+
+l
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+> (l)
+
+(l) = ( l + ) 1
+
+= 10 3
+
+= 10 2
+
+= 10 1
+
+= 10 0
+
+= 10 1
+
+Fig. 15 : λ(l) ( ϵ=0.01) in different scaling rate α.behaviors in s0 
+
+> i
+
+, these nodes offer solid, unam-biguous foundation for the subsequent hierarchical condensation. 
+
+Hierarchical Condensation . To transform the flat, linear sequence of leaf nodes N 0 = {n0 
+
+> i
+
+}
+
+into a meaningful plot hierarchy that reveals com-plex storyline, we employ an iterative, bottom-up condensation process. The core of condensation process is to progressive cluster a set of child nodes 
+
+N l into Kl distinct clusters {C l
+
+> 1
+
+, Cl
+
+> 2
+
+, . . . , ClKl } and condense each cluster Clj into a parent node nl+1 
+
+> j
+
+by plot condensation (Figure 16), yielding a more abstract parent node set N l+1 = {nl+1  
+
+> j
+
+}.Specifically, we approach the above cluster-ing problem using the K-Means algorithm. To ensure that higher-level clusters focus more on plot semantic similarity, we design a distance met-ric D l that introduces a decay coefficient λ(l) to the temporal distance, shifting the emphasis from temporal to semantic proximity as the hierarchy deepens. Dl(nli, n lj ) = λ(l) · |tli − tlj |
+
+F +  1 − cos( eli, elj ) (8) where decay function λ(l) = (α · l + ϵ)−1 pro-gressively reduces temporal influence at higher hierarchy levels (Figure 15). Here, α > 0 is a scal-ing factor controlling the decay rate, and ϵ is a small constant (1 × 10 −2) to prevent division by zero. tli denotes the time of node nli, and eli rep-resents the normalized semantic embedding of its textual content extracted by Qwen3 embedding 15 Plot Summary (𝐀 1086          
+
+> 𝐀 ):
+> …Uncle Vernon and Aunt
+> Petunia are standing in a dark
+> room, with Uncle Vernon
+> looking surprised and Aunt
+> Petunia looking concerned.
+> Plot Summary (𝐀 𝐀
+> 𝐀 +1):
+> Uncle Vernon and Aunt Petunia Dursley are
+> shocked by the revelation of their nephew's true
+> identity and refuse to let him go. Hagrid questions
+> their ability to stop Harry from attending Hogwarts.
+> Despite the Dursleys' attempts to prevent it, …
+> 𝐀 1086
+> 𝐀
+> Dialogue (𝐀 1086
+> 𝐀 ):
+> I will not pay to
+> have a crackpot
+> old fool teach him
+> magic tricks.
+> Characters () :
+> Uncle Vernon Dursley,
+> Aunt Petunia Dursley
+> 𝐀 1091
+> 𝐀
+> Plot Summary ( 𝐀 1091
+> 𝐀 ):
+> Hagrid, the Hogwarts
+> caretaker, is seen holding a
+> red umbrella in a dimly lit
+> room,…
+> Dialogue ( 𝐀 1091
+> 𝐀 ):
+> None
+> Characters () :
+> Hagrid
+> …
+
+𝐀 𝐀                 
+
+> 𝐀 +1
+> Prompt: You are a master storyteller tasked with summarizing video content.
+> Given a sequence of plot descriptions from a video, your goal is to create a
+> concise and coherent plot summary (or synopsis) …
+> … …
+> Plot Summary (𝐀 1063
+> 𝐀 ):
+> Uncle Vernon Dursley
+> and Aunt Petunia Dursley
+> are shocked…
+> Dialogue ( 𝐀 1063
+> 𝐀 ):
+> It's an outrage! A
+> scandal!
+> Characters () :
+> Uncle Vernon Dursley,
+> Aunt Petunia Dursley
+> 𝐀 1063
+> 𝐀
+> Time (𝐀 1086
+> 𝐀 ):
+> 𝐀 1086
+> 𝐀 =1086
+> Time (𝐀 𝐀
+> 𝐀 +1):
+> 𝐀 𝐀
+> 𝐀 +1=1063
+> Time (𝐀 1091
+> 𝐀 ):
+> 𝐀 1091
+> 𝐀 =1091
+> Time (𝐀 1063
+> 𝐀 ):
+> 𝐀 1063
+> 𝐀 =1063
+> min(·)
+> …… …
+
+Fig. 16 : Plot condensation of child nodes’ tex-tual content for parent node (Red parts exists only when l = 0). [106] model ϕemb :
+
+eli =
+
+(
+
+ϕemb 
+
+ (P0
+
+i , d 0
+
+i , s 0
+
+i ) , l = 0 
+
+ϕemb (sli), l ≥ 1 (9) The two branches separately model low-level visual details (e.g., characters and dialogues) and high-level plot semantics. At each level, for every cluster Clj , all nodes 
+
+{nli} are first sorted chronologically by tli. Their textual content are fed into Gemini-2.0-flash to generate a single, more abstract plot summary 
+
+sl+1 
+
+j . The resulting parent node is defined as 
+
+nl+1 
+
+j = ( sl+1 
+
+j , t l+1 
+
+j ), where tl+1 
+
+j = min( tli|nli ∈ C lj )is the latest time among child nodes belonging to the cluster Clj . The collection of all such nodes constitutes the next level of the tree N l+1 .The number of clusters Kl is determined by a compression rate β ∈ (0 , 1), which dynami-cally adjusts to video content and controls the compression ratio between successive layers, thus determining the overall depth of the PlotTree N :
+
+Kl = max(1 , ⌊β · |N l|⌋ ) (10) where ⌊·⌋ denotes the floor operation. 
+
+5.2 PlotTree QA 
+
+To enable a deep understanding of the plot in long videos, we reframe the VideoQA task as a RAG problem over the PlotTree N . Once the PlotTree is constructed, it can be reused for multiple incoming questions without reconstruction. As illustrated in Figure 13(b). This process consists of two main steps: Node retrieval and QA. 
+
+Node Retrieval . Node retrieval stage aims to capture both macro-level themes and micro-level details simultaneously. Given a question q, we first extract and encode question q from QA pair into semantic embeddings eq using Qwen3 embedding model. Subsequently, we calculate the semantic similarity between eq and all nodes’ semantic embedding {eli|nli ∈ N } and select the top-M
+
+matching nodes. This forms a retrieval set Nret ,that spans multiple levels of the plot hierarchy. 
+
+QA . The QA stage is responsible for synthe-sizing the retrieved information and performing reasoning. We extract the plot summaries from each node in the retrieved node set Nret and sort them chronologically 12 . These sorted summaries are then concatenated into a single, coherent con-text paragraph. Finally, this context is combined with the original QA pair to construct a prompt, which is fed to Gemini-2.0-flash to generate the final answer. 
+
+## 6 Experiments 
+
+In this section, we evaluate the proposed Sto-ryVideoQA dataset through a series of experi-ments. We first describe the experimental setup, followed by benchmarking VLMs-based and MLLMs-based SOTA methods on StoryVideoQA to reveal the key challenges of DVU. We then use our PlotTree and more SOTA methods to further evaluate on StoryVideoQA-G. 
+
+6.1 Experimental Setup 
+
+Baselines . We totally benchmark 20 SOTA meth-ods on StoryVideoQA and StoryVideoQA-G, and categorize these methods into 3 groups. 
+
+• VLMs . VLMs-based method includes Singular-ity [54], VIOLETv2 [57] and Vid-TLDR [56]. We use the weights finetuned on MSRVTT-QA, the most commonly used VideoQA dataset, to ensure fairness. 
+
+> 12
+
+Higher level nodes have priority when times are identical. 
+
+16 Table 8 : Evaluation results (%) on StoryVideoQA datasets between VLMs-based and MLLMs-based methods across 14 fine-grained topics (2 question types (P, I) and 7 story element combinations (C, A, L and their combinations)). P I                                                                                                                                                                                                                                
+
+> Method Venue CALCA CL AL CAL CALCA CL AL CAL Avg.
+> VLMs
+> SINGULARITY [54] ACL’23 21.44 20.59 20.20 20.96 20.59 20.31 19.85 20.53 20.84 20.37 20.61 19.92 20.24 19.90 20.48 VIOLETv2 [57] CVPR’23 19.27 16.32 18.18 16.86 20.32 18.45 18.30 12.03 12.69 14.15 12.54 14.70 14.68 14.09 16.06 Vid-TLDR [56] CVPR’24 19.16 19.16 21.07 21.71 22.42 21.94 23.53 23.11 24.15 23.27 22.89 23.16 23.40 24.31 22.24
+> MLLMs
+> SeViLA [54] CVPR’23 30.32 27.38 35.44 24.31 30.74 26.65 22.05 20.78 21.08 22.61 19.47 21.69 21.21 19.18 24.89 VideoLLaMA2 [72] ArXiv’24 44.77 47.03 52.26 58.76 58.96 62.24 71.17 79.31 77.87 81.40 79.69 79.74 78.32 80.22 66.68 VideoChat2 [44] CVPR’24 35.53 39.15 45.04 49.53 50.58 52.91 62.95 65.67 65.03 69.59 66.41 66.91 65.98 69.80 56.37 Chat-UniVi [10] CVPR’24 29.35 41.00 25.37 37.98 28.89 38.94 31.31 28.14 32.36 19.55 28.18 19.88 29.47 22.92 30.03 MA-LMM [76] CVPR’24 40.95 45.68 48.06 54.26 55.03 58.01 64.45 72.34 71.43 74.49 71.59 72.35 71.78 74.10 61.32 TimeChat [1] CVPR’24 20.97 17.47 29.83 26.28 30.84 28.24 30.07 44.24 44.13 47.08 41.19 41.69 39.93 37.72 33.49 Video-ChatGPT [11] ACL’24 7.41 18.16 4.34 16.94 9.52 17.05 14.00 31.12 30.26 24.91 29.19 24.78 27.51 23.47 19.30 Video-XL [79] CVPR’25 46.75 58.94 51.35 60.91 57.10 61.75 66.67 75.09 73.21 75.98 73.08 73.51 71.71 73.63 64.88 ViLAMP [78] ICML’25 54.19 66.26 58.04 70.70 67.24 71.63 76.03 84.60 82.83 84.91 83.04 83.07 82.22 83.44 73.97 VideoLLaMA3 [73] ArXiv’25 55.47 71.00 62.85 74.06 68.88 74.21 78.99 85.56 83.91 87.03 84.22 84.60 83.63 85.53 76.32
+
+• MLLMs . MLLMs-based method includes SeViLA [101], Chat-Univi [10], MA-LMM [76], TimeChat [1], Video-ChatGPT [11], VideoChat2 [44], VideoLLaMA2[72], VideoL-LaMA3 [73], ViLAMP [78], Video-XL [79], VideoChat-Flash [107], Long-VITA [108], and Qwen3-VL [109]. With the exception of SeViLA, which uses the FlanT5-XL 3B model [65] as its backbone, all other MLLMs-based methods in our evaluation utilize their officially recommended LLMs ranging from 7B to 14B as their backbone. This includes various versions from both the LLaMA [62, 64] and Qwen series [109–111] models. In addition, we also evaluate two frontier MLLMs, Gemini-3-Flash 13 and GPT-5.2 14 to establish the current performance ceiling of the StoryVideoQA benchmark. 
+
+• Agents . Agents methods includes VideoTree [112] and Video2RAG [88]. 
+
+Implementation Details . Following prior works [17, 27, 28, 43, 75], We set methods in zero-shot VideoQA settings on StoryVideoQA, with official default configurations to ensure fairness. For VLMs-based and MLLMs-based methods, all experiments are run on 4 × NVIDIA RTX A6000 GPUs. We use the default or officially recom-mended number of input frames for each method to ensure fair and reproducible comparisons. For 
+
+> 13 https://deepmind.google/models/gemini/
+> 14 https://openai.com/
+
+agents methods, we standardize the core compo-nents to isolate the performance of the agentic workflow itself. To maintain consistency across all agents, we employ LLaVA-1.6 as the captioning tool, Qwen3 embedding model for embedding, and Gemini-2.0-Flash as the LLMs. For PlotTree, we set the sample rate of keyframe as 1 fps, scaling factor α as 10, compression rate β as 1/36, and extract top-32 matching nodes in PlotTree QA process. Notably, only the Video2RAG and Plot-Tree methods can utilize the provided character library for enhanced character identification. For more implementation details of baselines, please refer to Section D of the Appendix. 
+
+Evaluation Metrics . We use accuracy [52] as metrics, calculating by dividing the number of correct answered QAs by the total number of QAs. 
+
+6.2 Experiment Result 
+
+Our evaluation employs a dual setting for feasi-bility and breadth. Only VLMs-based and main MLLMs-based methods are benchmarked on the full set StoryVideoQA. Some methods are assessed on a representative subset StoryVideoQA-G due to the prohibitive API costs and time consuming of evaluating on the full 363K QAs set. 
+
+6.2.1 Evaluations on StoryVideoQA 
+
+We conduct comprehensive evaluations of VLMs-based and MLLMs-based methods on the full StoryVideoQA dataset. Table 8 shows detailed results categorized by all 14 fine-grained topics. 17 Dq                                                                         
+
+> Da
+> 49.4 48.6 47.6 46.6 46.8 45.3 44.8 44.0 43.9
+> 49.2 48.1 47.6 46.5 46.7 45.2 44.9 44.2 44.2
+> 49.6 48.3 47.8 46.9 46.7 45.0 44.3 44.0 43.9
+> 49.2 48.3 47.4 46.3 46.0 44.7 43.8 44.0 43.1
+> 49.4 47.7 46.6 45.7 45.2 43.7 43.5 42.5 41.8
+> 48.4 47.5 46.1 45.0 43.7 42.9 41.9 41.7 41.6
+> 47.5 46.0 44.3 43.5 42.8 41.9 41.1 40.5 40.1
+> 46.1 43.4 41.9 40.9 40.0 38.7 38.1 38.0 37.8
+> 41.6 37.5 35.7 34.2 34.1 32.9 31.9 31.7 31.4 32.5
+> 35.0
+> 37.5
+> 40.0
+> 42.5
+> 45.0
+> 47.5
+> ACC (%)
+
+(a) Dq and DaDq                                                                          
+
+> Dqa
+> 55.6 55.0 55.3 55.1 55.7 55.3 55.3 56.2 56.8
+> 51.2 51.7 50.9 50.8 50.5 50.2 50.9 50.6 51.3
+> 49.5 49.2 48.8 48.2 48.4 47.7 48.0 48.0 48.0
+> 47.7 47.4 46.5 46.6 45.7 45.8 45.1 44.9 44.7
+> 45.7 46.0 45.1 44.8 43.7 43.5 43.0 43.0 42.8
+> 44.7 44.2 42.9 42.3 42.3 41.4 40.6 40.4 40.4
+> 43.4 41.4 41.0 40.2 39.8 39.0 37.8 38.1 38.5
+> 40.4 37.9 37.0 36.2 35.4 34.7 34.2 33.8 33.8
+> 33.8 31.3 30.4 29.4 29.6 28.8 29.0 28.6 28.9 30.0
+> 35.0
+> 40.0
+> 45.0
+> 50.0
+> 55.0
+> ACC (%)
+
+(b) Dq and Dqa Dqa                                                                           
+
+> Da
+> 57.4 52.9 50.0 47.1 44.8 41.9 39.4 36.1 30.8
+> 57.3 52.9 49.8 47.3 44.7 41.9 39.4 35.3 31.0
+> 57.3 52.9 49.3 46.9 44.7 42.9 39.9 35.0 30.6
+> 57.4 52.0 49.4 47.4 44.1 42.5 39.7 34.9 30.2
+> 56.7 51.2 48.8 46.4 44.6 42.9 39.5 35.2 29.6
+> 55.6 50.3 48.1 46.0 44.7 42.0 39.8 34.8 30.7
+> 54.1 49.2 47.2 44.7 44.0 42.5 39.9 35.5 30.9
+> 50.9 46.5 45.2 43.3 42.9 40.9 40.1 35.9 30.7
+> 46.8 44.1 42.4 41.0 40.3 40.0 39.1 34.9 28.2 30.0
+> 35.0
+> 40.0
+> 45.0
+> 50.0
+> 55.0
+> ACC (%)
+
+(c) Dqa and Da
+
+Fig. 17 : Average QA accuracy across different difficulty levels on StoryVideoQA. C A L CA CL AL CAL 
+
+Story element combinations           
+
+> 20
+> 30
+> 40
+> 50
+> 60
+> ACC (%)
+> 32.74
+> 37.55 36.31
+> 41.02 40.09 42.49 44.57
+> 49.42 49.21 49.64 48.62 48.15 48.47 48.33
+
+Question Type 
+
+P I
+
+Fig. 18 : Average performance of VLMs and MLLMs on fine-grained topic. 
+
+VLMs vs. MLLMs . The results in Table 8reveal a distinct performance gap between the two main architectural paradigms, MLLMs-based methods achieve up to 76.32% accuracy, while tra-ditional VLMs-based methods remain below 23%. Across fine-grained topics, VLMs-based methods perform poorly on both perception and inference QAs (none exceeding 30%), whereas MLLMs ben-efit from pre-trained knowledge and show clear gains on inference QAs. The advantage of MLLMs mainly stems from integrating LLMs as their core, which brings stronger language understanding and enhanced reasoning ability. 
+
+Fine-grained Topic Analysis . For the average performance of VLMs and MLLMs on fine-grained topic (Figure 18), we find perception QAs show notable performance degradation on single story element QAs compared to those of composite story elements. Take P-CAL as an example, the aver-age performance drops are substantial: 11.83% for character (P-C), 7.02% for action (P-A), and 8.26% for location (P-L). Conversely, performance on inference QAs does not exhibit such a clear TV Movie 
+
+Video Type 
+
+0
+
+20 
+
+40 
+
+60 
+
+> ACC (%)
+
+38.28 41.83 
+
+49.30 47.86 
+
+Question Type 
+
+P I
+
+Fig. 19 : Average performance analysis across dif-ferent video types and question types. trend. This result is highly consistent with our finding in Figure 12(b). 
+
+Video Type . Furthermore, we compare perfor-mance across two video types (TV and Movie) and two question types (perception and infer-ence). For perception QAs, performance is lower on TV (38.28%) than movies (41.83%), while for inference QAs, performance is lower on movies (47.86%) than TV videos (49.30%), as illustrated in Figure 19. This suggests that despite MLLMs’ strong prior knowledge, they encounter significant challenges when performing long-range inference on the more complex and long contexts movies (Refer to Appendix E for more experiments of disentangling priority knowledge). 
+
+Difficulty Influence . To validate our difficulty metrics, we analyze methods’ accuracy across dis-cretized bins of question ( Dq ), answer ( Da), and question-answer difficulty ( Dqa ) on the full Sto-ryVideoQA dataset. As shown in Figures 17, aver-age performance declines as difficulty increases, confirming the reliability of our metrics. 18 Table 9 : Comparisons (%) on StoryVideoQA-G across 14 fine-grained topics. The baseline marked with * is implemented by us due to the lack of official code. P I
+
+Method Venue C A L CA CL AL CAL C A L CA CL AL CAL Avg. 
+
+VLMs 
+
+SINGULARITY [54] ACL’23 22.63 20.07 18.45 21.36 18.73 21.89 19.76 21.63 21.00 20.91 25.11 18.73 17.00 17.70 20.44 VIOLETv2 [57] CVPR’23 18.83 14.97 18.28 16.64 19.48 18.53 16.33 12.77 12.12 15.19 11.09 13.16 18.50 12.92 15.78 Vid-TLDR [56] CVPR’24 18.83 20.23 22.07 20.04 26.59 23.79 25.60 22.34 20.56 24.46 18.33 24.30 25.50 22.19 22.39 
+
+MLLMs 
+
+SeViLA [101] CVPR’23 27.12 22.70 32.07 20.98 32.40 28.63 20.97 22.70 18.61 23.67 17.19 19.49 21.25 17.42 23.66 VideoLLaMA2 [72] ArXiv’24 48.36 52.47 58.45 62.76 63.48 68.63 77.62 79.08 79.22 83.63 79.41 83.04 82.25 82.58 70.13 VideoChat2 [44] CVPR’24 38.00 44.74 51.90 48.96 54.12 61.05 72.78 67.20 63.20 70.22 64.03 68.35 70.50 69.94 59.23 Chat-UniVi [10] CVPR’24 31.78 40.79 25.34 41.40 25.66 38.95 31.85 30.32 35.06 19.33 28.05 21.27 31.25 23.88 30.71 MA-LMM [76] CVPR’24 46.98 49.18 54.31 53.88 58.80 65.89 67.54 75.89 70.78 74.75 73.30 78.23 76.25 77.53 64.69 TimeChat [1] CVPR’24 24.35 21.05 37.76 28.36 41.01 33.05 31.25 44.68 43.51 52.27 42.08 47.34 43.00 43.82 37.36 Video-ChatGPT [11] ACL’24 9.33 18.26 5.34 19.66 8.80 14.32 14.31 28.55 29.87 26.63 26.92 23.29 28.00 19.66 18.95 Video-XL [79] CVPR’25 51.30 61.84 60.17 66.16 60.86 69.05 70.77 73.76 72.29 77.71 73.76 80.51 75.00 78.93 68.50 ViLAMP [78] ICML’25 58.55 69.08 64.83 74.29 72.28 77.47 77.62 87.41 85.28 85.80 82.35 87.59 87.50 86.52 77.34 VideoLLaMA3 [73] ArXiv’25 60.45 72.04 68.62 79.02 72.66 82.53 86.29 86.88 85.28 88.56 86.43 89.11 88.25 88.76 80.09 VideoChat-Flash [107] ArXiv’25 60.45 71.88 68.79 76.37 76.40 80.00 85.89 87.77 83.77 89.74 84.62 90.89 88.50 88.20 80.01 Long-VITA [108] ArXiv’25 63.39 71.38 66.21 73.91 67.42 77.26 82.46 73.76 75.32 70.41 76.92 76.20 80.25 83.71 73.52 Qwen3-VL [109] ArXiv’25 58.03 68.91 62.59 76.56 68.16 77.89 83.06 86.52 87.01 87.38 88.69 91.14 89.50 91.01 78.48 
+
+Frontier MLLMs 
+
+Gemini-3-Flash Google 85.32 84.21 84.14 88.09 85.77 83.37 87.70 93.79 88.53 88.95 88.91 93.16 92.75 90.73 87.96 GPT-5.2 OpenAI 73.23 73.85 80.17 84.88 78.28 82.11 89.11 92.91 90.04 93.29 90.72 91.39 92.75 92.98 85.38 
+
+Agents (Powered by Gemini-2.0-Flash) 
+
+Video2RAG* [88] EMNLP’24 77.72 71.05 73.45 80.34 79.59 78.11 85.89 90.78 91.99 91.12 89.37 90.13 90.50 91.57 83.63 VideoTree [112] CVPR’25 56.30 53.78 56.55 65.78 61.24 66.74 73.19 86.17 81.60 86.39 82.13 86.08 85.75 85.96 72.02 PlotTree Ours 83.07 75.66 78.28 82.80 85.58 81.89 87.30 91.67 92.64 92.11 90.50 91.90 93.25 93.26 86.50 
+
+Agents (Powered by Gemini-3-Flash) 
+
+Video2RAG* [88] EMNLP’24 85.84 86.02 86.03 86.77 86.33 83.79 81.85 90.78 83.77 86.39 84.16 88.35 90.75 87.08 86.24 VideoTree [112] CVPR’25 81.87 83.72 79.31 89.22 81.84 84.84 90.52 93.62 88.31 90.14 87.56 88.86 93.00 89.33 86.98 PlotTree Ours 89.12 88.32 88.28 89.22 87.45 85.89 89.31 94.86 87.23 89.35 86.88 88.61 91.75 85.39 88.80 0.16 0.38 0.41 0.43 0.45 0.47 0.48 0.51 0.56 0.85 
+
+D
+
+0
+
+25 
+
+50 
+
+75 
+
+100 
+
+> ACC (%)
+
+51.2% 50.1% 48.8% 47.2% 45.3% 42.5% 39.4% 36.3% 
+
+31.1% 
+
+> VIOLETv2
+> Vid-TLDR
+> SINGULARITY
+> ViLAMP
+> VideoLLaMA2
+> VideoLLaMA3
+> VideoChat2
+> Chat-UniVi
+> MA-LMM
+> Video-XL
+> Video-ChatGPT
+> SeViLA
+> TimeChat
+
+Fig. 20 : Average (bars) and individual perfor-mance (curves) analysis of D on StoryVideoQA. In addition, we further analyze methods’ per-formance across different difficulty levels by divid-ing the total difficulty score D into 9 groups, each containing an equal number of QAs. The average performance of VLMs-based and MLLMs-based methods within each group is shown as blue bars, while the continuous curves depict individual method’s performance (Figure 20). Both aver-age and most individual methods’ performance declines as difficulty D increases (a few excep-tions, e.g., VIOLETv2, with near random perfor-mance). This trend confirms that our proposed difficulty measure effectively distinguishes QAs of varying challenge levels in the StoryVideoQA, enabling researchers to better understand how QAs difficulty impacts methods’ performance and to develop more targeted improvements. 
+
+6.2.2 Evaluations on StoryVideoQA-G 
+
+In this section, we conduct more extensive exper-iments on the manually-labeled, high-quality golden subset StoryVideoQA-G across three cat-egories of methods: VLMs, MLLMs, and agents including PlotTree, as illustrated in Table 9. 
+
+Agents vs. VLMs & MLLMs . The agent-based paradigm exhibits distinct advantages over 19 Table 10 : Effect (%) of character identification on StoryVideoQA-G, Char. stands for character identi-fication. P I                                                                                                                 
+
+> Method Venue Char. CALCA CL AL CAL CALCA CL AL CAL Avg.
+> ✗71.16 66.61 68.62 72.78 73.03 71.79 82.26 89.89 89.39 89.74 88.46 90.38 91.25 92.70 80.22 Video2RAG EMNLP’24 ✓77.72 71.05 73.45 80.34 79.59 78.11 85.89 90.78 91.99 91.12 89.37 90.13 90.50 91.57 83.63
+> ✗56.30 53.78 56.55 65.78 61.24 66.74 73.19 86.17 81.60 86.39 82.13 86.08 85.75 85.96 72.02 VideoTree CVPR’25 ✓59.76 52.96 60.69 69.38 67.98 69.26 79.84 88.83 86.80 90.53 87.56 91.39 89.75 90.17 75.99
+> ✗74.27 68.59 70.52 75.99 77.72 76.84 87.50 90.78 88.96 91.32 88.01 92.41 91.75 91.85 82.37 PlotTree Ours ✓83.07 75.66 78.28 82.80 85.58 81.89 87.30 91.67 92.64 92.11 90.50 91.90 93.25 93.26 86.50
+
+MLLMs and VLMs. When powered by Gemini-2.0-Flash, agents like PlotTree (86.50%) and Video2RAG (83.63%) already surpass large-scale pre-trained VLMs and MLLMs. However, the frontier MLLMs Gemini-3-Flash (87.96%) outper-forms all Gemini-2.0-powered agents, demonstrat-ing the immense potential of its native multi-modal understanding over raw video frames. To explore the upper bounds of the agent paradigm, we upgraded their backbones to Gemini-3-Flash. Although all agents improved, e.g., VideoTree gains 14.96% as the stronger Gemini-3-Flash com-pensates for its reasoning gaps. It most struggle to surpass the standalone Gemini-3-Flash because agents rely on transformed captions with inherent information loss. Remarkably, PlotTree (88.80%) is the only agent that outperforms the frame-input Gemini-3-Flash, proving that a well-structured reasoning architecture can overcome the caption-ing bottleneck. 
+
+PlotTree vs. other Agents . PlotTree con-sistently outperforms both VideoTree and Video2RAG across all fine-grained topics under Gemini-2.0-Flash / Gemini-3-Flash setting (Table 9). Under the Gemini-2.0-Flash setting, PlotTree demonstrates significant superiority, outperform-ing VideoTree and Video2RAG by 14.48% and 2.87%, respectively. When upgrading to the Gemini-3-Flash frontier MLLMs, the performance gap between PlotTree and VideoTree narrows from 14.48% to 1.82%. It indicates that the enhanced reasoning and multimodal alignment of Gemini-3-Flash can partially offset the limitations of VideoTree’s more generalized video abstrac-tion. However, PlotTree (88.80%) maintains its lead, proving that its specialized hierarchical plot modeling remains more effective for complex sto-rylines’ understanding than relying solely on the scaling of MLLMs backbone capacities. 1 4 8 16 32 256 512 
+
+Input frame/document number 
+
+> 50
+> 60
+> 70
+> 80
+> ACC (%)
+> PlotTree
+> Video2RAG
+> VideoLLaMA3
+> Qwen3-VL
+> VideoChat-Flash
+
+Fig. 21 : Dynamic performance of different models across varying input frame/document numbers. Stars ( ⋆) indicate the maximum feasible/official configurations used in our main evaluations. 
+
+Characters’ Effect . To isolate the architectural gains from character identification, we ablate all agents methods with the same character module as PlotTree (i.e., plot captioning in PlotTree). As quantified in Table 10, the integration of explicit character identification consistently enhances per-formance across all models, with PlotTree exhibit-ing the most significant uplift of 4.13% (82.37% 
+
+→ 86.50%) compared to VideoTree (+3.97%) and Video2RAG (+3.41%). Moreover, PlotTree also outperforms baselines in the absence of character cues setting (82.37% vs. 80.22% for Video2RAG) and significantly broadens this gap when provided with identical character-level knowledge (Please refer to Appendix F for more robustness experi-ments of character recognition in PlotTree). 
+
+Impact of Frame/Document Number . To understand the relationship between the number of input frames/documents and performance, we conduct a dynamic analysis on differnt frames/-documents number. As shown in Figure 21 , per-formance generally improves as M increases, the 20 Table 11 : Ablation Study (%) for PlotTree on StoryVideoQA-G. 
+
+Module P I
+
+Ins. Dia. Tree C A L CA CL AL CAL C A L CA CL AL CAL Avg. 
+
+✗ ✗ ✗ 71.16 66.61 68.62 72.78 73.03 71.79 82.26 89.89 89.39 89.74 88.46 90.38 91.25 92.70 80.22 
+
+✓ ✗ ✗ 78.58 68.75 72.59 79.40 80.71 77.89 86.49 90.78 89.18 91.91 89.59 91.39 91.25 93.54 83.57 
+
+✗ ✓ ✗ 80.48 68.26 73.97 80.91 80.52 75.37 85.48 90.78 92.21 90.34 89.59 92.15 92.00 92.70 83.79 
+
+✗ ✗ ✓ 74.27 68.59 70.52 75.99 77.72 76.84 87.50 90.78 88.96 91.32 88.01 92.41 91.75 91.85 82.37 
+
+✓ ✓ ✗ 77.72 71.05 73.45 80.34 79.59 78.11 85.89 90.78 91.99 91.12 89.37 90.13 90.50 91.57 83.63 
+
+✓ ✗ ✓ 83.42 75.33 78.45 82.99 83.15 80.42 88.10 92.02 90.91 92.50 88.24 90.38 91.50 94.94 86.00 
+
+✗ ✓ ✓ 83.94 73.85 76.03 83.74 84.27 79.37 89.11 92.02 91.56 91.72 87.78 93.16 93.25 94.10 86.03 
+
+✓ ✓ ✓ 83.07 75.66 78.28 82.80 85.58 81.89 87.30 91.67 92.64 92.11 90.50 91.90 93.25 93.26 86.50 8 16 24 32 40 
+
+> Number of RAG nodes ( M)
+> 80
+> 82
+> 84
+> 86
+> ACC (%)
+> Better
+> Compression Rate ( )
+> = 1/9
+> = 1/18
+> = 1/27
+> = 1/36
+> = 1/45
+> Video2RAG
+
+(a) β and M (while α=10) 8 16 24 32 40          
+
+> Number of RAG nodes ( M)
+> 80
+> 82
+> 84
+> 86
+> ACC (%)
+> Better
+> Scaling factor ( )
+> =10 3
+> =10 2
+> =10 1
+> =10 0
+> =10 1
+> Video2RAG
+
+(b) α and M (while β=1/36) 10 3   
+
+> 10 2
+> 10 1
+> 10 0
+> 10 1
+> Scaling factor ( )
+> 1/9
+> 1/18
+> 1/27
+> 1/36
+> 1/45
+> Compress Rate ( )
+> 84.0
+> 84.5
+> 85.0
+> 85.5
+> 86.0
+> 86.5
+> 87.0
+> ACC (%)
+> 85.7
+> 85.8
+> 85.9
+> 86.0
+> 86.1
+
+(c) α and β (while M =32) 
+
+Fig. 22 : Dynamic performance of different hyperparameters in PlotTree. model performance exhibits a consistent upward trend as the number of input frame/document increases. It is noteworthy that both the offi-cial default settings and our hardware-constrained configurations (e.g., 256 frames for Qwen3-VL) reside near the performance saturation point. Specifically, agents that retrieve documents via RAG reach their performance plateau with fewer documents; this suggests that for deep video understanding, agent-based reasoning relies more on the precision of key information retrieval rather than the mere accumulation of context. 
+
+6.2.3 Studies on PlotTree 
+
+This section mainly evaluate the PlotTree on StoryVideoQA-G, covering ablation study, dynamic performance and qualitative analysis. 
+
+Ablation Study . To evaluate the individual con-tributions of our components, we conduct an abla-tion study on the Ins. (face recognition), Dia. (dia-logue), and Tree (PlotTree architecture) modules (Table 11). Results show that all three modules independently yield performance gains over the baseline, with the Tree architecture alone achiev-ing 82.37%. This highlights its inherent capability to maintain narrative logic and filter noise even without external character cues. While merging modules consistently further boosts performance, the synergy between character-level data (Ins. and Dia.) and the Tree structure produces the peak result of 86.50%. This confirms that while perceptual tools provide raw data, PlotTree acts as a critical reasoning hub that leverages global context to rectify local recognition failures. 
+
+Dynamic Performance . We first analyze the impact of the number of RAG nodes M on model performance. Under the same scaling fac-tor (Figure 22(a)) and compression rate (Figure 22(b)), we evaluate PlotTree across different com-pression rates β and scaling factors α between the number of RAG nodes M . As expected, expand-ing the range of RAG nodes allows PlotTree to access more information, thereby improving performance. However, when M exceeds 32, the performance gain saturates and may even decline due to the introduction of irrelevant information. In addition, PlotTree consistently outperforms 21 Q1 
+
+Question types: ,Perception (P) Inference (I) Story elements : , ,Character (C) Action (A) Location (L)   
+
+> Q2: Based on the events of the film, what can be inferred about the security of the
+> Gringotts bank and how does that influence the wizarding economy?
+> A. The bank has bad security.
+> B. The bank is always broken into.
+> C. The bank is impossible to get into.
+> D. The bank is very secure.
+> E. The bank is destined to fall. I
+
+L-      
+
+> Q3: What is the full name of the woman who helps Harry board the train to Hogwarts?
+> A. Molly Weasley
+> B. Petunia Dursley
+> C. Narcissa Malfoy
+> D. Lily Potter
+> E. Minerva McGonagall PC-
+> Q4: In what specific chamber is the Mirror of Erised located?
+> A. Astronomy Tower
+> B. Library
+> C. Empty classroom
+> D. Great Hall
+> E. Dungeon P
+
+L-  
+
+> Q1: Based on the contrasting responses of Hagrid and Professor McGonagall, what
+> can be inferred about the different values and perspectives of the different
+> characters?
+> A. The characters value rules and authority.
+> B. There will be a balance between being a rule-follower and a rule-breaker.
+> C. The characters are not as important as the storyline.
+> D. The characters are all evil.
+> E. The characters will not help Harry. I
+
+A LC-                               
+
+> PlotTree :BVideo2RAG: BVideoLLaMA3: AVid-TLDR: APlotTree :DVideo2RAG: AVideoLLaMA3: DVid-TLDR: B
+> PlotTree :DVideo2RAG: DVideoLLaMA3: EVid-TLDR: BPlotTree :AVideo2RAG: EVideoLLaMA3: EVid-TLDR: D
+> Q2 Q3 Q4
+> The Mirror of Erised is located
+> at an empty classroom
+> Hagrid try to break the
+> rule to attack Dursleys
+> There is no safer place
+> than Gringotts Bank
+> Molly Weasley is guiding
+> Harry to the train.
+> Professor McGonagall is
+> explaining the rules.
+
+Fig. 23 : Qualitative study on StoryVideoQA-G. Video2RAG, demonstrating its superior robust-ness across various parameter settings. Furthermore, we examine the influence of dif-ferent scaling factors α and compression rates β
+
+(Figure 22(c)). Larger decay factors α lead to bet-ter overall performance. Combined with the decay function illustrated in Figure 15, this indicates that lower-level (leaf) nodes should focus more on temporal consistency for visual understand-ing, while higher-level nodes should emphasize semantic similarity. Regarding compression rate 
+
+β, PlotTree achieves optimal performance at a moderate level of compression. Overall, the best configuration is obtained with α=10 and β=1/36. 
+
+Qualitative Analysis . Beyond quantitative met-rics, we also perform a qualitative comparison (Figure 23) between PlotTree and the best base-line from each method type in StoryVideoQA-G, namely Video2RAG in agents, VideoLLaMA3 in MLLMs, and Vid-TLDR in VLMs. The results highlight that PlotTree demonstrates stronger long-range reasoning ability, primarily owing to its hierarchical plot structure that preserves global narrative coherence. Conversely, other methods represent a video as a flat sequence of discrete events or visual embedding, struggling to capture the plot’s long-range evolution and hierarchical structure (Q1-Q3 in Figure 23). A shared limita-tion is in perception QAs, whici requires precise location understanding. The suboptimal perfor-mance of all methods on these questions indicates their lack of location recognition capability. 
+
+## 7 Conclusion 
+
+In this paper. we introduce StoryMindv2, an enhanced multi-agent framework featuring anovel supervisor-guided generation mechanism, a refined multi-reviewer voting strategy and a novel difficulty measure to evaluate question complexity, candidate answer divergence, and question-answer concordance. StoryMindv2 successfully enables high-quality, large-scale QA generation. Utiliz-ing this framework, we construct StoryVideoQA, the largest and most diverse dataset for DVU to date. It features over 363K QAs on 393.2 hours diverse,long-range story videos with balanced cov-erage across 14 fine-grained topics. We use this as a new benchmark to provide a comprehensive analysis of 20 SOTA methods. Finally, we propose PlotTree, which uses a hierarchical plot struc-ture for efficient comprehension, achieves supe-rior performance in comprehending the long-range evolution of storylines. 22 CRediT authorship contribution statement Zhengqian Wu : Conceptualization, Method-ology, Validation, Investigation, Data curation, Writing - original draft, Writing - review &editing, Zhixian Liu : Validation, Investiga-tion, Data curation. Aodong Chen : Valida-tion, Investigation, Data curation. Jingyang Zhang : Validation, Investigation, Data cura-tion. Ruizhe Li : Conceptualization, Validation, Investigation, Data curation. Hanlin Ge : Inves-tigation, Data curation. Zhongyuan Wang :Investigation, Data curation, Funding acquisition. 
+
+Chunxia Xiao : Investigation, Data curation, Funding acquisition. Chao Liang : Conceptual-ization, Methodology, Investigation, Data cura-tion, Writing - original draft, Writing - review & editing, Funding acquisition. 
+
+Competing Interests 
+
+All authors certify that they have no affilia-tions with or involvement in any organization or entity with any financial interest or non-financial interest in the subject matter or materials dis-cussed in this manuscript. 
+
+Acknowledgements 
+
+This work is supported by the National Nat-ural Science Foundation of China (No. 62372339, 62371350, and 62372336), Key Science and Tech-nology Research Project of Xinjiang Produc-tion and Construction Corps (2025AB029), Hubei Provincial Science and Technology Plan Project (No. 2025BAB020, 2025CSA057) and the Min-istry of Education Industry-University Coopera-tive Education Project (No. 240700006245501). The numerical calculations in this paper have been done on the supercomputing system in the Supercomputing Center of Wuhan University. 
+
+Data Availability Statement 
+
+The authors confirm that the data sup-porting the findings of this study will be made publicly available upon acceptance of the manuscript. Specifically, this includes the Sto-ryMindv2 dataset construction framework, the StoryVideoQA dataset, and the PlotTree video understanding method. Supplementary materials and instructions for access will be provided to ensure reproducibility. 
+
+## References 
+
+[1] Ren, S., Yao, L., Li, S., Sun, X., Hou, L.: Timechat: A time-sensitive multimodal large language model for long video under-standing. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 14313–14323 (2024) [2] Huang, D.-A., Liao, S., Radhakrishnan, S., Yin, H., Molchanov, P., Yu, Z., Kautz, J.: Lita: Language instructed temporal-localization assistant. In: Leonardis, A., Ricci, E., Roth, S., Russakovsky, O., Sat-tler, T., Varol, G. (eds.) Computer Vision – ECCV 2024, pp. 202–218. Springer, Cham (2025) [3] Qian, L., Li, J., Wu, Y., Ye, Y., Fei, H., Chua, T.-S., Zhuang, Y., Tang, S.: Momen-tor: advancing video large language model with fine-grained temporal reasoning. In: Proceedings of the 41st International Con-ference on Machine Learning, pp. 41340– 41356 (2024) [4] Lee, M.J., Gong, D., Cho, M.: Video sum-marization with large language models. In: Proceedings of the Computer Vision and Pattern Recognition Conference, pp. 18981– 18991 (2025) [5] Argaw, D.M., Yoon, S., Heilbron, F.C., Deil-amsalehy, H., Bui, T., Wang, Z., Dernon-court, F., Chung, J.S.: Scaling up video sum-marization pretraining with large language models. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 8332–8341 (2024) [6] He, B., Wang, J., Qiu, J., Bui, T., Shrivas-tava, A., Wang, Z.: Align and attend: Multi-modal summarization with dual contrastive losses. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 14867–14878 (2023) [7] Wu, Z., Wang, X., Chang, H., Chen, H., Sun, L., Zhu, W.: Aligning large multimodal 23 model with sequential recommendation via content-behavior guidance. In: Proceedings of the 2025 International Conference on Multimedia Retrieval. ICMR ’25, pp. 1507– 1516. Association for Computing Machinery, New York, NY, USA (2025) [8] Gu, G., Wu, Z., He, J., Song, L., Wang, Z., Liang, C.: Talksee: Interactive video retrieval engine using large language model. In: MultiMedia Modeling, pp. 387–393. Springer, Cham (2024) [9] Galanopoulos, D., Goulas, A., Leven-takis, A., Patras, I., Mezaris, V.: An llm framework for long-form video retrieval and audio-visual question answering using qwen2/2.5. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops, pp. 3739–3748 (2025) [10] Jin, P., Takanobu, R., Zhang, W., Cao, X., Yuan, L.: Chat-univi: Unified visual repre-sentation empowers large language models with image and video understanding. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recogni-tion, pp. 13700–13710 (2024) [11] Maaz, M., Rasheed, H., Khan, S., Khan, F.: Video-ChatGPT: Towards detailed video understanding via large vision and lan-guage models. In: Ku, L.-W., Martins, A., Srikumar, V. (eds.) Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pp. 12585–12602. Association for Computational Linguistics, Bangkok, Thai-land (2024) [12] Li, K., He, Y., Wang, Y., Li, Y., Wang, W., Luo, P., Wang, Y., Wang, L., Qiao, Y.: VideoChat: Chat-Centric Video Under-standing (2024) [13] Yu, Z., Xu, D., Yu, J., Yu, T., Zhao, Z., Zhuang, Y., Tao, D.: Activitynet-qa: A dataset for understanding complex web videos via question answering. Proceedings of the AAAI Conference on Artificial Intel-ligence 33 , 9127–9134 (2019) [14] Xiao, J., Shang, X., Yao, A., Chua, T.-S.: Next-qa: Next phase of question-answering to explaining temporal actions. In: Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 9777–9786 (2021) [15] Guo, J., Liang, C., Wang, Z.: Who, what and where: Composite-semantic instance search for story videos. In: 2023 IEEE Interna-tional Conference on Multimedia and Expo (ICME), pp. 858–863 (2023). IEEE [16] Guo, J., Lu, A., Wu, Z., Wang, Z., Liang, C.: Who, what, and where: Composite-semantics instance search for story videos. IEEE Transactions on Image Processing 34 ,1412–1426 (2025) [17] Wu, Z., Li, R., Xu, Z., Wang, Z., Xiao, C., Liang, C.: Friendsqa: A new large-scale deep video understanding dataset with fine-grained topic categorization for story videos. Proceedings of the AAAI Conference on Artificial Intelligence 39 (8), 8523–8531 (2025) [18] Tapaswi, M., Zhu, Y., Stiefelhagen, R., Tor-ralba, A., Urtasun, R., Fidler, S.: Movieqa: Understanding stories in movies through question-answering. In: Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pp. 4631–4640 (2016) [19] Lei, J., Yu, L., Bansal, M., Berg, T.: TVQA: Localized, compositional video question answering. In: Riloff, E., Chiang, D., Hock-enmaier, J., Tsujii, J. (eds.) Proceedings of the 2018 Conference on Empirical Meth-ods in Natural Language Processing, pp. 1369–1379. Association for Computational Linguistics, Brussels, Belgium (2018) [20] Lei, J., Yu, L., Berg, T., Bansal, M.: TVQA+: Spatio-temporal grounding for video question answering. In: Jurafsky, D., Chai, J., Schluter, N., Tetreault, J. (eds.) Proceedings of the 58th Annual Meeting of the Association for Computational Linguis-tics, pp. 8211–8225. Association for Compu-tational Linguistics, Online (2020) 24 [21] Curtis, K., Awad, G., Rajput, S., Sobo-roff, I.: Hlvu: A new challenge to test deep understanding of movies the way humans do. In: Proceedings of the 2020 International Conference on Multimedia Retrieval. ICMR ’20, pp. 355–361. Association for Computing Machinery, New York, NY, USA (2020) [22] Choi, S., On, K.-W., Heo, Y.-J., Seo, A., Jang, Y., Lee, M., Zhang, B.-T.: Dramaqa: Character-centered video story understand-ing with hierarchical qa. In: Proceedings of the AAAI Conference on Artificial Intelli-gence, vol. 35, pp. 1166–1174 (2021) [23] Fung, Y., Wang, H., Wang, T., Kebarighotbi, A., Bansal, M., Ji, H., Natarajan, P.: Deepmaven: Deep question answering on long-distance movie/tv show videos with multimedia knowledge extrac-tion and synthesis. In: Proceedings of the 17th Conference of the European Chap-ter of the Association for Computational Linguistics, pp. 3041–3051 (2023) [24] Rawal, R., Saifullah, K., Basri, R., Jacobs, D., Somepalli, G., Goldstein, T.: Cinepile: A long video question answering dataset and benchmark. arXiv preprint arXiv:2405.08813 (2024) [25] Song, E., Chai, W., Wang, G., Zhang, Y., Zhou, H., Wu, F., Chi, H., Guo, X., Ye, T., Zhang, Y., et al. : Moviechat: From dense token to sparse memory for long video understanding. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 18221–18232 (2024) [26] Zhang, H., Dong, L., Liu, Y., Huang, Y., Wang, Y., Wang, L., Qiao, Y.: Lvbench: A benchmark for long-form video understand-ing with versatile multi-modal question answering. International Journal of Com-puter Vision 133 (11), 7726–7747 (2025) [27] Fu, C., Dai, Y., Luo, Y., Li, L., Ren, S., Zhang, R., Wang, Z., Zhou, C., Shen, Y., Zhang, M., Chen, P., Li, Y., Lin, S., Zhao, S., Li, K., Xu, T., Zheng, X., Chen, E., Shan, C., He, R., Sun, X.: Video-mme: The first-ever comprehensive evaluation benchmark of multi-modal llms in video analysis. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recogni-tion (CVPR), pp. 24108–24118 (2025) [28] Wu, H., Li, D., Chen, B., Li, J.: Longvideobench: A benchmark for long-context interleaved video-language understanding. In: Globerson, A., Mackey, L., Belgrave, D., Fan, A., Paquet, U., Tomczak, J., Zhang, C. (eds.) Advances in Neural Information Processing Systems, vol. 37, pp. 28828–28857 (2024) [29] Hu, K., Wu, P., Pu, F., Xiao, W., Zhang, Y., Yue, X., Li, B., Liu, Z.: Video-mmmu: Eval-uating knowledge acquisition from multi-discipline professional videos. arXiv preprint arXiv:2501.13826 (2025) [30] Chen, G., Liu, Y., Huang, Y., Pei, B., Xu, J., He, Y., Lu, T., Wang, Y., Wang, L.: Cg-bench: Clue-grounded question answering benchmark for long video understanding. In: The Thirteenth International Conference on Learning Representations [31] Yu, J., Wu, Y., Chu, M., Ren, Z., Huang, Z., Chu, P., Zhang, R., He, Y., Li, Q., Li, S., et al.: Vrbench: A benchmark for multi-step reasoning in long narrative videos. arXiv preprint arXiv:2506.10857 (2025) [32] Wang, W., He, Z., Hong, W., Cheng, Y., Zhang, X., Qi, J., Ding, M., Gu, X., Huang, S., Xu, B., Dong, Y., Tang, J.: LVBench: An Extreme Long Video Under-standing Benchmark. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pp. 22958–22967 (2025) [33] He, X., Zhu, W.: Visual question answering from theory to application. Image (2020) [34] Zhong, Y., Ji, W., Xiao, J., Li, Y., Deng, W., Chua, T.-S.: Video question answer-ing: Datasets, algorithms and challenges. In: Goldberg, Y., Kozareva, Z., Zhang, 25 Y. (eds.) Proceedings of the 2022 Con-ference on Empirical Methods in Natural Language Processing, pp. 6439–6455. Asso-ciation for Computational Linguistics, Abu Dhabi, United Arab Emirates (2022) [35] Nguyen, T., Bin, Y., Xiao, J., Qu, L., Li, Y., Wu, J.Z., Nguyen, C.-D., Ng, S.-K., Luu, A.T.: Video-language understanding: A sur-vey from model architecture, model train-ing, and data perspectives. In: Ku, L.-W., Martins, A., Srikumar, V. (eds.) Findings of the Association for Computational Linguis-tics: ACL 2024, pp. 3636–3657. Association for Computational Linguistics, Bangkok, Thailand (2024) [36] Xiao, J., Huang, N., Qin, H., Li, D., Li, Y., Zhu, F., Tao, Z., Yu, J., Lin, L., Chua, T.-S., et al.: Videoqa in the era of llms: An empirical study. International Journal of Computer Vision, 1–24 (2025) [37] Xu, D., Zhao, Z., Xiao, J., Wu, F., Zhang, H., He, X., Zhuang, Y.: Video question answering via gradually refined attention over appearance and motion. In: Proceed-ings of the 25th ACM International Con-ference on Multimedia. MM ’17, pp. 1645– 1653. Association for Computing Machinery, New York, NY, USA (2017) [38] Yu, Y., Kim, J., Kim, G.: A joint sequence fusion model for video question answering and retrieval. In: Ferrari, V., Hebert, M., Sminchisescu, C., Weiss, Y. (eds.) Computer Vision – ECCV 2018, pp. 487–503. Springer, Cham (2018) [39] Li, L., Chen, Y.-C., Cheng, Y., Gan, Z., Yu, L., Liu, J.: HERO: Hierarchical encoder for Video+Language omni-representation pre-training. In: Webber, B., Cohn, T., He, Y., Liu, Y. (eds.) Proceedings of the 2020 Conference on Empirical Methods in Nat-ural Language Processing (EMNLP), pp. 2046–2065. Association for Computational Linguistics, Online (2020) [40] Liu, Y., Li, S., Liu, Y., Wang, Y., Ren, S., Li, L., Chen, S., Sun, X., Hou, L.: Temp-compass: Do video llms really understand videos? In: Findings of the Association for Computational Linguistics ACL 2024, pp. 8731–8772 (2024) [41] Li, Y., Chen, X., Hu, B., Wang, L., Shi, H., Zhang, M.: Videovista: A versatile bench-mark for video understanding and reason-ing. arXiv preprint arXiv:2406.11303 (2024) [42] Wu, B., Yu, S., Chen, Z., Tenenbaum, J.B., Gan, C.: Star: A benchmark for situated rea-soning in real-world videos. arXiv preprint arXiv:2405.09711 (2024) [43] Mangalam, K., Akshulakov, R., Malik, J.: Egoschema: A diagnostic benchmark for very long-form video language understand-ing. Advances in Neural Information Pro-cessing Systems 36 , 46212–46244 (2023) [44] Li, K., Wang, Y., He, Y., Li, Y., Wang, Y., Liu, Y., Wang, Z., Xu, J., Chen, G., Luo, P., Wang, L., Qiao, Y.: Mvbench: A comprehensive multi-modal video under-standing benchmark. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 22195–22206 (2024) [45] Grauman, K., Westbury, A., Byrne, E., Chavis, Z., Furnari, A., Girdhar, R., Ham-burger, J., Jiang, H., Liu, M., Liu, X., et al. : Ego4d: Around the world in 3,000 hours of egocentric video. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 18995–19012 (2022) [46] Xu, Z., Guo, J., Zhang, C., Wang, Z., Xiao, C., Liang, C.: Quantum interference-inspired who-what-where composite-semantics instance search for story videos. In: Proceedings of the 33rd ACM International Conference on Multi-media. MM ’25, pp. 4166–4174, New York, NY, USA (2025) [47] Liang, C., Xu, C., Cheng, J., Min, W., Lu, H.: Script-to-movie: A computational frame-work for story movie composition. IEEE Transactions on Multimedia 15 (2), 401–414 (2013) 26 [48] Liang, C., Xu, C., Cheng, J., Lu, H.: Tvparser: An automatic tv video parsing method. In: CVPR 2011, pp. 3377–3384 (2011) [49] Curtis, K., Awad, G., Rajput, S., Soboroff, I.: The acm multimedia 2022 deep video understanding grand challenge. In: Proceed-ings of the 30th ACM International Con-ference on Multimedia. MM ’22, pp. 7075– 7078. Association for Computing Machinery, New York, NY, USA (2022) [50] Curtis, K., Awad, G., Godil, A., Soboroff, I.: The acm multimedia 2023 deep video under-standing grand challenge. In: Proceedings of the 31st ACM International Conference on Multimedia. MM ’23, pp. 9606–9609. Association for Computing Machinery, New York, NY, USA (2023) [51] Kukleva, A., Tapaswi, M., Laptev, I.: Learn-ing interactions and relationships between movie characters. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 9849– 9858 (2020) [52] Li, R., Guo, J., Li, M., Wu, Z., Liang, C.: A hierarchical deep video understand-ing method with shot-based instance search and large language model. In: Proceedings of the 31st ACM International Conference on Multimedia, pp. 9425–9429 (2023) [53] Li, D., Li, J., Li, H., Niebles, J.C., Hoi, S.C.: Align and prompt: Video-and-language pre-training with entity prompts. In: Proceed-ings of the IEEE/CVF Conference on Com-puter Vision and Pattern Recognition, pp. 4953–4963 (2022) [54] Lei, J., Berg, T., Bansal, M.: Revealing single frame bias for video-and-language learning. In: Rogers, A., Boyd-Graber, J., Okazaki, N. (eds.) Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pp. 487–507. Association for Com-putational Linguistics, Toronto, Canada (2023) [55] Xu, H., Ye, Q., Yan, M., Shi, Y., Ye, J., Xu, Y., Li, C., Bi, B., Qian, Q., Wang, W., et al. : mplug-2: A modularized multi-modal foundation model across text, image and video. In: International Conference on Machine Learning, pp. 38728–38748 (2023). PMLR [56] Choi, J., Lee, S., Chu, J., Choi, M., Kim, H.J.: vid-tldr: Training free token merging for light-weight video transformer. In: Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 18771–18781 (2024) [57] Fu, T.-J., Li, L., Gan, Z., Lin, K., Wang, W.Y., Wang, L., Liu, Z.: An empirical study of end-to-end video-language trans-formers with masked visual modeling. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recogni-tion (CVPR), pp. 22898–22909 (2023) [58] OpenAI: Chatgpt: A language model for conversational ai openai. Technical report (2023) [59] Team, G., Anil, R., Borgeaud, S., Wu, Y., Alayrac, J.-B., Yu, J., Soricut, R., Schalk-wyk, J., Dai, A.M., Hauth, A., et al.: Gem-ini: a family of highly capable multimodal models. arXiv preprint arXiv:2312.11805 (2023) [60] Reid, M., Savinov, N., Teplyashin, D., Lep-ikhin, D., Lillicrap, T., Alayrac, J.-b., Sori-cut, R., Lazaridou, A., Firat, O., Schrit-twieser, J., et al.: Gemini 1.5: Unlock-ing multimodal understanding across mil-lions of tokens of context. arXiv preprint arXiv:2403.05530 (2024) [61] Yang, Z., Li, L., Lin, K., Wang, J., Lin, C.-C., Liu, Z., Wang, L.: The dawn of lmms: Preliminary explorations with gpt-4v (ision). arXiv preprint arXiv:2309.17421 
+
+9(1) (2023) [62] Touvron, H., Lavril, T., Izacard, G., Mar-tinet, X., Lachaux, M.-A., Lacroix, T., Rozi` ere, B., Goyal, N., Hambro, E., Azhar, 27 F., et al.: Llama: Open and efficient foun-dation language models. arXiv preprint arXiv:2302.13971 (2023) [63] Chiang, W.-L., Li, Z., Lin, Z., Sheng, Y., Wu, Z., Zhang, H., Zheng, L., Zhuang, S., Zhuang, Y., Gonzalez, J.E., et al.: Vicuna: An open-source chatbot impress-ing gpt-4 with 90%* chatgpt quality. See https://vicuna. lmsys. org (accessed 14 April 2023) (2023) [64] Touvron, H., Martin, L., Stone, K., Albert, P., Almahairi, A., Babaei, Y., Bashlykov, N., Batra, S., Bhargava, P., Bhosale, S., et al.: Llama 2: Open foundation and fine-tuned chat models. arXiv preprint arXiv:2307.09288 (2023) [65] Chung, H.W., Hou, L., Longpre, S., Zoph, B., Tay, Y., Fedus, W., Li, Y., Wang, X., Dehghani, M., Brahma, S., Webson, A., Gu, S.S., Dai, Z., Suzgun, M., Chen, X., Chowd-hery, A., Castro-Ros, A., Pellat, M., Robin-son, K., Valter, D., Narang, S., Mishra, G., Yu, A., Zhao, V., Huang, Y., Dai, A., Yu, H., Petrov, S., Chi, E.H., Dean, J., Devlin, J., Roberts, A., Zhou, D., Le, Q.V., Wei, J.: Scaling instruction-finetuned language mod-els. Journal of Machine Learning Research 
+
+25 (70), 1–53 (2024) [66] Yin, S., Fu, C., Zhao, S., Li, K., Sun, X., Xu, T., Chen, E.: A survey on multi-modal large language models. arXiv preprint arXiv:2306.13549 (2023) [67] Li, J., Li, D., Savarese, S., Hoi, S.: BLIP-2: Bootstrapping language-image pre-training with frozen image encoders and large lan-guage models. In: Krause, A., Brunskill, E., Cho, K., Engelhardt, B., Sabato, S., Scar-lett, J. (eds.) Proceedings of the 40th Inter-national Conference on Machine Learning. Proceedings of Machine Learning Research, vol. 202, pp. 19730–19742 (2023) [68] Liu, H., Li, C., Wu, Q., Lee, Y.J.: Visual instruction tuning. In: Oh, A., Naumann, T., Globerson, A., Saenko, K., Hardt, M., Levine, S. (eds.) Advances in Neural Infor-mation Processing Systems, vol. 36, pp. 34892–34916 (2023) [69] Alayrac, J.-B., Donahue, J., Luc, P., Miech, A., Barr, I., Hasson, Y., Lenc, K., Men-sch, A., Millican, K., Reynolds, M., et al. :Flamingo: a visual language model for few-shot learning. Advances in neural informa-tion processing systems 35 , 23716–23736 (2022) [70] Zhang, H., Li, X., Bing, L.: Video-llama: An instruction-tuned audio-visual language model for video understanding. arXiv preprint arXiv:2306.02858 (2023) [71] Lin, B., Ye, Y., Zhu, B., Cui, J., Ning, M., Jin, P., Yuan, L.: Video-LLaVA: Learn-ing united visual representation by align-ment before projection. In: Al-Onaizan, Y., Bansal, M., Chen, Y.-N. (eds.) Proceedings of the 2024 Conference on Empirical Meth-ods in Natural Language Processing, pp. 5971–5984. Association for Computational Linguistics, Miami, Florida, USA (2024) [72] Cheng, Z., Leng, S., Zhang, H., Xin, Y., Li, X., Chen, G., Zhu, Y., Zhang, W., Luo, Z., Zhao, D., Bing, L.: Videollama 2: Advanc-ing spatial-temporal modeling and audio understanding in video-llms. arXiv preprint arXiv:2406.07476 (2024) [73] Zhang, B., Li, K., Cheng, Z., Hu, Z., Yuan, Y., Chen, G., Leng, S., Jiang, Y., Zhang, H., Li, X., et al.: Videollama 3: Frontier multimodal foundation models for image and video understanding. arXiv preprint arXiv:2501.13106 (2025) [74] Zhang, P., Zhang, K., Li, B., Zeng, G., Yang, J., Zhang, Y., Wang, Z., Tan, H., Li, C., Liu, Z.: Long context transfer from language to vision. arXiv preprint arXiv:2406.16852 (2024) [75] Shen, X., Xiong, Y., Zhao, C., Wu, L., Chen, J., Zhu, C., Liu, Z., Xiao, F., Varadarajan, B., Bordes, F., Liu, Z., Xu, H., J. Kim, H., Soran, B., Krishnamoor-thi, R., Elhoseiny, M., Chandra, V.: Longvu: Spatiotemporal adaptive compression for long video-language understanding. arXiv 28 preprint arXiv:2410.17434 (2024) [76] He, B., Li, H., Jang, Y.K., Jia, M., Cao, X., Shah, A., Shrivastava, A., Lim, S.-N.: Ma-lmm: Memory-augmented large multimodal model for long-term video understanding. In: Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition, pp. 13504–13514 (2024) [77] Man, Y., Huang, Y., Zhang, C., Li, B., Niu, W., Yin, M.: Adacmˆ 2: On understand-ing extremely long-term video with adaptive cross-modality memory reduction. In: Pro-ceedings of the Computer Vision and Pat-tern Recognition Conference, pp. 8534–8544 (2025) [78] Cheng, C., Guan, J., Wu, W., Yan, R.: Scal-ing video-language models to 10k frames via hierarchical differential distillation. arXiv preprint arXiv:2504.02438 (2025) [79] Shu, Y., Liu, Z., Zhang, P., Qin, M., Zhou, J., Liang, Z., Huang, T., Zhao, B.: Video-xl: Extra-long vision language model for hour-scale video understanding. In: Proceedings of the Computer Vision and Pattern Recog-nition Conference, pp. 26160–26169 (2025) [80] Tang, Y., Bi, J., Xu, S., Song, L., Liang, S., Wang, T., Zhang, D., An, J., Lin, J., Zhu, R., et al.: Video understanding with large language models: A survey. IEEE Trans-actions on Circuits and Systems for Video Technology (2025) [81] Wang, X., Zhang, Y., Zohar, O., Yeung-Levy, S.: Videoagent: Long-form video understanding with large language model as agent. In: European Conference on Com-puter Vision, pp. 58–76 (2024). Springer [82] Liu, H., Jiang, S., Duan, F., Lyu, Y., Wang, X., Ge, H., Liang, C.: Cadencerag: Context-aware and dependency-enhanced retrieval augmented generation for holis-tic video understanding. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops, pp. 3688–3697 (2025) [83] Ma, Z., Gou, C., Shi, H., Sun, B., Li, S., Rezatofighi, H., Cai, J.: Drvideo: Document retrieval based long video understanding. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recogni-tion (CVPR), pp. 18936–18946 (2025) [84] Zhang, C., Lu, T., Islam, M.M., Wang, Z., Yu, S., Bansal, M., Bertasius, G.: A simple LLM framework for long-range video question-answering. In: Al-Onaizan, Y., Bansal, M., Chen, Y.-N. (eds.) Proceed-ings of the 2024 Conference on Empirical Methods in Natural Language Processing, pp. 21715–21737. Association for Compu-tational Linguistics, Miami, Florida, USA (2024) [85] Zhao, Y., Misra, I., Kr¨ ahenb¨ uhl, P., Gird-har, R.: Learning video representations from large language models. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition, pp. 6586– 6597 (2023) [86] Lin, K., Ahmed, F., Li, L., Lin, C.-C., Azarnasab, E., Yang, Z., Wang, J., Liang, L., Liu, Z., Lu, Y., et al.: Mm-vid: Advanc-ing video understanding with gpt-4v (ision). arXiv preprint arXiv:2310.19773 (2023) [87] Yang, Z., Chen, G., Li, X., Wang, W., Yang, Y.: Doraemongpt: toward understanding dynamic scenes with large language models (exemplified as a video agent). In: Proceed-ings of the 41st International Conference on Machine Learning, pp. 55976–55997 (2024) [88] Zhang, L., Zhao, T., Ying, H., Ma, Y., Lee, K.: Omagent: A multi-modal agent frame-work for complex video understanding with task divide-and-conquer. In: Proceedings of the 2024 Conference on Empirical Meth-ods in Natural Language Processing, pp. 10031–10045 (2024) [89] Wang, Z., Yu, S., Stengel-Eskin, E., Yoon, J., Cheng, F., Bertasius, G., Bansal, M.: Videotree: Adaptive tree-based video repre-sentation for llm reasoning on long videos. In: Proceedings of the Computer Vision and 29 Pattern Recognition Conference, pp. 3272– 3283 (2025) [90] Niu, Y., Liang, C., Lu, A., Huang, B., Wang, Z., Guo, J.: Person-action instance search in story videos: An experimental study. ACM Trans. Inf. Syst. 42 (2) (2023) [91] Rohrbach, A., Rohrbach, M., Tandon, N., Schiele, B.: A dataset for movie description. In: 2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), pp. 3202–3212 (2015) [92] Rohrbach, A., Torabi, A., Rohrbach, M., Tandon, N., Pal, C., Larochelle, H., Courville, A., Schiele, B.: Movie descrip-tion. Int. J. Comput. Vision 123 (1), 94–120 (2017) [93] Wang, L., Yang, N., Huang, X., Yang, L., Majumder, R., Wei, F.: Multilingual e5 text embeddings: A technical report. arXiv preprint arXiv:2402.05672 (2024) [94] Mu, F., Mo, S., Li, Y.: Snag: Scalable and accurate video grounding. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 18930–18940 (2024) [95] Chen, Q., Di, S., Xie, W.: Grounded multi-hop videoqa in long-form egocentric videos. Proceedings of the AAAI Conference on Artificial Intelligence 39 (2), 2159–2167 (2025) [96] Bishop, C.M.: Pattern Recognition and Machine Learning vol. 4. Springer [97] Shannon, C.E.: A mathematical theory of communication. The Bell system technical journal 27 (3), 379–423 (1948) [98] Wehrl, A.: General properties of entropy. Reviews of Modern Physics 50 (2), 221 (1978) [99] R´ enyi, A.: On measures of entropy and infor-mation. In: Proceedings of the Fourth Berke-ley Symposium on Mathematical Statistics and Probability, Volume 1: Contributions to the Theory of Statistics, vol. 4, pp. 547–562 (1961). University of California Press [100] Zhang, T., Kishore, V., Wu, F., Weinberger, K.Q., Artzi, Y.: Bertscore: Evaluating text generation with bert. In: International Con-ference on Learning Representations (2020) [101] Yu, S., Cho, J., Yadav, P., Bansal, M.: Self-chained image-language model for video localization and question answering. In: Oh, A., Naumann, T., Globerson, A., Saenko, K., Hardt, M., Levine, S. (eds.) Advances in Neural Information Processing Systems, vol. 36, pp. 76749–76771 (2023) [102] Han, T., Bain, M., Nagrani, A., Varol, G., Xie, W., Zisserman, A.: Autoad: Movie description in context. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 18930–18940 (2023) [103] Han, T., Bain, M., Nagrani, A., Varol, G., Xie, W., Zisserman, A.: Autoad ii: The sequel - who, when, and what in movie audio description. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pp. 13645–13655 (2023) [104] Han, T., Bain, M., Nagrani, A., Varol, G., Xie, W., Zisserman, A.: Autoad iii: The pre-quel - back to the pixels. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pp. 18164–18174 (2024) [105] Xie, J., Han, T., Bain, M., Nagrani, A., Varol, G., Xie, W., Zisserman, A.: Autoad-zero: A training-free framework for zero-shot audio description. In: Proceedings of the Asian Conference on Computer Vision (ACCV), pp. 2265–2281 (2024) [106] Zhang, Y., Li, M., Long, D., Zhang, X., Lin, H., Yang, B., Xie, P., Yang, A., Liu, D., Lin, J., Huang, F., Zhou, J.: Qwen3 embedding: Advancing text embedding and reranking through foundation models. arXiv preprint arXiv:2506.05176 (2025) 30 [107] Li, X., Wang, Y., Yu, J., Zeng, X., Zhu, Y., Huang, H., Gao, J., Li, K., He, Y., Wang, C., et al.: Videochat-flash: Hierarchical com-pression for long-context video modeling. arXiv preprint arXiv:2501.00574 (2024) [108] Shen, Y., Fu, C., Dong, S., Wang, X., Zhang, Y.-F., Chen, P., Zhang, M., Cao, H., Li, K., Zheng, X., et al.: Long-vita: Scaling large multi-modal models to 1 million tokens with leading short-context accuracy. arXiv e-prints, 2502 (2025) [109] Bai, S., Cai, Y., Chen, R., Chen, K., Chen, X., Cheng, Z., Deng, L., Ding, W., Gao, C., Ge, C., Ge, W., Guo, Z., Huang, Q., Huang, J., Huang, F., Hui, B., Jiang, S., Li, Z., Li, M., Li, M., Li, K., Lin, Z., Lin, J., Liu, X., Liu, J., Liu, C., Liu, Y., Liu, D., Liu, S., Lu, D., Luo, R., Lv, C., Men, R., Meng, L., Ren, X., Ren, X., Song, S., Sun, Y., Tang, J., Tu, J., Wan, J., Wang, P., Wang, P., Wang, Q., Wang, Y., Xie, T., Xu, Y., Xu, H., Xu, J., Yang, Z., Yang, M., Yang, J., Yang, A., Yu, B., Zhang, F., Zhang, H., Zhang, X., Zheng, B., Zhong, H., Zhou, J., Zhou, F., Zhou, J., Zhu, Y., Zhu, K.: Qwen3-VL Technical Report (2025) [110] Yang, A., Yang, B., Hui, B., Zheng, B., Yu, B., Zhou, C., Li, C., Li, C., Liu, D., Huang, F., Dong, G., Wei, H., Lin, H., Tang, J., Wang, J., Yang, J., Tu, J., Zhang, J., Ma, J., Xu, J., Zhou, J., Bai, J., He, J., Lin, J., Dang, K., Lu, K., Chen, K., Yang, K., Li, M., Xue, M., Ni, N., Zhang, P., Wang, P., Peng, R., Men, R., Gao, R., Lin, R., Wang, S., Bai, S., Tan, S., Zhu, T., Li, T., Liu, T., Ge, W., Deng, X., Zhou, X., Ren, X., Zhang, X., Wei, X., Ren, X., Fan, Y., Yao, Y., Zhang, Y., Wan, Y., Chu, Y., Liu, Y., Cui, Z., Zhang, Z., Fan, Z.: Qwen2 techni-cal report. arXiv preprint arXiv:2407.10671 (2024) [111] Yang, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Li, C., Liu, D., Huang, F., Wei, H., Lin, H., Yang, J., Tu, J., Zhang, J., Yang, J., Yang, J., Zhou, J., Lin, J., Dang, K., Lu, K., Bao, K., Yang, K., Yu, L., Li, M., Xue, M., Zhang, P., Zhu, Q., Men, R., Lin, R., Li, T., Xia, T., Ren, X., Ren, X., Fan, Y., Su, Y., Zhang, Y., Wan, Y., Liu, Y., Cui, Z., Zhang, Z., Qiu, Z.: Qwen2.5 techni-cal report. arXiv preprint arXiv:2412.15115 (2024) [112] Wang, Z., Yu, S., Stengel-Eskin, E., Yoon, J., Cheng, F., Bertasius, G., Bansal, M.: Videotree: Adaptive tree-based video repre-sentation for llm reasoning on long videos. In: Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR), pp. 3272–3283 (2025) [113] Wang, W., He, Z., Hong, W., Cheng, Y., Zhang, X., Qi, J., Ding, M., Gu, X., Huang, S., Xu, B., Dong, Y., Tang, J.: Lvbench: An extreme long video under-standing benchmark. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pp. 22958–22967 (2025) [114] Li, K., Wang, Y., Li, Y., Wang, Y., He, Y., Wang, L., Qiao, Y.: Unmasked teacher: Towards training-efficient video foundation models. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), pp. 19948–19960 (2023) [115] Chen, L., Li, J., Dong, X., Zhang, P., Zang, Y., Chen, Z., Duan, H., Wang, J., Qiao, Y., Lin, D., et al. : Are we on the right way for evaluating large vision-language models?, vol. 37, pp. 27056–27087 (2024) [116] Ataallah, K., Bakr, E.M., Ahmed, M., Gou, C., Pahwa, K., Ding, J., Elhoseiny, M.: InfiniBench: A benchmark for large multi-modal models in long-form movies and TV shows. In: Proceedings of the 2025 Confer-ence on Empirical Methods in Natural Lan-guage Processing, pp. 19485–19512. Associa-tion for Computational Linguistics, Suzhou, China (2025) 31 Appendix 
+
+## A More Datasets Comparisons 
+
+To further provide a comprehensive landscape of VideoQA, we compare our StoryVideoQA with both story-centric and general-purpose VideoQA datasets (detailed in Table A1). Compared to general-purpose VideoQA datasets for long video such as Video-MME [27], LVBench [113], and LongVideoBench [28], our dataset exhibits dis-tinct characteristics: 
+
+• Scale : With 363K QAs and a density of 923.19 
+
+h−1, StoryVideoQA is one to two orders of mag-nitude larger than recent general benchmarks (e.g., Video-MME, LongVideoBench). 
+
+• Depth : Unlike general-purpose datasets that include fragmented content (e.g., news, sports), StoryVideoQA focuses exclusively on structural story reasoning on story videos (TV series and movies). 
+
+• Difficulty : StoryVideoQA is the a DVU dataset that incorporates a systematic difficulty measure, bridging the gap in existing bench-marks by enabling a granular analysis of model logic across varying complexity levels. 
+
+## B Details of StoryMindv2 
+
+In this section, we discuss more detailed imple-mentation of StoryMindv2, including data source, alignment details, and the prompt for the genera-tor, supervisor and reviewers. 
+
+B.1 Data Source 
+
+As illustrated in Table A2, the StoryVideoQA dataset is constructed from a diverse set of story videos, covering both TV series and movies. For TV series, it includes popular sitcoms such as 
+
+Friends series and The Big Bang Theory series (first eight seasons), as well as the fantasy drama 
+
+Game of Thrones series. For movies, we collected scripts from top-rated movies on both IMDB 15 
+
+and Douban 16 , spanning a wide range of genres: 
+
+> 15 https://www.imdb.com/
+> 16 https://www.douban.com/
+
+• Classic dramas and crime movies, such as The Godfather, The Shawshank Redemption, Pulp Fiction, and American Beauty. 
+
+• Fantasy and adventure movies, including The Lord of the Rings trilogy, Harry Potter series, The Hobbit, Pirates of the Caribbean, and The Avengers. 
+
+• Science fiction and action movies, such as Incep-tion, The Matrix, The Dark Knight trilogy, Star Wars: Return of the Jedi, and Jurassic Park. 
+
+• Animated and family movies, including Toy Story 3, The Lion King, Up, and How to Train Your Dragon. 
+
+• Psychological thrillers and mysteries, such as Black Swan, Memento, Gone Girl, Vertigo, and Rear Window. In addition to the scripts, we also collect portrait images of characters to support face recognition and character grounding in videos. Specifically, we incorporate the portraits provided by the PAINS dataset [90] for Friends and The Big Bang Theory . For Game of Thrones , since no public face database is available, we manually crop a library of 471 portrait photos for the 63 main characters directly from the videos. Furthermore, for the remaining movies, we crawl actor portraits from IMDB, ensuring that each major character has a corresponding visual reference. 
+
+B.2 Alignment Details 
+
+To ensure the quality of the script-subtitle align-ment, we first perform automatic alignment using a DTW approach following PAINS [90]. Subse-quently, 4 annotators independently verify the alignment results and made necessary corrections. To further guarantee reliability, the corrected alignments from each annotator are cross-verified by the others. Whenever inconsistencies or dis-agreements are identified, the annotators conduct joint discussions and only confirm the final align-ment after reaching a consensus. 
+
+B.3 Prompt for Generator 
+
+The prompt template for generator contains five main parts: system prompt, fine-grained topics description, video description, QAs requirements, and feedback from supervisor. The prompt tem-plate for generator is shown in Figure A1. 32 Table A1 : Comparisons of existing VideoQA datasets. Scale compares the number of QAs (# QAs), the total length (Len.(h)) of all videos, the average duration (Dur.(s)) of videos, QAs density (Den.(h −1)) in terms of (# QAs)/(Len.) and dataset scale (Sca.(h)) in terms of (# QAs) ×(Len.). Fine-grained topic considers the number of fine-grained topics exceeding 5% of the dataset (# Fin.) and the balance degree of fine-grained topic distribution. The Gini index (Gin.) and entropy (Ent.) are employed to measure the distribution’s balance. The figures around the “/” corresponds to TV series and movies, respectively.                                                                                                                                                                                                       
+
+> Dataset Venue Scale Fine-grained topic Type Difficulty measure Len. (h) # QAs Dur. (s) Den.(h −1)Sca. (h) # Fin. Gin. Ent.
+> Story-centric VideoQA Datasets for story video
+> MovieQA [18] CVPR’16 381.0 14.9K 202.7 39.11 5.68M 60.819 2.713 Movie ✗
+> TVQA [19] EMNLP’18 461.2 144.9K 76.2 314.18 66.83M 80.821 2.873 TV ✗
+> TVQA+ [20] ACL’20 71.7 29.4K 61.5 410.04 2.11M 50.789 2.660 TV ✗
+> HLVU (DVU 22&23) [21] ICMR’20 24.8 455 106/4,907 18.35 0.01M 60.773 2.548 Movie ✗
+> DramaQA [22] AAAI’21 20.5 17.9K 3.6/91.8 873.17 0.37M ---TV ✓
+> DeepMovieQA [23] EACL’23 41.3 1K 3,102 24.21 0.04M ---Movie ✗
+> CinePile [24] CVPRW’24 417.6 305K 160 730.36 127.37M ---Movie ✗
+> MovieChat-1K [25] CVPR’24 156.7 19.0K 564 121.25 2.98M 40.701 2.203 Movie ✗
+> LvBench [26] IJCV’25 209.5 20.0K 948 95.76 4.20M ---Movie ✗
+> General-purpose VideoQA Datasets for long video
+> LongVideoBench [28] NeurIPS’24 494.4 6,678 473 13.51 3.30M ---General long video ∗✗
+> LVBench [113] ICCV’25 117.0 1,549 4,101 13.24 0.18M ---General long video ∗✗
+> Video-MME [27] CVPR’25 254.5 2,700 1,017.9 10.61 0.69M ---General long video ∗✗
+> CG-Bench [30] ICLR’25 550.0 12,129 1,624.4 22.05 6.67M ---General long video ∗✗
+> VRBench [31] arXiv’25 1,545.6 8,243 5,796 5.33 12.74M ---General long video ∗✗
+> Video-MMMU [29] arXiv’25 42.2 900 506.2 21.33 0.04M ---General long video ∗✗
+> FriendsQA [17] AAAI’25 89.6 44.6K 1,358 497.77 4.00M 14 0.927 3.794 TV StoryVideoQA Ours 393.2 363K 1,635/7,878 923.19 142.73M 14 0.927 3.795 TV/Movie ✓
+
+∗ For general long video, LongVideoBench includes life, movie, knowledge, and news. LVBench features 6 types: sports, documentary, self media, life, TV, and cartoon. Video-MME spans 6 domains including knowledge, film & television, sports competition, life record, and Multilingual. CG-Bench categorizes videos into 14 root domains including life record, arts, and news. VRBench focuses on narrative videos such as movies, sports, travelogues. Video-MMMU covers professional educational videos in 6 disciplines like science and art. 
+
+B.4 Prompt for Supervisor 
+
+The prompt template for supervisor contains five main parts: system prompt, fine-grained topics description, video description, generated QAs, and task. The prompt template for supervisor is shown in Figure A2. 
+
+B.5 Prompt for Reviewer 
+
+The prompt template for reviewer contains five main parts: system prompt, video description, generated QAs, correctness requirements and answer requirements. The prompt template for reviewer is shown in Figure A3. 
+
+## C StoryVideoQA Statistics 
+
+As illustrated in Figure A4, StoryVideoQA includes 363K QAs, primarily sourced from three main video types. For TV Sitcoms, the data is derived from Friends and the first eight seasons of The Big Bang Theory , whose QAs account for 31.0% and 24.7%, respectively. The Drama cate-gory is composed of Game of Thrones , with its QAs making up 17.9% of the total. Finally, Sto-ryVideoQA also incorporates 78 Movies, whose QAs constitute the remaining 26.4%. For more QAs examples, please refer to Figure A6 (Movie) and Figure A7 (TV). 
+
+## D Implementation Details 
+
+In our experiments, we strictly adhere to the official implementation and the optimal hyper-parameter settings (including frame sampling rates) provided by the respective authors of each model. Since different MLLM architectures have diverse designs for temporal encoders (e.g., mem-ory banks, sliding windows, or global pooling), using a fixed number of frames across all models might inadvertently lead to sub-optimal perfor-mance for certain architectures. Thus, for our StoryVideoQA benchmark, we ensure each model is tested with default input frame number and within our hardware constraints (RTX A6000 GPUs). 
+
+• SINGULARITY . SINGULARITY [54] is an efficient single-frame approach for end-to-end 33 Table A2 : Data source and face database of StoryVideQA, including script sources, the number of characters(# Character), and the number of collected portraits (# Portrait). Since each character has a single portrait in movies, the values of # Character and # Portrait are identical.. 
+
+Name Script Source # Character # Portrait 
+
+Game of Throne series https://genius.com/artists/Game-of-thrones 63 471 
+
+Friends series PAINS [90] 16 240 
+
+The Big Bang Theory series (first eight seasons) PAINS [90] 22 308 IMDB-001-The Shawshank Redemption https://screenplays.io/screenplay/the-shawshank-redemption 23 23 IMDB-002-The Godfather https://screenplays.io/screenplay/the-godfather 20 20 IMDB-004-The Dark Knight https://screenplays.io/screenplay/the-dark-knight 15 15 IMDB-005-Pulp Fiction https://screenplays.io/screenplay/pulp-fiction 26 26 IMDB-008-12 Angry Men https://screenplays.io/screenplay/12-angry-men 9 9IMDB-009-The Fellowship of the Ring https://screenplays.io/screenplay/the-fellowship-of-the-ring 24 24 IMDB-011-The Lord of the Rings The Two Towers https://screenplays.io/screenplay/the-two-towers 29 29 IMDB-013-Inception https://screenplays.io/screenplay/inception 26 26 IMDB-016-The Lord of the Rings The Return of the King https://screenplays.io/screenplay/the-return-of-the-king 33 33 IMDB-018-The Matrix https://screenplays.io/screenplay/the-matrix 13 13 IMDB-019-Star Wars Episode VI Return of the Jedi https://screenplays.io/screenplay/star-wars-episode-vi-return-of-the-jedi 27 27 IMDB-023-The Usual Suspects https://screenplays.io/screenplay/the-usual-suspects 15 15 IMDB-025-Its A Wonderful Life https://screenplays.io/screenplay/its-a-wonderful-life 13 13 IMDB-032-Psycho https://screenplays.io/screenplay/psycho 16 16 IMDB-034-Rear Window https://screenplays.io/screenplay/rear-window 15 15 IMDB-039-The Terminator https://screenplays.io/screenplay/the-terminator 13 13 IMDB-040-Memento https://screenplays.io/screenplay/memento 10 10 IMDB-041-The Pianist https://screenplays.io/screenplay/the-pianist 21 21 IMDB-046-The Departed https://screenplays.io/screenplay/the-departed 26 26 IMDB-050-Boyhood https://screenplays.io/screenplay/boyhood 19 19 IMDB-051-The Prestige https://screenplays.io/screenplay/the-prestige 20 20 IMDB-052-The Dark Knight Rises https://screenplays.io/screenplay/the-dark-knight-rises 62 62 IMDB-056-The Lion King https://screenplays.io/screenplay/the-lion-king 17 17 IMDB-057-The Shining https://screenplays.io/screenplay/the-shining 10 10 IMDB-060-American Beauty https://screenplays.io/screenplay/american-beauty 15 15 IMDB-067-Vertigo https://screenplays.io/screenplay/vertigo 11 11 IMDB-073-A Clockwork Orange https://screenplays.io/screenplay/a-clockwork-orange 19 19 IMDB-078-Reservoir Dogs https://screenplays.io/screenplay/reservoir-dogs 13 13 IMDB-080-Gone Girl https://screenplays.io/screenplay/gone-girl 22 22 IMDB-091-Amadeus https://screenplays.io/screenplay/amadeus 15 15 IMDB-095-All About Eve https://screenplays.io/screenplay/all-about-eve 12 12 IMDB-097-The Apartment https://screenplays.io/screenplay/the-apartment 11 11 IMDB-100-Some Like It Hot https://screenplays.io/screenplay/some-like-it-hot 15 15 IMDB-103-Inglourious Basterds https://screenplays.io/screenplay/inglourious-basterds 32 32 IMDB-104-Indiana Jones and the Last Crusade https://screenplays.io/screenplay/indiana-jones-and-the-last-crusade 17 17 IMDB-106-A Separation https://screenplays.io/screenplay/a-separation 4 4IMDB-110-Toy Story 3 https://screenplays.io/screenplay/toy-story-3 37 37 IMDB-111-Unforgiven https://screenplays.io/screenplay/unforgiven 20 20 IMDB-114-Chinatown https://screenplays.io/screenplay/chinatown 18 18 IMDB-115-Up https://screenplays.io/screenplay/up 22 22 IMDB-139-Gran Torino https://screenplays.io/screenplay/gran-torino 14 14 IMDB-141-Casino https://screenplays.io/screenplay/casino 20 20 IMDB-142-The Big Lebowski https://screenplays.io/screenplay/the-big-lebowski 22 22 IMDB-143-Warrior https://screenplays.io/screenplay/warrior 19 19 IMDB-146-It Happened One Night https://screenplays.io/screenplay/it-happened-one-night 10 10 IMDB-151-How To Train Your Dragon 2 https://screenplays.io/screenplay/how-to-train-your-dragon-2 14 14 IMDB-151-How To Train Your Dragon https://screenplays.io/screenplay/how-to-train-your-dragon 12 12 IMDB-156-The Maltese Falcon https://screenplays.io/screenplay/the-maltese-falcon 14 14 IMDB-176-Annie Hal https://screenplays.io/screenplay/annie-hall 18 18 IMDB-177-Network https://screenplays.io/screenplay/network 7 7IMDB-179-The Grand Budapest Hotel https://screenplays.io/screenplay/the-grand-budapest-hotel 27 27 IMDB-182-The Princess Bride https://screenplays.io/screenplay/the-princess-bride 15 15 IMDB-187-The Wizard Of Oz https://screenplays.io/screenplay/the-wizard-of-oz 19 19 IMDB-189-The Avengers https://screenplays.io/screenplay/the-avengers 29 29 IMDB-191-The Grapes of Wrath https://screenplays.io/screenplay/the-grapes-of-wrath 24 24 IMDB-199-Strangers on a Train https://screenplays.io/screenplay/strangers-on-a-train 8 8IMDB-211-Harry Potter 1 https://screenplays.io/screenplay/harry-potter-and-the-sorcerers-stone 14 14 IMDB-211-Harry Potter 2 https://screenplays.io/screenplay/harry-potter-and-the-chamber-of-secrets 37 37 IMDB-211-Harry Potter 3 https://screenplays.io/screenplay/harry-potter-and-the-prisoner-of-azkaban 35 35 IMDB-211-Harry Potter 4 https://screenplays.io/screenplay/harry-potter-and-the-goblet-of-fire 37 37 IMDB-211-Harry Potter 5 https://screenplays.io/screenplay/harry-potter-and-the-order-of-the-phoenix 49 49 IMDB-211-Harry Potter 6 https://screenplays.io/screenplay/harry-potter-and-the-half-blood-prince 39 39 IMDB-211-Harry Potter 7 https://screenplays.io/screenplay/harry-potter-and-the-deathly-hallows-part-1 66 66 IMDB-211-Harry Potter 8 https://screenplays.io/screenplay/harry-potter-and-the-deathly-hallows-part-2 51 51 IMDB-223-Pirates of the Caribbean3 At Worlds End https://screenplays.io/screenplay/pirates-of-the-caribbean-at-worlds-end 33 33 IMDB-223-Pirates of the Caribbean4 On Stranger Tides https://screenplays.io/screenplay/pirates-of-the-caribbean-on-stranger-tides 28 28 IMDB-233-The Graduate https://screenplays.io/screenplay/the-graduate 15 15 IMDB-234-The Help https://screenplays.io/screenplay/the-help 26 26 IMDB-236-The Hustler https://screenplays.io/screenplay/the-hustler 9 9IMDB-237-Jurassic Park https://screenplays.io/screenplay/jurassic-park 15 15 Douban-052-Dead Poets Society https://screenplays.io/screenplay/dead-poets-society 20 20 Douban-065-Life of Pi https://screenplays.io/screenplay/life-of-pi 7 7Douban-070-The Curious Case Of Benjamin Button https://screenplays.io/screenplay/the-curious-case-of-benjamin-button 32 32 Douban-139-A Perfect World https://screenplays.io/screenplay/a-perfect-world 16 16 Douban-146-Black Swan https://screenplays.io/screenplay/black-swan 13 13 Douban-159-Following https://screenplays.io/screenplay/following 4 4Douban-173-The Croods https://screenplays.io/screenplay/the-croods 8 8Douban-198-Thelma and Louis https://screenplays.io/screenplay/thelma-and-louise 12 12 34 System: 
+
+You are an expert in long story video comprehension and now need to come up with a series of question-answer pairs for them to answer. For each QA-pair you 
+
+generate, please ignore any prior knowledge about these movies and TV series, and construct QA-pairs (QAs) based solely on the given video description. 
+
+Fine-grained topics description: 
+
+QAs for story video comprehension is divided into 2 question types,7 story element combinations. 
+
+Question type: P, I. 
+
+Description: For QAs of type P, it can be obtained from the appearance of video directly, while QAs of type I, need to analyze the content of the video and logical 
+
+reasoning to get the results. Therefore, you need to focus on a more long-term understanding of the scripts, such as cross scene, even cross the whole script, generate 
+
+less QAs about short-term understanding. 
+
+Story element combinations: C, A, L, CA, CL, AL, CAL. 
+
+Description: We focus on 7 story element combinations of storylines. We focuses on 3 core story elements of the video: character, action, and location, where C stands 
+
+for character, A stands for action, and L stands for location. Therefore, there are 7 possible story element combinations, i.e., ‘C’, ‘A’, ‘L’, ‘CA’, ‘CL’, ‘AL’, ‘CAL’. It 
+
+should be attention that there should be only story elements in QAs. For example, ‘C’ can only involve ’character’, not anything about ‘action’ or ‘location’. You can 
+
+only generate QAs about ‘character’. 
+
+Video description: 
+
+{video description} 
+
+QAs requirements: 
+
+(1) Video-only answerability: Please note that the generated QAs must be answerable after watching the video. Do not create QAs regarding information that is not 
+
+visually or verbally conveyed in the video. Additionally, it is important to emphasize that, due to the length of the video, the QAs should be correspond uniquely 
+
+to the plot of the video without ambiguity. Don’t give specific video time in QAs, because this reduces the difficulty of the QAs. 
+
+(2) Scope & detail: I hope relevant segments can cover long-from video understanding. I want to generate QAs of different difficulty, so for each type you need to 
+
+help me generate QAs of different difficulty by either focusing on more long-from video clip, or focusing on more complex character’s relationship. You can 
+
+even generate QAs cover the whole episode. And the generation of QAs should ideally be spread throughout the video rather than concentrated in certain scenes. 
+
+In order to better validate the QA-pair, Please generate the basis of inference, a list of the start and end times of the relevant segments in the video, and a list of 
+
+the relevant characters related to QA-pair. 
+
+(3) Tool & format compliance: Please carefully follow the instructions of the tool ‘ Tools_of_saving_QAs_with_X_X ’ to generate and save a series of QAs based on 
+
+the following information for those types haven’t enough QAs. 
+
+Feedback from supervisor: 
+
+{feedback} 
+
+Prompt for Generator Fig. A1 : Prompt template for Generator. learning on video-text tasks. It adopts a single-frame training, and multi-frame inference strat-egy for efficient and accurate learning on aset of video-text tasks. For evaluation on Sto-ryVideoQA, we follow the official settings which leverage 4 frames as input and the weights fine-tuned on MSRVTT-QA [37], the most com-monly used Factoid VideoQA dataset, to eval-uate on StoryVideoQA. 
+
+• VIOLETv2 . VIOLETv2 [57] is a VLM which achieves strong performance in video-language task by effective masked visual modeling (MVM) training. The training strategy is based on empirical study on adopting MVM for video-language learning. We use the weights fine-tuned on MSRVTT-QA to evaluate on Sto-ryVideoQA with 32 frames as input. 
+
+• Vid-TLDR . Vid-TLDR [56] puts forward a training-free token merging for VLM, aims to enhance the efficiency of VLM by merging the background tokens without additional train-ing. Similar to VIOLETv2, we follow official settings which leverage a UMT-L/16 [114] ver-sion fine-tuned on MSRVTT-QA to evaluate on StoryVideoQA with 12 frames as input. 
+
+• SeViLA . SeViLA [101] is a novel framework leveraging a large pre-trained image-language models to tackle VideoQA task. It contains two stages: temporal keyframe localization and question answering on videos. We follow the offi-cial settings which leverage 32 frames as input, and utilize BLIP2 based on FlanT5-XL 3B to evaluate on StoryVideoQA. 
+
+• VideoLLaMA2 . VideoLLaMA2 [72] is aMLLM which incorporates a spatial-temporal convolution connector and an audio branch to enhance spatial-temporal modeling and audio understanding for video and audio-oriented tasks. We follow the official settings which leverage 32 frames as input, and utilize Vide-oLLaMA2 7B chat model to evaluate on Sto-ryVideoQA. 
+
+• VideoChat2 . VideoChat2 [44] is a robust MLLM that significantly outperforms existing 35 System: 
+
+You are an expert in supervising the question answer pair (QAs). 
+
+Fine-grained topics description: 
+
+QAs for story video comprehension is divided into 2 question types,7 story element combinations. 
+
+Question type: P, I. 
+
+Description: For QAs of type P, it can be obtained from the appearance of video directly, while QAs of type I, need to analyze the content of the video and logical 
+
+reasoning to get the results. Therefore, you need to focus on a more long-term understanding of the scripts, such as cross scene, even cross the whole script, generate 
+
+less QAs about short-term understanding. 
+
+Story element combinations: C, A, L, CA, CL, AL, CAL. 
+
+Description: We focus on 7 story element combinations of storylines. We focuses on 3 core story elements of the video: character, action, and location, where C stands 
+
+for character, A stands for action, and L stands for location. Therefore, there are 7 possible story element combinations, i.e., ‘C’, ‘A’, ‘L’, ‘CA’, ‘CL’, ‘AL’, ‘CAL’. It 
+
+should be attention that there should be only story elements in QAs. For example, ‘C’ can only involve ’character’, not anything about ‘action’ or ‘location’. You can 
+
+only generate QAs about ‘character’. 
+
+Video description: 
+
+{video description} 
+
+Generated QAs: 
+
+{generated QAs} 
+
+Task: 
+
+(1) You need to delete invalid QAs and use “Tools of delete invalid QAs” to delete. Please accurately find out those invalid QAs and delete them. 
+
+(2) You can retrieve similar QAs from fault archive to find out similar fault, by which you can summarize the feedback from the generator’s generated QAs history. 
+
+(3) Give your feedback about the quality of these QAs for the improvements of generator. According to the retrieval results of the deleted QAs database and 
+
+temporary state, summarize shortly and tell the generator which aspects are well done and should be promoted, which issues need improvement, and which 
+
+mistakes should be remembered and not repeated. 
+
+Prompt for Supervisor Fig. A2 : Prompt template for Supervisor. System: 
+
+You are very good at reviewing QAs for correctness and answering given QAs. Here is a video description for a movie or TV show, and the corresponding test QAs for 
+
+understanding the content of the movie or TV show. You are asked to evaluate each QA-pair, assessing its correctness (True or False). Assuming you are actually doing 
+
+the test and can only watch the video, you only need to give the corresponding assessment in the order in which they are presented. 
+
+Video description: 
+
+{video description} 
+
+Generated QAs: 
+
+{generated QAs} 
+
+Correctness Requirements: 
+
+For each QA-pair, determine if the answer is correct based solely on the provided video description, using the following guidelines: 
+
+(1) Correctness: The answer must be correct based solely on the provided video description. The answer must be explicitly stated in the text or can be directly and 
+
+logically inferred from the text. 
+
+(2) No Prior Knowledge: Do not use any prior knowledge. The QAs must be answerable after watching the video without any prior knowledge. No Assumptions: Do 
+
+not make any assumptions. 
+
+(3) Example of ‘True’: If a question asks, ‘What is the name of the character with a beard?’ and the text says, ‘...a man with a beard named Hagrid...’, the answer is 
+
+‘True’. Example of ‘False’: If a question asks, ‘What is the name of Harry’s pet owl?’ and the text only says, ‘...Harry has an owl...’, the answer is ‘False’ 
+
+because the owl’s name is not given. Respond with ‘True’ if the answer meets all criteria, and ‘False’ if it does not. There’re about 20% incorrect questions totally, 
+
+you need to find out them exactly. 
+
+Answer Requirements: 
+
+You need to select an answer from choices list for each QA-pair based solely on the provided video description. If it’s a wrong QA-pair or there are not any supported 
+
+evidence in video description to select an answer, please respond ‘XXX’ as placeholder. 
+
+Prompt for Reviewer 
+
+Fig. A3 : Prompt template for Reviewer. models by over 15% on MVBench, which cov-ers 20 challenging video tasks that cannot be effectively solved with a single frame. We follow the official settings which leverage 16 frames as input, and utilize VideoChat2 vicuna 7B version to evaluate on StoryVideoQA. 
+
+• Chat-UniVi . Chat-Univi [10] is a MLLM employing a set of dynamic visual tokens to uni-formly represent images and videos. It allows 36 …
+
+> The  BigBang
+> Theory
+> Friends
+> Game of
+> Thrones
+> Top Movie
+
+## TV: Sitcom 
+
+## Movie 
+
+Perception (P) Inference (I) Question type: , Story element: , ,Character (C) Action (A) Location (L) 
+
+Q1 : Based on the characters' actions in the episode, 
+
+what can be inferred about their individual coping 
+
+mechanisms, and how do they act to support each 
+
+other, offering comfort and guidance at Monica's 
+
+apartment? 
+
+A. They always support each other, 
+
+they offer comfort to each other. 
+
+B. They hate each other, 
+
+they argue each other. 
+
+C. They don't care, they 
+
+always look away. 
+
+D. They are seeking 
+
+therapy, they are making 
+
+appointment with therapist. 
+
+E. They are seeking new 
+
+life, they plan to leave the city. 
+
+Story element 
+
+combination: 
+
+Question type: I
+
+A L
+
+Story element combination: 
+
+Question type: I
+
+C A
+
+Story element combination: Question type: P C L
+
+Q3: How does the scene where Ned executes Will, 
+
+compared to the discovery of the direwolf pups, reflect 
+
+the themes of justice, duty, and tradition within the Stark 
+
+family? 
+
+A. It emphasizes the rejection of tradition. 
+
+B. It highlights the blending of customs. 
+
+C. It underscores themes of justice and tradition. 
+
+D. It implies the rejection of the old ways. 
+
+E. It reflects a blending of the traditions. 
+
+Story element combination: Question type: P C LA
+
+Q4: Considering the actions of Harry, Ron and Hermione in 
+
+the chess chamber, how does their location and what they did 
+
+affect their relationship? 
+
+A. It shows their unity as they solve the challenges in the film. 
+
+B. It shows their love as they get closer. 
+
+C. It shows they are always trying to undermine each other. 
+
+D. It shows they are not very good chess players. 
+
+E. It shows that they are very scared. 
+
+Q2 : What does Leonard's willingness 
+
+to retrieve Penny's TV reveal about his 
+
+feelings towards her? 
+
+A. Apathy 
+
+B. Pity 
+
+C. Romantic interest 
+
+D. Neighborly obligation 
+
+E. Scientific curiosity 
+
+## TV: Drama 
+
+## 31.0% 
+
+## 24.7% 
+
+## 17.9% 
+
+## 26.4% Fig. A4 : QAs examples on different video type of StoryVideoQA. the model capture spatial and temporal infor-mation using a limited number of visual tokens. We follow the official settings which leverage 64 frames as input, and utilize ChatUniVi vicuna 7B version to evaluate on StoryVideoQA. 
+
+• MA-LMM . MA-LMM [76] introduces a plug-and-play long-term memory bank module to address the context length and memory con-straints of MLLM. It can be easily integrated into existing MLLM in an off-the-shelf manner. We follow the official settings which leverage 120 37 frames as input, and utilize MA-LMM vicuna 7B version to evaluate on StoryVideoQA. 
+
+• TimeChat . TimeChat [1] is a time-sensitive MLLM designed for long video understand-ing. By a time-aware sliding video Q-Former, TimeChat demonstrates strong temporal local-ization capabilities. We follow the official set-tings which leverage 32 frames as input, and uti-lize TimeChat LLaMA-2 7B version to evaluate on StoryVideoQA. 
+
+• Video-ChatGPT . Video-ChatGPT [11] is a MLLM merging a video-adapted visual encoder with a LLM. The model is trained on 100,000 video-instruction pairs and the model can understand and generate detailed conversations about videos. We follow the official settings which leverage 100 frames as input, and utilize Video-ChatGPT LLaVA-7B-Lightening version to evaluate on StoryVideoQA. 
+
+• VideoLLaMA3 . VideoLLaMA3 [73] is avision-centric multimodal foundation model that emphasizes high-quality image-text data for robust video understanding. It features a framework that adapts to variable-resolution inputs with dynamic vision tokens and employs a similarity-based token reduction strategy to ensure precise and compact video represen-tations. We follow the official settings which leverage 128 frames as input, and utilize Vide-oLLaMA3 Qwen2.5 7B version to evaluate on StoryVideoQA due to hardware constraints. 
+
+• ViLAMP . ViLAMP [78] is a hierarchi-cal video-language model designed for ultra-long video understanding through a ”mixed-precision” processing strategy. It introduces dif-ferential distillation to preserve task-relevant information while suppressing redundancy via two mechanisms: differential keyframe selection at the frame level and differential feature merg-ing at the patch level. We follow the official settings which sample keyframes with 600 maxi-mum frames number and utilize ViLAMP llava-qwen 7B version to evaluate on StoryVideoQA. 
+
+• Video-XL . Video-XL [79] is a novel MLLM designed to overcome context length constraints and high processing costs in long video under-standing. It leverages the inherent KV spar-sification capacity of MLLMs by introducing a Visual Summarization Token (VST), which condenses visual information within specific intervals into associated KV pairs. We follow the official settings which leverage 128 frames as input and utilize Video-XL llava-qwen 7B version to evaluate on StoryVideoQA. 
+
+• VideoChat-Flash . VideoChat-Flash [107] is a powerful MLLM designed for long-context video modeling through a novel Hierarchical video token Compression (HiCo) method. By leveraging visual redundancy, HiCo compresses long video context from the clip-level to the video-level, achieving an extreme compression ratio of approximately 1/50 while preserving essential details. We follow the official set-tings which leverage 512 frames as input and utilize VideoChat-Flash Qwen2.5-7B version with 1M visual tokens context to evaluate on StoryVideoQA-G. 
+
+• Long-VITA . Long-VITA [108] is a scalable large multi-modal model designed for long-context understanding across image, video, and text modalities. It utilizes a multi-stage train-ing schema, progressing from vision-language alignment to sequential long-sequence fine-tuning. By implementing context-parallelism distributed inference and a logits-masked lan-guage modeling head, Long-VITA can scale to extremely long inputs during inference while maintaining high efficiency. We follow the offi-cial settings that leverage 256 frames as input, and utilize Long-VITA 14B version with 1M visual tokens context as input to evaluate on StoryVideoQA-G. 
+
+• Qwen3-VL . Qwen3-VL [109] is the latest multimodal foundation model in the Qwen series, supporting interleaved contexts of up to 256K tokens. Architecturally, it introduces an enhanced interleaved-MRoPE for superior spatial-temporal modeling and integrates Deep-Stack to leverage multi-level ViT features for tighter vision-language alignment. Lever-aging its native long-context window, Qwen3-VL demonstrates leading performance in cross-referencing and retrieval across extended mul-timodal inputs. We follow the official settings that leverage 256 frames as input, and utilize Qwen3-VL 8B instruct version to evaluate on StoryVideoQA-G. 
+
+• Frontier MLLMs (Closed-source) . We include Gemini 3 Flash 17 and GPT-5.2 18 to 
+
+> 17 https://deepmind.google/models/gemini/
+> 18 https://openai.com/
+
+38 establish the current performance ceiling of the StoryVideoQA-G benchmark. Due to API bud-get, we evaluate these two models with 32 frames input. 
+
+• Agents-based methods . To maintain consis-tency across all agents, we employ LLaVA-1.6 as the captioning tool, Qwen3 embedding model for embedding text, and Gemini-2.0-Flash as the LLMs, video frames are sampled at 1 fps. 
+
+## E StoryVideoQA-GA 
+
+While using well-known films ensures high-quality data, existing models may rely on prior knowledge from pre-training rather than video-based rea-soning. To ensure our benchmark measures gen-uine multimodal understanding, rather than the model’s priority knowledge of popular plots, we introduce StoryVideoQA-GA (anonymized ver-sion of StoryVideoQA-G) to decouple external knowledge from visual evidence. To this end, We conduct a blindfold test using an anonymized version of StoryVideoQA focus-ing on 3W (Who, What and Where) elements. Since Action (What) elements are less susceptible to pretraining bias, Characters (Who) and Loca-tions (Where) carry heavy prior knowledge. Hence we focus on anonymizing all 147 unique charac-ters and 147 specific locations in StoryVideoQA-G by replacing them with generic placeholders (e.g., ”Harry” → ”Character 1”, ”Hogwarts” → ”Loca-tion 1”), including questions, choices, subtitles, and characers library (Note: We refer to this anonymized version as ”StoryVideoQA-GA”). As shown in the Table A3, except for afew baselines whose performance fluctuates near the 20% random guess level for 5-option ques-tions (e.g., SINGULARITY from 20.44% to 21.44%, and VideoChatGPT from 18.95% to 23.20%), most models exhibit a marked perfor-mance decline on StoryVideoQA-GA compared to StoryVideoQA-G, e.g., VideoLLaMA2 (70.13% to 58.61%), PlotTree (86.50% to 82.08%). This phenomenon aligns with current findings in the field [115, 116]. and demonstrates that our pro-posed anonymized dataset, StoryVideoQA-GA, facilitates a more effective and faithful assess-ment of the DVU capabilities of various mod-els. Particularly, it should be emphasized that despite a 4.42% decline, PlotTree still achieves the best performance (82.08%) among all mod-els in StoryVideoQA-GA dataset, validating its outstanding video understanding and reasoning capabilities. P-C       
+
+> P-A
+> P-L
+> P-CA P-CL
+> P-AL
+> P-CAL
+> I-C
+> I-A
+> I-L
+> I-CA I-CL
+> I-AL
+> I-CAL
+> 50% 60% 70% 80% 90%
+> PlotTree (w/ Ver.) PlotTree (w/o Ver.)
+
+Fig. A5 : Robustness analysis (%) of facial recog-nition reliability on the StoryVideoQA-G. 
+
+## F Robustness Analysis 
+
+To assess PlotTree’s sensitivity to the facial recog-nition noise, we conduct a robustness analysis of facial recognition reliability on the StoryVideoQA-G dataset. We manually re-verify (Ver.) 109,449 detected facial frames and find a negligible error rate of only 0.56%, which demonstrates the high reliability of InsightFace for character recognition. Furthermore, we correct all facial recognition errors to get ground truth identities. Finally, Plot-Tree’s average performance without manual veri-fication remains highly competitive, with a negli-gible gap of only 0.04% compared to the version using ground-truth identities. Instead of ampli-fying upstream errors, PlotTree effectively sup-presses them through its structural reasoning. As illustrated in Figure A5, the performance across almost all fine-grained topics remains nearly iden-tical under both settings. This consistency further confirms that PlotTree’s structural reasoning can effectively suppresses error propagation, ensuring robust performance even with imperfect upstream perception. 39 What visual cues, such as a weary gait or stooped posture, indicate 
+
+the long-term effects of prison life on Red's physical appearance? 
+
+A. A confident smile and direct gaze. 
+
+B. Expensive tailored suits and polished shoes. 
+
+C. A heavy limp and constant cough. 
+
+D. Stooped shoulders, a weary gaze, and calloused hands. 
+
+E. A loud and boisterous demeanor. 
+
+How does the action of broadcasting Mozart over the prison PA 
+
+system visually disrupt the routine and order of Shawshank? 
+
+A. Loud noises and chaos 
+
+B. Subtle and unnoticed 
+
+C. Causes violence 
+
+D. Creates a moment of peace and contemplation 
+
+E. Uplifting and inspirational 
+
+What visual elements does the film use to create a sense of 
+
+confine-ment and lack of freedom within the prison yard? 
+
+A. the presence of recreational equipment 
+
+B. the vastness of the space 
+
+C. the lush greenery 
+
+D. the looming walls, barbed wire, and ever-present guard towers 
+
+E. the lack of visual details 
+
+What visual elements present during the scene where Andy 
+
+is attacked in the showers contribute to the tone? 
+
+A. The claustrophobic camera angles and tight framing. 
+
+B. The use of darkness and shadows. 
+
+C. The expressions on the faces of the attackers. 
+
+D. All of the above 
+
+E. None of the above 
+
+In the final scene, how does the setting combine with Red's actions 
+
+to contribute to the movie's central theme, and the plot as a whole? 
+
+A. It is about freedom. 
+
+B. It is about the past. 
+
+C. It is about time. 
+
+D. It is about moving on. 
+
+E. It is about staying in the past. 
+
+What visual elements present during the scene where Andy is 
+
+attacked in the showers contribute to the tone? 
+
+A. The claustrophobic camera angles and tight framing. 
+
+B. The use of darkness and shadows. 
+
+C. The expressions on the faces of the attackers. 
+
+D. All of the above 
+
+E. None of the above 
+
+Considering the lighting and setting of the parole hearing room 
+
+and Red's demeanor, what is the visual story that is shown to the 
+
+audience? 
+
+A. The tone is hopeless with no potential for release. 
+
+B. The tone is both hopeless and longing. 
+
+C. The tone is hopeful and longing. 
+
+D. The tone is only despair. 
+
+E. The tone is peace. 
+
+What commentary does the film as a whole make about justice, 
+
+hope and friendship by focusing on the various characters? 
+
+A. That the system is corrupt and needs to be changed. 
+
+B. That there is a need to hold on to hope, despite the odds. 
+
+C. That there is no way to truly change as a person. 
+
+D. That violence is the only way to achieve freedom. 
+
+E. That all prisoners are dangerous and cannot be trusted. 
+
+Given the fact that there are prisoners who claim innocence, what 
+
+inferences can be made by looking at the actions of the prison staff? 
+
+A. That the prisoners are guilty. 
+
+B. That the staff doesn't care about rehabilitation. 
+
+C. That the staff is inherently evil. 
+
+D. The prison staff are overworked. 
+
+E. None 
+
+Considering the importance of contraband, what can be inferred 
+
+about the corruption of the prison system? 
+
+A. The guards are well-respected. 
+
+B. The prisoners are well-respected. 
+
+C. The guards are corrupt. 
+
+D. The prisoners respect the rules. 
+
+E. The prisoners enjoy it. 
+
+How do the actions of both Red and Andy in the hayfield reflect 
+
+the themes of freedom and hope? 
+
+A. That the hayfield had no meaning. 
+
+B. That the two men were not actually friends. 
+
+C. That hope is dangerous. 
+
+D. That they have achieved their goal. 
+
+E. That they were not truly free. 
+
+> Considering the exercise yard and the library in Shawshank, what can be
+> inferred about the human need for both physical and intellectual outlets in
+> coping with confinement?
+> A. Physical and intellectual outlets are unimportant for prisoners.
+> B. Only physical activity alleviates the stress of prison.
+> C. Only intellectual pursuits provide solace.
+> D. Both physical and intellectual outlets are essential to maintaining sanity
+> and hope in confinement.
+> E. Neither physical nor intellectual activity can help a prisoner.
+> Considering the relationship between Andy and Red, and the visual
+> contrast between their respective cells and the prison yard, what can be
+> inferred about the different ways they cope with confinement and find
+> meaning within Shawshank?
+> A. Andy finds meaning in small acts of defiance, while Red seeks solace in
+> routine.
+> B. Red is naturally hopeful, while Andy is inherently cynical.
+> C. Both characters find meaning in the same ways.
+> D. Neither character finds meaning within Shawshank.
+> E. Their methods are unrelated to their environment.
+
+Considering the limited opportunities for expression within Shaws -
+
+hank, what inferences can be drawn about the importance of Red's 
+
+character and influence in relation to the setting? 
+
+A. His influence is not important. 
+
+B. His influence helps the prison operate. 
+
+C. The prison is a dangerous place. 
+
+D. Red is a person of value. 
+
+E. The prisoners are not to be trusted. 
+
+Question types: ,Perception (P) Inference (I) Story elements: , ,Character (C) Action (A) Location (L)    
+
+> PC-
+> PA-
+> P
+
+L-   
+
+> P-C
+
+A   
+
+> P-C
+
+L  
+
+> P-
+
+A L   
+
+> P-C
+
+A L   
+
+> IC-
+> IA-
+> I
+
+L-   
+
+> I-C
+
+A  
+
+> I-
+
+A L   
+
+> I-C
+
+A L   
+
+> I-C
+
+LFig. A6 : More QAs examples on movie with different fine-graiend topics. 40 What is the name of the character who is from Lincoln High 
+
+survivor? 
+
+A. Rachel 
+
+B. Monica 
+
+C. Phoebe 
+
+D. Carol 
+
+E. Frannie 
+
+What does Rachel do when she is cut off by the machine while 
+
+talking to Barry on the phone? 
+
+A. Calls back 
+
+B. Keeps talking 
+
+C. Hangs up 
+
+D. Screams 
+
+E. Cries 
+
+Where is the place where the main characters usually hang out? 
+
+A. Monica's Apartment 
+
+B. Ross's Apartment 
+
+C. A Restaurant 
+
+D. Central Perk 
+
+E. Iridium 
+
+What does Rachel do when she finds Paul's watch at Monica's 
+
+apartment and what action does Monica take? 
+
+A. She throws it away, Monica ignores it. 
+
+B. She breaks it, Monica gets angry. 
+
+C. She puts it back, Monica tells her to put it back. 
+
+D. She keeps it, Monica asks her to give it back. 
+
+E. She hides it, Monica finds it. 
+
+Based on the setting of Monica's apartment and the presence of 
+
+Rachel in a wedding dress, where did Rachel most likely come 
+
+from before arriving at Monica's apartment? 
+
+A. From her honeymoon 
+
+B. From her work 
+
+C. From her wedding 
+
+D. From a funeral 
+
+E. From the airport 
+
+According to the video, what action does Ugly Naked Guy take 
+
+outside, and where does Chandler witness this? 
+
+A. Practicing yoga in Central Perk 
+
+B. Using a ThighMaster outside Monica's apartment 
+
+C. Setting up an exhibit at the museum 
+
+D. Dancing at the ob /gyn 
+
+E. Eating lasagna outside Barry's office 
+
+According to the video, what is Ross doing at the museum when 
+
+Carol arrives and tells him she is pregnant, and what is the 
+
+location? 
+
+A. Setting up an exhibit; The museum 
+
+B. Having lunch; Central Perk 
+
+C. Talking to Carol; Ross's apartment 
+
+D. Working on a project; A library 
+
+E. Attending a meeting; A restaurant 
+
+Based on the advice Joey gives to Ross about ice cream flavors, what 
+
+can be inferred about Joey's approach to romantic relationships? 
+
+A. He values long-term commitment. 
+
+B. He prioritizes emotional connection. 
+
+C. He views relationships as fleeting and diverse. 
+
+D. He fears intimacy. 
+
+E. He only dates supermodels. 
+
+Given the group's interactions with Alan and Monica, what can be 
+
+inferred about the dynamics of relationship decisions? 
+
+A. They don't make relationship decisions together. 
+
+B. They value each other's opinions. 
+
+C. They don't care about each other. 
+
+D. They want to control Monica. 
+
+E. They dislike Alan. 
+
+Considering the various locations presented, what can be inferred about the 
+
+characters' values based on where they choose to spend their time and with 
+
+whom? 
+
+A. Their values are primarily materialistic. 
+
+B. Their values are not reflected in their choices of location. 
+
+C. Their values are primarily focused on career advancement. 
+
+D. Their values are primarily based on convenience and practicality. 
+
+E. Their values are reflected in their choices of location and activities. 
+
+What does Ross's detailed explanation of laundry techniques to Rachel 
+
+reveal about his communication style and his ability to empathize with 
+
+others? 
+
+A. He is naturally condescending and enjoys lecturing others. 
+
+B. He is trying to impress Rachel with his intelligence. 
+
+C. He is simply trying to be helpful and supportive, but lacks self-awareness. 
+
+D. He is trying to assert his dominance and control. 
+
+E. He is trying to sabotage Rachel's attempt at independence. 
+
+Considering the emphasis on Central Perk as a gathering spot, what 
+
+inferences can be made about the value the characters place on community 
+
+and affordability, and how do their actions support this? 
+
+A. They are primarily concerned with saving money. 
+
+B. They prioritize material possessions above all else. 
+
+C. They value community and accessible social spaces. 
+
+D. They are indifferent to social interaction. 
+
+E. They are primarily focused on their careers. 
+
+Given that Chandler and Phoebe meet at Central Perk to discuss their 
+
+relationships, what can be inferred about the role of such spaces in 
+
+providing comfort and community? 
+
+A. Cafes are inherently superficial spaces. 
+
+B. Community is always a distraction. 
+
+C. Friendship is a substitute for genuine connection. 
+
+D. Cafes can provide a safe space for emotional intimacy. 
+
+E. Community is always a necessity. 
+
+Considering the recurring theme of relationships and the setting of Central 
+
+Perk, what can be inferred about the importance of community and social 
+
+support in navigating the complexities of love and commitment? 
+
+A. They prioritize financial stability and career success above all else. 
+
+B. They believe that romantic love is the key to happiness and fulfillment. 
+
+C. They value the support and companionship of friends and family. 
+
+D. They are generally cynical about the possibility of finding lasting love. 
+
+E. They are unconcerned with the opinions of others. 
+
+Question types: ,Perception (P) Inference (I) Story elements: , ,Character (C) Action (A) Location (L) 
+
+P C-
+
+P A-
+
+P L-
+
+P - C A
+
+P - C L
+
+P - A L
+
+P - C A L
+
+I C-
+
+I A-
+
+I L-
+
+I - C A
+
+I - A L
+
+I - C A L
+
+I - C LFig. A7 : More QAs examples on TV with different fine-graiend topics. 41 Table A3 : Comparisons (%) on StoryVideoQA-G (G) and StoryVideoQA-GA (GA) across 14 fine-grained topics. P I
+
+Method Venue Data C A L CA CL AL CAL C A L CA CL AL CAL Avg. 
+
+VLMs 
+
+GA 25.22 18.59 23.28 22.12 20.79 16.00 15.32 23.58 21.65 20.12 27.60 23.04 19.50 23.88 21.44 SINGULARITY [54] ACL’23 G 22.63 20.07 18.45 21.36 18.73 21.89 19.76 21.63 21.00 20.91 25.11 18.73 17.00 17.70 20.44 GA 26.60 12.17 16.90 18.15 19.85 15.79 15.93 14.54 14.50 15.58 11.31 14.68 18.25 14.33 16.49 VIOLETv2 [57] CVPR’23 G 18.83 14.97 18.28 16.64 19.48 18.53 16.33 12.77 12.12 15.19 11.09 13.16 18.50 12.92 15.78 GA 18.48 20.23 22.24 20.42 26.22 24.00 26.01 21.63 20.56 24.46 18.33 24.56 25.50 22.19 22.38 Vid-TLDR [56] CVPR’24 G 18.83 20.23 22.07 20.04 26.59 23.79 25.60 22.34 20.56 24.46 18.33 24.30 25.50 22.19 22.39 
+
+MLLMs 
+
+GA 27.98 21.38 26.72 24.39 25.66 24.42 18.75 21.63 20.13 22.88 18.33 20.25 22.75 18.26 22.66 SeViLA [101] CVPR’23 G 27.12 22.70 32.07 20.98 32.40 28.63 20.97 22.70 18.61 23.67 17.19 19.49 21.25 17.42 23.66 GA 38.51 43.26 47.24 55.58 52.25 57.05 62.50 68.62 64.72 72.19 66.06 72.41 69.50 66.85 58.61 VideoLLaMA2 [72] ArXiv’24 G 48.36 52.47 58.45 62.76 63.48 68.63 77.62 79.08 79.22 83.63 79.41 83.04 82.25 82.58 70.13 GA 35.23 43.26 45.34 47.83 51.31 58.11 68.75 64.89 61.04 71.20 61.99 66.58 67.75 68.26 56.79 VideoChat2 [44] CVPR’24 G 38.00 44.74 51.90 48.96 54.12 61.05 72.78 67.20 63.20 70.22 64.03 68.35 70.50 69.94 59.23 GA 23.83 37.66 16.72 32.33 19.10 29.68 26.61 18.79 24.24 13.81 17.65 14.68 24.00 16.01 22.91 ChatUniVi [10] CVPR’24 G 31.78 40.79 25.34 41.40 25.66 38.95 31.85 30.32 35.06 19.33 28.05 21.27 31.25 23.88 30.71 GA 42.49 47.70 47.41 52.17 54.12 61.26 67.14 73.05 65.80 73.77 68.33 73.92 74.00 75.00 61.31 MA-LMM [76] CVPR’24 G 46.98 49.18 54.31 53.88 58.80 65.89 67.54 75.89 70.78 74.75 73.30 78.23 76.25 77.53 64.69 GA 22.45 25.00 26.21 27.98 28.84 29.26 27.22 39.54 38.74 40.24 36.43 42.78 38.50 33.99 32.06 TimeChat [1] CVPR’24 G 24.35 21.05 37.76 28.36 41.01 33.05 31.25 44.68 43.51 52.27 42.08 47.34 43.00 43.82 37.36 GA 25.56 16.78 19.48 22.31 23.97 24.42 29.44 24.82 21.65 22.88 25.11 22.28 21.75 26.40 23.20 VideoChatGPT [11] ACL’24 G 9.33 18.26 5.34 19.66 8.80 14.32 14.31 28.55 29.87 26.63 26.92 23.29 28.00 19.66 18.95 GA 41.80 59.87 47.59 63.89 60.11 66.53 69.56 72.52 69.91 70.81 69.68 73.92 72.75 76.12 64.31 Video-XL [79] CVPR’25 G 51.30 61.84 60.17 66.16 60.86 69.05 70.77 73.76 72.29 77.71 73.76 80.51 75.00 78.93 68.50 GA 54.75 64.47 58.97 71.08 66.10 73.68 76.01 84.75 81.60 83.63 80.77 83.80 84.50 82.87 73.73 ViLAMP [78] ICML’25 G 58.55 69.08 64.83 74.29 72.28 77.47 77.62 87.41 85.28 85.80 82.35 87.59 87.50 86.52 77.34 GA 55.79 72.20 59.83 74.86 68.91 78.74 81.25 85.11 79.00 86.39 83.48 85.57 85.50 86.24 76.35 VideoLLaMA3 [73] ArXiv’25 G 60.45 72.04 68.62 79.02 72.66 82.53 86.29 86.88 85.28 88.56 86.43 89.11 88.25 88.76 80.09 
+
+Agents 
+
+GA 72.19 68.42 66.38 75.24 75.28 75.37 82.26 89.01 86.80 87.57 87.56 90.13 90.00 90.73 80.24 Video2RAG [88] EMNLP’24 G 77.72 71.05 73.45 80.34 79.59 78.11 85.89 90.78 91.99 91.12 89.37 90.13 90.50 91.57 83.63 GA 42.83 43.59 43.79 55.20 50.94 60.84 72.18 77.30 75.11 83.63 75.79 81.52 80.50 80.90 64.27 VideoTree [112] CVPR’25 G 56.30 53.78 56.55 65.78 61.24 66.74 73.19 86.17 81.60 86.39 82.13 86.08 85.75 85.96 72.02 GA 72.71 68.59 69.83 79.96 77.53 77.68 85.08 89.72 88.10 89.35 89.14 91.39 91.00 92.70 82.08 PlotTree Ours G 83.07 75.66 78.28 82.80 85.58 81.89 87.30 91.67 92.64 92.11 90.50 91.90 93.25 93.26 86.50 42
