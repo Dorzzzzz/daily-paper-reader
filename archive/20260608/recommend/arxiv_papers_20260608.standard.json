@@ -1,0 +1,510 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-08T21:27:58.413621+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 10,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 5,
+    "quick_skim_target": 12,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2606.06036v1",
+      "source": "arxiv",
+      "title": "Memory is Reconstructed, Not Retrieved: Graph Memory for LLM Agents",
+      "abstract": "Despite recent progress, LLM agents still struggle with reasoning over long interaction histories. While current memory-augmented agents rely on a static retrieve-then-reason paradigm, this rigid pipeline design prevents them from dynamically adapting memory access to intermediate evidence discovered during inference. To bridge this gap, we propose MRAgent, a framework that combines an associative memory graph with an active reconstruction mechanism. We represent memory as a Cue-Tag-Content graph, where associative tags serve as semantic bridges connecting fine-grained cues to memory contents. Operating on this structure, our active reconstruction mechanism integrates LLM reasoning directly into memory access, allowing the agent to iteratively explore and prune retrieval paths based on accumulated evidence. This ensures that memory retrieval is dynamically adapted to the reasoning context while avoiding combinatorial explosion caused by unconstrained expansion. Experiments on the LoCoMo benchmark and LongMemEval benchmark demonstrate significant improvements over strong baselines (up to 23%), while substantially reducing token and runtime cost, highlighting the effectiveness of active and associative reconstruction for long-horizon memory reasoning.",
+      "authors": [
+        "Shuo Ji",
+        "Yibo Li",
+        "Bryan Hooi"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.IR"
+      ],
+      "published": "2026-06-04T11:29:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.06036v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "graph memory for LLM agents with active reconstruction",
+      "llm_evidence_cn": "面向LLM智能体的图记忆与主动重建机制",
+      "llm_evidence": "面向LLM智能体的图记忆与主动重建机制",
+      "canonical_evidence": "面向LLM智能体的图记忆与主动重建机制",
+      "llm_tldr_en": "Proposes MRAgent with associative memory graph and active reconstruction, enabling dynamic memory access during inference.",
+      "llm_tldr_cn": "现有智能体记忆采用静态检索-推理范式，无法根据推理中间证据动态调整。本文提出MRAgent，将记忆表示为线索-标签-内容图，并通过主动重建机制将推理融入记忆访问，使智能体能在推理中迭代探索。实验表明该方法在长交互历史推理任务上优于现有范式。",
+      "llm_tldr": "现有智能体记忆采用静态检索-推理范式，无法根据推理中间证据动态调整。本文提出MRAgent，将记忆表示为线索-标签-内容图，并通过主动重建机制将推理融入记忆访问，使智能体能在推理中迭代探索。实验表明该方法在长交互历史推理任务上优于现有范式。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06240v1",
+      "source": "arxiv",
+      "title": "TOKI: A Bitemporal Operator Algebra for Contradiction Resolution in LLM-Agent Persistent Memory",
+      "abstract": "Persistent memory for an LLM agent is a write-heavy substrate: every belief update is a versioned write, and a new claim may contradict a stored one. Production systems use four resolution heuristics (last-writer-wins, evidence-weighted merge, await-confirmation, per-rule policy), yet none declares the isolation level it assumes or the write-time anomalies it admits. We show that contradiction resolution is write-time concurrency control and make the missing contract explicit. TOKI types the four heuristics as one family of bitemporal operators over a dual-row schema, each with an isolation precondition and a provenance annotation that preserves the losing fact in an audit row. Four soundness theorems close the contract across isolation, schema, and provenance, lift the guarantees to operator pipelines, and extend the fold operators to n-ary conflict sets. A tightness companion proves that, within the relational schedule model, keyed logging of the adjudicating judge is necessary for replay consistency, which every audited baseline omits. A verdict matrix over eight systems localizes the gap: every baseline that keeps a language-model judge on the write path admits at least one of three write-time anomalies (replay inconsistency, belief-drift skew, audit erasure); a content-addressed engine-layer comparator avoids them only by removing the judge, and TOKI alone excludes all three while keeping it. On its one natural-workload slice the audit-row defence moves LoCoMo by 0.86, and ablating the typed memory layer removes 0.49 accuracy on 1,444 answerable LoCoMo questions; the cross-system comparison stays underpowered and claims no superiority. The contribution is the contract: a write-time correctness specification, proved sound across isolation, schema, and provenance, pinning the guarantee every production heuristic assumes but no deployed system makes explicit.",
+      "authors": [
+        "Ziming Wang"
+      ],
+      "primary_category": "cs.DB",
+      "categories": [
+        "cs.DB",
+        "cs.AI"
+      ],
+      "published": "2026-06-04T14:46:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.06240v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Persistent memory with contradiction resolution for LLM agents",
+      "llm_evidence_cn": "LLM智能体持久化记忆中的矛盾解决",
+      "llm_evidence": "LLM智能体持久化记忆中的矛盾解决",
+      "canonical_evidence": "LLM智能体持久化记忆中的矛盾解决",
+      "llm_tldr_en": "TOKI formalizes contradiction resolution in persistent memory as bitemporal operators, providing soundness theorems for four common heuristics.",
+      "llm_tldr_cn": "LLM智能体持久化记忆面临信念更新冲突问题。本文提出TOKI，将四种矛盾解决启发式（如最后写入胜出）统一建模为双时态算子，并给出其隔离前提与正确性定理。该工作明确了记忆系统写入时的并发控制契约，为智能体记忆设计提供了理论基础。",
+      "llm_tldr": "LLM智能体持久化记忆面临信念更新冲突问题。本文提出TOKI，将四种矛盾解决启发式（如最后写入胜出）统一建模为双时态算子，并给出其隔离前提与正确性定理。该工作明确了记忆系统写入时的并发控制契约，为智能体记忆设计提供了理论基础。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06532v1",
+      "source": "arxiv",
+      "title": "GOPAgen: Motion-Aware and Efficient Agentic Long-Video Understanding with Structural Memory and Hierarchical Reasoning",
+      "abstract": "Despite significant progress in agentic long video understanding, existing methods still lack detailed motion comprehension coupled with an efficient memory architecture. In this paper, we propose GOPAgen, a novel approach that first integrates video codec into the video understanding framework via a meticulously designed motion agent trained on Groups of Pictures (GOPs) from video codec. We further develop a GOP tree reasoning algorithm, which is naturally aligned with video codec and enhances the model's ability to understand local detailed motions in videos. Additionally, we carefully design a structural memory mechanism that integrates local motion information with detailed captions in structural pages, and propose an efficient coarse-to-fine zoom-in algorithm to fully exploit the structural memory. Furthermore, we incorporate a motion vector database into the framework to enable efficient retrieval of motion vectors at different granularities. Overall, our method achieves superior Video Question Answering (VQA) performance on various video understanding benchmarks, including MotionBench and Egoschema, thereby demonstrating the superiority of our proposed framework.",
+      "authors": [
+        "Haozhe Chi",
+        "Yang Jin",
+        "Yadong Mu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-03T17:47:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.06532v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "agentic long-video understanding with structural memory and hierarchical reasoning",
+      "llm_evidence_cn": "基于结构记忆和层级推理的智能长视频理解",
+      "llm_evidence": "基于结构记忆和层级推理的智能长视频理解",
+      "canonical_evidence": "基于结构记忆和层级推理的智能长视频理解",
+      "llm_tldr_en": "GOPAgen integrates video codec motion agent and structural memory for efficient long-video understanding with detailed motion comprehension.",
+      "llm_tldr_cn": "针对现有智能体长视频理解缺乏运动细节和高效记忆的问题，本文提出GOPAgen，首次将视频编码中的图片组(GOP)机制融入视频理解框架，通过训练运动智能体和设计GOP树推理算法，实现了对局部运动的精细理解；同时提出结构记忆机制整合运动与描述信息。实验证明该方法在长视频理解中兼具效率与准确性。",
+      "llm_tldr": "针对现有智能体长视频理解缺乏运动细节和高效记忆的问题，本文提出GOPAgen，首次将视频编码中的图片组(GOP)机制融入视频理解框架，通过训练运动智能体和设计GOP树推理算法，实现了对局部运动的精细理解；同时提出结构记忆机制整合运动与描述信息。实验证明该方法在长视频理解中兼具效率与准确性。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06787v1",
+      "source": "arxiv",
+      "title": "AdMem: Advanced Memory for Task-solving Agents",
+      "abstract": "Large Language Models (LLMs) show promise as tool-using agents but remain limited in long-horizon tasks that require remembering, organizing, and reusing knowledge. Prior memory approaches aim to resolve the situation, but mainly focus on storing factual information. Recent work on procedural memory improves task reuse, yet often reduces to replaying past successes without addressing failure cases or online scalability. We introduce a unified and automatic memory framework that integrates semantic, episodic, and procedural memory in a bi-level design combining short-term and long-term stores. A multi-agent architecture with actor, memory, and critic agents enables automatic memory generation, reward annotation, and adaptive retrieval. Long-term memory is managed through reward-based evaluation, merging, and pruning, ensuring scalability and continual improvement. Experiments across various environments show that our approach improves robustness and success on long multi-turn tasks compared to existing baselines. This work highlights the importance of comprehensive, adaptive memory for advancing LLM-based agents.",
+      "authors": [
+        "Runzhe Wang",
+        "Huilin Lu",
+        "Shengjie Liu",
+        "Li Dong",
+        "Jason Zhu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-05T00:11:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.06787v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "unified automatic memory framework integrating semantic, episodic, procedural memory",
+      "llm_evidence_cn": "统一自动记忆框架，融合语义、情景和程序记忆",
+      "llm_evidence": "统一自动记忆框架，融合语义、情景和程序记忆",
+      "canonical_evidence": "统一自动记忆框架，融合语义、情景和程序记忆",
+      "llm_tldr_en": "AdMem proposes a unified, automatic memory framework integrating semantic, episodic, and procedural memory in a bi-level design with short-term and long-term stores, using a multi-agent architecture for automatic memory generation and adaptive retrieval, enhancing task-solving agents in long-horizon tasks.",
+      "llm_tldr_cn": "AdMem针对大语言模型在长时任务中记忆组织与重用不足的问题，提出了一种统一自动记忆框架，融合语义、情景和程序记忆，采用双层设计结合短期和长期存储。通过多智能体架构实现自动记忆生成、奖励标注和自适应检索，在长时任务中显著提升智能体的任务完成能力。该框架为agent记忆系统设计提供了新范式。",
+      "llm_tldr": "AdMem针对大语言模型在长时任务中记忆组织与重用不足的问题，提出了一种统一自动记忆框架，融合语义、情景和程序记忆，采用双层设计结合短期和长期存储。通过多智能体架构实现自动记忆生成、奖励标注和自适应检索，在长时任务中显著提升智能体的任务完成能力。该框架为agent记忆系统设计提供了新范式。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.07433v1",
+      "source": "arxiv",
+      "title": "Watch, Remember, Reason: Human-View Video Understanding with MLLMs",
+      "abstract": "Video understanding is being rapidly transformed by multimodal large language models (MLLMs), as research moves from short clips to long, multimodal, and knowledge-intensive video scenarios. These scenarios require models to handle sparse evidence, long-range dependencies, multimodal alignment, and reliable inference under limited computational budgets. This work presents a human-view perspective on LLM-based video understanding, organized around three functional abilities: watching, remembering, and reasoning. Rather than treating video tasks as isolated benchmarks, this view provides a unified structure for analyzing how video MLLMs acquire evidence, preserve context, and produce grounded outputs. We introduce a formulation that characterizes video understanding systems by their perceptual representations, memory states, reasoning traces, and final predictions. Based on this formulation, we identify challenges in spatio-temporal perception, efficient long-video processing, memory modeling, streaming understanding, and faithful reasoning. Representative methods are organized by their roles in video MLLM systems. Watching covers fine-grained, comprehensive, audio-visual, and efficient perception. Remembering includes offline and streaming memory, while reasoning covers text-only reasoning and thinking with videos. We further examine application domains such as egocentric, sports, instructional, medical, and narrative videos, and cover training datasets and evaluation benchmarks across task types, supervision formats, modalities, and capability dimensions. Finally, we outline open problems and future directions for scalable, memory-aware, and evidence-grounded video intelligence. Related works will be continuously traced at https://github.com/marinero4972/Awesome-HumanView-VideoUnderstanding.",
+      "authors": [
+        "Jiahao Meng",
+        "Yue Tan",
+        "Qi Xu",
+        "Kuan Gao",
+        "Weisong Liu",
+        "Yanwei Li",
+        "Jason Li",
+        "Lingdong Kong",
+        "Haochen Wang",
+        "Qianyu Zhou",
+        "Jiangning Zhang",
+        "Guangliang Cheng",
+        "Yunhai Tong",
+        "Lu Qi",
+        "Minghsuan Yang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.MM"
+      ],
+      "published": "2026-06-05T16:29:13+00:00",
+      "link": "https://arxiv.org/pdf/2606.07433v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "human-view video understanding focusing on long, multimodal, knowledge-intensive scenarios",
+      "llm_evidence_cn": "人类视角的视频理解，关注长视频、多模态、知识密集型场景",
+      "llm_evidence": "人类视角的视频理解，关注长视频、多模态、知识密集型场景",
+      "canonical_evidence": "人类视角的视频理解，关注长视频、多模态、知识密集型场景",
+      "llm_tldr_en": "This work presents a unified perspective on LLM-based video understanding, structuring the problem into watching, remembering, and reasoning abilities for long and complex videos.",
+      "llm_tldr_cn": "该论文从人类视角审视多模态大模型下的视频理解，将能力分为看、记、推理三个功能。随着研究从短视频转向长、多模态与知识密集型视频，现有方法在处理稀疏证据、长程依赖等问题上存在挑战。论文提出了一个统一框架来分析和比较不同视频MLLM如何获取证据、保持上下文并生成有依据的输出，为长视频理解研究提供了结构化指导。",
+      "llm_tldr": "该论文从人类视角审视多模态大模型下的视频理解，将能力分为看、记、推理三个功能。随着研究从短视频转向长、多模态与知识密集型视频，现有方法在处理稀疏证据、长程依赖等问题上存在挑战。论文提出了一个统一框架来分析和比较不同视频MLLM如何获取证据、保持上下文并生成有依据的输出，为长视频理解研究提供了结构化指导。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.07512v1",
+      "source": "arxiv",
+      "title": "MemDreamer: Decoupling Perception and Reasoning for Long Video Understanding via Hierarchical Graph Memory and Agentic Retrieval Mechanism",
+      "abstract": "Current Vision-Language Models struggle with hours-long videos because processing full-length visual sequences induces prohibitive token explosion and attention dilution. To overcome this, we introduce MemDreamer to decouple perception and reasoning, shifting long-video understanding into an agentic exploration process. As a plug-and-play framework, it incrementally streams videos to construct a Hierarchical Graph Memory, a top-down three-tier architecture for semantic abstraction, anchored by a foundational graph capturing spatiotemporal and causal relations. During inference, the reasoning model employs agentic tool-augmented retrieval, navigating hierarchies, searching nodes, and traversing logical edges via an Observation-Reason-Action loop. Experiments show MemDreamer achieves SOTA results across four mainstream benchmarks, narrowing the gap with human experts to only 3.7 points. It constrains the reasoning context window to merely 2% of full-context ingestion while delivering a 12.5 point absolute accuracy gain. Furthermore, statistical analysis uncovers a strong positive linear correlation between an VLM's performance on logic reasoning and long-video understanding benchmarks, establishing agentic capability scaling as a new paradigm for multimodal comprehension.",
+      "authors": [
+        "Cong Chen",
+        "Guo Gan",
+        "Kaixiang Ji",
+        "ChaoYang Zhang",
+        "Zhen Yang",
+        "Guangming Yao",
+        "Hao Chen",
+        "Jingdong Chen",
+        "Yi Yuan",
+        "Chunhua Shen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-05T17:59:21+00:00",
+      "link": "https://arxiv.org/pdf/2606.07512v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "decoupling perception and reasoning for long video understanding via hierarchical graph memory",
+      "llm_evidence_cn": "通过分层图记忆解耦感知与推理实现长视频理解",
+      "llm_evidence": "通过分层图记忆解耦感知与推理实现长视频理解",
+      "canonical_evidence": "通过分层图记忆解耦感知与推理实现长视频理解",
+      "llm_tldr_en": "MemDreamer decouples perception and reasoning for long video understanding by constructing a Hierarchical Graph Memory incrementally from streaming video and using agentic tool-augmented retrieval, overcoming token explosion and attention dilution in hours-long videos.",
+      "llm_tldr_cn": "MemDreamer针对现有时长视频理解模型中全长度视觉序列处理导致的token爆炸和注意力稀释问题，提出解耦感知与推理的框架。通过增量构建分层图记忆（Hierarchical Graph Memory）实现语义抽象，并利用智能体工具增强检索进行推理，显著提升对小时级视频的理解能力。该方法作为即插即用框架，可兼容多种视觉语言模型。",
+      "llm_tldr": "MemDreamer针对现有时长视频理解模型中全长度视觉序列处理导致的token爆炸和注意力稀释问题，提出解耦感知与推理的框架。通过增量构建分层图记忆（Hierarchical Graph Memory）实现语义抽象，并利用智能体工具增强检索进行推理，显著提升对小时级视频的理解能力。该方法作为即插即用框架，可兼容多种视觉语言模型。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.05749v1",
+      "source": "arxiv",
+      "title": "MARDoc: A Memory-Aware Refinement Agent Framework for Multimodal Long Document QA",
+      "abstract": "Iterative retrieval-reasoning agents have recently shown promise for multimodal long-document question answering. However, most existing systems maintain a single growing context that mixes retrieval traces, observations, and intermediate reasoning. As interactions accumulate, key evidence becomes scattered and diluted, making multi-hop reasoning noisy. We propose MARDoc, a Memory-Aware Refinement Agent framework that decouples long-document QA into three specialized agents: an Explorer for multi-granularity multimodal retrieval, a Refiner for distilling interaction traces into structured evidence and reasoning memories, and a Reflector for checking evidence sufficiency and providing targeted feedback. Across iterations, the agents rely on a dynamically updated structured memory rather than a full accumulated interaction history. This design reduces context noise while preserving answer-critical facts and their logical dependencies. Experiments on MMLongBench-Doc and DocBench show that MARDoc achieves strong results, outperforming same-backbone baselines and demonstrating the effectiveness of structured memory for agentic document QA.",
+      "authors": [
+        "Kaifeng Chen",
+        "Hongtao Liu",
+        "Qiyao Peng",
+        "Jian Yang",
+        "Yongqiang Liu",
+        "Xiaochen Zhang",
+        "Qing Yang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-04T06:23:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.05749v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Memory-aware agent framework for long document QA with structured memories",
+      "llm_evidence_cn": "面向长文档问答的记忆感知智能体框架，包含结构化记忆",
+      "llm_evidence": "面向长文档问答的记忆感知智能体框架，包含结构化记忆",
+      "canonical_evidence": "面向长文档问答的记忆感知智能体框架，包含结构化记忆",
+      "llm_tldr_en": "MARDoc decouples long-document QA into Explorer, Refiner, and Reflector agents with structured evidence and reasoning memories.",
+      "llm_tldr_cn": "迭代检索推理智能体在多模态长文档问答中容易混淆关键证据。本文提出MARDoc，将过程解耦为探索器（检索）、精炼器（蒸馏为结构化证据与推理记忆）和反射器（检查充分性）。通过记忆模块隔离不同轮次结果，显著提升多跳推理的准确性。",
+      "llm_tldr": "迭代检索推理智能体在多模态长文档问答中容易混淆关键证据。本文提出MARDoc，将过程解耦为探索器（检索）、精炼器（蒸馏为结构化证据与推理记忆）和反射器（检查充分性）。通过记忆模块隔离不同轮次结果，显著提升多跳推理的准确性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.05761v2",
+      "source": "arxiv",
+      "title": "SubtleMemory: A Benchmark for Fine-Grained Relational Memory Discrimination in Long-Horizon AI Agents",
+      "abstract": "Persistent AI assistants, such as OpenClaw, accumulate large collections of related memories over long-term interactions. As these memories grow, they may reinforce one another, diverge across contexts, or directly conflict, making correct assistance depend on memory relations rather than isolated recall. Existing long-term memory benchmarks rarely probe how agents preserve and utilize such relations during downstream tasks. To address this gap, we introduce SubtleMemory, a benchmark for fine-grained relational memory discrimination in long-running AI agents. SubtleMemory constructs relation-controlled latent semantic artifacts whose variants instantiate complementary, nuanced, or contradictory relations, and embeds them into realistic user-agent histories, requiring agents to recover distributed relational structures during later queries and instructions. The benchmark contains 1,522 evaluation instances over 10 long histories, grounded in 1,090 relation-controlled memory-variant sets and spanning user-related and non-user-related queries. Evaluating six standalone memory systems, two Claw-style agents with native memory modules, and three Claw-style agents with plugin memory modules, we find that current systems remain weak on fine-grained relational memory discrimination. We further introduce diagnostic protocols that reveal distinct capability profiles across memory preservation, retrieval, and downstream reasoning stages.",
+      "authors": [
+        "Wenxuan Wang",
+        "Haoyu Sun",
+        "Fukuan Hou",
+        "Mingyang Song",
+        "Weinan Zhang",
+        "Yu Cheng",
+        "Yang Yang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-04T06:43:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.05761v2",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "benchmark for relational memory discrimination in long-horizon agents",
+      "llm_evidence_cn": "长时智能体关系记忆辨别基准",
+      "llm_evidence": "长时智能体关系记忆辨别基准",
+      "canonical_evidence": "长时智能体关系记忆辨别基准",
+      "llm_tldr_en": "SubtleMemory benchmark evaluates fine-grained relational memory discrimination in long-running AI agents using relation-controlled artifacts.",
+      "llm_tldr_cn": "针对现有长期记忆基准忽视记忆关系判别的问题，本文提出SubtleMemory基准，通过构造关系控制的潜在语义工件，生成互补、细微或矛盾的记忆关系变体，嵌入下游任务评估智能体对记忆关系的保持与利用能力。该基准填补了长时AI智能体关系记忆辨别的评估空白。",
+      "llm_tldr": "针对现有长期记忆基准忽视记忆关系判别的问题，本文提出SubtleMemory基准，通过构造关系控制的潜在语义工件，生成互补、细微或矛盾的记忆关系变体，嵌入下游任务评估智能体对记忆关系的保持与利用能力。该基准填补了长时AI智能体关系记忆辨别的评估空白。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.06926v1",
+      "source": "arxiv",
+      "title": "SVHighlights: Towards Extremely Long Sport Video Highlight Detection",
+      "abstract": "While highlight detection for long-form videos is of great practical importance, most existing methods remain limited to short-form content, largely due to the absence of a suitable benchmark. To bridge this gap, we introduce SVHighlights, to the best of our knowledge, the first benchmark for highlight detection in extremely long sports videos, each exceeding one hour in duration, across multiple sports categories. SVHighlights is constructed from pairs of full-length sports videos and their corresponding official highlight videos using a dataset generation pipeline, enabling scalable label generation without conventional per-clip saliency annotation. The benchmark comprises 320 videos with an average duration of 2.00 hours and a total of 640.18 hours, substantially exceeding previous datasets. Existing methods also face fundamental challenges on long videos: models trained on short clips fail to generalize to hour-long content, and their clip-level scoring lacks the broader context needed to identify highlights. To address this and provide a strong baseline, we present TF-SELECTOR, a training-free segment-based approach that divides each video into context-aware segments by merging adjacent shots sharing the same semantic content, and predicts segment-level saliency scores using a large language model with multimodal inputs including visual captions, transcripts, and audio volume. Experiments demonstrate that TF-SELECTOR achieves superior performance across most metrics compared to Video Temporal Grounding (VTG)-tuned baselines, with improvements of +3.12 in HIT@1, +4.06 in HIT@K, and +2.95 in IoU. These results establish SVHighlights as a challenging testbed for long-form highlight detection and demonstrate that a simple segment-based strategy can effectively scale to hour-long videos.",
+      "authors": [
+        "Donggyu Lee",
+        "Youngbin Ki",
+        "Jeonghun Kang",
+        "Taehwan Kim"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.MM"
+      ],
+      "published": "2026-06-05T05:42:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.06926v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Extremely long sport video highlight detection benchmark",
+      "llm_evidence_cn": "超长体育视频高亮检测基准",
+      "llm_evidence": "超长体育视频高亮检测基准",
+      "canonical_evidence": "超长体育视频高亮检测基准",
+      "llm_tldr_en": "SVHighlights is the first benchmark for highlight detection in extremely long sports videos (avg 2 hrs), using a scalable generation pipeline.",
+      "llm_tldr_cn": "针对超长体育视频（每段超过1小时）高亮检测缺乏基准的问题，提出了SVHighlights。该基准通过全片视频与官方高亮视频对自动生成标签，包含320个视频，总时长640小时。提供了新的评估标准，推动了长视频高亮检测的研究。",
+      "llm_tldr": "针对超长体育视频（每段超过1小时）高亮检测缺乏基准的问题，提出了SVHighlights。该基准通过全片视频与官方高亮视频对自动生成标签，包含320个视频，总时长640小时。提供了新的评估标准，推动了长视频高亮检测的研究。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.02450v1",
+      "source": "arxiv",
+      "title": "Reason-Then-Retrieve for CoVR-R with Structured Edit Prompts and Dense-Sparse Fusion",
+      "abstract": "CoVR-R studies reason-aware composed video retrieval: given a reference video and an edit instruction, the system must retrieve the target video that satisfies the edit. The main difficulty is that the target is not described directly; it must be inferred from fine-grained changes in object identity, action order, final state, hand interaction, and scene transition. We build a zero-shot reason-then-retrieve pipeline around Qwen3.5-27B. For each gallery video, the model generates a retrieval-oriented structured description and a dense embedding by pooling generated-token hidden states with token-dependent weights. For each query, the model first performs edit reasoning over the reference video and instruction, then generates a target-video description whose hidden states serve as the query embedding. We complement dense retrieval with a TF-IDF branch over the generated texts and fuse the two rankings with split-specific weights. On validation, the current best submission reaches 80.81 at R@1, 94.86 at R@5, 97.11 at R@10, and 98.59 at R@50. On the blind test split, it reaches 89.73 at R@1, 95.79 at R@5, 96.63 at R@10, and 97.98 at R@50.",
+      "authors": [
+        "DongQing Liu",
+        "MengShi Qi",
+        "HongWei Ji"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-01T16:21:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.02450v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "addresses composed video retrieval requiring reasoning about fine-grained video changes",
+      "llm_evidence_cn": "处理需要推理视频细粒度变化的组合视频检索任务",
+      "llm_evidence": "处理需要推理视频细粒度变化的组合视频检索任务",
+      "canonical_evidence": "处理需要推理视频细粒度变化的组合视频检索任务",
+      "llm_tldr_en": "Proposes a zero-shot reason-then-retrieve pipeline for composed video retrieval using Qwen3.5-27B, generating structured descriptions and dense-sparse fusion embeddings.",
+      "llm_tldr_cn": "针对组合视频检索任务（CoVR-R），提出零样本推理-检索流水线。先对大语言模型进行编辑推理，生成目标视频的结构化描述，再利用生成令牌的隐藏状态进行密度-稀疏融合嵌入。在基准上取得领先效果，无需额外训练数据。",
+      "llm_tldr": "针对组合视频检索任务（CoVR-R），提出零样本推理-检索流水线。先对大语言模型进行编辑推理，生成目标视频的结构化描述，再利用生成令牌的隐藏状态进行密度-稀疏融合嵌入。在基准上取得领先效果，无需额外训练数据。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.06853v1",
+      "source": "arxiv",
+      "title": "MotionEnhancer: Leveraging Video Diffusion for Motion-Enhanced Vision-Language Models",
+      "abstract": "The new era has witnessed a remarkable capability to extend Vision-Language Models (VLMs) for tackling tasks of video understanding. While current VLMs excel at event- or story-level understanding, their ability to capture fine-grained motion details remains limited, primarily due to their focus on high-level static semantic structures and macro-event logic. In contrast, Video Diffusion Models (VDMs) are adept at modeling dynamic motion patterns, benefiting from large-scale video data and the intrinsic requirement of temporal generation. In this paper, we introduce MotionEnhancer, a novel approach that leverages motion priors distilled from a powerful video diffusion model as auxiliary supervision to enhance the motion understanding capability of a VLM via attention alignment. MotionEnhancer comprises two simple parameter-free modules, Motion-sensitive Head Selection (MHS) and Motion-salient Text Token Identification (MTTI), to directly extract and optimize motion-related attentions from the VDM in a computation-only manner. MotionEnhancer provides a scalable solution for motion understanding without additional training parameters, modifications to existing architectures, or tool calling. Extensive experiments demonstrate that MotionEnhancer can achieve consistent improvements over state-of-the-art VLMs on two motion-level video understanding benchmarks, especially on motion-related metrics.",
+      "authors": [
+        "Yifan Xu",
+        "Chao Zhang",
+        "Ruifei Ma",
+        "Fei Gao",
+        "Zhifei Yang",
+        "Jiaxing Qi",
+        "Zhipeng Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-05T02:56:48+00:00",
+      "link": "https://arxiv.org/pdf/2606.06853v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Enhances video understanding by integrating motion priors from diffusion models",
+      "llm_evidence_cn": "通过视频扩散模型运动先验增强视频理解能力",
+      "llm_evidence": "通过视频扩散模型运动先验增强视频理解能力",
+      "canonical_evidence": "通过视频扩散模型运动先验增强视频理解能力",
+      "llm_tldr_en": "MotionEnhancer distills motion priors from a video diffusion model to improve fine-grained motion understanding in VLMs, outperforming baselines on motion-centric benchmarks.",
+      "llm_tldr_cn": "当前视觉语言模型擅长高层语义理解但缺乏精细运动捕捉。本文提出MotionEnhancer，从视频扩散模型中蒸馏运动先验作为辅助监督，增强VLM对时间动态的建模能力。在多个运动相关视频理解基准上取得显著提升。该方法有效弥合了静态语义与动态运动之间的鸿沟。",
+      "llm_tldr": "当前视觉语言模型擅长高层语义理解但缺乏精细运动捕捉。本文提出MotionEnhancer，从视频扩散模型中蒸馏运动先验作为辅助监督，增强VLM对时间动态的建模能力。在多个运动相关视频理解基准上取得显著提升。该方法有效弥合了静态语义与动态运动之间的鸿沟。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.07402v1",
+      "source": "arxiv",
+      "title": "M$^3$Exam: Benchmarking Multimodal Memory for Realistic User-Agent Interactions",
+      "abstract": "Language agents are increasingly deployed over accumulating multimodal information, yet existing benchmarks assume a human-human form with sparse visuals and straightforward content, evaluating neither reasoning over authentic multimodal file interaction nor the interpretation of concealed user information. We therefore introduce M$^3$Exam, a query-centric multimodal conversational memory benchmark built on realistic user-agent interaction, with multi-dimensional evaluation spanning cross-modal grounding and implicit information inference. Benchmarking MLLMs and memory systems reveals persistent gaps in cross-modal grounding, cross session reasoning, and the efficiency cost of accumulating multimodal context. We further propose M$^3$Proctor, a multimodal memory method that detects query modality bias and consumes raw visual sources only on demand, improving accuracy by 13% while cutting index-construction time and retrieved tokens by over 70%.",
+      "authors": [
+        "Zhengjun Huang",
+        "Wenxuan Liu",
+        "Zhoujin Tian",
+        "Wei Chen",
+        "Junle Chen",
+        "Yuqian Wu",
+        "Fangyuan Zhang",
+        "Qintian Guo",
+        "Xiaofang Zhou"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-05T15:44:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.07402v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal memory benchmark for user-agent interactions",
+      "llm_evidence_cn": "面向用户-代理交互的多模态记忆基准",
+      "llm_evidence": "面向用户-代理交互的多模态记忆基准",
+      "canonical_evidence": "面向用户-代理交互的多模态记忆基准",
+      "llm_tldr_en": "M^3Exam is a query-centric multimodal conversational memory benchmark evaluating cross-modal grounding and implicit inference, revealing gaps in current memory systems.",
+      "llm_tldr_cn": "现有记忆基准缺乏真实多模态交互和隐式信息推理评估，该论文提出M^3Exam基准，基于真实用户-代理交互，评估跨模态记忆和隐含信息推断。对MLLM和记忆系统的测试揭示了跨模态对齐和跨会话推理的不足。并进一步提出M^3Proctor作为改进方案。该基准为代理记忆系统设计提供了重要评测参考。",
+      "llm_tldr": "现有记忆基准缺乏真实多模态交互和隐式信息推理评估，该论文提出M^3Exam基准，基于真实用户-代理交互，评估跨模态记忆和隐含信息推断。对MLLM和记忆系统的测试揭示了跨模态对齐和跨会话推理的不足。并进一步提出M^3Proctor作为改进方案。该基准为代理记忆系统设计提供了重要评测参考。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "research papers on agent memory system design",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}
