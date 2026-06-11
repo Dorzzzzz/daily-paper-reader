@@ -1,0 +1,287 @@
+Title: Decision-Aware Memory Cards: Counterfactual-Inspired Context Selection and Compression for Tool-Using LLM Agents
+
+URL Source: https://arxiv.org/pdf/2606.08151v1
+
+Published Time: Tue, 09 Jun 2026 00:40:46 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Decision-Aware Memory Cards: Counterfactual-Inspired Context Selection and Compression for Tool-Using LLM Agents 
+
+Xinyu Guan 1, Qianyang Zhao 1, and Yuming Deng 1
+
+Alibaba Group, China 
+
+guanhan.gxy@alibaba-inc.com zhaoqianyang.zqy@alibaba-inc.com finaldreamer@qq.com 
+
+Corresponding author: Xinyu Guan. 
+
+Abstract. Tool-using LLM agents often fail not because relevant text is absent, but because decisive evidence is not selected, compressed, or surfaced at action time. We present CICL, a decision-aware con-text layer that turns instance evidence into a context graph, routes de-terministic, Opus-assisted, Qwen, Codex/GPT-5.5, and Qwen-QLoRA judgments through a shared eight-field schema, scores units by action shift, outcome uplift, necessity, and negative-transfer risk, and packs high-utility evidence as typed memory cards for a budgeted agent. The design separates the measured decision signal from the judge model, so frontier annotation, local surrogates, and lightweight rankers can be compared under one auditable protocol. Empirically, CICL yields a con-crete open-benchmark gain while exposing its limits. On 50 SWE-bench Verified file-retrieval instances, direct Qwen3.6-plus reranking of BM25 top-50 candidates raises hit@1 from 0.58 to 0.78 and MRR@10 from 
+
+0.634 to 0.790 , with all 2,500 judgments parseable. Controlled diagnos-tics show action-criticality: at budget 120, CICL reaches F1 0.620 on v1 and 0.425 on v3, and removing the top-utility semantic v3 unit collapses F1 to 0.000 . Supplementary checks add Qwen-QLoRA agreement over 710 candidates, a small 200-label real-code Opus-assisted signal, and a three-instance patch smoke validating retrieval-to-patch plumbing with-out claiming official SWE-bench success. RepoBench-R summaries still beat cards, and compact rankers do not yet replace the heuristic. CICL contributes a reproducible measurement and selection layer for decision-critical context, not an end-to-end coding-agent repair claim. 
+
+Keywords: LLM agents · Context selection · Counterfactual utility ·
+
+Memory compression · Opus-assisted diagnostics. 
+
+## 1 Introduction 
+
+Tool-using LLM agents can interleave reasoning and acting [1], learn to use tools and revise behaviour from feedback [2,3], and accumulate reusable skills in open-ended environments [4]. In coding systems such as SWE-agent [5], these 
+
+> arXiv:2606.08151v1 [cs.AI] 6 Jun 2026
+
+2 X. Guan et al.      
+
+> Instance evidence
+> task
+> files
+> tests
+> traces
+> rules
+> memory
+> Context graph
+> link evidence detect conflicts keep scope
+> Decision utility engine
+> action shift success gain
+> need signal risk / cost
+> Memory cards
+> trigger evidence action hint + scope
+> Budgeted agent
+> pack context choose action log trace
+> Judge router
+> Opus Qwen API Codex Qwen-QLoRA
+> Evidence ledger
+> supported / limited / deferred
+
+Fig. 1. CICL pipeline. The framework turns instance evidence into a graph, routes judge signals through a decision-utility engine, and packs memory cards for a budgeted agent. Opus, direct Qwen API calls, Codex, and a trained Qwen-QLoRA model used as an optional local surrogate are reported separately, so model-dependent signals are not collapsed into one score. 
+
+agents are increasingly limited by the quality of their context window rather than by model scale alone. A repository issue may hinge on one failing test, one invariant, or one file-level constraint. Recent coding-agent context benchmarks make this bottleneck explicit [6,7]. Longer prompts do not guarantee that this evidence is found, retained, or surfaced at the moment of action. This turns context selection into a decision problem: the useful context is not necessarily the nearest text under a retrieval score, but the evidence that changes what the agent is prepared to do next. CICL operationalises this idea by treating each candidate context unit as a decision-time intervention. The selector estimates whether adding the unit would shift the next action, improve the expected outcome, be necessary for success, or introduce negative transfer, and then packs the highest-utility evidence under a token budget. Selected units are rewritten as decision-aware memory cards with trigger, evidence, action hint, failure-if-ignored, and scope fields. This sep-aration between judgment schema and judging model is important in practice: a costly frontier annotator, a local Qwen judge, a lightweight ranker, or a provider-specific code model can be used depending on budget, privacy, and deployment constraints, while the measured decision signal remains comparable. Figure 1 gives an overview of this pipeline. The paper studies two linked questions. First, does decision-aware utility give a useful ranking signal for agent context? Second, does the signal survive judge substitution, rather than collapsing into a provider-specific prompt? We lead with the most externally meaningful result: on the open-source SWE-bench Ver-ified file-retrieval benchmark, direct Qwen3.6-plus judgments over top-50 candi-dates improve BM25 on hit@1 and MRR@10. The remaining experiments explain why the signal is plausible, when compression helps, and where strong simple baselines still expose a boundary. 
+
+Contributions. (1) We frame agent context selection as a decision-time inter-vention and formalise a four-component utility for action-critical evidence. (2) Decision-Aware Memory Cards for LLM Agents 3
+
+We introduce decision-aware memory cards and a graph-based assembly pipeline for packing action-oriented context. (3) We evaluate the same judgment schema across Opus-assisted annotations, lightweight rankers, Qwen-family judges, and a Codex/GPT-5.5 provider check. (4) We provide controlled diagnostics iden-tifying where the framework works, where open-source retrieval improves, and where baselines remain stronger. 
+
+## 2 Related Work 
+
+Agents, benchmarks, and context budgets. Tool-using agents show that LLMs can call tools, reuse experience, and coordinate multi-step workflows. AutoGen and ChatDev extend this pattern to collaborative software development [8,9]. Memory benchmarks show that final success is too coarse for agent state [10]; incremental and self-evolving settings sharpen this concern [11,12]. In code, pub-lic repair and repository benchmarks provide realistic settings, while Agentless and OpenHands mark practical endpoints from non-agent repair to open coding-agent infrastructure [13,14]. CICL studies a narrower layer shared by these sys-tems: before the next action, which retrieved evidence would actually change the decision? 
+
+Retrieval and long-context selection. Sparse and dense retrieval remain the de-fault route for placing evidence in an agent prompt. Lexical and supervised dense methods supply strong baselines; Contriever and FAISS cover unsupervised re-trieval and vector search [15,16]. RAG conditions generation on retrieved ev-idence [17]; Atlas and HyDE add retrieval-scale pretraining and hypothetical evidence [18,19]; Self-RAG adds self-critique to retrieval-conditioned generation [20]. Long-context work adds a caution: more tokens do not ensure that salient facts are used when they appear in distracting positions [21,22]. CICL keeps retrieval as candidate generation, then scores whether each candidate changes the intended action. 
+
+Memory, compression, and contribution-aware diagnostics. Agent-memory and context-learning methods reuse context as agent state; closest in motivation is AutoContext [23]. ACE and ACON provide nearby agent-adaptation base-lines [24,25]. Prompt-compression methods reduce length by estimating token-or sentence-level utility. CICL instead preserves typed trigger, evidence, ac-tion, failure, and scope fields, and asks whether a unit still supports a deci-sion after compression. The closest contribution-aware comparisons are causal-memory selection and RepoShapley [26,27]. CICL uses comparative supervision and parameter-efficient adaptation only as diagnostic machinery rather than a standalone coding-agent claim. 4 X. Guan et al. 
+
+## 3 Method 
+
+3.1 Decision-Aware Context Selection 
+
+Consider an agent policy π acting on tasks x ∈ X . At each decision step the agent receives a context block C ⊆ U , where U is the pool of candidate units produced by the instance graph. Unlike BM25 [28] or dense selectors such as DPR and ColBERT [29,30], CICL treats selected evidence as an intervention. A relevance selector solves Crel = arg max tok( C)≤B
+
+P 
+
+> c∈C
+
+sim( c, x ) under token budget B. CICL replaces sim with a decision-time utility U (c, x ) that estimates whether c would change the action distribution induced by π.
+
+3.2 Counterfactual-Inspired Utility 
+
+Let C− denote the context assembled before considering candidate c, and let 
+
+C+ = C− ∪ { c}. With π(a | x, C ) denoting the next-action distribution under context C, CICL decomposes utility into four components: 
+
+∆act (c, x ) = E 1{arg max a π(a | x, C +)̸ = arg max a π(a | x, C −)} 
+
+∆out (c, x ) = E V (x, C +) − V (x, C −) 
+
+N (c, x ) = Pr  success( x, C +) = 1 ∧ success( x, C −) = 0 
+
+R(c, x ) = Pr  c induces negative transfer on x .
+
+(1) Here, V denotes an expected success score. The expectations are operationalised by the evaluator used in each instantiation: deterministic simulator probes, a provider judgment, or lightweight-ranker predictions under the same reference context. The aggregate utility is a fixed linear aggregation: 
+
+U (c, x ) = α ∆ act (c, x ) + β ∆ out (c, x ) + γ N (c, x ) − λ R (c, x ). (2) We instantiate the four components in three ways: (i) a deterministic proxy suitable for ablations and unit testing; (ii) a Claude-Opus 4.7 counterfactual annotation assistant that produces a structured eight-field judgment per (task, candidate) pair; and (iii) a 25-dimensional pairwise linear ranker trained on these Opus-assisted diagnostic annotations. The annotations are provider-generated and disclosed as such, not human gold labels or a released judge replica. Eq. 3 is the operational version used for judge-style judgments: it plugs the judge fields into the same signed utility components and adds a bounded cost penalty. We keep this aggregation fixed across Opus, Qwen, and Codex/GPT-5.5 judge runs to prevent ablation drift; deterministic proxy ablations use the same component signs with model-free estimates: 
+
+s = 0 .34 ∆act + 0 .26 N + 0 .28 ∆out − 0.22 R − 0.08 cost . (3) In the implementation, cost = min(1 , tok( c)/1000 + 0 .2R) for LLM-judged units, matching the released scorer. The coefficients in Eq. 3 are pre-set heuristic weights, not learned from test labels. Component-removal ablations provide the Decision-Aware Memory Cards for LLM Agents 5
+
+Table 1. Eight-field judge schema used by Opus and Qwen. The four utility fields feed Eq. 3; confidence is retained for audit and diagnostics, and token cost comes from context metadata.                          
+
+> Field Role Field Role
+> no_context_action action without unit with_context_action action with unit
+> action_shift action change [0 ,1] necessity dependence [0 ,1]
+> expected_outcome_uplift value gain [0 ,1] negative_transfer_risk conflict risk [0 ,1]
+> reason short rationale confidence self-confidence [0 ,1]
+
+current sensitivity evidence; equal-weight, random-weight, and learned-weight sweeps remain future work. Table 1 lists the judge output fields. We stress that “causal” here denotes counterfactual-inspired utility estimation rather than for-mal causal identification: the expectations above are not identified by any ran-domised intervention, and we defer a detailed discussion of this boundary to Section 7. 
+
+3.3 Instance Context Graph 
+
+For each repository or environment instance, CICL constructs a graph whose nodes correspond to files, symbols, task memories, rules, failures, and strategy records. Edges capture containment, similarity, conflict, precondition, and task-memory relations. The graph supports both lexical and structural retrieval to-gether with one-hop neighbour expansion, enabling recovery of decision-relevant context even when lexical overlap with the query is weak. Each node is a context unit annotated with an identifier, instance id, type, source, content, token cost, and confidence score. Importantly, the graph never requires gold context iden-tifiers for selection; gold ids appear only during offline evaluation and in oracle baselines. We audit all method-facing artifacts for gold-label leakage and include the audit script in the reproducibility package. 
+
+3.4 Decision-Aware Memory Cards 
+
+CICL compiles selected units into compact memory cards with five manda-tory fields— trigger (when to consult), evidence (supporting clue), action hint 
+
+(next-action verb), failure-if-ignored (risk if skipped), and scope (applicable boundary)—plus a diagnostic causal score (U (c, x )) for ordering. The format prioritises decision usefulness over exhaustive semantic fidelity. Where generic prompt compression often optimises token- or sentence-level importance, as in LLMLingua and LongLLMLingua [31,32], or filters by salience [33]; CICL stores typed decision fields. A deterministic structural audit checks required-field com-pleteness, action-verb presence, compression ratio, and absence of placeholder text. 
+
+3.5 Budget-Aware Assembly 
+
+At inference time, CICL retrieves candidate units, expands graph neighbours, scores candidates via U , and packs the highest-utility evidence under a fixed 6 X. Guan et al. 
+
+token budget. We distinguish post-selection compression, which first selects ids and then compresses their text, from pre-budget compression, which changes candidate costs before packing and can therefore change the selected ids. We report the two modes separately to avoid conflating compression gains with changes in selection. 
+
+3.6 Opus-Assisted Annotation and an Open-Weights Surrogate Judge 
+
+Claude-Opus 4.7 is used to assist a human-designed context-utility annotation workflow. These diagnostic annotations train small CICL context rankers rather than a reproduced teacher: a 25-feature pairwise linear ranker and a two-layer MLP. All features are available at inference time, including proxy utility com-ponents, retrieval and lexical-overlap scores, unit type, token cost, confidence, history success, and graph signals such as conflict degree and source/task over-lap. Rankers are trained from within-task positive–negative candidate pairs, fol-lowing preference-learning style supervision [34,35], and are then used only for context ordering. The cleaned linear ranker reaches 0.939 pairwise accuracy on the post-leakage-fix v1 suite; an earlier 0.996 leaky run is excluded because it used provider-side llm_* features unavailable at inference. As a local open-weights alternative we fine-tune Qwen3.5-9B with QLoRA on two 16 GB V100 GPUs for the same eight-field schema, following LoRA/QLoRA adaptation [36,37]. We treat it as an agreement surrogate, not an Opus replace-ment. Training uses the released v1 Opus-assisted SFT split ( 1,400 examples; 
+
+1,256 train and 144 validation examples, split by task); evaluation measures selection-level agreement via top-k Jaccard and Spearman ρ on 710 candidates from 25 base tasks. This keeps deterministic, Opus-assisted, lightweight-ranker, and Qwen-surrogate scores auditable as separate components. 
+
+## 4 Experimental Setup 
+
+4.1 Tasks and Benchmarks 
+
+Table 2 gives the minimal data map. SWE-bench Verified is the main real-code retrieval benchmark [38]; synthetic suites isolate mechanism; RepoBench-R tests compression [39]. CodeSearchNet motivates the broader semantic code-search setting that these repository-level retrieval tasks inherit [40]. 
+
+4.2 Methods Compared 
+
+We compare CICL and CICL_Distilled with NoContext, FullContext, Vanil-laRAG, GraphMemory, SummaryMemory, SelfGeneratedExamples, AutoCon-textKG, and OracleGoldContext. The last uses gold ids only as an upper bound and is never employed as a selector elsewhere. We additionally report seven CICL ablations removing individual scoring components. Decision-Aware Memory Cards for LLM Agents 7
+
+Table 2. Dataset summary with scale, use, and evaluation scope.        
+
+> Source Use Scale Evaluation scope SWE-bench Verified Open-source retrieval benchmark 50 instances; 2,500 Qwen judgments File retrieval only; no patch success Synthetic v1/v3 Controlled mechanism tests 250 eval tasks each; 1,400/1,800 labels Ranking sanity, removal, and budget effects RepoBench-R Real-code compression 100 tasks; budgets 60–400 Compression, not repair success Judge/ranker pilots Judge substitution diagnostics 200 Opus-assisted labels; 710 Qwen-agreement candidates; 250 GPT-5.5 judgments Surrogate and provider checks only
+
+4.3 Metrics 
+
+For each task we report simulated success rate, context precision/recall/F1 against gold ids, mean reciprocal rank (MRR) of the first gold id in the selec-tion, average tokens consumed, and average tool calls. In settings where paired task-level deltas are available, compression-suite experiments additionally em-ploy paired bootstrap tests with 2,000 resamples for delta metrics and report 95% confidence intervals; bootstrap pairs are matched per task id. The exe-cutable pilots further report patch success and harmful-selection rates. 
+
+4.4 Implementation Details 
+
+The deterministic simulator, the heuristic CICL ranker, the AutoContextKG se-lector, and the compression pipeline are implemented in pure Python with fixed random seeds. The Opus-assisted annotation pipeline queries Claude-Opus 4.7 with provider-supported decoding settings using a counterfactual prompt tem-plate that enforces the eight-field JSON schema. The synthetic linear rankers are trained for 80 epochs with the pairwise logistic trainer (learning rate 0.08 ,L2 5 × 10 −4 in the public script); the real-code pilot uses the same trainer for 
+
+100 epochs. The MLP rankers use the same cleaned examples but optimise a BPR pairwise loss for 120 epochs with AdamW (learning rate 10 −3, batch size 
+
+256 , weight decay 10 −4, dropout 0.1). The Qwen3.5-9B QLoRA judge is trained on two 16 GB V100 GPUs and uses rank r = 8 , α = 16 , dropout 0.05 , tar-get modules q_proj, k_proj, v_proj, o_proj , effective batch size 16 (batch 
+
+1 × 16 gradient accumulation steps), one epoch, lr = 2 × 10 −4, bf16 disabled (V100 compatibility), and 4-bit NF4 base-weight quantisation. Local generation, training, and evaluation scripts use fixed seeds. Decoding used deterministic or provider-default settings where supported, and all external annotation runs keep archived JSON outputs; because hosted LLM backends can drift, reported num-bers are tied to the released artifacts rather than to re-querying the provider. The Codex/GPT-5.5 path uses the same code-retrieval prompt and eight-field schema on the first five SWE-bench Verified instances; it is reported as a small provider check, not as a full retrieval benchmark. 8 X. Guan et al.                 
+
+> A. SWE-bench Verified MRR@10
+> 0.25 .50 .75 1.00
+> Det. proxy 0.314
+> BM25 0.634
+> Qwen3.6+ 0.790
+> B. CICL budget sensitivity
+> 0
+> .40
+> .80
+> 80 120 200 400
+> v1 v3
+> C. RepoBench-R success
+> 0
+> .11
+> .22
+> 60 120 200 400
+> Summary Cards Raw
+
+Fig. 2. Compact result overview. Panel A foregrounds the open-source SWE-bench Verified retrieval result; Panels B and C show the main controlled budget trend and RepoBench-R compression boundary. 
+
+Table 3. SWE-bench Verified file-level retrieval (50 instances), sorted by non-oracle MRR@10. Direct Qwen3.6-plus judgments re-rank top-50 candidates; the metric is retrieval quality and not a patch result.                                                       
+
+> Method Hit@1 Coverage R@5 R@10 MRR@10 Gold rank Qwen CausalRerank 0.78 0.80 0.654 0.654 0.790 1.03
+> Qwen CausalHybrid 0.70 0.82 0.624 0.634 0.733 1.88 BM25 0.58 0.80 0.554 0.634 0.634 2.43 HybridRAG 0.58 0.80 0.554 0.634 0.634 2.43 Deterministic CausalRerank 0.26 0.56 0.274 0.324 0.314 5.25 HashedEmbedding 0.18 0.30 0.160 0.160 0.192 5.07 Random 0.00 0.04 0.000 0.007 0.002 10.50 OracleGoldContext 1.00 1.00 0.824 0.824 1.000 1.00
+
+## 5 Results 
+
+5.1 Open-Source File Retrieval Benchmark 
+
+We begin with the open benchmark most likely to matter for coding agents: SWE-bench Verified file-level retrieval. This setting does not measure patch suc-cess, but it asks whether the selector can place the target file high enough for a downstream agent to act. On 50 instances (Table 3), BM25/HybridRAG reaches hit@1 0.58 and MRR@10 0.634 . The older deterministic causal proxy is weaker than BM25, but direct Qwen3.6-plus judgments over the top-50 file pool raise hit@1 to 0.78 and MRR@10 to 0.790 , with 2500/2500 parseable judgments. The result is the paper’s main positive real-code finding: decision-aware judging be-comes a strong reranking signal when the judge can read the candidate evidence well. Figure 2 places this open benchmark next to the controlled mechanism and compression trends. We also ran the same prompt and schema through Codex/GPT-5.5 on the first five SWE-bench Verified instances (250 candidate judgments). All judg-ments parsed; on this five-instance slice, CausalRerank, CausalHybridRerank, BM25, and HybridRAG all obtain hit@1 and MRR@10 of 0.60 . We use this only to check that the schema can run through another provider; the 50-instance Qwen3.6-plus run is the main retrieval comparison. Decision-Aware Memory Cards for LLM Agents 9
+
+Table 4. Evidence ranking by claim strength, including negative evidence and appli-cability boundaries.                  
+
+> Rank Evidence Strength Boundary 1Qwen3.6-plus reranking improves SWE-bench Verified hit@1 and MRR@10 over BM25 Real-code retrieval positive File-level, not patch success 2Remove-top on v3 collapses F1
+> 0.245 →0.000 ; random removal gives 0.205
+> Strong controlled positive Synthetic utility sanity check 3Selected-then-compressed cards save 44 .93 tokens, 95% CI
+> [41 .05 ,48 .74] ,p < 10 −3
+> Strong compression positive Same selected ids only 4RepoBench-R cards beat raw selection, but Summary reaches higher success Mixed / negative evidence Compression, not repair 5Qwen and GPT-5.5 parse 960 valid judgments Judge portability Synthetic / provider check
+
+Table 5. Causal removal ablation on synthetic v3 (250 tasks, budget 400). Removing the highest-utility unit collapses F1 and MRR to zero. Condition F1 MRR Precision Recall CICL_full 0.245 0.980 0.196 0.327 CICL_remove_random 0.205 0.716 0.179 0.239 CICL_remove_top 0.000 0.000 0.000 0.000 
+
+5.2 Evidence Map 
+
+The remaining results explain why the real-code gain is plausible and where it does not yet transfer. Table 4 ranks the evidence by claim strength so that controlled positives, compression findings, and negative boundaries are visible in one place. 
+
+5.3 Ablation 
+
+Tables 5 and 6 report the two ablation diagnostics most directly tied to the selec-tion mechanism: removing selected evidence and varying the token budget. The clearest controlled signal is the causal-removal diagnostic. Removing the highest-scoring unit collapses v3 context F1 from 0.245 to 0.000 and MRR from 0.980 
+
+to 0.000 ; random removal is much less destructive (F1 0.205 ). The supplement adds the same removal check on v1 and a compression-order split. The second controlled pattern is an inverted-U over token budgets (Table 6). CICL peaks at budget 120 on both suites (v1 0.620 , v3 0.425 ) and then decays as larger budgets admit more distractors. On v3, VanillaRAG remains stronger, so the budget result is a limited positive result rather than evidence of dominance. 
+
+5.4 Main Synthetic Ranking Results 
+
+Table 7 reports the standard budget-120 comparison, sorted by average non-oracle F1 across the two suites. On v1, CICL is below AutoContextKG but 10 X. Guan et al. 
+
+Table 6. Context F1 across token budgets (250 tasks each). Rows are sorted by non-oracle peak strength. CICL peaks at budget 120 on both suites; the inverted-U is driven by precision loss at larger budgets. Bold marks each row’s peak.                                          
+
+> Synthetic v1 Synthetic v3 Method 80 120 200 400 80 120 200 400 AutoContextKG 0.706 0.850 0.671 0.481 0.481 0.406 0.441 0.305 VanillaRAG 0.523 0.562 0.643 0.459 0.465 0.525 0.477 0.373 CICL 0.562 0.620 0.286 0.250 0.400 0.425 0.347 0.250 CICL_Distilled 0.414 0.295 0.405 0.350 0.305 0.241 0.230 0.175
+
+Table 7. Main 250-task evaluation at budget 120, sorted by average non-oracle F1 across v1/v3. v1 uses structural distractors; v3 uses semantic distractors. Bold = best non-oracle per metric. Synthetic v1 (structural) Synthetic v3 (semantic) Method F1 MRR Tokens F1 MRR Tokens AutoContextKG 0.850 0.984 94.3 0.406 1.000 98.4 VanillaRAG 0.562 0.603 107.3 0.525 0.593 103.6 CICL 0.620 0.817 117.8 0.425 0.896 117.2 CICL_Dist. (MLP) 0.328 0.277 111.2 0.334 0.273 113.0 GraphMemory 0.511 0.654 116.8 0.303 0.617 117.0 CICL_Dist. (linear) 0.295 0.302 110.6 0.241 0.226 113.7 SelfGenExamples 0.138 0.338 98.6 0.124 0.366 101.9 FullContext 0.020 0.037 115.0 0.027 0.045 114.0 SummaryMemory 0.010 0.018 99.8 0.007 0.014 102.4 NoContext 0.000 0.000 0.0 0.000 0.000 0.0 OracleGold 1.000 1.000 89.0 1.000 1.000 45.0 
+
+above VanillaRAG and GraphMemory. On v3, semantic distractors change the ordering: VanillaRAG has the best F1 and AutoContextKG the best MRR, while CICL remains competitive but no longer dominates. 
+
+5.5 RepoBench-R Compression Suite 
+
+Table 8 reports the 100-task RepoBench-R Python compression suite. At budget 120, causal-card compression improves over raw selection in success ( 0.02 →
+
+0.06 ) and context recall ( +0 .04 , 95% CI [0 .01 , 0.08] , p = 0 .016 by matched paired bootstrap with 2,000 resamples). Generic extractive summarisation is nevertheless stronger at the same budget ( 0.11 success; summary-vs-card recall delta +0 .05 , 95% CI [0 .01 , 0.10] , p = 0 .009 ). In selected-then-compressed mode, causal cards save 44 .93 tokens per query over raw selection (95% CI [41 .05 , 48 .74] ,
+
+p < 10 −3) with identical selected ids. The supported result is therefore specific: cards can save tokens and improve raw budget fitting, but generic summaries are the stronger baseline on this starter slice. Decision-Aware Memory Cards for LLM Agents 11                                                                                        
+
+> Table 8. RepoBench-R 100-task compression sweep (means across 100 tasks). Within each budget, rows are sorted by success and then F1. Budget Method Success F1 Tokens Selected Ratio 60 Causal card 0.02 0.014 49.8 2.95 0.51 60 Raw 0.02 0.013 47.5 2.02 1.00 60 Summary 0.02 0.009 55.2 2.63 0.26 120 Summary 0.11 0.030 115.3 5.31 0.27 120 Causal card 0.06 0.023 103.6 4.43 0.38 120 Raw 0.02 0.007 106.1 2.88 1.00 200 Summary 0.13 0.022 193.2 8.90 0.24 200 Causal card 0.08 0.022 186.7 5.92 0.42 200 Raw 0.06 0.020 186.0 4.09 1.00 400 Summary 0.22 0.030 335.1 14.51 0.19 400 Causal card 0.15 0.027 380.8 10.08 0.41 400 Raw 0.08 0.020 374.3 5.52 1.00
+> Table 9. Qwen3.5-9B QLoRA judge vs. Opus 4.7 (710 candidates, 25 tasks). Metric Value JSON parse rate 1.000 Avg. top-5 Jaccard vs. Opus 0.592 Avg. Spearman ρvs. Opus 0.379 MAE (max across 5 numeric fields) 0.059
+
+5.6 Opus-Assisted Rankers and Qwen Selection Agreement 
+
+We collected 1 400 Opus-4.7-assisted counterfactual judgments on the v1 base tasks and trained both lightweight rankers. The linear 25-dimensional ranker achieves pairwise accuracy 0.939 but remains below the heuristic on down-stream F1. The MLP ranker improves over linear on both suites (v3 F1 0.241 →
+
+0.334 ; Table 7); pairwise accuracies are 0.939 /0.797 for the linear ranker and 
+
+0.945 /0.816 for the MLP on v1/v3. The learned ranker still does not replace the hand-designed ranker. On a supplementary real-code pilot, Opus 4.6 assists annotation for 200 RepoBench-R candidates from 50 training tasks; the resulting linear ranker reaches F1 0.027 and success 0.060 on 50 heldout tasks ( ∆F1 = 0 .027 vs. heuris-tic CICL, 95% CI [0 .000 , 0.060] , p = 0 .042 ; Oracle F1 0.580 ). A heldout budget sweep in the supplement keeps the signal small, so this is preliminary evidence rather than mature real-code retrieval training. The Qwen3.5-9B QLoRA judge was evaluated on 710 (task, candidate) pairs from 25 base tasks (Table 9). This is a selection-agreement diagnostic on the syn-thetic Opus-assisted label distribution, not a held-out task-generalisation test. JSON parse rate is 1.00 ; field-level MAE against Opus stays below 0.06 on all numeric fields. Top-5 selection Jaccard averages 0.592 and Spearman ρ reaches 
+
+0.379 —sufficient for validation-pool use, but too noisy for unattended deploy-ment. 12 X. Guan et al. 
+
+5.7 Executable Checks and Harmful-Context Stress 
+
+A two-task toy patch-and-test pilot verifies that selected context can be passed through an executable patch loop: CICL, VanillaRAG, and AutoContextKG reach patch success 1.00 , while NoContext reaches 0.00 . Three Astropy patch-generation checks in the supplement test real-code patch formatting but are not official SWE-bench passes. In harmful-context stress tests, CICL often selects stale units ( 70 .8% on v1; 68 .8% on v3), but ranks the gold unit ahead of them (harmful-before-gold = 0 .00 ). The signal is ordering under stale evidence, not full harmful-context avoidance. 
+
+5.8 Memory-Card Structural Audit 
+
+A deterministic audit checks required fields, action hints, compression success, and placeholder absence. On RepoBench-R, the rates are: fields 1.000 , hints 
+
+1.000 , compression 0.948 , and token ratio 0.486 . This checks structure only, not semantic faithfulness. 
+
+## 6 Discussion 
+
+The results support decision-aware utility as a scoped ranking signal. On SWE-bench Verified, the schema is weak under a deterministic proxy but becomes a strong file reranker with Qwen3.6-plus. The synthetic removal and budget studies explain why: high-utility evidence can be necessary, while extra context can add distractors. The negative findings sharpen the contribution. RepoBench-R shows that memory cards save tokens, but generic summaries preserve lexical details useful for code completion. Together with the v3 and deterministic SWE-bench fail-ures, this keeps the claim bounded: CICL measures and exploits decision-critical evidence, but the judge and compression format must match the retrieval setting. 
+
+## 7 Limitations 
+
+– Causal wording. The score is counterfactual-inspired, not identified by ran-domised intervention. 
+
+– Evaluation scope. We report toy and real-code patch-generation checks, but no official SWE-bench patch success. 
+
+– Stronger baselines remain. Summarisation wins on RepoBench-R, Vanil-laRAG dominates on v3, and the Qwen SWE-bench result is file-level only. 
+
+– Scale and surrogates. Diagnostics cover 25–250 tasks; the real-code pilot is weak; Qwen agreement is synthetic-distribution only. Decision-Aware Memory Cards for LLM Agents 13 
+
+## 8 Conclusion 
+
+CICL reframes context selection for tool-using LLM agents as a decision-aware problem. Useful context is not merely similar to the task; it is evidence that can change the agent’s next action, raise the expected outcome, become necessary for success, or introduce negative transfer. By scoring these effects and packing selected evidence into typed memory cards, CICL gives researchers a measurable notion of decision-critical context and gives builders a practical layer for auditing context failures, targeting expensive judge calls, and compressing long prompts without treating all retrieved text as equally valuable. Across the main experiments and supplementary diagnostics, the signal is useful but deliberately bounded. On SWE-bench Verified file-level retrieval, Qwen3.6-plus reranking improves BM25 from 0.58 to 0.78 hit@1 and from 0.634 
+
+to 0.790 MRR@10. Controlled removal explains why the ranking is not only cos-metic: deleting the top-utility unit collapses synthetic v3 F1 from 0.245 to 0.000 .The appendix further stress-tests the protocol: Qwen-QLoRA produces parseable judgments for all 710 agreement candidates, a 200-label real-code Opus-assisted pilot yields a small heldout signal, and a three-instance patch-generation smoke validates the retrieval-to-patch plumbing without claiming official SWE-bench success. The negative results are equally informative: RepoBench-R shows that memory cards can lose lexical detail to generic summaries, and compact rankers do not yet replace the heuristic selector. CICL is therefore best viewed as a decision-aware layer for measuring, rank-ing, and compressing agent context, rather than as a standalone coding agent. Future work should scale real-code annotations, learn adaptive utility weights, combine structured cards with lexical snippets, and evaluate the selector inside end-to-end agent rollouts. 
+
+Reproducibility Statement. The codebase, evaluation harness, evidence log, and Qwen-QLoRA configuration are available at https://github.com/ stephen-guan-researcher/CICL. A Qwen3.5-9B QLoRA adapter-only release is available at https://huggingface.co/XinyuGuan/CICL; it must be loaded with the Qwen/Qwen3.5-9B base model and is not a standalone judge model. A supplementary appendix reports additional diagnostics omitted from the page-limited main text.  
+
+> Disclosure of Interests. The authors have no competing interests to declare that are relevant to the content of this article.
+
+## References 
+
+> 1. Yao, S., et al.: React: Synergizing reasoning and acting in language models. In: International Conference on Learning Representations (2023), https://openreview. net/forum?id=WE_vluYUL-X
+
+14 X. Guan et al. 2. Schick, T., et al.: Toolformer: Language models can teach themselves to use tools. In: Advances in Neural Information Processing Systems (2023), https://arxiv.org/ abs/2302.04761 3. Shinn, N., Cassano, F., Gopinath, A., Narasimhan, K., Yao, S.: Reflexion: Language agents with verbal reinforcement learning. In: Advances in Neural Information Processing Systems (2023), https://arxiv.org/abs/2303.11366 4. Wang, G., et al.: Voyager: An open-ended embodied agent with large language models (2023), https://arxiv.org/abs/2305.16291 5. Yang, J., et al.: SWE-agent: Agent-computer interfaces enable automated software engineering (2024), https://arxiv.org/abs/2405.15793 6. Li, H., et al.: Contextbench: A benchmark for context retrieval in coding agents (2026), https://arxiv.org/abs/2602.05892 7. Zhu, J., et al.: Swe context bench: A benchmark for context learning in coding (2026), https://arxiv.org/abs/2602.08316 8. Wu, Q., et al.: Autogen: Enabling next-gen llm applications via multi-agent con-versation (2023), https://arxiv.org/abs/2308.08155 9. Qian, C., et al.: Communicative agents for software development (2023), https: //arxiv.org/abs/2307.07924 10. He, Z., et al.: Memoryarena: Benchmarking agent memory in interdependent multi-session agentic tasks (2026), https://arxiv.org/abs/2602.16313 11. Hu, Y., Wang, Y., McAuley, J.: Evaluating memory in llm agents via incremental multi-turn interactions (2025), https://arxiv.org/abs/2507.05257 12. Wang, Y., et al.: Evomembench: Benchmarking agent memory from a self-evolving perspective (2026), https://arxiv.org/abs/2605.18421 13. Xia, C.S., Deng, Y., Dunn, S., Zhang, L.: Agentless: Demystifying llm-based soft-ware engineering agents (2024), https://arxiv.org/abs/2407.01489 14. Wang, X., et al.: Openhands: An open platform for ai software developers as gen-eralist agents (2024), https://arxiv.org/abs/2407.16741 15. Izacard, G., et al.: Unsupervised dense information retrieval with contrastive learn-ing. In: Transactions on Machine Learning Research (2022), https://arxiv.org/abs/ 2112.09118 16. Johnson, J., Douze, M., Jégou, H.: Billion-scale similarity search with gpus. IEEE Transactions on Big Data (2019), https://arxiv.org/abs/1702.08734 17. Lewis, P., et al.: Retrieval-augmented generation for knowledge-intensive nlp tasks. In: Advances in Neural Information Processing Systems (2020), https://arxiv.org/ abs/2005.11401 18. Izacard, G., et al.: Few-shot learning with retrieval augmented language models. In: International Conference on Learning Representations (2023), https://arxiv. org/abs/2208.03299 19. Gao, L., Ma, X., Lin, J., Callan, J.: Precise zero-shot dense retrieval without rele-vance labels. In: Annual Meeting of the Association for Computational Linguistics (2023), https://arxiv.org/abs/2212.10496 20. Asai, A., et al.: Self-rag: Learning to retrieve, generate, and critique through self-reflection. In: International Conference on Learning Representations (2024), https: //arxiv.org/abs/2310.11511 21. Liu, N.F., et al.: Lost in the middle: How language models use long contexts. Transactions of the Association for Computational Linguistics (2024), https:// arxiv.org/abs/2307.03172 22. Bai, Y., et al.: Longbench: A bilingual, multitask benchmark for long context understanding (2023), https://arxiv.org/abs/2308.14508 Decision-Aware Memory Cards for LLM Agents 15 23. Cai, K., et al.: Autocontext: Instance-level context learning for llm agents (2025), https://arxiv.org/abs/2510.02369 24. Zhang, Q., et al.: Agentic context engineering: Evolving contexts for self-improving language models (2025), https://arxiv.org/abs/2510.04618 25. Kang, M., et al.: Acon: Optimizing context compression for long-horizon llm agents (2025), https://arxiv.org/abs/2510.00615 26. Srivastava, S.S.: Causal intervention-based memory selection for long-horizon llm agents (2026), https://arxiv.org/abs/2605.17641 27. Huo, Y., et al.: Reposhapley: Shapley-enhanced context filtering for repository-level code completion (2026), https://arxiv.org/abs/2601.03378 28. Robertson, S., Zaragoza, H.: The probabilistic relevance framework: BM25 and beyond. In: Foundations and Trends in Information Retrieval. Now Publishers (2009), https://doi.org/10.1561/1500000019 29. Karpukhin, V., et al.: Dense passage retrieval for open-domain question answering. In: Empirical Methods in Natural Language Processing (2020), https://arxiv.org/ abs/2004.04906 30. Khattab, O., Zaharia, M.: ColBERT: Efficient and effective passage search via contextualized late interaction over BERT. In: SIGIR (2020), https://arxiv.org/ abs/2004.12832 31. Jiang, H., et al.: LLMLingua: Compressing prompts for accelerated inference of large language models. In: Empirical Methods in Natural Language Processing (2023), https://arxiv.org/abs/2310.05736 32. Jiang, H., et al.: Longllmlingua: Accelerating and enhancing llms in long context scenarios via prompt compression. In: Annual Meeting of the Association for Com-putational Linguistics (2024), https://arxiv.org/abs/2310.06839 33. Li, Y., Dong, B., Lin, C., Guerin, F.: Selective context: Efficient and context-aware prompt compression (2023), https://arxiv.org/abs/2304.12102 34. Ouyang, L., et al.: Training language models to follow instructions with human feedback. In: Advances in Neural Information Processing Systems (2022), https: //arxiv.org/abs/2203.02155 35. Stiennon, N., et al.: Learning to summarize with human feedback. In: Advances in Neural Information Processing Systems (2020), https://arxiv.org/abs/2009.01325 36. Hu, E.J., et al.: LoRA: Low-rank adaptation of large language models. In: Inter-national Conference on Learning Representations (2022), https://arxiv.org/abs/ 2106.09685 37. Dettmers, T., Pagnoni, A., Holtzman, A., Zettlemoyer, L.: QLoRA: Efficient fine-tuning of quantized llms. In: Advances in Neural Information Processing Systems (2023), https://arxiv.org/abs/2305.14314 38. Jimenez, C.E., et al.: SWE-bench: Can language models resolve real-world github issues? In: International Conference on Learning Representations (2024), https: //arxiv.org/abs/2310.06770 39. Liu, T., Xu, C., McAuley, J.: Repobench: Benchmarking repository-level code auto-completion systems (2023), https://arxiv.org/abs/2306.03091 40. Husain, H., et al.: Codesearchnet challenge: Evaluating the state of semantic code search. In: NeurIPS Workshop on Machine Learning for Software Engineering (2019), https://arxiv.org/abs/1909.09436
