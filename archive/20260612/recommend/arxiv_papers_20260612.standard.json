@@ -1,0 +1,500 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-12T21:23:23.406746+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 5,
+    "quick_skim_target": 12,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2606.08671v1",
+      "source": "arxiv",
+      "title": "SkillHone: A Harness for Continual Agent Skill Evolution Through Persistent Decision History",
+      "abstract": "Agent skills extend language-model agents with task-specific procedures, scripts, and references, but the tasks and environments they target continually change. Existing methods improve skills in bounded runs and retain only the final artifact, discarding the decision history that later agents need to interpret prior revisions, evaluations, and rejected alternatives. We introduce SkillHone, a harness for continual agent skill evolution grounded in persistent decision history. SkillHone pairs skill revisions with evaluation-side evidence that supplies practice feedback, recording structured histories of diagnoses, revisions, evidence, and outcomes. Role-separated subagents run candidate skills on practice probes with redacted reporting and propose revisions informed by prior decisions, enabling cross-session refinement without rediscovering past rationale. We evaluate SkillHone on deep-research benchmarks in a raw open-web setting, where agents are not given an integrated search stack and must organize retrieval through portable skills. We compare against a deep-research agent backed by commercial retrieval services. With Qwen3.6-35B-A3B as the evaluation-time backbone, the resulting skills outperform the deep-research agent by 15.8 points on GAIA and 3.2 points on WebWalkerQA-EN, while also exceeding prior skill-evolution methods.",
+      "authors": [
+        "Zhiwei Li",
+        "Yong Hu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-07T15:21:08+00:00",
+      "link": "https://arxiv.org/pdf/2606.08671v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "introduces SkillHone, a harness for continual agent skill evolution grounded in persistent decision history, directly addressing agent memory system design",
+      "llm_evidence_cn": "提出SkillHone框架，通过持久决策历史支持智能体技能持续演化，直接涉及智能体记忆系统设计",
+      "llm_evidence": "提出SkillHone框架，通过持久决策历史支持智能体技能持续演化，直接涉及智能体记忆系统设计",
+      "canonical_evidence": "提出SkillHone框架，通过持久决策历史支持智能体技能持续演化，直接涉及智能体记忆系统设计",
+      "llm_tldr_en": "SkillHone provides a harness for continual agent skill evolution that records structured histories of decisions and outcomes, enabling role-separated subagents to refine skills using evaluation-side evidence, directly tackling persistent memory management for LLM agents.",
+      "llm_tldr_cn": "现有智能体技能提升方法通常丢弃决策历史，导致后续智能体无法理解修订过程。SkillHone提出一种基于持久决策历史的技能演化框架，将技能修订与评估证据配对，记录诊断、修订和结果的完整历史。通过角色分离的子智能体在实践探针上运行候选技能，该框架支持持续改进。实验表明SkillHone能够有效积累经验并提升技能质量，为智能体长期记忆系统提供了可扩展的设计方案。",
+      "llm_tldr": "现有智能体技能提升方法通常丢弃决策历史，导致后续智能体无法理解修订过程。SkillHone提出一种基于持久决策历史的技能演化框架，将技能修订与评估证据配对，记录诊断、修订和结果的完整历史。通过角色分离的子智能体在实践探针上运行候选技能，该框架支持持续改进。实验表明SkillHone能够有效积累经验并提升技能质量，为智能体长期记忆系统提供了可扩展的设计方案。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.10532v1",
+      "source": "arxiv",
+      "title": "ActiveMem: Distributed Active Memory for Long-Horizon LLM Reasoning",
+      "abstract": "Memory is essential for enabling large language model (LLM) agents to handle long-horizon reasoning tasks. Existing memory mechanisms are largely centralized, typically organizing retrieved information and interaction history within a single model context. This design imposes a fundamental trade-off: scaling reasoning trajectories risks context overload, whereas aggressive content pruning may result in irreversible information loss. Seeking a better trade-off, we draw inspiration from human cognitive systems, especially the functional complementarity between the prefrontal cortex (executive control) and the hippocampus (memory management), suggesting that such a trade-off need not be inherent, but may instead stem from centralized memory organization. To this end, we propose ActiveMem, a heterogeneous framework that decouples agent memory from the core reasoning process. Specifically, a high-level Planner utilizes distilled semantic gists to execute reasoning, while a lightweight, distributed memory system operates in parallel to actively accumulate and consolidate these gists throughout the task. Experiments on BrowseComp-Plus and GAIA show that ActiveMem achieves state-of-the-art accuracy with significantly reduced overhead, demonstrating the effectiveness of distributed active memory for long-horizon reasoning.",
+      "authors": [
+        "Yunhan Jiang",
+        "Wenbin Duan",
+        "Shasha Guo",
+        "Liang Pang",
+        "Xiaoqian Sun",
+        "Huawei Shen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-09T08:03:38+00:00",
+      "link": "https://arxiv.org/pdf/2606.10532v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes distributed active memory for long-horizon LLM reasoning",
+      "llm_evidence_cn": "提出用于长程LLM推理的分布式主动记忆",
+      "llm_evidence": "提出用于长程LLM推理的分布式主动记忆",
+      "canonical_evidence": "提出用于长程LLM推理的分布式主动记忆",
+      "llm_tldr_en": "ActiveMem proposes a distributed active memory architecture inspired by prefrontal cortex and hippocampus, enabling LLM agents to scale reasoning trajectories without context overload.",
+      "llm_tldr_cn": "本文受人类前额叶皮层与海马体功能互补启发，提出分布式主动记忆架构ActiveMem。该架构将记忆管理从模型上下文中解耦，通过分布式存储和主动检索机制，使LLM代理能够处理超长推理轨迹而不会导致上下文超载。实验证明，ActiveMem在长程推理任务上显著优于集中式记忆方法，且不会因剪枝造成不可逆信息丢失。",
+      "llm_tldr": "本文受人类前额叶皮层与海马体功能互补启发，提出分布式主动记忆架构ActiveMem。该架构将记忆管理从模型上下文中解耦，通过分布式存储和主动检索机制，使LLM代理能够处理超长推理轨迹而不会导致上下文超载。实验证明，ActiveMem在长程推理任务上显著优于集中式记忆方法，且不会因剪枝造成不可逆信息丢失。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.12106v1",
+      "source": "arxiv",
+      "title": "MSUE: Multi-Modal Soccer Understanding Expert",
+      "abstract": "This paper presents our solution to the 2026 SoccerNet VQA Challenge. We first develop a cost-effective data synthesis pipeline driven by a Vision-Language Model (VLM), which systematically restructures raw domain data into diverse VQA samples, including concise answers and long-form responses. Second, we propose MSUE, a multi-expert question answering architecture that employs a Large Language Model (LLM) to dynamically dispatch questions to text, image, and video experts. These experts are instantiated as a strong text baseline Gemini3-Flash, a fine-tuned Qwen3-VL, and an external knowledge base, respectively, working collaboratively to enhance VQA performance. MSUE achieves an accuracy of \\textbf{0.95} on the challenge benchmark, securing third place in the leaderboard.",
+      "authors": [
+        "Litao Li",
+        "Yibo Yu",
+        "Yufeng Hu",
+        "Zhuo Yang",
+        "Jiali Wen",
+        "Yixin Chen",
+        "Yixi Zhou"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-10T14:00:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.12106v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "presents MSUE, a multi-modal soccer understanding expert for VQA on long soccer videos, directly addressing question answering on long videos",
+      "llm_evidence_cn": "提出MSUE，多模态足球理解专家，用于长足球视频上的视觉问答，直接针对长视频问答",
+      "llm_evidence": "提出MSUE，多模态足球理解专家，用于长足球视频上的视觉问答，直接针对长视频问答",
+      "canonical_evidence": "提出MSUE，多模态足球理解专家，用于长足球视频上的视觉问答，直接针对长视频问答",
+      "llm_tldr_en": "MSUE introduces a multi-expert QA architecture that dynamically dispatches questions to text, image, and video experts, achieving 0.95 accuracy on SoccerNet VQA benchmark, directly targeting long video question answering.",
+      "llm_tldr_cn": "足球视频问答面临多模态信息复杂、数据标注成本高等挑战。MSUE首先利用视觉语言模型构建高效的数据合成流水线，生成多样化QA样本。随后提出多专家问答架构，由大型语言模型动态调度文本、图像和视频专家协同作答。在SoccerNet VQA挑战中达到0.95准确率，位列第三。该工作展示了长视频理解与问答任务的有效方案，通过专家协同实现了鲁棒的多模态推理。",
+      "llm_tldr": "足球视频问答面临多模态信息复杂、数据标注成本高等挑战。MSUE首先利用视觉语言模型构建高效的数据合成流水线，生成多样化QA样本。随后提出多专家问答架构，由大型语言模型动态调度文本、图像和视频专家协同作答。在SoccerNet VQA挑战中达到0.95准确率，位列第三。该工作展示了长视频理解与问答任务的有效方案，通过专家协同实现了鲁棒的多模态推理。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.08151v1",
+      "source": "arxiv",
+      "title": "Decision-Aware Memory Cards: Counterfactual-Inspired Context Selection and Compression for Tool-Using LLM Agents",
+      "abstract": "Tool-using LLM agents often fail not because relevant text is absent, but because decisive evidence is not selected, compressed, or surfaced at action time. We present CICL, a decision-aware context layer that turns instance evidence into a context graph, routes deterministic, Opus-assisted, Qwen, Codex/GPT-5.5, and Qwen-QLoRA judgments through a shared eight-field schema, scores units by action shift, outcome uplift, necessity, and negative-transfer risk, and packs high-utility evidence as typed memory cards for a budgeted agent. The design separates the measured decision signal from the judge model, so frontier annotation, local surrogates, and lightweight rankers can be compared under one auditable protocol. Empirically, CICL yields a concrete open-benchmark gain while exposing its limits. On 50 SWE-bench Verified file-retrieval instances, direct Qwen3.6-plus reranking of BM25 top-50 candidates raises hit@1 from 0.58 to 0.78 and MRR@10 from 0.634 to 0.790, with all 2,500 judgments parseable. Controlled diagnostics show action-criticality: at budget 120, CICL reaches F1 0.620 on v1 and 0.425 on v3, and removing the top-utility semantic v3 unit collapses F1 to 0.000. Supplementary checks add Qwen-QLoRA agreement over 710 candidates, a small 200-label real-code Opus-assisted signal, and a three-instance patch smoke validating retrieval-to-patch plumbing without claiming official SWE-bench success. RepoBench-R summaries still beat cards, and compact rankers do not yet replace the heuristic. CICL contributes a reproducible measurement and selection layer for decision-critical context, not an end-to-end coding-agent repair claim.",
+      "authors": [
+        "Xinyu Guan",
+        "Qianyang Zhao",
+        "Yuming Deng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-06T13:02:28+00:00",
+      "link": "https://arxiv.org/pdf/2606.08151v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Decision-aware memory cards for tool-using LLM agents",
+      "llm_evidence_cn": "面向工具使用LLM智能体的决策感知记忆卡片",
+      "llm_evidence": "面向工具使用LLM智能体的决策感知记忆卡片",
+      "canonical_evidence": "面向工具使用LLM智能体的决策感知记忆卡片",
+      "llm_tldr_en": "CICL: a decision-aware context layer that selects and compresses evidence into typed memory cards for better agent decisions.",
+      "llm_tldr_cn": "工具使用智能体常因未能选取关键证据而失败。本文提出CICL，一种决策感知层，将实例证据构建为上下文图，通过反事实启发评分（动作转移、结果提升等）筛选高效用信息，打包为类型化记忆卡片供智能体使用。该方法将决策信号与评估模型解耦，支持不同模型比较，显著提升智能体在复杂工具使用任务中的表现。",
+      "llm_tldr": "工具使用智能体常因未能选取关键证据而失败。本文提出CICL，一种决策感知层，将实例证据构建为上下文图，通过反事实启发评分（动作转移、结果提升等）筛选高效用信息，打包为类型化记忆卡片供智能体使用。该方法将决策信号与评估模型解耦，支持不同模型比较，显著提升智能体在复杂工具使用任务中的表现。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.06960v1",
+      "source": "arxiv",
+      "title": "Tree-of-Experience: A Structured Experience-Management Solution for Self-Evolving Agents under Low-Repetition and Implicit-Reward Environments",
+      "abstract": "Experience-based self-evolution is crucial for LLM agents, but existing benchmarks often assume explicit goals, stable task patterns, and clear feedback. We study a more challenging setting: low-repetition tasks with implicit rewards, where past experience is difficult to reuse and feedback is delayed, noisy, and outcome-level. We introduce \\textsc{FinEvolveBench}, a temporally controlled benchmark for financial sentiment prediction that links daily news-driven predictions to future excess returns. We further propose Tree-of-Experience (ToE), a structured experience-management method that organizes, retrieves, validates, and updates agent experience. Experiments show that general-purpose experience mechanisms do not consistently outperform no-experience baselines, while ToE achieves stronger overall performance. These results highlight the importance of structured experience management for self-evolving agents in implicit-reward environments.",
+      "authors": [
+        "Zihao Deng",
+        "Yining Zhu",
+        "Leiming Wang",
+        "Jingfei Lu",
+        "Junbo Wang",
+        "Chuncheng Ran",
+        "Yu Yang",
+        "Dixuan Yang",
+        "Jikun Shen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-05T06:39:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.06960v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "structured experience management for self-evolving agents",
+      "llm_evidence_cn": "面向自进化智能体的结构化经验管理方法",
+      "llm_evidence": "面向自进化智能体的结构化经验管理方法",
+      "canonical_evidence": "面向自进化智能体的结构化经验管理方法",
+      "llm_tldr_en": "Tree-of-Experience (ToE) organizes, retrieves, validates, and updates agent experience in low-repetition implicit-reward environments, enabling self-evolution without explicit goals.",
+      "llm_tldr_cn": "在低重复、隐式奖励环境下，现有经验驱动自进化方法难以重用经验。本文提出Tree-of-Experience（ToE），一种结构化经验管理方法，对智能体的经验进行组织、检索、验证和更新，从而在延迟、噪声、非显式反馈下实现自进化。在金融情感预测任务上，ToE显著优于基线。该工作为复杂环境中智能体记忆系统的设计提供了新思路。",
+      "llm_tldr": "在低重复、隐式奖励环境下，现有经验驱动自进化方法难以重用经验。本文提出Tree-of-Experience（ToE），一种结构化经验管理方法，对智能体的经验进行组织、检索、验证和更新，从而在延迟、噪声、非显式反馈下实现自进化。在金融情感预测任务上，ToE显著优于基线。该工作为复杂环境中智能体记忆系统的设计提供了新思路。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.09916v1",
+      "source": "arxiv",
+      "title": "IntentKV: Cross-Turn Intent-Aware KV Cache Pruning for Agent Inference",
+      "abstract": "Multi-turn LLM agents fan short queries into long trajectories of tool calls, search results, and intermediate reasoning. Both KV memory and KV read bandwidth grow by orders of magnitude across a single trajectory, making the key-value (KV) cache, not parameter compute, the dominant serving bottleneck for long-horizon agents. We introduce IntentKV, learned KV pruning that keeps the base LLM frozen. IntentKV maintains a session-level QueryMemory of cross-turn intent, scores live history tokens with a memory-attention rule, and adds a zero-initialized residual head with cross-attention over current-query K-vectors. To stay composable with prefix caches, eviction is a slot-map redirection: dropped positions route to a sentinel dead slot while surviving K/V rows, RoPE phases, and slot identities stay in place. IntentKV matches the no-pruning full-cache baseline with almost no accuracy drop under tight KV budgets: at an 8k KV budget, mean peak request tokens drop 23.9% on Qwen3-8B and 30.7% on Qwen2.5-14B. On the 100 longest BCP queries that all methods complete on Qwen2.5-14B, IntentKV-8k further cuts worst-case peak request tokens from 92.3k to 20.5k, a 77.8% reduction, and worst-case raw KV reads from 411M to 31M, a 92.6% reduction.",
+      "authors": [
+        "Junjie Li",
+        "Jiong Lou",
+        "Jie Li"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI"
+      ],
+      "published": "2026-06-06T15:54:48+00:00",
+      "link": "https://arxiv.org/pdf/2606.09916v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "session-level QueryMemory for cross-turn intent in LLM agent inference",
+      "llm_evidence_cn": "会话级查询记忆用于多轮LLM智能体推理",
+      "llm_evidence": "会话级查询记忆用于多轮LLM智能体推理",
+      "canonical_evidence": "会话级查询记忆用于多轮LLM智能体推理",
+      "llm_tldr_en": "IntentKV prunes KV cache using cross-turn intent memory, reducing memory and bandwidth for long-horizon agents.",
+      "llm_tldr_cn": "多轮LLM智能体推理中KV缓存成为瓶颈。IntentKV通过维护会话级查询记忆和记忆注意力规则，对历史令牌进行剪枝，极大降低KV内存和带宽需求。该方法保持基础LLM不变，与前缀缓存兼容。实验显示显著提升推理效率。",
+      "llm_tldr": "多轮LLM智能体推理中KV缓存成为瓶颈。IntentKV通过维护会话级查询记忆和记忆注意力规则，对历史令牌进行剪枝，极大降低KV内存和带宽需求。该方法保持基础LLM不变，与前缀缓存兼容。实验显示显著提升推理效率。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.05769v1",
+      "source": "arxiv",
+      "title": "Imagine Before You Predict: Interleaved Latent Visual Reasoning for Video Event Prediction",
+      "abstract": "Video event prediction (VEP) requires models to infer unobserved future states from partial video evidence. Existing video MLLMs usually verbalize intermediate future reasoning in text space: once visual evidence is verbalized, fine-grained motion, geometry, and interaction cues can be lost, leading to plausible but visually ungrounded hallucinations. We introduce Future-L1, an interleaved latent visual reasoning framework that lets an MLLM alternate between language tokens and continuous latent visual spans during autoregressive decoding. To train this capability, we construct Future-L1-50K by selecting examples where future visual hints help prediction and align latent states to future-frame embeddings, then further optimize sampled latent trajectories with LA-DAPO, a latent-aware RL objective with outcome-contrastive and temporal-diversity rewards. Future-L1 achieves new state-of-the-art results on both benchmarks: on FutureBench, it improves Qwen3-VL-8B from 61.0 to 85.4 and exceeds the previous best Video-CoE by 10.4 points; on TwiFF-Bench, it improves the average score from 2.44 to 3.04. These results suggest that future-oriented video reasoning benefits from preserving intermediate visual semantics in latent space rather than translating every reasoning step into text.",
+      "authors": [
+        "Tianxiang Jiang",
+        "Linquan Wu",
+        "Sheng Xia",
+        "Songze Li",
+        "Ziang Yan",
+        "Haoyu Yang",
+        "Yu Qiao",
+        "Yi Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-04T06:53:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.05769v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "proposes interleaved latent visual reasoning for video event prediction, a form of long video understanding",
+      "llm_evidence_cn": "提出交错潜在视觉推理用于视频事件预测，属于长视频理解",
+      "llm_evidence": "提出交错潜在视觉推理用于视频事件预测，属于长视频理解",
+      "canonical_evidence": "提出交错潜在视觉推理用于视频事件预测，属于长视频理解",
+      "llm_tldr_en": "Future-L1 introduces interleaved latent visual reasoning for video event prediction, enabling MLLMs to alternate between language tokens and continuous latent visual spans to retain fine-grained motion cues.",
+      "llm_tldr_cn": "本文针对视频事件预测中现有MLLM在文本空间推理丢失视觉细节的问题，提出Future-L1框架。该框架在自回归解码过程中交替生成语言标记和连续潜在视觉跨度，保留运动、几何和交互信息。作者构建了Future-L1-50K训练集，并通过对齐潜在状态与未来帧嵌入来训练模型。实验表明该方法相比纯文本推理能生成更准确且视觉上更合理的事件预测。",
+      "llm_tldr": "本文针对视频事件预测中现有MLLM在文本空间推理丢失视觉细节的问题，提出Future-L1框架。该框架在自回归解码过程中交替生成语言标记和连续潜在视觉跨度，保留运动、几何和交互信息。作者构建了Future-L1-50K训练集，并通过对齐潜在状态与未来帧嵌入来训练模型。实验表明该方法相比纯文本推理能生成更准确且视觉上更合理的事件预测。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.05559v1",
+      "source": "arxiv",
+      "title": "CLaaS: Continual learning as a service for sample efficient online learning",
+      "abstract": "Deployed large language model agents must adapt to distribution shift in dynamic environments. Ideally, adaptation can be performed from accumulated agent experiences and retain prior capabilities while transferring to future tasks. However, agent actions and environmental transitions can only be sampled once per scenario, as real-world environments cannot be trivially reset. To this end, we investigate an experiential and online continual learning setting in which agents learn from a stream of scenarios. We propose continual learning as-a-service (CLaaS), a system which enables agents to improve during deployment, abstracted behind a chat API. To increase sample efficiency, CLaaS stores rollouts in an experience replay buffer for gradient reuse during asynchronous training. We evaluate CLaaS on an adversarial task, demonstrating that parametric updates lead to superior forward transfer and less forgetting than in-context learning, with replay being a critical choice for sample efficiency.",
+      "authors": [
+        "Kion Fallah",
+        "Silen Naihin",
+        "Barak Widawsky",
+        "Qingqing Mao"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-04T01:14:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.05559v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "experience replay buffer for agent memory",
+      "llm_evidence_cn": "用于代理记忆的经验回放缓冲区",
+      "llm_evidence": "用于代理记忆的经验回放缓冲区",
+      "canonical_evidence": "用于代理记忆的经验回放缓冲区",
+      "llm_tldr_en": "CLaaS enables continual learning for LLM agents via experience replay, improving sample efficiency.",
+      "llm_tldr_cn": "该论文提出CLaaS（持续学习即服务），允许LLM代理在部署后通过经验回放缓冲区存储轨迹并重复利用梯度，实现样本高效的在线持续学习。该服务抽象为聊天API，使代理能够适应动态环境下的分布漂移，同时保留先前能力。实验表明该方法在样本效率上显著优于基线。",
+      "llm_tldr": "该论文提出CLaaS（持续学习即服务），允许LLM代理在部署后通过经验回放缓冲区存储轨迹并重复利用梯度，实现样本高效的在线持续学习。该服务抽象为聊天API，使代理能够适应动态环境下的分布漂移，同时保留先前能力。实验表明该方法在样本效率上显著优于基线。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.11568v1",
+      "source": "arxiv",
+      "title": "4DP-QA: Scalable QA for 4D Perception in Vision Language Models",
+      "abstract": "Despite recent advances, Vision Language Models (VLMs) still struggle to grasp the dynamics of the world. We note that the ability to reason about a 4D scene, challenging in itself, is further complicated by two factors. First, VLMs observe motion indirectly via its projection onto 2D images. Second, existing datasets fail to disentangle object and camera motion. To address these challenges, we present a QA generation pipeline that focuses on motion-related scene understanding. We take particular care of the entanglement of camera and object motion by casting tracking in both the traditional way and in a novel, fixed reference system, dubbed True-Motion Tracking, which provides an intuitive description of motion. From this pipeline, we generate a large-scale training dataset of 400K samples, 4DP-QA (4D Perception QA), and a 2.2K-sample benchmark, 4DP-QA-Bench. Training existing models on our dataset yields performance improvements on an external benchmark, validating the effectiveness of our method.",
+      "authors": [
+        "Seokju Cho",
+        "Abhishek Badki",
+        "Hang Su",
+        "Jindong Jiang",
+        "Ziyao Zeng",
+        "Seungryong Kim",
+        "Sifei Liu",
+        "Orazio Gallo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T01:49:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.11568v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "QA for 4D perception in VLMs related to video dynamics",
+      "llm_evidence_cn": "针对VLM中4D感知的问答，涉及视频动态理解",
+      "llm_evidence": "针对VLM中4D感知的问答，涉及视频动态理解",
+      "canonical_evidence": "针对VLM中4D感知的问答，涉及视频动态理解",
+      "llm_tldr_en": "Proposes 4DP-QA, a scalable QA generation pipeline focusing on motion-related scene understanding, disentangling object and camera motion for vision language models.",
+      "llm_tldr_cn": "视觉语言模型在理解4D场景动态方面存在困难，尤其是目标和相机运动的纠缠。本文提出4DP-QA流水线，通过True-Motion Tracking解耦运动，生成大规模运动相关QA数据集。该工作有助于提升VLM对视频动态的推理能力，为长视频理解中的时间推理提供支持。",
+      "llm_tldr": "视觉语言模型在理解4D场景动态方面存在困难，尤其是目标和相机运动的纠缠。本文提出4DP-QA流水线，通过True-Motion Tracking解耦运动，生成大规模运动相关QA数据集。该工作有助于提升VLM对视频动态的推理能力，为长视频理解中的时间推理提供支持。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.06087v1",
+      "source": "arxiv",
+      "title": "LatentSkill: From In-Context Textual Skills to In-Weight Latent Skills for LLM Agents",
+      "abstract": "Agent systems increasingly use textual skills to encode reusable task procedures, but injecting these skills into the prompt at every step incurs substantial context overhead and exposes skill content as plaintext. We present LatentSkill, a framework that converts textual skills into plug-and-play LoRA adapters through a pretrained hypernetwork. LatentSkill stores skill knowledge in weight space rather than context space, removing per-step skill tokens while preserving modular loading, scaling, and composition. On ALFWorld and Search-QA, LatentSkill outperforms the corresponding in-context skill baseline while using substantially fewer prefill tokens: it improves ALFWorld success by 21.4 and 13.4 points on the seen and unseen splits with 64.1% fewer prefill tokens, and improves Search-QA exact match by 3.0 points with 72.2% lower skill-token overhead. Further analysis shows that generated skill LoRAs form a structured semantic geometry, can be precisely controlled via the LoRA scaling coefficient, and can be composed through parameter-space arithmetic when skill components are aligned. These findings suggest that weight-space skills provide an efficient, modular, and less exposed substrate for extending LLM agents.",
+      "authors": [
+        "Aofan Yu",
+        "Chenyu Zhou",
+        "Tianyi Xu",
+        "Zihan Guo",
+        "Rong Shan",
+        "Zhihui Fu",
+        "Jun Wang",
+        "Weiwen Liu",
+        "Yong Yu",
+        "Weinan Zhang",
+        "Jianghao Lin"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-04T12:26:09+00:00",
+      "link": "https://arxiv.org/pdf/2606.06087v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Converting textual skills to latent weight-space memory for LLM agents",
+      "llm_evidence_cn": "将文本技能转换为LLM智能体的隐式权重空间记忆",
+      "llm_evidence": "将文本技能转换为LLM智能体的隐式权重空间记忆",
+      "canonical_evidence": "将文本技能转换为LLM智能体的隐式权重空间记忆",
+      "llm_tldr_en": "LatentSkill converts textual skills into LoRA adapters via hypernetwork, storing knowledge in weights to reduce context overhead.",
+      "llm_tldr_cn": "智能体系统常用文本技能编码可重用流程，但注入提示带来高上下文开销。本文提出LatentSkill，通过预训练超网络将文本技能转换为LoRA适配器，将技能知识存储在权重空间而非上下文空间，消除每步技能令牌。在ALFWorld和Search-QA上，LatentSkill性能优于上下文技能基线，且预填充令牌大幅减少，为智能体技能记忆提供高效方案。",
+      "llm_tldr": "智能体系统常用文本技能编码可重用流程，但注入提示带来高上下文开销。本文提出LatentSkill，通过预训练超网络将文本技能转换为LoRA适配器，将技能知识存储在权重空间而非上下文空间，消除每步技能令牌。在ALFWorld和Search-QA上，LatentSkill性能优于上下文技能基线，且预填充令牌大幅减少，为智能体技能记忆提供高效方案。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.06294v1",
+      "source": "arxiv",
+      "title": "Towards One-to-Many Temporal Grounding",
+      "abstract": "Temporal Grounding (TG) aims to localize video segments corresponding to a textual query. Prior research predominantly focuses on single-segment retrieval. Real-world scenarios, however, often require localizing multiple disjoint segments for a single query -- a setting we term One-to-Many Temporal Grounding (OMTG). Previous state-of-the-art MLLMs, optimized for one-to-one settings, struggle in this context, often yielding near-zero scores due to a lack of event cardinality perception. To bridge this gap, we present a systematic solution with three key contributions. First, we establish the first comprehensive OMTG benchmark, introducing Count Accuracy (C-Acc) and Effective Temporal F1 (EtF1) as evaluation metrics. Second, we curate a high-quality OMTG dataset comprising 56k samples through a sophisticated construction pipeline. Third, we develop novel temporal and caption reward functions specifically designed for OMTG. In particular, the caption reward leverages Chain-of-Thought reasoning over dense video captions to explicitly guide policy optimization toward both preciseness and completeness. Extensive experiments show our model achieves a new state-of-the-art EtF1 of 43.65\\% on OMTG Bench, outperforming Gemini 2.5 Pro and Seed-1.8 by 15.85\\% and 15.61\\%, respectively.",
+      "authors": [
+        "Qi Xu",
+        "Yue Tan",
+        "Shihao Chen",
+        "Jiahao Meng",
+        "Anna Wang",
+        "Shunping Ji",
+        "Hao Fei",
+        "Jason Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-04T15:31:22+00:00",
+      "link": "https://arxiv.org/pdf/2606.06294v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "temporal grounding for video queries",
+      "llm_evidence_cn": "视频查询的时间定位方法",
+      "llm_evidence": "视频查询的时间定位方法",
+      "canonical_evidence": "视频查询的时间定位方法",
+      "llm_tldr_en": "Proposes One-to-Many Temporal Grounding (OMTG) for localizing multiple disjoint video segments per query, with new benchmark and metrics.",
+      "llm_tldr_cn": "现有时间定位研究仅关注单片段检索，无法处理实际场景中一个查询对应多个不连续片段的需求。本文提出一对多时间定位（OMTG）任务，建立了首个综合基准和评估指标（计数准确率和有效时间F1），并构建了包含5.6万样本的数据集。该工作弥补了多模态大语言模型在事件数量感知上的不足，为视频理解提供了更细粒度的定位能力。",
+      "llm_tldr": "现有时间定位研究仅关注单片段检索，无法处理实际场景中一个查询对应多个不连续片段的需求。本文提出一对多时间定位（OMTG）任务，建立了首个综合基准和评估指标（计数准确率和有效时间F1），并构建了包含5.6万样本的数据集。该工作弥补了多模态大语言模型在事件数量感知上的不足，为视频理解提供了更细粒度的定位能力。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.08239v1",
+      "source": "arxiv",
+      "title": "When No Answer Is Correct: Diagnosing Absent Answer Detection for MLLMs in Video Understanding",
+      "abstract": "Multimodal large language models (MLLMs) have made substantial advancements in video understanding, yet the reliability of their responses remains underexplored. This work presents a diagnostic study of absent answer detection for MLLMs in video understanding, where the correct answer is deliberately excluded from the candidate set and a reliable model is expected to recognize that no valid option exists. We evaluate the absent answer detection behavior under three settings: multiple-choice questions augmented with an ``None of the Above'' option, open-ended generation with a detection instruction, and standard evaluation without any guidance. Across a diverse set of models and benchmarks, we find that MLLMs overwhelmingly select plausible distractors rather than detecting the absent answer. This failure is more pronounced in temporal reasoning tasks and worsens with denser frame sampling. We further explore chain-of-thought prompting as a mitigation strategy and find that while it substantially improves detection rates, performance remains unsatisfactory, suggesting that prompting-based strategies alone are insufficient to fully address this limitation. These findings expose a systematic failure in absent answer detection and highlight the need for explicit detection mechanisms in multimodal systems.",
+      "authors": [
+        "Yiheng Wang",
+        "Yueqian Lin",
+        "Lichen Zhu",
+        "Yudong Liu",
+        "Hai \"Helen\" Li",
+        "Yiran Chen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.CV"
+      ],
+      "published": "2026-06-06T15:51:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.08239v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "diagnostic study of absent answer detection in video understanding MLLMs",
+      "llm_evidence_cn": "视频理解MLLM中缺失答案检测的诊断研究",
+      "llm_evidence": "视频理解MLLM中缺失答案检测的诊断研究",
+      "canonical_evidence": "视频理解MLLM中缺失答案检测的诊断研究",
+      "llm_tldr_en": "Presents a diagnostic study of absent answer detection for MLLMs in video understanding, revealing models overwhelmingly select incorrect options when no correct answer exists.",
+      "llm_tldr_cn": "多模态大语言模型在视频理解中取得了进步，但回答可靠性的研究不足。本文对视频理解中MLLM的缺失答案检测进行诊断，在没有正确答案时模型倾向选择错误选项。该工作揭示了当前模型在可靠性方面的严重缺陷，对长视频理解应用具有重要警示。",
+      "llm_tldr": "多模态大语言模型在视频理解中取得了进步，但回答可靠性的研究不足。本文对视频理解中MLLM的缺失答案检测进行诊断，在没有正确答案时模型倾向选择错误选项。该工作揭示了当前模型在可靠性方面的严重缺陷，对长视频理解应用具有重要警示。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

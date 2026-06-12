@@ -6,77 +6,58 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-11
-- 运行时间：2026-06-11 21:27:28 UTC
+- 最新运行日期：2026-06-12
+- 运行时间：2026-06-12 21:28:39 UTC
 - 运行状态：成功
-- 本次总论文数：19
-- 精读区：11
-- 速读区：8
+- 本次总论文数：12
+- 精读区：7
+- 速读区：5
 
 ### 今日简报（AI）
-今日精读11篇、速读8篇，聚焦长视频智能理解和智能体记忆管理两大前沿方向。最值得关注的是长视频高效理解中的Q-Fold（10分）与GOPAgen（9分），以及跨智能体记忆Rosetta Memory（8分）和工具智能体上下文压缩（8分）。普通读者可重点关注这三类方法的核心架构，它们代表了当前视频分析与智能体推理的主流优化路径。
-- 详情：[/202606/11/README](/202606/11/README)
+1) 今日推荐12篇论文，精读7篇重点聚焦智能体技能演进与长程推理。  
+2) 最值得关注《SkillHone》与《ActiveMem》两篇9分研究：前者通过持续决策历史推动智能体技能进化，后者用分布式主动记忆增强大模型的长程推理能力。  
+3) 建议优先精读这两篇高分工作，后续可结合《CLaaS》和《LatentSkill》探索更高效的样本学习与隐式技能迁移方法。
+- 详情：[/202606/12/README](/202606/12/README)
 
 ### 精读区论文标签
-1. [Q-Fold: Query-Aware Focus-Context Spatio-Temporal Folding for Long Video Understanding](/202606/11/2606.12125v1-q-fold-query-aware-focus-context-spatio-temporal-folding-for-long-video-understanding)  
-   标签：评分：10.0/10、query:long-video
-   evidence：查询感知的时空折叠用于长视频理解
-2. [GOPAgen: Motion-Aware and Efficient Agentic Long-Video Understanding with Structural Memory and Hierarchical Reasoning](/202606/11/2606.06532v1-gopagen-motion-aware-and-efficient-agentic-long-video-understanding-with-structural-memory-and-hierarchical-reasoning)  
+1. [SkillHone: A Harness for Continual Agent Skill Evolution Through Persistent Decision History](/202606/12/2606.08671v1-skillhone-a-harness-for-continual-agent-skill-evolution-through-persistent-decision-history)  
+   标签：评分：9.0/10、query:agent-memory
+   evidence：提出SkillHone框架，通过持久决策历史支持智能体技能持续演化，直接涉及智能体记忆系统设计
+2. [ActiveMem: Distributed Active Memory for Long-Horizon LLM Reasoning](/202606/12/2606.10532v1-activemem-distributed-active-memory-for-long-horizon-llm-reasoning)  
+   标签：评分：9.0/10、query:agent-memory
+   evidence：提出用于长程LLM推理的分布式主动记忆
+3. [MSUE: Multi-Modal Soccer Understanding Expert](/202606/12/2606.12106v1-msue-multi-modal-soccer-understanding-expert)  
    标签：评分：9.0/10、query:long-video
-   evidence：面向长视频理解的运动感知智能体与结构化记忆
-3. [MemToolAgent: Leveraging Memory for Tool Using Agents Based on Environment and User Feedback](/202606/11/2606.07909v2-memtoolagent-leveraging-memory-for-tool-using-agents-based-on-environment-and-user-feedback)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：基于环境与用户反馈的工具使用代理记忆管理
-4. [Remember with Confidence: Uncertainty Quantification for Spatio-temporal Memory with Probabilistic Guarantees](/202606/11/2606.08277v1-remember-with-confidence-uncertainty-quantification-for-spatio-temporal-memory-with-probabilistic-guarantees)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：面向长周期机器人操作的空间-时间记忆系统并引入不确定性量化
-5. [ConMem: Structured Memory-Guided Adaptation in Training-Free Multi-Agent Systems](/202606/11/2606.08702v1-conmem-structured-memory-guided-adaptation-in-training-free-multi-agent-systems)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：多代理系统中的记忆引导适应，结构化记忆卡
-6. [Experience Makes Skillful: Enabling Generalizable Medical Agent Reasoning via Self-Evolving Skill Memory](/202606/11/2606.09365v2-experience-makes-skillful-enabling-generalizable-medical-agent-reasoning-via-self-evolving-skill-memory)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：医疗智能体的自演化技能记忆
-7. [ActiveMem: Distributed Active Memory for Long-Horizon LLM Reasoning](/202606/11/2606.10532v1-activemem-distributed-active-memory-for-long-horizon-llm-reasoning)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：面向长程推理的分布式主动记忆
-8. [Infini Memory: Maintainable Topic Documents for Long-Term LLM Agent Memory](/202606/11/2606.10677v1-infini-memory-maintainable-topic-documents-for-long-term-llm-agent-memory)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：LLM代理的长期记忆，主题结构化文档
-9. [Organize then Retrieve: Hierarchical Memory Navigation for Efficient Agents](/202606/11/2606.11680v1-organize-then-retrieve-hierarchical-memory-navigation-for-efficient-agents)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：为高效代理设计的层次化记忆导航，将经验组织为文件系统式结构
-10. [From Content to Knowledge: Lightning Fast Long-Video Understanding with Neural Knowledge Representations](/202606/11/2606.11913v1-from-content-to-knowledge-lightning-fast-long-video-understanding-with-neural-knowledge-representations)  
-   标签：评分：9.0/10、query:long-video
-   evidence：长视频理解，神经知识表征
-11. [Natural-Language Temporal Grounding in Hour-Long Videos is a Search Problem: A Benchmark and Empirical Decomposition](/202606/11/2606.12300v1-natural-language-temporal-grounding-in-hour-long-videos-is-a-search-problem-a-benchmark-and-empirical-decomposition)  
-   标签：评分：9.0/10、query:long-video
-   evidence：小时级视频的自然语言时间定位
+   evidence：提出MSUE，多模态足球理解专家，用于长足球视频上的视觉问答，直接针对长视频问答
+4. [Imagine Before You Predict: Interleaved Latent Visual Reasoning for Video Event Prediction](/202606/12/2606.05769v1-imagine-before-you-predict-interleaved-latent-visual-reasoning-for-video-event-prediction)  
+   标签：评分：8.0/10、query:long-video
+   evidence：提出交错潜在视觉推理用于视频事件预测，属于长视频理解
+5. [Tree-of-Experience: A Structured Experience-Management Solution for Self-Evolving Agents under Low-Repetition and Implicit-Reward Environments](/202606/12/2606.06960v1-tree-of-experience-a-structured-experience-management-solution-for-self-evolving-agents-under-low-repetition-and-implicit-reward-environments)  
+   标签：评分：8.0/10、query:agent-memory
+   evidence：面向自进化智能体的结构化经验管理方法
+6. [Decision-Aware Memory Cards: Counterfactual-Inspired Context Selection and Compression for Tool-Using LLM Agents](/202606/12/2606.08151v1-decision-aware-memory-cards-counterfactual-inspired-context-selection-and-compression-for-tool-using-llm-agents)  
+   标签：评分：8.0/10、query:agent-memory
+   evidence：面向工具使用LLM智能体的决策感知记忆卡片
+7. [IntentKV: Cross-Turn Intent-Aware KV Cache Pruning for Agent Inference](/202606/12/2606.09916v1-intentkv-cross-turn-intent-aware-kv-cache-pruning-for-agent-inference)  
+   标签：评分：8.0/10、query:agent-memory
+   evidence：会话级查询记忆用于多轮LLM智能体推理
 
 ### 速读区论文标签
-1. [Frames2LoRA: Parametric Video Internalization for Vision-Language Models](/202606/11/2606.04351v2-frames2lora-parametric-video-internalization-for-vision-language-models)  
-   标签：评分：8.0/10、query:long-video
-   evidence：参数化视频内化实现高效查询回答
-2. [Rosetta Memory: Adaptive Memory for Cross-LLM Agents](/202606/11/2606.07711v1-rosetta-memory-adaptive-memory-for-cross-llm-agents)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：跨LLM智能体的自适应记忆，实现持久化与演化
-3. [Decision-Aware Memory Cards: Counterfactual-Inspired Context Selection and Compression for Tool-Using LLM Agents](/202606/11/2606.08151v1-decision-aware-memory-cards-counterfactual-inspired-context-selection-and-compression-for-tool-using-llm-agents)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：面向工具使用LLM代理的决策感知记忆卡
-4. [From Player to Master: Enhancing Test-Time Learning of LLM Agents via Reinforcement Learning over Memory](/202606/11/2606.08656v1-from-player-to-master-enhancing-test-time-learning-of-llm-agents-via-reinforcement-learning-over-memory)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：记忆更新训练，基于强化学习的记忆优化
-5. [MAVIS: Multi-Agent Video Retrieval via Structured Video Understanding](/202606/11/2606.09641v1-mavis-multi-agent-video-retrieval-via-structured-video-understanding)  
-   标签：评分：8.0/10、query:long-video
-   evidence：通过结构化视频理解的多智能体视频检索，支持属性级索引
-6. [Selection Integrity for LLM Graph Memory: An Accumulability Criterion for Information-Flow-Blind Retrieval](/202606/11/2606.12290v1-selection-integrity-for-llm-graph-memory-an-accumulability-criterion-for-information-flow-blind-retrieval)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：智能体图记忆的选择完整性
-7. [PROJECTMEM: A Local-First, Event-Sourced Memory and Judgment Layer for AI Coding Agents](/202606/11/2606.12329v1-projectmem-a-local-first-event-sourced-memory-and-judgment-layer-for-ai-coding-agents)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：AI编程智能体的本地优先记忆层
-8. [Driving Video Retrieval for Complex Queries with Structured Grounding](/202606/11/2606.09109v1-driving-video-retrieval-for-complex-queries-with-structured-grounding)  
+1. [CLaaS: Continual learning as a service for sample efficient online learning](/202606/12/2606.05559v1-claas-continual-learning-as-a-service-for-sample-efficient-online-learning)  
+   标签：评分：7.0/10、query:agent-memory
+   evidence：用于代理记忆的经验回放缓冲区
+2. [LatentSkill: From In-Context Textual Skills to In-Weight Latent Skills for LLM Agents](/202606/12/2606.06087v1-latentskill-from-in-context-textual-skills-to-in-weight-latent-skills-for-llm-agents)  
+   标签：评分：7.0/10、query:agent-memory
+   evidence：将文本技能转换为LLM智能体的隐式权重空间记忆
+3. [Towards One-to-Many Temporal Grounding](/202606/12/2606.06294v1-towards-one-to-many-temporal-grounding)  
    标签：评分：7.0/10、query:long-video
-   evidence：面向动态驾驶事件的视频检索框架，适用于长视频分析
+   evidence：视频查询的时间定位方法
+4. [When No Answer Is Correct: Diagnosing Absent Answer Detection for MLLMs in Video Understanding](/202606/12/2606.08239v1-when-no-answer-is-correct-diagnosing-absent-answer-detection-for-mllms-in-video-understanding)  
+   标签：评分：7.0/10、query:long-video
+   evidence：视频理解MLLM中缺失答案检测的诊断研究
+5. [4DP-QA: Scalable QA for 4D Perception in Vision Language Models](/202606/12/2606.11568v1-4dp-qa-scalable-qa-for-4d-perception-in-vision-language-models)  
+   标签：评分：6.0/10、query:long-video
+   evidence：针对VLM中4D感知的问答，涉及视频动态理解
 
 
 <div class="dpr-home-promo-card">

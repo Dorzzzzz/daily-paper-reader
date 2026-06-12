@@ -1,0 +1,257 @@
+Title: MSUE: Multi-Modal Soccer Understanding Expert
+
+URL Source: https://arxiv.org/pdf/2606.12106v1
+
+Published Time: Thu, 11 Jun 2026 01:06:53 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# MSUE: Multi-Modal Soccer Understanding Expert 
+
+Litao Li 1,† , Yibo Yu 2, Yufeng Hu 4, Zhuo Yang 3, Jiali Wen 1, Yixin Chen 1, Yixi Zhou 11South China University of Technology, 2Johns Hopkins University, 3Peking University 
+
+> 4
+
+University of Electronic Science and Technology of China 
+
+> †
+
+Project lead seonyee@foxmail.com 
+
+Abstract 
+
+This paper presents our solution to the 2026 SoccerNet VQA Challenge. We first develop a cost-effective data syn-thesis pipeline driven by a Vision-Language Model (VLM), which systematically restructures raw domain data into di-verse VQA samples, including concise answers and long-form responses. Second, we propose MSUE, a multi-expert question answering architecture that employs a Large Lan-guage Model (LLM) to dynamically dispatch questions to text, image, and video experts. These experts are instan-tiated as a strong text baseline Gemini3-Flash, a fine-tuned Qwen3-VL, and an external knowledge base, re-spectively, working collaboratively to enhance VQA perfor-mance. MSUE achieves an accuracy of 0.95 on the chal-lenge benchmark, securing third place in the leaderboard. 
+
+1. Introduction 
+
+Visual Question Answering (VQA) in dynamic soccer sce-narios is a challenging task that requires precise visual per-ception, temporal reasoning, and rich domain knowledge. Existing approaches often struggle to jointly handle hetero-geneous modalities and domain-specific reasoning, leading to limited performance in complex real-world settings. In this work, we present our winning solution for the 2026 SoccerNet VQA Challenge. We first construct a cost effective data synthesis pipeline driven by a Vision Language Model, which systematically transforms raw domain data into diverse VQA samples with both concise and long form answers, significantly improv-ing data coverage and diversity. Building upon this, we propose MSUE, a multi expert question answering frame-work that leverages a Large Language Model to dynam-ically route queries to specialized experts in text, image, and video domains, including Gemini3-Flash, a fine-tuned Qwen3-VL, and an external knowledge base. This collab-orative design enables effective integration of multimodal perception and domain knowledge. Our approach achieves an accuracy of 0.95 on the challenge benchmark, surpassing the second place by over 5%, establishing a new state of the art and demonstrating the effectiveness of our framework. 
+
+2. Data Curation 
+
+2.1. Data Source 
+
+Our training pipeline leverages data from Soccer-Bench [14], SoccerNet-V3 [3, 4, 6, 8], SoccerChat [7], SoccerReplay-1988 [15], SoccerNet-Caption [12], and SoccerWiki [14]. After manual cleaning and consistency rectification, we obtain 32,151 high-quality instruction-tuning samples. The overall workflow is summarized in Figure 1. 
+
+2.2. Data Pipeline 
+
+Caption and MCQ Generation. The raw corpus contains both pure textual sources and visual data, but their super-vision signals are not directly aligned in a unified training format. To construct dense semantic annotations, we first use DeepSeek-V3.2 [11] and Qwen3-VL-32B [1] to derive detailed captions from these heterogeneous inputs, cover-ing both textual knowledge and fine-grained visual con-tent. Based on the resulting dense captions, we further em-ploy Qwen3-VL-32B to generate multiple-choice questions (MCQs) together with candidate options and reference an-swers, thereby converting all samples into a standardized VQA MCQ format. 
+
+Ensemble Consistency Verification. Initial reformatted data contains 20% noise. We use three VLMs: Step3-VL-10B [10], Qwen3-VL-235B-A22B [1], and InternVL3.5-241B-A28B [16] for cross-validation. A sample is kept only if at least two models agree on the answer. For ambigu-ous samples, 80% are discarded to reduce label noise, while 20% are retained to preserve diversity. 
+
+2.3. Task-Guided Data Synthesis 
+
+To increase instructional diversity, we perform SFT with LoRA [9] on Qwen3-VL-32B to build an instruction engine. 1
+
+> arXiv:2606.12106v1 [cs.CV] 10 Jun 2026
+
+This engine converts single-query instances into multi-turn dialogues by projecting 14 predefined QA paradigms onto each visual input, generating roughly three diverse reason-ing tasks per sample. The prompt design is illustrated in Figure 1. 
+
+3. Baseline 
+
+To determine the optimal baseline for subsequent train-ing, we evaluate the performance of several state-of-the-art (SOTA) Vision-Language Models (VLMs) on the official test set. The comparative results are summarized in Table 1.  
+
+> Table 1. Performance comparison of various SOTA VLMs on the official SoccerNet test set. The best results are highlighted in bold .
+
+Model Params Accuracy (%) GPT-4o [13] - 0.39 Qwen2.5-VL-7B [2] 7B 0.34 Qwen2.5-VL-32B [2] 32B 0.40 InternVL3.5-38B [16] 38B 0.41 Step3-VL-10B [10] 10B 0.37 Qwen3-VL-8B [1] 8B 0.38 
+
+Qwen3-VL-32B [1] 32B 0.45 
+
+Based on the results, we selected Qwen3-VL-32B, which exhibits superior zero-shot generalization capabilities, as our baseline. 
+
+4. Method 
+
+Inspired by SoccerAgent [14], We propose MSUE (Multi-modal Soccer Understanding Expert), a modular divide-and-conquer framework for football video, image, and text understanding. MSUE consists of a domain-adapted vision backbone, a lightweight question router, and specialized ex-perts for text, image, and video reasoning. By decompos-ing heterogeneous VQA questions into expert-specific in-ference paths, the framework improves robustness and ef-ficiency under diverse reasoning demands. Our method achieves 0.95 accuracy on the challenge benchmark. The overall framework is illustrated in Figure 1. 
+
+4.1. Vision Foundational Backbone 
+
+The Vision Foundational Backbone (VFB) is built upon Qwen3-VL-32B-Instruct [1] through a two-stage adaptation pipeline. We first perform full-parameter tuning on a cu-rated football caption corpus to inject domain-specific vi-sual semantics. We then conduct LoRA instruction tun-ing on augmented VQA data spanning open-ended and multiple-choice tasks. This progressive adaptation strength-ens football reasoning while preserving general multimodal capability, yielding a strong unified visual expert. We im-plement the two-stage fine-tuning pipeline using the ms-                      
+
+> Table 2. Training Hyper-parameters for the two-stage VFB train-ing pipeline.
+> Hyper-param Stage 1: Captioning Stage 2: Q&A
+> Type Full-parameter LoRA (Rank=16,Alpha=32) Learning Rate 1×10 −52×10 −4
+> Epochs 24Batch Size 816 DeepSpeed Zero3-offload Zero2 max-length 8192 10240 Weight Decay 0.05 0.1 Warmup-Ratio 0.05 0.05
+
+swift and execute all training and inference procedures on a compute node equipped with 8 ×NVIDIA H100 GPUs. The specific configurations for our two-stage VFB training pipeline are detailed in Table 3. 
+
+4.2. Question Routing and Expert Dispatch 
+
+To address the heterogeneous nature of soccer VQA, we di-rectly use Qwen3-4B [1] with a routing prompt to classify each query into 14 predefined categories and then dispatch it to the corresponding expert. This routing stage separates questions requiring temporal reasoning, visual grounding, knowledge retrieval, or multi-step inference before answer generation, substantially reducing errors caused by inappro-priate inference paths. 
+
+4.3. Multi-Modal Q&A Experts 
+
+Following question routing, MSUE dispatches each query to one of three modality-specific experts. The Text Q&A Expert uses Gemini-3-Flash [5] with SoccerWiki retrieval. Structured knowledge entries are encoded by all-MiniLM-L6-v2, and the retrieved evidence is appended to the prompt for grounded answer generation. The Image Q&A Expert uses the fine-tuned VFB with cross-modal retrieval over SoccerWiki images and meta-data. The retrieved references provide external evidence for entity recognition and scene understanding. The Video Q&A Expert uses the fine-tuned VFB with a coarse-to-fine strategy. The model first produces dense descriptions of entities, actions, and scene context. These intermediate summaries are then used to retrieve matched evidence from SoccerReplay [15], which is incorporated through retrieval-augmented generation for final answer prediction. 
+
+4.4. Failure-Aware Expert Refinement 
+
+Beyond the core expert architecture, we introduce targeted refinements for representative failure-prone categories. For Jersey Color Relevant QA , we decompose reason-ing into event recognition, responsible-player identification, and jersey color localization, reducing confusion in visu-ally similar scenarios. For Commentary Generation , we 2Data Curation 
+
+Data Source 
+
+SoccerNet v3, SoccerBench... 
+
+Stage1  Caption and MCQ Generation 
+
+MCQ 
+
+Stage2  Consistency Verification 
+
+VLM s
+
+Keep 
+
+High prob discard 
+
+Task -Guided Data Synthesis 
+
+> LoRA
+> Annotator
+> Prompt
+> Overview of the
+> 14 Categories
+> of questions
+> Training
+> Data
+
+High quality  samples  (Caption & QA) 
+
+MSUE Pipeline  Vision Foundational Backbone 
+
+2-stage FT 
+
+Question Router 
+
+Text QA Expert  Image QA Expert  Video QA Expert 
+
+> SoccerWiki
+> Retrieval
+> SoccerWiki
+> Retrieval
+> Coarse -to -fine
+> strategy
+> SoccerReplay
+> Retrieval
+
+Failure -Aware Expert Refinement 
+
+> Jersey Color
+> Event -Team -Color
+> Commentary
+> Semantic Filtering
+> Background Knowledge
+> Entity+SoccerWiki
+
+Final Answer          
+
+> RAG
+> database
+> "You are an expert AI assistant specialized in football (soccer)
+> video understanding, analysis, and player knowledge. "
+> "Your capabilities span 14 core task types: game state QA, match
+> situation QA, commentary generation, "
+> "commentary -relevant QA, background knowledge QA (text and
+> image), action classification, jersey color/number recognition, "
+> "multi -view foul detection, score/time reasoning, replay
+> grounding, and camera status analysis
+> (switching/classification). \n\n"
+> "You possess comprehensive knowledge of professional football
+> players, including their identities, nationalities, clubs, "
+> "positions, playing styles, career milestones, and iconic moments.
+> When visual evidence (e.g., jersey number, appearance, "
+> "context) aligns with this knowledge, use it to inform your
+> answer. \n\n"
+> "Given a question (Q) and optional visual input (video, images,
+> or none), select the single option (O1, O2, etc.) "
+> "that is most directly supported by the combination of visual
+> evidence and football domain knowledge. Pay strict attention
+> to: \n"
+> "-Temporal dynamics and player/ball trajectories, \n"
+> "-Official football rules (e.g., offside, handball, foul criteria), \n"
+> "-Visual identifiers (jersey numbers, colors, logos, facial
+> features), \n"
+> "-Player -specific context (e.g., 'Which player scored?' requires
+> mapping visual cues to known player profiles), \n"
+> "-Consistency across multi -view or multi -frame inputs. \n\n"
+> "Your response must be ONLY the option identifier (e.g., 'O1',
+> 'O2', 'O3', 'O4'). "
+> "Do not include explanations, punctuation, or any additional
+> text."
+> Jersey Color ?
+> Step1. Identify the soccer event at
+> that moment
+> Step2. Identify the two teams in
+> the match and the match details
+> Step3. Determine jersey colors based
+> on team and match information, as
+> well as native visual data
+> Commentary ?
+> Comment
+> Options
+> Best
+> Choice
+> Background Knowledge ?
+> Question Entity
+> Extract
+> Search
+> Best
+> Choice
+
+Prompt for  Task -Guided  Data Synthesis 
+
+Caption Figure 1. Overview of our overall framework, including the data curation pipeline, the prompt design for task-guided data synthesis, the working pipeline of MSUE, and the failure-aware expert refinement strategy. Table 3. Training Hyper-parameters for the two-stage VFB train-ing pipeline. All experiments were conducted on a server with 8 ×
+
+NVIDIA H100 GPUs. 
+
+Hyper-param Stage 1: Captioning Stage 2: Q&A (LoRA) 
+
+Type Full-parameter LoRA Learning Rate 1 × 10 −5 2 × 10 −4
+
+Epochs 2 4Batch Size 8 16 LoRA Rank ( r) - 16 LoRA Alpha ( α) - 32 Weight Decay 0.05 0.1 Warmup-Ratio 0.05 0.05 
+
+address hallucination and answer inconsistency by intro-ducing semantic alignment between generated commentary and candidate options, filtering irrelevant choices before fi-nal prediction. For Background Knowledge Image QA , we first identify the queried entity type, then retrieve matched SoccerWiki knowledge for prompt augmentation, improv-ing disambiguation and reducing errors caused by incom-plete parametric knowledge. These refinements complement expert routing and im-prove robustness on cases involving ambiguity, hallucina-tion, and external knowledge dependence. 
+
+5. Experiments 
+
+5.1. Implementation Details 
+
+All training and inference procedures were executed on a high-performance compute node equipped with 8×
+
+NVIDIA H100 GPUs. The specific configurations for our two-stage VFB training pipeline are detailed in Table 3. 
+
+5.2. Comparison Experiments 
+
+We evaluate M-SUE on the SoccerNet-VQA test set and compare it with several state-of-the-art MLLMs. As shown in Table 4, our method achieves a top accuracy of 0.91 ,setting a new state-of-the-art performance. The results demonstrate that while large-scale general VLMs (e.g., In-ternVL3.5) possess strong foundational capabilities, they often struggle with specialized soccer rules and player iden-tification in zero-shot scenarios. By leveraging our high-quality data synthesis pipeline, M-SUE successfully aligns professional soccer domain knowledge with visual per-ception, significantly outperforming both base models and larger-scale competitors. 
+
+Table 4. Comparison with state-of-the-art methods on the SoccerNet-VQA test set. FT and ZS denote Fine-tuned and Zero-shot, respectively. Our M-SUE achieves the best performance among all models. Method Type Parameters Accuracy (%) Qwen2.5-VL-7B FT 7B 0.54 Qwen2.5-VL-32B FT 32B 0.63 InternVL3.5-38B FT 38B 0.63 Qwen3-VL-8B FT 8B 0.6 Qwen3-VL-32B FT 32B 0.78 Qwen3-VL-235B-A22B ZS 235B 0.65 InternVL3.5-241B-A28B ZS 241B 0.64 Qwen3.5-397B-A17B ZS 397B 0.72 
+
+M-SUE (Ours) FT 32B 0.91 
+
+5.3. Ablation on VFB Training Stages 
+
+We evaluate the incremental gains of the VFB across dif-ferent training phases. Table 5 illustrates the performance 3trajectory from general perception to domain-specific rea-soning. 
+
+Table 5. Ablation study of VFB training stages on the SoccerNet-VQA validation set. Stage 1 aligns basic soccer visual features, while Stage 2 introduces large-scale synthetic instruction data. Training Stage Data Composition Accuracy (%) Baseline - 0.45 Stage 1 Caption Pairs 0.73 Stage 2 Q&A Pairs 0.78 
+
+As shown, the Baseline model exhibits a substantial do-main gap. Stage 1 (Caption Pairs) bridges this gap by es-tablishing a mapping between visual actions and profes-sional soccer vocabulary, yielding a +28% gain . Stage 2 (Q&A Pairs) further improves accuracy to 0.78 , indicating that instruction-tuning on diverse question formats is essen-tial for evolving from passive description to active temporal reasoning. 
+
+5.4. Effectiveness of Expert Design 
+
+We conduct a granular ablation study to evaluate the in-dividual contributions of the Text, Image, and Video Ex-perts. As shown in Table 6, each specialized module pro-gressively enhances the model’s reasoning accuracy by ad-dressing specific modality challenges. 
+
+Table 6. Ablation of the three Expert modules. Each expert ad-dresses specific challenges: Text/Image Experts mitigate factual hallucinations via RAG, while the Video Expert enhances tempo-ral reasoning. Method Component Accuracy (%) VFB 0.78 + Text Expert 0.83 + Image Expert 0.85 + Video Expert 0.91 
+
+Text and Image Experts for Fact Verification. To mitigate modality interference and factual hallucinations prevalent in standard VLMs, the Text and Image Experts integrate struc-tured metadata retrieval from SoccerWiki with visual simi-larity search. This retrieval-augmented mechanism grounds entity recognition (e.g., player identities and club history) in external knowledge, improving accuracy from 0.78 to 0.85 . These results demonstrate the efficacy of incorporat-ing domain-specific knowledge for specialized sports anal-ysis. Video Expert for Semantic Alignment. The integration of the Video Expert further increases performance to 0.91 .Addressing the semantic ambiguity inherent in short Soc-cerNet queries, we employ a coarse-to-fine reasoning strat-egy. This pipeline first generates dense descriptions of player actions as intermediate representations, subsequently aligning low-level visual features with high-level semantic queries. Empirical results indicate that structured reason-ing prior to answer generation significantly enhances per-formance in complex video VQA tasks. 
+
+References 
+
+[1] Shuai Bai, Yuxuan Cai, Ruizhe Chen, Keqin Chen, Xionghui Chen, Zesen Cheng, Lianghao Deng, Wei Ding, Chang Gao, Chunjiang Ge, Wenbin Ge, Zhifang Guo, Qidong Huang, Jie Huang, Fei Huang, Binyuan Hui, Shutong Jiang, Zhao-hai Li, Mingsheng Li, Mei Li, Kaixin Li, Zicheng Lin, Jun-yang Lin, Xuejing Liu, Jiawei Liu, Chenglong Liu, Yang Liu, Dayiheng Liu, Shixuan Liu, Dunjie Lu, Ruilin Luo, Chenxu Lv, Rui Men, Lingchen Meng, Xuancheng Ren, Xingzhang Ren, Sibo Song, Yuchong Sun, Jun Tang, Jianhong Tu, Jian-qiang Wan, Peng Wang, Pengfei Wang, Qiuyue Wang, Yux-uan Wang, Tianbao Xie, Yiheng Xu, Haiyang Xu, Jin Xu, Zhibo Yang, Mingkun Yang, Jianxin Yang, An Yang, Bowen Yu, Fei Zhang, Hang Zhang, Xi Zhang, Bo Zheng, Humen Zhong, Jingren Zhou, Fan Zhou, Jing Zhou, Yuanzhi Zhu, and Ke Zhu. Qwen3-vl technical report, 2025. 1, 2 [2] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhao-hai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, Jiabo Ye, Xi Zhang, Tianbao Xie, Zesen Cheng, Hang Zhang, Zhibo Yang, Haiyang Xu, and Junyang Lin. Qwen2.5-vl technical report, 2025. 2 [3] Anthony Cioppa, Adrien Deliège, Silvio Giancola, Bernard Ghanem, and Marc Van Droogenbroeck. Scaling up soccer-net with multi-view spatial localization and re-identification. 
+
+Scientific Data , 9(1):355, 2022. 1 [4] Anthony Cioppa, Silvio Giancola, Adrien Deliege, Le Kang, Xin Zhou, Zhiyu Cheng, Bernard Ghanem, and Marc Van Droogenbroeck. Soccernet-tracking: Multiple object track-ing dataset and benchmark in soccer videos, 2022. 1 [5] Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Marcel Blis-tein, Ori Ram, Dan Zhang, Evan Rosen, et al. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261 , 2025. 2 [6] Adrien Deliège, Anthony Cioppa, Silvio Giancola, Meisam J. Seikavandi, Jacob V. Dueholm, Kamal Nas-rollahi, Bernard Ghanem, Thomas B. Moeslund, and Marc Van Droogenbroeck. Soccernet-v2: A dataset and benchmarks for holistic understanding of broadcast soccer videos, 2021. 1 [7] Sushant Gautam, Cise Midoglu, Vajira Thambawita, Michael A. Riegler, Pål Halvorsen, and Mubarak Shah. Soc-cerchat: Integrating multimodal data for enhanced soccer game understanding. ArXiv e-prints , 2025. 1 [8] Silvio Giancola, Mohieddine Amine, Tarek Dghaily, and Bernard Ghanem. Soccernet: A scalable dataset for ac-tion spotting in soccer videos. In 2018 IEEE/CVF Con-
+
+4ference on Computer Vision and Pattern Recognition Work-shops (CVPRW) . IEEE, 2018. 1 [9] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Liang Wang, Weizhu Chen, et al. Lora: Low-rank adaptation of large language models. 
+
+Iclr , 1(2):3, 2022. 1 [10] Ailin Huang, Chengyuan Yao, Chunrui Han, Fanqi Wan, Hangyu Guo, Haoran Lv, Hongyu Zhou, Jia Wang, Jian Zhou, Jianjian Sun, Jingcheng Hu, Kangheng Lin, Liang Zhao, Mitt Huang, Song Yuan, Wenwen Qu, Xiangfeng Wang, Yanlin Lai, Yingxiu Zhao, Yinmin Zhang, Yukang Shi, Yuyang Chen, Zejia Weng, Ziyang Meng, Ang Li, Aobo Kong, Bo Dong, Changyi Wan, David Wang, Di Qi, Ding-ming Li, En Yu, Guopeng Li, Haiquan Yin, Han Zhou, Hanshan Zhang, Haolong Yan, Hebin Zhou, Hongbo Peng, Jiaran Zhang, Jiashu Lv, Jiayi Fu, Jie Cheng, Jie Zhou, Jisheng Yin, Jingjing Xie, Jingwei Wu, Jun Zhang, Jun-feng Liu, Kaijun Tan, Kaiwen Yan, Liangyu Chen, Lina Chen, Mingliang Li, Qian Zhao, Quan Sun, Shaoliang Pang, Shengjie Fan, Shijie Shang, Siyuan Zhang, Tianhao You, Wei Ji, Wuxun Xie, Xiaobo Yang, Xiaojie Hou, Xiaoran Jiao, Xiaoxiao Ren, Xiangwen Kong, Xin Huang, Xin Wu, Xing Chen, Xinran Wang, Xuelin Zhang, Yana Wei, Yang Li, Yan-ming Xu, Yeqing Shen, Yuang Peng, Yue Peng, Yu Zhou, Yusheng Li, Yuxiang Yang, Yuyang Zhang, Zhe Xie, Zhewei Huang, Zhenyi Lu, Zhimin Fan, Zihui Cheng, Daxin Jiang, Qi Han, Xiangyu Zhang, Yibo Zhu, and Zheng Ge. Step3-vl-10b technical report, 2026. 1, 2 [11] Aixin Liu, Aoxue Mei, Bangcai Lin, Bing Xue, Bingxuan Wang, Bingzheng Xu, Bochao Wu, Bowei Zhang, Chao-fan Lin, Chen Dong, et al. Deepseek-v3. 2: Pushing the frontier of open large language models. arXiv preprint arXiv:2512.02556 , 2025. 1 [12] Hassan Mkhallati, Anthony Cioppa, Silvio Giancola, Bernard Ghanem, and Marc Van Droogenbroeck. Soccernet-caption: Dense video captioning for soccer broadcasts com-mentaries. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 5074– 5085, 2023. 1 [13] OpenAI, :, Aaron Hurst, Adam Lerer, Adam P. Goucher, Adam Perelman, Aditya Ramesh, Aidan Clark, AJ Ostrow, Akila Welihinda, Alan Hayes, Alec Radford, Aleksander M ˛ adry, Alex Baker-Whitcomb, Alex Beutel, Alex Borzunov, Alex Carney, Alex Chow, Alex Kirillov, Alex Nichol, Alex Paino, Alex Renzin, Alex Tachard Passos, Alexander Kir-illov, Alexi Christakis, Alexis Conneau, Ali Kamali, Al-lan Jabri, Allison Moyer, Allison Tam, Amadou Crookes, Amin Tootoochian, Amin Tootoonchian, Ananya Kumar, Andrea Vallone, Andrej Karpathy, Andrew Braunstein, An-drew Cann, Andrew Codispoti, Andrew Galu, Andrew Kon-drich, Andrew Tulloch, Andrey Mishchenko, Angela Baek, Angela Jiang, Antoine Pelisse, Antonia Woodford, Anuj Gosalia, Arka Dhar, Ashley Pantuliano, Avi Nayak, Avi-tal Oliver, Barret Zoph, Behrooz Ghorbani, Ben Leim-berger, Ben Rossen, Ben Sokolowsky, Ben Wang, Benjamin Zweig, Beth Hoover, Blake Samic, Bob McGrew, Bobby Spero, Bogo Giertler, Bowen Cheng, Brad Lightcap, Bran-don Walkin, Brendan Quinn, Brian Guarraci, Brian Hsu, Bright Kellogg, Brydon Eastman, Camillo Lugaresi, Car-roll Wainwright, Cary Bassin, Cary Hudson, Casey Chu, Chad Nelson, Chak Li, Chan Jun Shern, Channing Con-ger, Charlotte Barette, Chelsea Voss, Chen Ding, Cheng Lu, Chong Zhang, Chris Beaumont, Chris Hallacy, Chris Koch, Christian Gibson, Christina Kim, Christine Choi, Christine McLeavey, Christopher Hesse, Claudia Fischer, Clemens Winter, Coley Czarnecki, Colin Jarvis, Colin Wei, Constantin Koumouzelis, Dane Sherburn, Daniel Kappler, Daniel Levin, Daniel Levy, David Carr, David Farhi, David Mely, David Robinson, David Sasaki, Denny Jin, Dev Val-ladares, Dimitris Tsipras, Doug Li, Duc Phong Nguyen, Duncan Findlay, Edede Oiwoh, Edmund Wong, Ehsan As-dar, Elizabeth Proehl, Elizabeth Yang, Eric Antonow, Eric Kramer, Eric Peterson, Eric Sigler, Eric Wallace, Eugene Brevdo, Evan Mays, Farzad Khorasani, Felipe Petroski Such, Filippo Raso, Francis Zhang, Fred von Lohmann, Freddie Sulit, Gabriel Goh, Gene Oden, Geoff Salmon, Giulio Starace, Greg Brockman, Hadi Salman, Haiming Bao, Haitang Hu, Hannah Wong, Haoyu Wang, Heather Schmidt, Heather Whitney, Heewoo Jun, Hendrik Kirchner, Henrique Ponde de Oliveira Pinto, Hongyu Ren, Huiwen Chang, Hyung Won Chung, Ian Kivlichan, Ian O’Connell, Ian O’Connell, Ian Osband, Ian Silber, Ian Sohl, Ibrahim Okuyucu, Ikai Lan, Ilya Kostrikov, Ilya Sutskever, Ing-mar Kanitscheider, Ishaan Gulrajani, Jacob Coxon, Jacob Menick, Jakub Pachocki, James Aung, James Betker, James Crooks, James Lennon, Jamie Kiros, Jan Leike, Jane Park, Jason Kwon, Jason Phang, Jason Teplitz, Jason Wei, Jason Wolfe, Jay Chen, Jeff Harris, Jenia Varavva, Jessica Gan Lee, Jessica Shieh, Ji Lin, Jiahui Yu, Jiayi Weng, Jie Tang, Jieqi Yu, Joanne Jang, Joaquin Quinonero Candela, Joe Beutler, Joe Landers, Joel Parish, Johannes Heidecke, John Schul-man, Jonathan Lachman, Jonathan McKay, Jonathan Uesato, Jonathan Ward, Jong Wook Kim, Joost Huizinga, Jordan Sitkin, Jos Kraaijeveld, Josh Gross, Josh Kaplan, Josh Sny-der, Joshua Achiam, Joy Jiao, Joyce Lee, Juntang Zhuang, Justyn Harriman, Kai Fricke, Kai Hayashi, Karan Singhal, Katy Shi, Kavin Karthik, Kayla Wood, Kendra Rimbach, Kenny Hsu, Kenny Nguyen, Keren Gu-Lemberg, Kevin But-ton, Kevin Liu, Kiel Howe, Krithika Muthukumar, Kyle Luther, Lama Ahmad, Larry Kai, Lauren Itow, Lauren Work-man, Leher Pathak, Leo Chen, Li Jing, Lia Guy, Liam Fe-dus, Liang Zhou, Lien Mamitsuka, Lilian Weng, Lindsay McCallum, Lindsey Held, Long Ouyang, Louis Feuvrier, Lu Zhang, Lukas Kondraciuk, Lukasz Kaiser, Luke He-witt, Luke Metz, Lyric Doshi, Mada Aflak, Maddie Simens, Madelaine Boyd, Madeleine Thompson, Marat Dukhan, Mark Chen, Mark Gray, Mark Hudnall, Marvin Zhang, Mar-wan Aljubeh, Mateusz Litwin, Matthew Zeng, Max John-son, Maya Shetty, Mayank Gupta, Meghan Shah, Mehmet Yatbaz, Meng Jia Yang, Mengchao Zhong, Mia Glaese, Mi-anna Chen, Michael Janner, Michael Lampe, Michael Petrov, Michael Wu, Michele Wang, Michelle Fradin, Michelle Pokrass, Miguel Castro, Miguel Oom Temudo de Cas-tro, Mikhail Pavlov, Miles Brundage, Miles Wang, Mi-nal Khan, Mira Murati, Mo Bavarian, Molly Lin, Murat Yesildal, Nacho Soto, Natalia Gimelshein, Natalie Cone, 
+
+5Natalie Staudacher, Natalie Summers, Natan LaFontaine, Neil Chowdhury, Nick Ryder, Nick Stathas, Nick Turley, Nik Tezak, Niko Felix, Nithanth Kudige, Nitish Keskar, Noah Deutsch, Noel Bundick, Nora Puckett, Ofir Nachum, Ola Okelola, Oleg Boiko, Oleg Murk, Oliver Jaffe, Olivia Watkins, Olivier Godement, Owen Campbell-Moore, Patrick Chao, Paul McMillan, Pavel Belov, Peng Su, Peter Bak, Pe-ter Bakkum, Peter Deng, Peter Dolan, Peter Hoeschele, Peter Welinder, Phil Tillet, Philip Pronin, Philippe Tillet, Prafulla Dhariwal, Qiming Yuan, Rachel Dias, Rachel Lim, Rahul Arora, Rajan Troll, Randall Lin, Rapha Gontijo Lopes, Raul Puri, Reah Miyara, Reimar Leike, Renaud Gaubert, Reza Zamani, Ricky Wang, Rob Donnelly, Rob Honsby, Rocky Smith, Rohan Sahai, Rohit Ramchandani, Romain Huet, Rory Carmichael, Rowan Zellers, Roy Chen, Ruby Chen, Ruslan Nigmatullin, Ryan Cheu, Saachi Jain, Sam Altman, Sam Schoenholz, Sam Toizer, Samuel Miserendino, Sand-hini Agarwal, Sara Culver, Scott Ethersmith, Scott Gray, Sean Grove, Sean Metzger, Shamez Hermani, Shantanu Jain, Shengjia Zhao, Sherwin Wu, Shino Jomoto, Shirong Wu, Shuaiqi, Xia, Sonia Phene, Spencer Papay, Srinivas Narayanan, Steve Coffey, Steve Lee, Stewart Hall, Suchir Balaji, Tal Broda, Tal Stramer, Tao Xu, Tarun Gogineni, Taya Christianson, Ted Sanders, Tejal Patwardhan, Thomas Cunninghman, Thomas Degry, Thomas Dimson, Thomas Raoux, Thomas Shadwell, Tianhao Zheng, Todd Under-wood, Todor Markov, Toki Sherbakov, Tom Rubin, Tom Stasi, Tomer Kaftan, Tristan Heywood, Troy Peterson, Tyce Walters, Tyna Eloundou, Valerie Qi, Veit Moeller, Vinnie Monaco, Vishal Kuo, Vlad Fomenko, Wayne Chang, Weiyi Zheng, Wenda Zhou, Wesam Manassra, Will Sheu, Woj-ciech Zaremba, Yash Patil, Yilei Qian, Yongjik Kim, You-long Cheng, Yu Zhang, Yuchen He, Yuchen Zhang, Yujia Jin, Yunxing Dai, and Yury Malkov. Gpt-4o system card, 2024. 2 [14] Jiayuan Rao, Zifeng Li, Haoning Wu, Ya Zhang, Yanfeng Wang, and Weidi Xie. Multi-agent system for comprehensive soccer understanding. In ACM Multimedia 2025 , 2025. 1, 2 [15] Jiayuan Rao, Haoning Wu, Hao Jiang, Ya Zhang, Yanfeng Wang, and Weidi Xie. Towards universal soccer video un-derstanding. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , 2025. 1, 2 [16] Weiyun Wang, Zhangwei Gao, Lixin Gu, Hengjun Pu, Long Cui, Xingguang Wei, Zhaoyang Liu, Linglin Jing, Sheng-long Ye, Jie Shao, Zhaokai Wang, Zhe Chen, Hongjie Zhang, Ganlin Yang, Haomin Wang, Qi Wei, Jinhui Yin, Wenhao Li, Erfei Cui, Guanzhou Chen, Zichen Ding, Changyao Tian, Zhenyu Wu, Jingjing Xie, Zehao Li, Bowen Yang, Yuchen Duan, Xuehui Wang, Zhi Hou, Haoran Hao, Tianyi Zhang, Songze Li, Xiangyu Zhao, Haodong Duan, Nianchen Deng, Bin Fu, Yinan He, Yi Wang, Conghui He, Botian Shi, Jun-jun He, Yingtong Xiong, Han Lv, Lijun Wu, Wenqi Shao, Kaipeng Zhang, Huipeng Deng, Biqing Qi, Jiaye Ge, Qipeng Guo, Wenwei Zhang, Songyang Zhang, Maosong Cao, Jun-yao Lin, Kexian Tang, Jianfei Gao, Haian Huang, Yuzhe Gu, Chengqi Lyu, Huanze Tang, Rui Wang, Haijun Lv, Wanli Ouyang, Limin Wang, Min Dou, Xizhou Zhu, Tong Lu, Dahua Lin, Jifeng Dai, Weijie Su, Bowen Zhou, Kai Chen, Yu Qiao, Wenhai Wang, and Gen Luo. Internvl3.5: Advanc-ing open-source multimodal models in versatility, reasoning, and efficiency, 2025. 1, 2 
+
+6
