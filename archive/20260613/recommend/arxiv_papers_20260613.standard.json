@@ -1,0 +1,569 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-13T21:11:01.887617+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 3,
+    "deep_cap": 7,
+    "deep_selected": 3,
+    "quick_candidates": 10,
+    "quick_skim_target": 12,
+    "quick_selected": 10
+  },
+  "deep_dive": [
+    {
+      "id": "2606.10694v1",
+      "source": "arxiv",
+      "title": "REAL: A Reasoning-Enhanced Graph Framework for Long-Term Memory Management of LLMs",
+      "abstract": "Large Language Models (LLMs) are increasingly expected to interact with users over long time horizons. However, due to their finite context window, LLMs cannot retain all past interactions, making long-term memory management essential for storing, updating, and retrieving historical information beyond the context limit. Although recent memory systems attempt to address this issue by storing historical information externally, existing approaches suffer from three key limitations: flat text-based memory organizations fail to capture explicit relations among memories, structured memory systems often destructively overwrite evolving facts, and current retrieval mechanisms remain query-agnostic and passive when evidence is incomplete. REAL constructs long-term conversational memory as a temporal and confidence-aware directed property graph, where each atomic fact is represented with entities, relations, valid-time intervals, confidence scores, and exploration intent labels. During memory construction, REAL adopts a non-destructive temporal update strategy that preserves parallel fact versions and their validity intervals, enabling faithful tracking of fact evolution. During retrieval, REAL anchors query-relevant root entities, decouples their exploration intents, and performs semantic evaluator-guided hybrid beam search to extract compact memory subgraphs. It further incorporates counterfactual inference to repair unreliable retrieval states and recover missing memory evidence through implicit logical relations. Comprehensive experiments demonstrate that REAL substantially improves long-term memory performance over flat-text, graph-based, and existing memory baselines, achieving an average improvement of 22.72\\%.",
+      "authors": [
+        "Keer Lu",
+        "Liwei Chen",
+        "Guoqing Jiang",
+        "Zhiheng Qin",
+        "Yunhuai Liu",
+        "Wentao Zhang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-09T10:53:10+00:00",
+      "link": "https://arxiv.org/pdf/2606.10694v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "long-term memory management for LLMs with graph framework",
+      "llm_evidence_cn": "LLM长期记忆管理的图框架",
+      "llm_evidence": "LLM长期记忆管理的图框架",
+      "canonical_evidence": "LLM长期记忆管理的图框架",
+      "llm_tldr_en": "REAL proposes a reasoning-enhanced graph framework for LLM long-term memory management, storing structured memory with explicit relations and enabling query-aware retrieval.",
+      "llm_tldr_cn": "大语言模型因上下文窗口有限需要长期记忆管理。现有方法存在记忆组织扁平、事实覆盖丢失、检索被动等问题。REAL提出推理增强的图框架，以结构化的方式存储记忆并维护显式关系，支持查询感知的主动检索和事实演化更新。实验表明在长对话保持和知识更新任务上显著优于基线。",
+      "llm_tldr": "大语言模型因上下文窗口有限需要长期记忆管理。现有方法存在记忆组织扁平、事实覆盖丢失、检索被动等问题。REAL提出推理增强的图框架，以结构化的方式存储记忆并维护显式关系，支持查询感知的主动检索和事实演化更新。实验表明在长对话保持和知识更新任务上显著优于基线。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.09803v1",
+      "source": "arxiv",
+      "title": "Echo-Memory: A Controlled Study of Memory in Action World Models",
+      "abstract": "We present \\textbf{Echo-Memory}, a controlled study of memory mechanisms in action-conditioned world models. These models generate multi-segment videos from a first frame, text prompt, and camera-action sequence, but their central failure is often memory rather than local image synthesis: after the camera leaves and returns, the scene or salient object may silently change. Existing memory designs are hard to compare because gains are entangled with backbone, training, retrieval, and evaluation differences. Echo-Memory fixes the action-to-video interface and varies only how history is stored and read by the generator. Under a shared video diffusion backbone, optimizer, camera-action representation, sampler, and evaluation pipeline, we compare raw context, compression-based memory, spatial summaries with different read-out paths, and state-space recurrence. This matched matrix separates four otherwise conflated axes: \\emph{capacity}, \\emph{compression}, \\emph{read-out}, and \\emph{recurrence}. We also evaluate memory through a three-branch protocol: replay quality, in-domain loop revisit, and open-domain return probes. The branches routinely disagree, showing that replay fidelity is not a sufficient proxy for remembering a world. Three findings follow. Raw context is a strong capacity baseline and improves open-domain return far more than it improves replay metrics. Compactness is not a free substitute for capacity: aggressive spatial and hybrid-compression memories lose the salient evidence needed for return. Finally, block-wise state-space recurrence is the strongest open-domain return mechanism in our matrix, showing that the structure of implicit memory matters as much as the decision to use it. These results provide a compact protocol for studying memory in action world models beyond isolated replay metrics.",
+      "authors": [
+        "Wayne King",
+        "Zeyue Xue",
+        "Yuxuan Bian",
+        "Jie Huang",
+        "Haoran Li",
+        "Yaowei Li",
+        "Yaofeng Su",
+        "Yuming Li",
+        "Haoyu Wang",
+        "Shiyi Zhang",
+        "Songchun Zhang",
+        "Yuwei Niu",
+        "Sihan Xu",
+        "Junhao Zhuang",
+        "Haoyang Huang",
+        "Nan Duan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.GR",
+        "cs.LG"
+      ],
+      "published": "2026-06-08T17:54:10+00:00",
+      "link": "https://arxiv.org/pdf/2606.09803v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "controlled study of memory in action world models for agent video generation",
+      "llm_evidence_cn": "动作世界模型中记忆机制的控制实验研究",
+      "llm_evidence": "动作世界模型中记忆机制的控制实验研究",
+      "canonical_evidence": "动作世界模型中记忆机制的控制实验研究",
+      "llm_tldr_en": "Echo-Memory is a controlled study of memory mechanisms in action-conditioned world models, comparing raw context, compressed memory, and explicit memory under a fixed video diffusion backbone.",
+      "llm_tldr_cn": "动作条件世界模型生成多段视频时，记忆缺失导致场景不一致。Echo-Memory在固定视频扩散骨干下，通过控制变量比较原始上下文、压缩记忆和显式记忆等机制，发现适当的记忆设计能显著提升长期一致性，并提供了标准化的评估基准。",
+      "llm_tldr": "动作条件世界模型生成多段视频时，记忆缺失导致场景不一致。Echo-Memory在固定视频扩散骨干下，通过控制变量比较原始上下文、压缩记忆和显式记忆等机制，发现适当的记忆设计能显著提升长期一致性，并提供了标准化的评估基准。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.11568v1",
+      "source": "arxiv",
+      "title": "4DP-QA: Scalable QA for 4D Perception in Vision Language Models",
+      "abstract": "Despite recent advances, Vision Language Models (VLMs) still struggle to grasp the dynamics of the world. We note that the ability to reason about a 4D scene, challenging in itself, is further complicated by two factors. First, VLMs observe motion indirectly via its projection onto 2D images. Second, existing datasets fail to disentangle object and camera motion. To address these challenges, we present a QA generation pipeline that focuses on motion-related scene understanding. We take particular care of the entanglement of camera and object motion by casting tracking in both the traditional way and in a novel, fixed reference system, dubbed True-Motion Tracking, which provides an intuitive description of motion. From this pipeline, we generate a large-scale training dataset of 400K samples, 4DP-QA (4D Perception QA), and a 2.2K-sample benchmark, 4DP-QA-Bench. Training existing models on our dataset yields performance improvements on an external benchmark, validating the effectiveness of our method.",
+      "authors": [
+        "Seokju Cho",
+        "Abhishek Badki",
+        "Hang Su",
+        "Jindong Jiang",
+        "Ziyao Zeng",
+        "Seungryong Kim",
+        "Sifei Liu",
+        "Orazio Gallo"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T01:49:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.11568v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "QA for 4D perception in vision-language models",
+      "llm_evidence_cn": "面向4D感知的视觉语言模型问答",
+      "llm_evidence": "面向4D感知的视觉语言模型问答",
+      "canonical_evidence": "面向4D感知的视觉语言模型问答",
+      "llm_tldr_en": "4DP-QA generates large-scale QA data focusing on motion understanding in 4D scenes, using True-Motion Tracking to disentangle object and camera motion.",
+      "llm_tldr_cn": "视觉语言模型对动态场景理解不足，现有数据集未区分物体与摄像机运动。本文提出4DP-QA，一个关注运动场景理解的问答生成流水线，引入真运动追踪以解耦运动。生成的大规模数据集促进4D感知能力，可用于视频问答任务。",
+      "llm_tldr": "视觉语言模型对动态场景理解不足，现有数据集未区分物体与摄像机运动。本文提出4DP-QA，一个关注运动场景理解的问答生成流水线，引入真运动追踪以解耦运动。生成的大规模数据集促进4D感知能力，可用于视频问答任务。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.06960v1",
+      "source": "arxiv",
+      "title": "Tree-of-Experience: A Structured Experience-Management Solution for Self-Evolving Agents under Low-Repetition and Implicit-Reward Environments",
+      "abstract": "Experience-based self-evolution is crucial for LLM agents, but existing benchmarks often assume explicit goals, stable task patterns, and clear feedback. We study a more challenging setting: low-repetition tasks with implicit rewards, where past experience is difficult to reuse and feedback is delayed, noisy, and outcome-level. We introduce \\textsc{FinEvolveBench}, a temporally controlled benchmark for financial sentiment prediction that links daily news-driven predictions to future excess returns. We further propose Tree-of-Experience (ToE), a structured experience-management method that organizes, retrieves, validates, and updates agent experience. Experiments show that general-purpose experience mechanisms do not consistently outperform no-experience baselines, while ToE achieves stronger overall performance. These results highlight the importance of structured experience management for self-evolving agents in implicit-reward environments.",
+      "authors": [
+        "Zihao Deng",
+        "Yining Zhu",
+        "Leiming Wang",
+        "Jingfei Lu",
+        "Junbo Wang",
+        "Chuncheng Ran",
+        "Yu Yang",
+        "Dixuan Yang",
+        "Jikun Shen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-05T06:39:16+00:00",
+      "link": "https://arxiv.org/pdf/2606.06960v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "structured experience management for self-evolving agents",
+      "llm_evidence_cn": "自进化代理的结构化经验管理",
+      "llm_evidence": "自进化代理的结构化经验管理",
+      "canonical_evidence": "自进化代理的结构化经验管理",
+      "llm_tldr_en": "Tree-of-Experience (ToE) organizes, retrieves, validates, and updates agent experience for low-repetition tasks with implicit rewards.",
+      "llm_tldr_cn": "该论文针对低重复和隐式奖励场景下经验难以复用的问题,提出Tree-of-Experience(ToE)方法,通过结构化的经验管理机制实现代理自我进化,并构建了FinEvolveBench基准.",
+      "llm_tldr": "该论文针对低重复和隐式奖励场景下经验难以复用的问题,提出Tree-of-Experience(ToE)方法,通过结构化的经验管理机制实现代理自我进化,并构建了FinEvolveBench基准.",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.08348v1",
+      "source": "arxiv",
+      "title": "Bayesian-Agent: Posterior-Guided Skill Evolution for LLM Agent Harnesses",
+      "abstract": "LLM agents increasingly rely on external inference conditions: prompts, tools, memory, SOPs, skills, and harness feedback. These assets can improve task execution without changing model weights, but they are often revised by heuristic reflection or by reusing observed successes and failures as if counts alone were reliable belief. We introduce \\textbf{Bayesian-Agent}, a native and cross-harness framework that treats reusable skills and SOPs as hypotheses about whether a frozen model will succeed under a particular prompt, context, and harness environment. Bayesian-Agent records verified trajectory evidence, maintains a feature-conditioned categorical posterior over each skill, and maps posterior state into inspectable actions such as patch, split, compress, retire, and explore. Model-facing prompts receive executable guardrails and failure-mode patches, while posterior summaries remain available for audit. With \\texttt{deepseek-v4-flash}, incremental repair improves SOP-Bench from 80\\% to 95\\%, Lifelong AgentBench from 90\\% to 100\\%, and RealFin-Bench from 45\\% to 65\\%. We further evaluate Bayesian-Agent's native backend and optional GenericAgent, mini-swe-agent, and Claude Code backends. The results include positive, negative, saturated, and case-study settings, suggesting that agent skill evolution is best viewed as posterior-guided harness optimization rather than uncalibrated prompt accumulation. The source code is available at https://github.com/DataArcTech/Bayesian-Agent.",
+      "authors": [
+        "Xiaojun Wu",
+        "Cehao Yang",
+        "Honghao Liu",
+        "Xueyuan Lin",
+        "Wenjie Zhang",
+        "Zhichao Shi",
+        "Xuhui Jiang",
+        "Chengjin Xu",
+        "Jia Li",
+        "Jian Guo"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-06T21:40:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.08348v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Bayesian framework for skill evolution in LLM agents, includes memory as external condition",
+      "llm_evidence_cn": "贝叶斯框架用于LLM智能体技能进化，涉及记忆等外部条件",
+      "llm_evidence": "贝叶斯框架用于LLM智能体技能进化，涉及记忆等外部条件",
+      "canonical_evidence": "贝叶斯框架用于LLM智能体技能进化，涉及记忆等外部条件",
+      "llm_tldr_en": "Bayesian-Agent treats reusable skills as hypotheses, maintaining a posterior over skills for adaptive refinement.",
+      "llm_tldr_cn": "该论文提出Bayesian-Agent框架，将可复用技能视为假设，通过维护技能的后验分布并根据特征条件进行自适应修正（如补丁、拆分、整合）。虽然直接重点是技能而非记忆架构，但记忆是智能体外部条件之一，且技能演化可间接支持记忆系统设计。",
+      "llm_tldr": "该论文提出Bayesian-Agent框架，将可复用技能视为假设，通过维护技能的后验分布并根据特征条件进行自适应修正（如补丁、拆分、整合）。虽然直接重点是技能而非记忆架构，但记忆是智能体外部条件之一，且技能演化可间接支持记忆系统设计。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.08049v1",
+      "source": "arxiv",
+      "title": "SKILL.nb: Selective Formalization and Gated Execution for Durable Agent Workflows",
+      "abstract": "AI agents increasingly turn past experience into reusable artifacts such as code, workflows, and procedural memories. Reuse can improve efficiency, but it also creates a lifecycle reliability problem: artifacts that succeed once may fail under environment drift, underspecified tasks, or changing task distributions, especially in web automation. We introduce SKILL.nb, a framework for governing reusable agent workflows with evidence-calibrated lifecycle policies. SKILL.nb uses selective formalization: execution evidence decides which workflow steps should become executable code, which should remain natural-language guided, and when those choices should be revised. Workflows are stored as auditable, versioned notebooks that interleave natural-language guidance, multi-language executable cells, validation gates, fallback paths, and multimodal evidence such as outputs, screenshots, and error traces. At runtime, gate-conditioned execution lets each step run code when its gates validate, or fall back locally when drift invalidates the executable realization. On WebArena-Verified, SKILL.nb achieves 53.7% single-round success, improving over the strongest baseline by 3.9 percentage points. Across three re-executions, it retains 91.7% of initially successful tasks, 15.5 points above the next best method. Under bounded repair, it recovers 72.9% of subsequent failures while limiting post-repair regressions to 4.2%, compared with 15.0% to 17.0% for persistent baselines. It also leads on Mind2Web cross-website and cross-domain splits. In a GitLab migration test, SKILL.nb preserves performance when reusing frozen state learned on GitLab 15.7, with frozen-versus-fresh target-version gaps of -1.7 points on GitLab 16.11 and +0.6 points on GitLab 18.9. These results identify lifecycle governance and gate-conditioned execution as reliability axes beyond one-shot task success.",
+      "authors": [
+        "Amine El Hattami",
+        "Nicolas Chapados",
+        "Christopher Pal"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-06-06T08:27:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.08049v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "framework for governing reusable agent workflows with evidence-calibrated lifecycle policies, storing procedural memories",
+      "llm_evidence_cn": "可重用智能体工作流的治理框架，存储程序性记忆",
+      "llm_evidence": "可重用智能体工作流的治理框架，存储程序性记忆",
+      "canonical_evidence": "可重用智能体工作流的治理框架，存储程序性记忆",
+      "llm_tldr_en": "SKILL.nb uses selective formalization to turn agent execution evidence into durable, auditable workflows with gated execution, improving lifecycle reliability.",
+      "llm_tldr_cn": "AI智能体重用过去经验形成的代码和工作流常因环境变化而失效。SKILL.nb提出选择性形式化，根据执行证据决定工作流步骤应成为可执行代码还是自然语言指导，并以版本化笔记本存储工作流，通过门控执行确保可靠性。实验证明该方法在Web自动化任务中显著提升了工作流的鲁棒性和可维护性。",
+      "llm_tldr": "AI智能体重用过去经验形成的代码和工作流常因环境变化而失效。SKILL.nb提出选择性形式化，根据执行证据决定工作流步骤应成为可执行代码还是自然语言指导，并以版本化笔记本存储工作流，通过门控执行确保可靠性。实验证明该方法在Web自动化任务中显著提升了工作流的鲁棒性和可维护性。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.10507v1",
+      "source": "arxiv",
+      "title": "HIPIF: Hierarchical Planning and Information Folding for Long-Horizon LLM Agent Learning",
+      "abstract": "While Large Language Models (LLMs) have demonstrated strong capabilities as autonomous agents across a wide range of tasks, their performance often degrades in multi-turn long-horizon agentic tasks. Existing methods have made progress through fine-grained credit assignment to alleviate long-horizon sparse rewards and hierarchical reinforcement learning to decompose tasks and reduce long-term dependency. However, these methods still do not directly address long-context interference, in which continuously growing histories weaken the agent's ability to track the global task state and impair subsequent reasoning and decision-making. Inspired by the way humans handle complex tasks through subgoal decomposition and completed progress summarization, we propose Hierarchical Planning and Information Folding (HIPIF) for long-horizon LLM agent learning. HIPIF trains the agent end-to-end to organize long-horizon execution around explicit subgoals while folding completed subgoal histories to reduce long-context interference. Furthermore, to stabilize subgoal-based planning and execution, HIPIF combines hierarchical reflection and subgoal-oriented process rewards to guide subgoal generation, transition, and execution, without relying on costly auxiliary models or task-specific expert trajectories. Extensive experiments on three publicly available agentic benchmarks demonstrate the validity of our method.",
+      "authors": [
+        "Juncheng Diao",
+        "Zhicong Lu",
+        "Peiguang Li",
+        "Yongwei Zhou",
+        "Changyuan Tian",
+        "Qingbin Li",
+        "Rongxiang Weng",
+        "Jingang Wang",
+        "Xunliang Cai"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-09T07:35:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.10507v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "long-horizon agent learning with hierarchical planning and information folding",
+      "llm_evidence_cn": "长程智能体学习中的分层规划与信息折叠",
+      "llm_evidence": "长程智能体学习中的分层规划与信息折叠",
+      "canonical_evidence": "长程智能体学习中的分层规划与信息折叠",
+      "llm_tldr_en": "Addresses long-context interference in LLM agents via hierarchical planning and information folding to improve multi-turn task performance.",
+      "llm_tldr_cn": "针对LLM智能体在多轮长程任务中因历史增长导致的上下文干扰问题，本文提出了分层规划与信息折叠方法（HIPIF）。该方法通过子目标分解和进度摘要来减少长期依赖，实验表明在长期任务上显著提升了推理和决策能力，为智能体架构中的记忆管理提供了新思路。",
+      "llm_tldr": "针对LLM智能体在多轮长程任务中因历史增长导致的上下文干扰问题，本文提出了分层规划与信息折叠方法（HIPIF）。该方法通过子目标分解和进度摘要来减少长期依赖，实验表明在长期任务上显著提升了推理和决策能力，为智能体架构中的记忆管理提供了新思路。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.08780v1",
+      "source": "arxiv",
+      "title": "Beyond Consistency: Preserving Temporal Structure in Zero-Shot Video Editing",
+      "abstract": "Existing zero-shot video editing methods rely on pre-trained diffusion models, successfully achieving spatial control and basic temporal consistency but fundamentally fail to preserve the video's original temporal structure.This distinction is critical: temporal consistency ensures visual smoothness, but temporal structure dictates the video's high-level narrative, rhythm, and semantic flow. Without this preservation, the edited output, especially for long videos with complex semantic variations, becomes narratively incoherent and semantically ambiguous. To address this limitation, we introduce a novel zero-shot editing approach that, for the first time, explicitly focuses on preserving the source video's temporal structure. We achieve this by adaptively partitioning the video into semantically distinct clips based on feature similarity and selecting a representative anchor frame for each clip. To enhance both intra-clip fidelity and computational efficiency, we design a clip-adaptive token merging strategy which leverages the anchor's semantic dominance to stabilize the editing. Furthermore, we employ an alternating combination strategy that ensures seamless inter-clip transitions while maintaining semantic distinction. Extensive experiments demonstrate that our method achieves state-of-the-art results, successfully balancing the preservation of original temporal structure with computational efficiency, and setting a new benchmark for zero-shot video editing fidelity.",
+      "authors": [
+        "Deyin Liu",
+        "Yisheng Ding",
+        "Zhe Jin",
+        "Xiatian Zhu",
+        "Anjan Dutta",
+        "Lin Wu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-07T18:53:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.08780v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "zero-shot video editing preserving temporal structure, explicitly addresses long videos",
+      "llm_evidence_cn": "零样本视频编辑保持时间结构，明确提及长视频",
+      "llm_evidence": "零样本视频编辑保持时间结构，明确提及长视频",
+      "canonical_evidence": "零样本视频编辑保持时间结构，明确提及长视频",
+      "llm_tldr_en": "Proposes a zero-shot video editing approach that preserves temporal structure, crucial for long videos with complex semantics.",
+      "llm_tldr_cn": "该论文指出现有零样本视频编辑方法只保证时间一致性却丢失了时间结构，导致长视频叙述不连贯。提出一种显式保留源视频时间结构的方法，通过调整扩散模型的时间注意力等机制，使得编辑后的长视频保持叙述连贯和语义清晰。属于长视频分析方法，但侧重编辑而非理解。",
+      "llm_tldr": "该论文指出现有零样本视频编辑方法只保证时间一致性却丢失了时间结构，导致长视频叙述不连贯。提出一种显式保留源视频时间结构的方法，通过调整扩散模型的时间注意力等机制，使得编辑后的长视频保持叙述连贯和语义清晰。属于长视频分析方法，但侧重编辑而非理解。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "understanding long videos",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.12047v1",
+      "source": "arxiv",
+      "title": "Metadata-Aware Multi-Prompt Reasoning for Zero-Shot Accident Understanding",
+      "abstract": "In this paper, we address the problem of zero-shot understanding of accidents from surveillance videos by identifying when an impact event occurs, what type of impact it is, and where in the frame it occurs using natural language. We propose a three-stage pipeline that decomposes the accident understanding into when, what, and where. The first stage extracts a short temporal window around the impact using vision-language similarity. In the second stage, we perform metadata-driven multi-prompt reasoning with five complementary views (baseline, motion, geometry, contrast, and tiebreaker) and resolve disagreement via an entropy-gated pairwise adjudicator. Finally, we localize the impact of an open-vocabulary detector queried on the predicted accident type and scene layout, and aggregate detections across keyframes using a score-weighted centroid. Our pipeline achieves a substantial improvement in the harmonic-mean score over a centre-of-frame baseline on the zero-shot ACCIDENT @ CVPR benchmark. We show that decomposing zero-shot video understanding into temporal localization, semantic classification, and spatial grounding enable more reliable reasoning with vision-language models than direct prompting alone.",
+      "authors": [
+        "Tarandeep Singh",
+        "Soumyanetra Pal",
+        "Soham Biswas",
+        "Nishanth Chandran"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "stat.ML"
+      ],
+      "published": "2026-06-10T13:12:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.12047v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "zero-shot accident understanding from surveillance video, video understanding task",
+      "llm_evidence_cn": "监控视频中的零样本事故理解，视频理解任务",
+      "llm_evidence": "监控视频中的零样本事故理解，视频理解任务",
+      "canonical_evidence": "监控视频中的零样本事故理解，视频理解任务",
+      "llm_tldr_en": "Proposes a three-stage pipeline for zero-shot accident understanding from surveillance video by decomposing into when, what, where.",
+      "llm_tldr_cn": "该论文针对监控视频中事故的零样本理解，提出三阶段流水线：通过视觉-语言相似性提取时间窗口，利用元数据驱动的多提示推理进行五视角分析，并通过熵门控成对裁决器解决分歧，最后用开放词汇检测器定位事故。方法设计针对短时事件，未明确强调长视频，但视频理解方法可迁移。",
+      "llm_tldr": "该论文针对监控视频中事故的零样本理解，提出三阶段流水线：通过视觉-语言相似性提取时间窗口，利用元数据驱动的多提示推理进行五视角分析，并通过熵门控成对裁决器解决分歧，最后用开放词汇检测器定位事故。方法设计针对短时事件，未明确强调长视频，但视频理解方法可迁移。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.09316v1",
+      "source": "arxiv",
+      "title": "Anything2Skill: Compiling External Knowledge into Reusable Skills for Agents",
+      "abstract": "Retrieval-augmented generation (RAG) enables agents to access external knowledge at inference time, but it primarily retrieves fragmented declarative evidence, leaving agents to repeatedly infer task procedures from passages, manuals, examples, logs, or trajectories. This raises a fundamental question: can skills extracted from external knowledge bases be installed into an agent, enabling it to rapidly approximate domain expertise? In this paper, we propose Anything2Skill, a taxonomy-guided framework that compiles heterogeneous external knowledge into reusable, retrievable, and executable skills for agents. Given a corpus of knowledge records, \\textsc{Anything2Skill} first decomposes each record into evidence windows and performs plan-and-expand skill extraction under a skill-tree prior. The extracted candidates are then converted into structured skill contracts that specify invocation conditions, contraindications, action moves, workflow steps, constraints, output specifications, supporting evidence, and confidence scores. To construct a deployable procedural memory, Anything2Skill manages the extracted skills in a persistent SkillBank through taxonomy-aware compilation, registry-level reconciliation, lifecycle tracking, versioned updates, and visible skill-tree projection. At inference time, agents retrieve both task-specific passages from the original knowledge base and relevant procedural skills from the SkillBank, allowing RAG to provide declarative evidence while compiled skills provide reusable procedural guidance. Experiments on qsv and GitHub-CLI show that Anything2Skill combined with RAG achieves 98.85\\% and 94.10\\% success rates, respectively, substantially outperforming RAG-only agents. These results suggest that compiling latent procedural knowledge into explicit skills is an effective way to extend retrieval-augmented agents from knowledge access toward capability reuse.",
+      "authors": [
+        "Qianjun Pan",
+        "Yutao Yang",
+        "Junsong Li",
+        "Jie Zhou",
+        "Kai Chen",
+        "Xin Li",
+        "Qin Chen",
+        "Liang He"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-08T10:24:32+00:00",
+      "link": "https://arxiv.org/pdf/2606.09316v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "compiling external knowledge into reusable skills for agents",
+      "llm_evidence_cn": "将外部知识编译为智能体的可复用技能",
+      "llm_evidence": "将外部知识编译为智能体的可复用技能",
+      "canonical_evidence": "将外部知识编译为智能体的可复用技能",
+      "llm_tldr_en": "Anything2Skill proposes a taxonomy-guided framework to compile heterogeneous external knowledge into reusable, retrievable, and executable skills for agents, enhancing long-term capability.",
+      "llm_tldr_cn": "现有RAG仅检索碎片化知识，智能体需反复推断任务流程。本文提出Anything2Skill，一个分类学引导的框架，将多种外部知识编译为可复用、可检索、可执行的技能，帮助智能体积累领域经验，实现类似长期记忆的效果，提升复杂任务推理能力。",
+      "llm_tldr": "现有RAG仅检索碎片化知识，智能体需反复推断任务流程。本文提出Anything2Skill，一个分类学引导的框架，将多种外部知识编译为可复用、可检索、可执行的技能，帮助智能体积累领域经验，实现类似长期记忆的效果，提升复杂任务推理能力。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.10671v1",
+      "source": "arxiv",
+      "title": "FadeMem: Distance-Aware Memory Consolidation for Autoregressive Video Diffusion",
+      "abstract": "Autoregressive video generators synthesize long videos by generating successive temporal segments, but their historical KV cache grows with video length. Existing bounded-cache methods reduce this cost with local windows, sink tokens, or compressed memory states, yet they usually assign fixed roles to different parts of the history. We propose FadeMem, a distance-aware KV memory consolidation mechanism that organizes historical KV blocks into a temporal hierarchy under a fixed cache budget. This design is motivated by frequency-dependent temporal decay: fine details decorrelate quickly, while coarse scene structure and identity remain useful over longer horizons. During generation, new history is inserted as fine-grained entries, while older adjacent entries are progressively merged under a power-law temporal allocation schedule, yielding a dense-near, sparse-far memory within one cache. Without architectural changes, FadeMem preserves recent context for short-term dynamics and compact long-range anchors for identity and scene coherence. Experiments show improved subject consistency, background stability, and temporal coherence over existing bounded-cache strategies.",
+      "authors": [
+        "Yu Lu",
+        "Junjie Yang",
+        "Piotr Koniusz",
+        "YuXin Song",
+        "Yi Yang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-09T10:22:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.10671v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "memory consolidation for long video generation",
+      "llm_evidence_cn": "面向长视频生成的记忆巩固",
+      "llm_evidence": "面向长视频生成的记忆巩固",
+      "canonical_evidence": "面向长视频生成的记忆巩固",
+      "llm_tldr_en": "FadeMem organizes KV cache into a temporal hierarchy with distance-aware consolidation for efficient long video generation.",
+      "llm_tldr_cn": "自回归视频生成器在长视频生成中KV缓存增长，现有有界缓存方法赋予历史固定角色。本文提出FadeMem，距离感知KV记忆巩固机制，将历史KV块组织成时间层次结构，在固定缓存预算下，新历史作为细粒度条目插入，旧历史按距离衰减合并为粗粒度表示。从而在长视频生成中保持质量的同时控制缓存大小。",
+      "llm_tldr": "自回归视频生成器在长视频生成中KV缓存增长，现有有界缓存方法赋予历史固定角色。本文提出FadeMem，距离感知KV记忆巩固机制，将历史KV块组织成时间层次结构，在固定缓存预算下，新历史作为细粒度条目插入，旧历史按距离衰减合并为粗粒度表示。从而在长视频生成中保持质量的同时控制缓存大小。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.10921v1",
+      "source": "arxiv",
+      "title": "Trace Only What You Need: Structure-Aware On-Demand Hypergraph Memory for Long-Document Question Answering",
+      "abstract": "Long-document question answering (QA) requires large language models (LLMs) to reason over evidence scattered across lengthy documents, where answers often depend on event order, section-level context, and cross-part evidence connections. Although retrieval-augmented generation (RAG) reduces the input context by retrieving relevant evidence, existing structured RAG methods still face three limitations: costly query-agnostic knowledge organization, insufficient use of original document structure, and no reuse of historical reasoning experience. To address these limitations, we propose DocTrace, a multi-agent RAG framework for long-document QA that supports query-triggered knowledge organization, document-structure-aware and experience-guided reasoning. DocTrace preserves document hierarchy with a lightweight document structural tree index, constructs agent-shared hypergraph-structured working memory on demand during reasoning, and stores successful reasoning plans in graph-structured experience memory for future reuse, enabling adaptive exploration across related long-document questions. Experiments on four long-document QA datasets show that DocTrace achieves the best performance on three datasets, surpassing the strongest baseline, ComoRAG, by up to 8.85% in F1 and 4.40% in EM, while reducing the overall computational cost by 53.32%",
+      "authors": [
+        "Xiangjun Zai",
+        "Xingyu Tan",
+        "Chen Chen",
+        "Xiaoyang Wang",
+        "Wenjie Zhang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-09T14:29:06+00:00",
+      "link": "https://arxiv.org/pdf/2606.10921v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "on-demand hypergraph memory for long-document QA",
+      "llm_evidence_cn": "面向长文档问答的按需超图记忆",
+      "llm_evidence": "面向长文档问答的按需超图记忆",
+      "canonical_evidence": "面向长文档问答的按需超图记忆",
+      "llm_tldr_en": "Proposes DocTrace, a multi-agent RAG framework with structure-aware on-demand hypergraph memory for long-document QA, improving evidence organization and reasoning.",
+      "llm_tldr_cn": "针对长文档问答中证据分散、结构利用不足的问题，本文提出了DocTrace多智能体RAG框架。该方法通过按需超图记忆组织知识，并利用文档结构感知的检索策略，同时复用历史推理经验。实验表明该方法在长文档问答任务上显著提升了答案准确性和效率。",
+      "llm_tldr": "针对长文档问答中证据分散、结构利用不足的问题，本文提出了DocTrace多智能体RAG框架。该方法通过按需超图记忆组织知识，并利用文档结构感知的检索策略，同时复用历史推理经验。实验表明该方法在长文档问答任务上显著提升了答案准确性和效率。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.12411v1",
+      "source": "arxiv",
+      "title": "Context-Driven Incremental Compression for Multi-Turn Dialogue Generation",
+      "abstract": "Modern conversational agents condition on an ever-growing dialogue history at each turn, incurring redundant attention and encoding costs that grow with conversation length. Naive truncation or summarization degrades fidelity, while existing context compressors lack cross-turn memory sharing or revision, causing information loss and compounding errors in long dialogues. We revisit the context compression under conversational dynamics and empirically present its fragility. To improve both efficiency and robustness, we introduce Context-Driven Incremental Compression (C-DIC), which treats a conversation as interleaved contextual threads and stores revisable per-thread compression states in a single, compact dialogue memory. At each turn, a lightweight retrieve, revise, and write-back loop shares information across turns and updates stale memories, stabilizing long-horizon behavior. In addition, we adapt truncated backpropagation-through-time (TBPTT) to our multi-turn setting, learning cross-turn dependencies without full-history backpropagation. Extensive experiments on long-form dialogue benchmarks demonstrate superior performance and efficiency of C-DIC; notably, C-DIC shows stable inference latency and perplexity over hundreds of dialogue turns, supporting a scalable path to high-quality dialogue modeling.",
+      "authors": [
+        "Yeongseo Jung",
+        "Jaehyeok Kim",
+        "Eunseo Jung",
+        "Jiachuan Wang",
+        "Yongqi Zhang",
+        "Ka Chun Cheung",
+        "Simon See",
+        "Lei Chen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-06-10T17:59:54+00:00",
+      "link": "https://arxiv.org/pdf/2606.12411v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "incremental compression for multi-turn dialogue memory",
+      "llm_evidence_cn": "多轮对话记忆的增量压缩",
+      "llm_evidence": "多轮对话记忆的增量压缩",
+      "canonical_evidence": "多轮对话记忆的增量压缩",
+      "llm_tldr_en": "Introduces C-DIC, a context-driven incremental compression method that stores revisable per-thread compression states in a compact dialogue memory for efficient long dialogues.",
+      "llm_tldr_cn": "针对多轮对话中历史增长导致的效率和精度问题，本文提出了上下文驱动的增量压缩方法（C-DIC）。该方法将对话视为交织的上下文线程，并为每个线程维护可修正的压缩状态，从而在紧凑的对话记忆中进行跨轮记忆共享，显著提升了长对话生成的质量和效率。",
+      "llm_tldr": "针对多轮对话中历史增长导致的效率和精度问题，本文提出了上下文驱动的增量压缩方法（C-DIC）。该方法将对话视为交织的上下文线程，并为每个线程维护可修正的压缩状态，从而在紧凑的对话记忆中进行跨轮记忆共享，显著提升了长对话生成的质量和效率。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
