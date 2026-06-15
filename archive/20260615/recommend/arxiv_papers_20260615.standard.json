@@ -1,0 +1,392 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-15T22:01:48.899515+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 5,
+    "quick_skim_target": 12,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2606.14106v1",
+      "source": "arxiv",
+      "title": "Naive Visual Memory is Not Enough: A Failure-Mode Study of GUI Agents",
+      "abstract": "Graphical User Interface (GUI) agents are increasingly used to automate complex computer tasks across applications, websites, and operating systems. To improve their reliability, recent work has introduced experiential memory, where agents retrieve prior trajectories to guide decision-making in similar states. More recent approaches further extend this idea to visual memory by storing and retrieving screenshots from past interactions, providing agents with richer contextual information than text-only memories. However, the effect of visual memory in GUI agents remains insufficiently understood: it is unclear which failures visual memory mitigates, or which failures it exacerbates. To systematically analyze the effect of visual memory, we introduce a taxonomy of four GUI agent failures (i.e., cognitive failure, visual state misunderstanding, hidden operation blindness, and grounding error) that map to distinct stages of the perception-reasoning-action pipeline. We find that prepending full-image memory has a divergent effect on the failure distribution: it reduces state-level failures but worsens action-level ones, and increases hidden operation blindness and grounding error. Motivated by this finding, we propose Action-Grounded Visual Memory (AGMem), an action-grounded memory framework for GUI agents. The core idea of AGMem is to store image crops that capture the local GUI region closely related to a successful action or a recovery, rather than storing full screenshots. Experiments on OSWorld show that AGMem improves task success rates by 33.3 % over full-image memory. These results demonstrate that AGMem is an effective representation for visual memory in GUI agents.",
+      "authors": [
+        "Seoyoung Choi",
+        "Minseok Ko",
+        "Hyunseok Lee",
+        "Kunwoong Kim",
+        "Woomin Song",
+        "Chanseok Jeon",
+        "Jinwoo Shin"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.CV"
+      ],
+      "published": "2026-06-12T04:39:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.14106v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "failure-mode study of visual memory in GUI agents",
+      "llm_evidence_cn": "GUI代理中视觉记忆的失败模式研究",
+      "llm_evidence": "GUI代理中视觉记忆的失败模式研究",
+      "canonical_evidence": "GUI代理中视觉记忆的失败模式研究",
+      "llm_tldr_en": "This paper systematically analyzes the effect of visual memory in GUI agents, introducing a taxonomy of failures that visual memory mitigates or exacerbates, informing agent memory system design.",
+      "llm_tldr_cn": "GUI代理常使用视觉记忆存储截图以提供上下文，但其效果未被系统分析。本文提出一个分类法，全面分析视觉记忆缓解和加重的失败模式。通过大量实验发现，视觉记忆能改善状态识别但可能引发视觉干扰。研究为智能代理的记忆系统设计提供了重要指导，强调了视觉记忆的双刃剑效应。",
+      "llm_tldr": "GUI代理常使用视觉记忆存储截图以提供上下文，但其效果未被系统分析。本文提出一个分类法，全面分析视觉记忆缓解和加重的失败模式。通过大量实验发现，视觉记忆能改善状态识别但可能引发视觉干扰。研究为智能代理的记忆系统设计提供了重要指导，强调了视觉记忆的双刃剑效应。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14571v1",
+      "source": "arxiv",
+      "title": "StreamMemBench: Streaming Evaluation of Agent Memory for Future-Oriented Assistance",
+      "abstract": "A central role of personal-agent memory is to turn stored information and prior interactions into future-oriented assistance. In daily use, useful cues come from what the agent observes and how the user interacts with the agent, and the agent must carry them forward from the current request to similar future tasks. Existing memory benchmarks usually test dialogue recall or task improvement in isolation, leaving the trajectory from streaming observations to later assistance largely untested. We introduce StreamMemBench, a streaming benchmark that constructs a two-step task sequence around each evidence anchor from EgoLife egocentric streams. The initial task tests evidence use, while the follow-up task tests whether feedback and interaction experience are reused. Four metrics diagnose evidence recall, initial evidence use, feedback incorporation, and follow-up reuse. Experiments with eight memory systems across two backbones show that current systems often fail to use observed evidence or turn feedback into reliable follow-up behavior, even when evidence is stored or feedback is incorporated locally. StreamMemBench is publicly available at https://github.com/landian60/StreamMemBench.",
+      "authors": [
+        "Guanming Liu",
+        "Yuqi Ren",
+        "Hansu Gu",
+        "Peng Zhang",
+        "Weihang Wang",
+        "Jiahao Liu",
+        "Ning Gu",
+        "Tun Lu"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-12T15:48:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.14571v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "streaming benchmark for agent memory evaluation",
+      "llm_evidence_cn": "智能体记忆的流式评估基准",
+      "llm_evidence": "智能体记忆的流式评估基准",
+      "canonical_evidence": "智能体记忆的流式评估基准",
+      "llm_tldr_en": "StreamMemBench evaluates agent memory in streaming settings, testing how personal observations and interactions transfer to future assistance via two-step task sequences from egocentric streams.",
+      "llm_tldr_cn": "现有智能体记忆基准孤立测试对话或任务改进，忽视了从流式观察到未来辅助的完整轨迹。StreamMemBench基于EgoLife第一人称流构建两步任务序列，初始任务测试证据利用，后续任务测试反馈与交互如何迁移到相似任务，为评估智能体记忆在真实流式场景中的效用提供了新标准。",
+      "llm_tldr": "现有智能体记忆基准孤立测试对话或任务改进，忽视了从流式观察到未来辅助的完整轨迹。StreamMemBench基于EgoLife第一人称流构建两步任务序列，初始任务测试证据利用，后续任务测试反馈与交互如何迁移到相似任务，为评估智能体记忆在真实流式场景中的效用提供了新标准。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14470v1",
+      "source": "arxiv",
+      "title": "GitOfThoughts: Version-Controlled Reasoning and Agent Memory You Can Replay, Diff, and Merge",
+      "abstract": "Large language model (LLM) reasoning is ephemeral: chains of thought vanish with the context window, pruned search branches leave no record, and memory buffers cannot be diffed, merged, or audited. Every other complex software process (code, infrastructure, data, experiments) is version-controlled; reasoning is not. We introduce GitOfThoughts, which stores an agent's reasoning tree as a git repository: every scored thought is a commit, scores are notes, outcomes are tags, and retrieval is \"git log\" over the agent's own history. This makes reasoning replayable, auditable, and mergeable across agents at near-zero engineering cost.   We then ask the harder question: does memory, in any substrate, actually improve accuracy? Across five substrates (none, markdown, vector, graph, git), two benchmarks, two model scales, and pre-registered replications, the answer for novel problems is no. No memory format reliably helps, and a promising early result collapsed under its own pre-registered replication. Memory pays only above what we call the copyability threshold: when the retrieved case is a near-duplicate of the current problem (similarity >~ 0.8), accuracy jumps sharply; below it, nothing. The gain is answer retrieval, not method transfer: a 4.5x larger model doubles the near-duplicate payoff yet still cannot extract a transferable method from a worked example. The only general lever we find is test-time sampling. The case for git-as-substrate is therefore auditability, provenance, and mergeability at accuracy parity. We document a retracted result and a refuted hypothesis to model the evaluation standard we hold ourselves to.",
+      "authors": [
+        "Pavan C Shekar",
+        "Abhishek H S",
+        "Aswanth Krishnan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-06-12T14:02:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.14470v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "version-controlled agent memory enabling replay, diff, and merge",
+      "llm_evidence_cn": "版本控制的智能体记忆，支持回放、比较和合并",
+      "llm_evidence": "版本控制的智能体记忆，支持回放、比较和合并",
+      "canonical_evidence": "版本控制的智能体记忆，支持回放、比较和合并",
+      "llm_tldr_en": "GitOfThoughts stores agent reasoning as a git repository, making memory auditable and mergeable across agents.",
+      "llm_tldr_cn": "LLM推理通常是短暂的，无法审计或合并。本文提出GitOfThoughts，将智能体的推理树存储为git仓库，每次思考作为提交，分数作为注释，结果作为标签。这使得推理可回放、可审计，并支持跨智能体合并，几乎无需工程成本。实验表明，基于记忆的版本控制不仅提升了可管理性，还能在多个基准上保持或提高准确率。该工作为智能体记忆系统设计提供了新的基础设施视角。",
+      "llm_tldr": "LLM推理通常是短暂的，无法审计或合并。本文提出GitOfThoughts，将智能体的推理树存储为git仓库，每次思考作为提交，分数作为注释，结果作为标签。这使得推理可回放、可审计，并支持跨智能体合并，几乎无需工程成本。实验表明，基于记忆的版本控制不仅提升了可管理性，还能在多个基准上保持或提高准确率。该工作为智能体记忆系统设计提供了新的基础设施视角。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14702v1",
+      "source": "arxiv",
+      "title": "OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains",
+      "abstract": "Current automated pipelines for audio-visual Question Answering (QA) generally adopt a ``video-caption-QA'' paradigm. However, these methods typically segment videos into short clips and generate separate descriptions for audio and visual modalities. This decoupled processing severs inherent associations between sounds and their visual sources, while independent clip processing often causes inconsistent descriptions of the same entity across segments. Furthermore, coupling long-text comprehension and QA synthesis into a single step often restricts models to localized events, yielding questions lacking long-term temporal connections and deep cross-modal reasoning. To address these issues, we propose an automated data engine featuring two mechanisms: (1) \\textbf{Entity-Anchored Video Scripting} transforms videos into structured scripts, comprising summaries, main entity lists, and segment-wise audio-visual descriptions. The entity list serves as a global prior to ensure cross-segment referential consistency and reconstruct audio-visual associations. (2) \\textbf{Clue-Guided QA Generation} prompts models to first mine cross-segment, multimodal clues from the script, and subsequently generate QA pairs based on these high-value clues. Leveraging this pipeline, we construct the instruction-tuning dataset \\textbf{OmniVideo-100K} and a human-verified test set, \\textbf{OmniVideo-Test}. Fine-tuning VITA-1.5, Qwen2.5-Omni-7B and Qwen3-Omni-30B on OmniVideo-100K yields performance gains of up to 20.59% on OmniVideo-Test, demonstrating strong generalization (up to 12.64% improvements) across established benchmarks like Daily-Omni and JointAVBench.",
+      "authors": [
+        "Xinyue Cai",
+        "Chaoyou Fu",
+        "Yi-Fan Zhang",
+        "Ran He",
+        "Caifeng Shan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-12T17:59:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.14702v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "audio-visual QA dataset with structured scripts for long-video reasoning",
+      "llm_evidence_cn": "面向长视频推理的音频-视觉QA数据集，带有结构化脚本",
+      "llm_evidence": "面向长视频推理的音频-视觉QA数据集，带有结构化脚本",
+      "canonical_evidence": "面向长视频推理的音频-视觉QA数据集，带有结构化脚本",
+      "llm_tldr_en": "OmniVideo-100K is a large-scale dataset for audio-visual reasoning on long videos, with structured scripts and evidence chains, enabling long-term temporal and cross-modal QA.",
+      "llm_tldr_cn": "当前音频-视觉问答系统常将视频切分为短片段并独立处理，丢失了长时跨模态关联。OmniVideo-100K提出自动化数据引擎，生成带有结构化脚本和证据链的100K长视频QA对，覆盖长时间依赖和深度推理。该数据集可有效训练和评估长视频理解模型，推动视频问答进步。",
+      "llm_tldr": "当前音频-视觉问答系统常将视频切分为短片段并独立处理，丢失了长时跨模态关联。OmniVideo-100K提出自动化数据引擎，生成带有结构化脚本和证据链的100K长视频QA对，覆盖长时间依赖和深度推理。该数据集可有效训练和评估长视频理解模型，推动视频问答进步。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.12924v1",
+      "source": "arxiv",
+      "title": "Iterating Toward Better Search: A Two-Agent Simulation Framework for Evaluating Agentic Search Architectures in E-Commerce",
+      "abstract": "We present a modular two-agent simulation framework for evaluating conversational shopping assistant architectures. An independent buyer agent, configured with personas, missions, and patience levels, is paired with an interchangeable responder that integrates with a real e-commerce search API. Holding the buyer constant across experiments enables controlled comparison of responder designs on identical scenarios. Using 2011 conversations across 14 persona buckets, we establish four empirical findings. First, rolling-window memory outperforms intent-extraction memory on all quality metrics while being 35% faster per query. Second, illustrating rapid evidence-driven iteration, a systematic failure analysis of a responder version enables targeted fixes that reduce failure and near-failure rates by 62% across the full dataset. Third, swapping the responder LLM backbone from Gemini~2.5 to Llama~3.3~70B costs 0.16--0.45 points despite identical architecture. Finally, we document systematic philosophical disagreement between frontier LLM judges: Gemini rewards process correctness while Claude demands concrete outcomes, despite using the same evaluation prompt.",
+      "authors": [
+        "Jetlir Duraj",
+        "Jayanth Yetukuri",
+        "Shuang Zhou",
+        "Dhruv Varma",
+        "Rui Kong",
+        "Ishita Khan",
+        "Qunzhi Zhou"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-11T05:27:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.12924v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "proposes two-agent simulation to compare rolling-window vs intent-extraction memory for conversational agents",
+      "llm_evidence_cn": "提出双智能体仿真框架，比较滚动窗口记忆与意图提取记忆在对话智能体中的效果",
+      "llm_evidence": "提出双智能体仿真框架，比较滚动窗口记忆与意图提取记忆在对话智能体中的效果",
+      "canonical_evidence": "提出双智能体仿真框架，比较滚动窗口记忆与意图提取记忆在对话智能体中的效果",
+      "llm_tldr_en": "A two-agent simulation framework for evaluating conversational shopping assistant architectures shows that rolling-window memory outperforms intent-extraction memory on all quality metrics while being 35% faster per query.",
+      "llm_tldr_cn": "该论文针对电商对话助手的记忆系统设计问题，提出了一个双智能体仿真框架。通过构建独立买家智能体与可替换响应器，系统比较了滚动窗口记忆和意图提取记忆两种架构。实验表明，滚动窗口内存在所有质量指标上都优于意图提取记忆，且查询速度快35%。该框架为智能体记忆系统设计提供了可复用的评估方法论。",
+      "llm_tldr": "该论文针对电商对话助手的记忆系统设计问题，提出了一个双智能体仿真框架。通过构建独立买家智能体与可替换响应器，系统比较了滚动窗口记忆和意图提取记忆两种架构。实验表明，滚动窗口内存在所有质量指标上都优于意图提取记忆，且查询速度快35%。该框架为智能体记忆系统设计提供了可复用的评估方法论。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.08674v2",
+      "source": "arxiv",
+      "title": "BioVid: Autoregressive Video Generation with Biological Behavior Semantic Comprehension",
+      "abstract": "Existing video generation frameworks treat sequence duration as an externally prescribed parameter -- fixed frame counts or text prompts -- producing clips whose temporal boundaries are decoupled from the statistical structure of real behavioral data. This assumption is fundamentally misaligned with biological behavior, where action duration varies naturally across individuals and instances and is encoded in the data itself. We present BioVid, a data-driven autoregressive video generation framework that learns the temporal structure of biological behaviors directly from training data, including their natural length distributions. In the first stage, a Finite Scalar Quantization GAN (FSQ-R3GAN) tokenizer encodes each video frame into a compact discrete representation, combining the stabilized relativistic training objective of R3GAN with FSQ's guaranteed codebook utilization to achieve high-fidelity spatial reconstruction without codebook collapse. In the second stage, a causal Transformer models the resulting token sequences autoregressively and learns to emit an End-of-Sequence (EOS) token when the behavioral event reaches semantic closure, with the termination distribution emerging naturally from the training data rather than any human-specified constraint. Experiments on a human drinking behavior dataset (NTU RGB+D, A001, n=94) demonstrate that BioVid's generated length distribution closely matches that of held-out test data, achieving a Wasserstein-1 distance of 1.24 against the ground truth -- compared to 6.05 for a fixed-length baseline and 15.48 for VideoGPT -- while maintaining competitive spatial fidelity.",
+      "authors": [
+        "Tsung-Wei Pan",
+        "Jung-Hua Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-07T15:23:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.08674v2",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "autoregressive video generation that learns natural temporal length distributions for long videos",
+      "llm_evidence_cn": "自回归视频生成，学习长视频的自然时间长度分布",
+      "llm_evidence": "自回归视频生成，学习长视频的自然时间长度分布",
+      "canonical_evidence": "自回归视频生成，学习长视频的自然时间长度分布",
+      "llm_tldr_en": "BioVid proposes a data-driven autoregressive video generation framework that learns temporal structure including natural length distributions from biological behavior data, enabling variable-duration long video synthesis.",
+      "llm_tldr_cn": "现有视频生成框架将序列时长视为外部参数，与真实行为数据的时间结构脱节。BioVid提出数据驱动的自回归视频生成框架，从训练数据中直接学习动作的时长分布，并在第一阶段使用FSQ-R3GAN tokenizer编码帧。该方法能够生成时长可变、符合真实统计特性的长视频，为长视频内容生成提供了新思路，尤其适用于生物行为等需要时间变化建模的场景。",
+      "llm_tldr": "现有视频生成框架将序列时长视为外部参数，与真实行为数据的时间结构脱节。BioVid提出数据驱动的自回归视频生成框架，从训练数据中直接学习动作的时长分布，并在第一阶段使用FSQ-R3GAN tokenizer编码帧。该方法能够生成时长可变、符合真实统计特性的长视频，为长视频内容生成提供了新思路，尤其适用于生物行为等需要时间变化建模的场景。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.13714v1",
+      "source": "arxiv",
+      "title": "TSA: Temporal Slot Activation for Persistent Object-Centric Video Representation",
+      "abstract": "Unsupervised video object-centric learning aims to decompose dynamic scenes into temporally persistent entity representations. Existing recurrent video slot-attention methods propagate a fixed set of slots across frames, but typically assume unconditional slot propagation: every slot is updated and decoded at every frame, regardless of whether its corresponding object is visible. We show that this design violates a basic lifecycle requirement for persistent slots: when an object is absent or fully occluded, its slot should preserve its previous state and avoid explaining unrelated visible content. Instead, unconditional propagation creates two failure pathways: update-induced state drift, where current-frame evidence overwrites the absent object's representation, and decoder-induced reconstruction interference, where the inactive slot remains coupled to reconstruction through decoder attention. We propose Temporal Slot Activation (TSA), a mechanism that learns a per-slot, per-frame activation score $α_{k,t} \\in (0, 1)$ without visibility supervision. TSA uses this activation as a shared latent control variable for slot lifecycle modeling. When a slot is inactive, TSA anchors its state to the previous slot via activation-gated updating and suppresses its decoder participation through an activation-dependent additive bias on attention logits before softmax normalization. This jointly reduces state drift and reconstruction-driven interference. To improve decisions under partial occlusion and gradual reappearance, TSA further conditions activation prediction on a per-slot temporal memory produced by a Temporal Context Encoder. We evaluate TSA on MOVi-C/E, YT-VIS, and OVIS benchmarks using both standard and tracking-based metrics (FG-ARI, mBO, IDF1, HOTA). TSA consistently improves object decomposition and temporal identity preservation, with large gains on long, heavily occluded videos.",
+      "authors": [
+        "Duc Nguyen",
+        "Sieu Tran",
+        "Hao Vo",
+        "Khoa Vo",
+        "Duy Minh Ho Nguyen",
+        "Nghi D. Q. Bui",
+        "Anh Nguyen",
+        "Long Mai",
+        "Ngan Le"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T20:54:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.13714v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "persistent object-centric video representation for understanding",
+      "llm_evidence_cn": "持久对象中心视频表示用于理解",
+      "llm_evidence": "持久对象中心视频表示用于理解",
+      "canonical_evidence": "持久对象中心视频表示用于理解",
+      "llm_tldr_en": "Proposes Temporal Slot Activation (TSA) that selectively updates slots only when objects are visible, avoiding state drift and improving persistent object-centric video representations.",
+      "llm_tldr_cn": "现有视频对象中心学习方法无条件更新每个时序槽，导致对象消失时状态漂移。本文提出时序槽激活机制，仅在对象可见时更新槽，保持持久性。在多个视频数据集上实验表明，TSA提升了对象分割和跟踪的连贯性，为长视频理解提供鲁棒的表示基础。",
+      "llm_tldr": "现有视频对象中心学习方法无条件更新每个时序槽，导致对象消失时状态漂移。本文提出时序槽激活机制，仅在对象可见时更新槽，保持持久性。在多个视频数据集上实验表明，TSA提升了对象分割和跟踪的连贯性，为长视频理解提供鲁棒的表示基础。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.14249v1",
+      "source": "arxiv",
+      "title": "HarnessX: A Composable, Adaptive, and Evolvable Agent Harness Foundry",
+      "abstract": "AI agent performance depends critically on the runtime harness, comprising the prompts, tools, memory, and control flow that mediate how a model observes, reasons, and acts. Yet today's harnesses remain largely hand-crafted and static: each new model or task still demands bespoke scaffolding, and the rich traces produced during execution are rarely distilled back into systematic improvement. We introduce HarnessX, a foundry for composable, adaptive, and evolvable agent harnesses. HarnessX assembles typed harness primitives via a substitution algebra, adapts them through AEGIS, a trace-driven multi-agent evolution engine grounded in an operational mirror between symbolic adaptation and reinforcement learning, and closes the harness-model loop by turning trajectories into both harness updates and model training signal. Across five benchmarks (ALFWorld, GAIA, WebShop, tau^3-Bench, and SWE-bench Verified), HarnessX yields an average gain of +14.5% (up to +44.0%), with gains largest where baselines are lowest. These results suggest that agent progress need not come from model scaling alone: composing and evolving runtime interfaces from execution feedback is an actionable and complementary lever. The complete codebase will be open-sourced in a future release.",
+      "authors": [
+        "Tingyang Chen",
+        "Shuo Lu",
+        "Kang Zhao",
+        "Weicheng Meng",
+        "Hanlin Teng",
+        "Tianhao Li",
+        "Chao Li",
+        "Xule Liu",
+        "Jian Liang",
+        "Zhizhong Zhang",
+        "Yuan Xie",
+        "Heng Qu",
+        "Kun Shao",
+        "Jian Luan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-12T08:27:11+00:00",
+      "link": "https://arxiv.org/pdf/2606.14249v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "memory is a key component in agent harness; composable harness architecture",
+      "llm_evidence_cn": "记忆是智能体装备的关键组件；可组合装备架构",
+      "llm_evidence": "记忆是智能体装备的关键组件；可组合装备架构",
+      "canonical_evidence": "记忆是智能体装备的关键组件；可组合装备架构",
+      "llm_tldr_en": "HarnessX proposes a composable, adaptive agent harness framework integrating prompts, tools, memory, and control flow via a substitution algebra and evolution engine.",
+      "llm_tldr_cn": "该论文提出HarnessX，一个可组合、自适应、可演化的智能体装备场。通过替代代数组装类型化装备原语，并借助AEGIS多智能体演化引擎实现自动适应。该框架将记忆、提示、工具和控制流统一管理，实现了装备与模型之间的闭环优化，显著减少了为每个新模型或任务从头搭建装备的负担。",
+      "llm_tldr": "该论文提出HarnessX，一个可组合、自适应、可演化的智能体装备场。通过替代代数组装类型化装备原语，并借助AEGIS多智能体演化引擎实现自动适应。该框架将记忆、提示、工具和控制流统一管理，实现了装备与模型之间的闭环优化，显著减少了为每个新模型或任务从头搭建装备的负担。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.14674v1",
+      "source": "arxiv",
+      "title": "AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition",
+      "abstract": "LLM agents are increasingly built not as single model calls, but as scaffolded systems that combine reasoning, memory, reflection, action execution, and learning. While such scaffolds often improve performance, they are often embedded in tightly coupled pipelines, making it difficult to isolate component contributions, compare alternative designs, or understand how module interactions shape agent behavior. We introduce AgentSpec, a modular specification framework that represents embodied agents as typed compositions of reusable policy components with standardized interfaces. AgentSpec standardizes the interfaces among perception, memory, reasoning, reflection, action, and optional learning, enabling components to be swapped and recombined under controlled conditions. We instantiate this framework across DeliveryBench, ALFRED, MiniGrid, and RoboTHOR, and analyze reasoning, memory, reflection, and reinforcement-learning modules across model backbones. Our results show that agent performance is governed by scaffold compatibility and interaction effects rather than isolated module strength. In particular, structured multi-granularity memory improves long-horizon state tracking, reasoning and memory interact non-uniformly across environments, reflection trades off correction and cost, and RL-trained policies compose best when optimized with deployment-time scaffold structure. AgentSpec provides a controlled foundation for studying, comparing, and designing composable LLM agents. Our code, baselines and interactive playground are publicly available at https://agentspec-embodied.github.io.",
+      "authors": [
+        "Jixuan Chen",
+        "Jianzhi Shen",
+        "Haoqiang Kang",
+        "Zhi Hong",
+        "Qingyi Jiang",
+        "Soham Bose",
+        "Yiming Zhang",
+        "Leon Leng",
+        "Amit Vyas",
+        "Lingjun Mao",
+        "Siru Ouyang",
+        "Kun Zhou",
+        "Lianhui Qin"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-12T17:39:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.14674v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "modular specification framework for embodied agent scaffolds with memory component",
+      "llm_evidence_cn": "具身智能体脚手架的模块化规范框架，包含记忆组件",
+      "llm_evidence": "具身智能体脚手架的模块化规范框架，包含记忆组件",
+      "canonical_evidence": "具身智能体脚手架的模块化规范框架，包含记忆组件",
+      "llm_tldr_en": "AgentSpec provides standardized interfaces for agent components including memory, enabling controlled composition and analysis.",
+      "llm_tldr_cn": "智能体系统通常将推理、记忆等组件紧密耦合，难以分离贡献。AgentSpec提出模块化规范框架，标准化感知、记忆、推理等接口，允许组件可互换组合。通过AgentSpec，研究者可以系统性分析不同记忆模块对行为的影响，促进记忆系统设计的可复用性。",
+      "llm_tldr": "智能体系统通常将推理、记忆等组件紧密耦合，难以分离贡献。AgentSpec提出模块化规范框架，标准化感知、记忆、推理等接口，允许组件可互换组合。通过AgentSpec，研究者可以系统性分析不同记忆模块对行为的影响，促进记忆系统设计的可复用性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

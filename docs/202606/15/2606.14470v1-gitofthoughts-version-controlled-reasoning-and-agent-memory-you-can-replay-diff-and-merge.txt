@@ -1,0 +1,326 @@
+Title: GitOfThoughts: Version-Controlled Reasoning and Agent Memory You Can Replay, Diff, and Merge
+
+URL Source: https://arxiv.org/pdf/2606.14470v1
+
+Published Time: Mon, 15 Jun 2026 01:06:49 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# GitOfThoughts: Version-Controlled Reasoning and Agent Memory You Can Replay, Diff, and Merge 
+
+## Pavan C Shekar Abhishek H S Aswanth Krishnan 
+
+QpiAI, Bengaluru, India 
+
+{pavan.s, abhishek.hs, ashwanth.krishnan}@qpiai.tech 
+
+# Abstract 
+
+Large language model (LLM) reasoning is ephemeral: chains of thought vanish with the context window, pruned search branches leave no record, and memory buffers cannot be diffed, merged, or audited. Every other com-plex software process (code, infrastructure, data, experi-ments) is version-controlled; reasoning is not. We introduce 
+
+GitOfThoughts , which stores an agent’s reasoning tree as a git repository: every scored thought is a commit, scores are notes, outcomes are tags, and retrieval is git log over the agent’s own history. This makes reasoning replayable, auditable, and mergeable across agents at near-zero engi-neering cost. We then ask the harder question: does memory, in any 
+
+substrate, actually improve accuracy? Across five sub-strates (none, markdown, vector, graph, git), two bench-marks, two model scales, and pre-registered replications, the answer for novel problems is no . No memory format reliably helps, and a promising early result collapsed un-der its own pre-registered replication. Memory pays only above what we call the copyability threshold : when the retrieved case is a near-duplicate of the current problem (similarity ≳ 0.8), accuracy jumps sharply; below it, noth-ing. The gain is answer retrieval, not method transfer: a 4.5× larger model doubles the near-duplicate payoff yet still cannot extract a transferable method from a worked example. The only general lever we find is test-time sam-pling. The case for git-as-substrate is therefore auditability, provenance, and mergeability at accuracy parity . We docu-ment a retracted result and a refuted hypothesis to model the evaluation standard we hold ourselves to. 
+
+# 1 Introduction 
+
+Modern software engineering rests on a substrate so univer-sal it has become invisible: every change to a non-trivial codebase is an immutable, parent-linked, content-addressed object in a version-control system. The same now holds for infrastructure-as-code, scientific datasets, and experiment tracking [ 27 ]. Reasoning is the remaining outlier. When a chain-of-thought prompt [ 21 ] expires, its steps are gone; when a tree-of-thoughts agent [ 24 ] prunes a branch, the pruned reasoning leaves no record; when Reflexion [ 16 ]writes a self-criticism, that buffer has no diff, no merge, no signed author, and no way for a third party to verify what the agent thought happened. We argue this ephemerality is a structural blocker, not a cosmetic one. It blocks reproducibility (replaying “what did the agent think at step 17?”), audit (detecting train–test leakage or gold-answer memorization), memory transfer 
+
+(combining two agents’ experience), and incident review 
+
+(retracing a confident wrong answer means re-running it, not reading its history). This paper tests two falsifiable hypotheses. H-substrate: 
+
+a version-controlled reasoning substrate provides opera-tional value (replay, audit, diff, merge) at accuracy par-ity with conventional memory stores. H-memory: cross-problem memory improves an agent’s accuracy on novel problems. GitOfThoughts is the instrument for both: the reasoning tree is a git repository (§3), and a pluggable mem-ory interface lets us hold the agent fixed while swapping only the substrate. The bulk of the paper is a controlled, pre-registered evaluation of these hypotheses, and the ver-dicts reshape how we think the field should talk about agent memory: 1. H-memory: rejected on novel problems. Across two benchmarks (GPQA-Diamond, MATH-500), two transfer regimes (cross-problem, cross-episode), two backbones, and up to n=500 , no memory substrate reliably improves accuracy on novel problems (§4). A promising +15 pp git trend at n=40 did not survive its own pre-registered replication. 2. Where the null breaks: the copyability thresh-old. A similarity sweep shows memory does help, sharply ( +12 to +13 .5 pp ∗), once the retrieved case is a near-duplicate of the test problem (cosine ≳ 0.8). Below that threshold, nothing. The gain is answer re-trieval, not method transfer, and a pre-registered 4.5×
+
+stronger backbone does not change this: scale steep-ens the copyability step (near-duplicate gain +22 .5to +28 .5 pp ∗) while the method band stays null (§5). This single result explains every null in the paper and 1
+
+> arXiv:2606.14470v1 [cs.AI] 12 Jun 2026
+
+bounds when agent memory pays off: recurring work-loads, not novel problems. 3. What does move accuracy. Test-time sampling (self-consistency, +3.4 pp ∗ at n=500 ) and base-model strength. Our own system headline on GPQA (47.0% vs. 33.0%) comes from MCQ-aware expansion plus a much larger compute budget, a confound we flag explicitly rather than claim as a memory win (§6). 4. H-substrate: supported. Git delivers auditability, provenance, line-level diffs over reasoning text, deter-ministic replay, and mergeable memory, at accuracy parity with every other substrate and at small absolute cost ( ∼15 ms/write; §3, §3.4). Throughout, we document a measurement bug we caught, a result we retracted, and a hypothesis of our own that the data refuted. We believe rigorously established negative results, reported with their full provenance, are a first-class contribution, and the substrate we propose is precisely the tool that makes such reporting cheap. 
+
+What GitOfThoughts is not. We claim no new tree-search algorithm; the outer tree-of-thoughts and inner Re-Act [ 25 ] loops are minimum-sufficient plumbing. We do not claim git is the only valid substrate, only that it is the most mature, operationally rich, and widely deployed content-addressed store available. The thesis: reasoning is the last unversioned software process; GitOfThoughts runs 
+
+git init on it. 
+
+# 2 Related Work 
+
+Iterative reasoning. ReAct [ 25 ], Reflexion [ 16 ], Self-Refine [ 9 ], and self-consistency [ 20 ] enrich single-question traces but keep them in transient in-memory structures that vanish at episode end and expose no transfer operation. 
+
+Tree search. Tree-of-Thoughts [ 24 ], LATS [ 30 ], RAP [3], and ReTreVal [ 6 ] extend search with reflection, MCTS, planning, or validation and cross-problem memory, but in each the tree is a Python object freed at process exit; GitOfThoughts gives this family a persistent, versioned substrate. 
+
+Long-term memory. Voyager’s skill library [ 18 ], Gener-ative Agents’ observation stream [ 13 ], MemoryBank [ 29 ], MemGPT [ 12 ], ExpeL [ 28 ], CLIN [ 10 ], Mem0 [ 1], A-MEM [ 22 ], and TextGrad [ 26 ] all use bespoke side stores. We map this landscape onto our {markdown, vector, graph} arms and add git as a versioned substrate. GitOfThoughts differs in substrate: its memory is the reasoning DAG it-self, in a content-addressed VCS. To our knowledge, no prior work treats the commit log of an LLM agent as its runtime memory, nor empirically compares a VCS against vector/graph stores as a reasoning-memory substrate.                       
+
+> Table 1: Reasoning concept ↔git primitive.
+> Reasoning concept git primitive
+> Scored reasoning node commit Node identity SHA-1 commit hash Refinement / parent commit parent edge Combined score git notes Validation outcome git tag ( success_* ,failed_* )Exploration path branch Session vs. cross-session master vs. memory
+> Keyword retrieval git log --grep
+> Content retrieval git log -S (pickaxe) Cross-agent merge git fetch &git merge
+> Reproducible artefact git bundle
+> Signed trace git commit -S
+
+Test-time scaling. Self-consistency [ 20 ], multi-agent debate [ 2 ], and verifier-based best-of-N selection [ 17 ] trade compute for accuracy; recent work finds debate mainly improves individual predictions while adjudication is the hard part, consistent with our selector-is-the-bottleneck result (§6). 
+
+In-context learning mechanisms. Our copyability find-ing connects to evidence that demonstrations often act through task recognition and surface format rather than method content [ 11 ]: in our controlled arms, the content of a retrieved worked example barely matters unless the exam-ple is copyable, which is the memory-substrate analogue of that ICL result. 
+
+Benchmarks. GPQA-Diamond [ 15 ] (graduate-level, “Google-proof” multiple choice), MATH-500 [ 5], and Sci-enceWorld [ 19 ], where SwiftSage [ 8] and CLIN report cross-episode learning. 
+
+# 3 Design: Reasoning as a Versioned DAG 
+
+The starting observation is that a reasoning tree shares every structural invariant git was designed for: immutable nodes, parent links, content addressing by hash, labelling, branch-ing, and search. Table 1 gives the one-to-one mapping; Figure 1 shows it in action. Every property git provides (immutable history, distributed replication, cryptographic verifiability, three-way merge, content-defined deduplica-tion, decades of tooling) becomes a property of the reason-ing trace at near-zero engineering cost. 
+
+## 3.1 Why not a database, or a JSONL log with grep? 
+
+A natural objection is that SQLite, a vector store, or, the strongest modern strawman, an append-only JSONL log plus ripgrep and SHA-256 hashing could play the same role, faster. We take this seriously, because the JSONL 2Figure 1: The reasoning tree is a git repository. Each scored thought is a commit with author, timestamp, and content-hash metadata; scores are git notes; validation outcomes are tags ( success_* , failed_* ); pruned attempts remain in history rather than vanishing. The winning path merges to main , an answer-free lesson is distilled to a long-lived memory branch, and retrieval is git log (--grep , -S ,tag filters) over the agent’s own history. Right: the operational properties this buys. Bottom: the end-to-end flow from exploration to retrieval. 
+
+strawman replicates much of git cheaply: append-only history, content hashes, and lexical retrieval. The resid-ual that git uniquely supplies is precisely the operational layer: (i) a tested three-way merge with conflict surfacing, the one structurally unique operation for combining two agents’ memories; (ii) signed authorship ( commit -S ) and native refs/tags; (iii) bit-identical reproduction via content addressing and git bundle ; (iv) free pack-file dedupli-cation; and (v) an unmatched tooling ecosystem (blame, bisect, hosting, CI) that a bespoke log must rebuild. These are operational arguments, and we treat them as such. The empirical question (holding the agent fixed and swapping only the substrate, does git retrieve priors as usefully as a semantic index, and at what cost?) is answered head-on in §4: no substrate buys accuracy on novel problems, so the operational properties become the deciding factor. We note that the merge operation, git’s strongest structural differen-tiator, now has a functional demonstration: a cross-process merge through a central bare repository ran end-to-end, and injected contradictory lessons surfaced as merge conflicts that simple concatenation silently retained (§6.3). Whether merged memory also helps accuracy is a pre-registered experiment still to run (§9). 
+
+## 3.2 Reasoning pipeline 
+
+The search machinery that produces the nodes is delib-erately conventional. Outer loop: a depth-1, branching-factor-4 tree of thoughts; for multiple-choice questions the four root children are the four candidate answers (A/B/C/D) and the model argues for each; this MCQ-aware expansion 
+
+turned out to be the largest single accuracy lever in the system. Inner loop: each node runs a ReAct loop (max 3 steps) with a calculator, a sympy solver, and a pulp 
+
+LP solver; web search is disabled in benchmark mode. 
+
+Scoring: s = 0.6 slocal + 0.4 scross ; the best child is vali-dated, tagged success/best or failed , and at most one re-expansion is allowed with typed-failure context. The score-and-tag step is exactly where GitOfThoughts deviates from vanilla tree-of-thoughts. 
+
+## 3.3 Git-native memory 
+
+Each problem is solved in its own ephemeral repos-itory. A commit-on-score hook writes four files per node ( thought.md , scores.json , trace.jsonl ,
+
+metadata.json ), commits with a structured message, at-taches a git note with the score, and tags the outcome. The 3Table 2: Fairness audit (GPQA-Diamond). Each row is one git invocation.        
+
+> Check Result
+> Same gold letters across 3 arms? 100/100
+> expected_answer in any commit? 0 hits Verbatim gold letter in any trace? 0/30 Fresh memory per question? verified Random-seed determinism (re-run)? bit-identical
+
+master branch accumulates the session tree; a long-lived 
+
+memory branch holds cross-problem insights. Retrieval uses only stock git: keyword ( --grep ), content ( -S pick-axe), outcome filter ( git tag -l ’success_*’ ), fron-tier ( git log master..memory ), ranked by a confidence-weighted score ρ = α scomb + β tag + γ recency with 
+
+(α, β , γ) = ( 0.7, 0.2, 0.1).
+
+## 3.4 Auditability properties 
+
+These are consequences of the substrate, not added engineering. Replayability: any SHA reconstructs a full reasoning state via git checkout . In-cident review: git diff success_X failed_Y – thought.md gives a line-level diff over the actual rea-soning text. Mergeable memory: git fetch peer && git merge peer/memory synchronizes two agents’ ex-perience, surfacing conflicts for adjudication. Searchable archives: 10,000 sessions are 10,000 repos, queryable with one shell loop. Fairness via git log -S : we audit our own GPQA run with the framework’s own primitive (Ta-ble 2), the same primitive an external reviewer would use. Pre-registrations in this paper are themselves git commits: the stronger-model replication’s decision rules were com-mitted before the 32B model served its first token, and the commit history is the audit trail. 
+
+# 4 The Memory Question: a Robust Null 
+
+Does cross-problem memory, in any substrate, improve accuracy on novel problems? We answer with three es-calating experiments, all behind one interface, with pre-registered hypotheses. Reading guide: the n=40 results (§4.2–4.3) are exploratory (their ±∼ 12 pp confidence in-tervals can only detect large effects) and exist to generate hypotheses that the high-powered n=500 study (§4.4) and the pre-registered replications then confirm or kill. We foreground the high-powered results; the small-n trends are reported because one of them taught us the paper’s central methodological lesson.                    
+
+> Table 3: Per-backend cost (GPQA, 40 ingested lessons).
+> Backend Write (ms) Read (ms) Storage
+> none ——0markdown 0.51 0.00 69 KB graph 0.14 0.35 184 KB git 15.4 48.0 191 KB vector 30.4 20.3 656 KB
+
+## 4.1 A pluggable MemoryBackend 
+
+Every memory read/write in the agent flows through one object with safe no-op defaults ( add_insight/failure/ success , get_relevant , get_summary , cost meters); the chosen backend is injected with a one-line change and tool code is untouched. Five implementations: • none : no cross-problem memory (ablation control); • markdown : a human-readable memory.md with dedu-plication and confidence weighting; • git : one shared repo; insights are commits on a 
+
+memory branch; retrieval is git grep ;• vector : all-MiniLM-L6-v2 embeddings [ 14 ] in a Chroma index, cosine nearest-neighbour; • graph : a networkx lesson/concept graph; spread-activation retrieval (associative, not nearest-neighbour). 
+
+## 4.2 Five substrates, controlled transfer (ex-ploratory, n=40 )
+
+Protocol. To isolate retrieval from write-path noise, all backends ingest identical knowledge. Per benchmark: (i) 
+
+study : solve K study problems, distilling one generalizable, answer-free lesson each into a shared lessons.jsonl ; (ii) 
+
+ingest : every backend replays the same lessons; (iii) test :solve M held-out problems with each backend injected read-only. Splits are deterministic, domain-stratified (study and test share domains, enabling transfer), and disjoint (audited: zero overlap). The primary agent is a single-shot retrieval-augmented solver; benchmarks are GPQA-Diamond and MATH-500; backbone Qwen3.5-9B served via vLLM [ 7]on one NVIDIA L40S. 
+
+Cost (measured). The substrates differ sharply in cost but all are cheap in absolute terms (Table 3): git pays 
+
+∼15 ms per write (a commit) and ∼48 ms per read (grep over history), the same order as the embedding index’s read (20 ms). 
+
+Pre-registered hypotheses. (H1) accumulated memory beats none, more on MATH-500 (recurring techniques) than GPQA; (H2) semantic backends beat lexical ones; (H3) git’s value is the engineering trade-off at accuracy parity, not top raw retrieval. 4Table 4: Transfer gain ∆ vs. none (single-shot agent, n=40 /cell, paired bootstrap 95% CI). Baselines: GPQA none = 52 .5% ,MATH-500 none = 57 .5%. Exploratory scale.                     
+
+> Bench. Backend Acc. ∆pp [95% CI] GPQA markdown 52.5% +0.0 [-12.5, +12.5] git 50.0% −2.5 [-15.0, +10.0] vector 62.5% +10 .0 [-2.5, +22.5] graph 50.0% −2.5 [-12.5, +7.5] MATH-500 markdown 55.0% −2.5 [-10.0, +5.0] git 52.5% −5.0 [-12.5, +0.0] vector 52.5% −5.0 [-12.5, +0.0] graph 52.5% −5.0 [-12.5, +0.0]
+
+Findings. The data discipline all three (Table 4). H1 is not supported : on GPQA every CI includes zero; on MATH-500 every backend lands 2.5–5 pp below the no-memory control. H2 has only a weak, local signal : vector is the single positive cell ( +10 pp , CI [−2.5, +22 .5] does not clear zero at n=40 ), a trend rather than a result. H3 is supported : git is statistically indistinguishable from the best backend on both benchmarks while being the only substrate that supplies the auditability properties of §3.4. 
+
+## 4.3 Memory inside the agent, and a trend that died 
+
+We next wire the backends inside the full agent (lessons re-trieved into the node prompt; distilled, answer-free lessons written after each problem) and test two regimes: cross-problem (GPQA, read-only frozen study memory from 30 disjoint problems) and cross-episode (ScienceWorld, 
+
+n=66 /arm, memory accumulating sequentially so the learn-ing curve is the signal). 
+
+The retraction this section exists for. At n=40 , git showed the largest gain of any substrate ( +15 pp ), but its CI just included zero, so we pre-registered it as a trend and ran a confirmation at n≈100 . The trend did not replicate 
+
+(Table 5): at n=98 , git collapses to +1.0 pp [−10 .2, +11 .2]
+
+and the backend ranking reshuffles (markdown worst →best, vector best →worst, git best → ≈ none). All CIs straddle zero. The instability of the ranking across samples is itself strong evidence that no substrate reliably helps at this scale and model; the n=40 +15 was small-sample luck, exactly the failure mode the pre-registered larger-n check exists to catch. 
+
+ScienceWorld: a floored agent, not evidence. No back-end beats no-memory ( ∆ ≤ 1.5 pp , all CIs cross zero) and no learning curve emerges. But we now flag, more strongly than before, that the scaffolded 9B sits at ∼12% absolute, versus SwiftSage’s 84.7 [ 8]: a floor. A null from a floored agent says “this agent could not demonstrate a benefit,” not “memory does not help cross-episode.” We therefore ex-clude ScienceWorld from the headline null claim and report                                                                   
+
+> Table 5: Memory inside the agent, ∆vs. none (paired bootstrap 95% CI). GPQA =accuracy; ScienceWorld =mean task score (floored; see text).
+> Setting Backend Score ∆[95% CI] GPQA (n=40, expl.) none 57.5% baseline markdown 50.0% −7.5 [-25, +10] vector 62.5% +5.0 [-7.5, +17.5] git 72.5% +15 .0 [-2.5, +32.5] GPQA (n=98, conf.) none 57.1% baseline markdown 62.2% +5.1 [-5.1, +15.3] vector 48.0% −9.2 [-20.4, +2.0] git 58.2% +1.0 [-10.2, +11.2] ScienceWorld (n=66, floored) none 12.3% baseline markdown 12.1% −0.2 [-3.8, +3.0] vector 13.2% +0.9 [-1.7, +3.7] git 13.9% +1.5 [-0.5, +4.0]
+> Table 6: MATH-500, n=500 , Qwen2.5-7B-Instruct. ∆vs. none (66.6%), paired bootstrap 95% CI; ∗=CI excludes 0.
+> Arm Acc. ∆vs. none [95% CI] none (zero-shot CoT) 66.6% baseline
+> sc5 (self-consistency) 70.0% +3.4[+0.6, +6.2] ∗
+> static few-shot (3 fixed) 67.0% +0.4 [-2.4, +3.4] markdown (lexical) 66.8% +0.2 [-2.6, +3.2] vector (semantic) 68.2% +1.6 [-1.4, +4.6] git (grep) 65.8% −0.8 [-4.2, +2.4] vector, subject-filtered 66.2% −0.4 [-3.6, +2.8] vector, answer-only 67.6% +1.0 [-2.2, +4.2] vector, answer-free lesson 66.2% −0.4 [-3.4, +2.6]
+
+it as an inconclusive arm pending a stronger base agent. 
+
+## 4.4 Scaling the question: MATH-500 at 
+
+## n=500 , with mechanism ablations 
+
+We now test at the largest scale, on a second back-bone (Qwen2.5-7B-Instruct [ 23 ]), on the benchmark most favourable to memory: MATH-500, whose within-subject problems reuse transferable methods (Vieta’s formulas, casework, telescoping), unlike GPQA’s disjoint facts. Mem-ory corpus: 2,000 disjoint MATH-train problems with gold worked solutions (leakage-audited against the test set); re-trieval top-3; a sympy -hardened answer checker applied identically to every arm. Three added arms turn the sub-strate comparison into a mechanism test: static few-shot (3 fixed exemplars; controls “having examples” vs. “retrieving relevant ones”), self-consistency (5 × majority vote; the standard test-time lever), and content/relevance ablations 
+
+on the best retriever (full worked solution vs. answer-only vs. answer-free lesson; subject-filtered retrieval). 
+
+Findings. Self-consistency is the only arm that signifi-cantly beats no-memory ( +3.4 pp ∗); no retrieval substrate 5−6 −4 −2 0 2 4 6      
+
+> git
+> lesson
+> subject
+> markdown
+> static
+> answer-only
+> vector
+> sc5
+> ∆accuracy vs. no-memory (pp)
+> Figure 2: What actually moves accuracy (MATH-500, n=500 ). Per-arm ∆vs. no-memory with paired bootstrap 95% CIs. Only self-consistency (green) clears zero; every memory substrate and the static-few-shot control sit within noise.
+
+does (Table 6, Fig. 2). Four results pin down why , one of which refutes our own prior hypothesis: 1. Relevance does not drive a gain. Forcing same-subject retrieval ( −0.4 ) did not beat unconstrained vector retrieval ( +1.6 ). An earlier subgroup signal (“problems whose retrieved exemplar shares the sub-ject score higher”) was confounded: semantically sim-ilar exemplars happen to share a subject, and forcing the subject label discards the better global match. We had hypothesized relevance was the lever; the con-trolled arm refutes it. 2. Content barely matters. Full worked solution ( +1.6 )
+
+≈ answer-only ( +1.0 ) > distilled lesson ( −0.4 ), all within noise; the model is not extracting transferable method from the exemplars. 3. Having examples is not the lever. Static few-shot (+0.4) ≈ none. 4. No online learning curve. With a git memory ac-cumulating the agent’s own verified solutions across the 500-problem stream, accuracy by quartile runs 70 .4 → 60 .0 → 67 .2 → 67 .2% , slightly down , even as subject-relevant retrievals grow. 
+
+Cross-model robustness. Re-running the GPQA mem-ory comparison on this second backbone ( n=98 ) repro-duces the null and the pattern: no substrate beats no-memory (none 40.8%; markdown −4.1 , git −2.0 , vector 
+
+−8.2 ; all CIs cross zero), with vector worst on both models and git ≈ none on both. The null therefore holds across two backbones (Qwen3.5-9B, Qwen2.5-7B-Instruct), two benchmarks, and up to n=500 . We state the scope of this claim precisely: the two full-suite backbones are adjacent in size and from different model families, and the 32B (§5) runs only the method-transfer arm; this is a robustness check, not a scaling law. 
+
+# 5 Where the Null Breaks: the Copy-ability Threshold 
+
+Every test so far lived in the disjoint-problem regime. But the systems that plausibly benefit from memory (support tickets, recurring bugs, repeated workflows) retrieve near-duplicate past cases. We therefore vary the test ↔memory similarity directly: for 200 hard (Level 4–5) MATH seeds we inject a single worked example at four similarity tiers and measure ∆ vs. no-memory (7B baseline 53.0%; cosine via MiniLM). 
+
+The first positive memory effect in this paper, and a clean boundary. A retrieved near-duplicate or paraphrase (cosine ≳ 0.85 ) gives +12 to +13 .5 pp with CIs clearing zero, while a same-subject or unrelated example (cosine 
+
+≤ 0.22 ) gives nothing (Table 7, Fig. 3). Pooling by cosine, the gain clears zero only in the top bin ( ≥ 0.85 : +12 .7
+
+[+ 8.4, +17 .3]∗). Memory has a similarity threshold τ ≈
+
+0.8. This explains every prior null (GPQA/MATH cross-problem exemplars sit at cosine ∼0.1 – 0.5 , below τ) and bounds when memory pays off: recurring or near-duplicate workloads, not novel problems. 
+
+The gain is copyability, not method transfer. A dedi-cated method-transfer arm, in which the memory is a real same-method, different-numbers problem (cosine 0.72; a different answer, hence not copyable; 187/196 memory answers differ from the test’s), is null: −4.1 [−9.7, +1.5].The model benefits from near-verbatim recurrence (the answer is essentially retrievable), not from abstracting a method out of a worked example. Notably, even with the exact solution present, the high-similarity tiers reach only 65%: the 7B does not blindly copy a retrieved answer either. 
+
+Does a stronger model transfer method? (pre-registered). The natural objection is that a 7B is simply too weak to exploit a retrieved method. We re-ran the method-transfer protocol unchanged on Qwen2.5-32B-Instruct (AWQ int4; the largest backbone our 46 GB GPU serves), fixing the decision rule before the run : method transfer is present iff the paired bootstrap 95% CI of ∆(method −
+
+none ) clears zero; the test is valid only if the recurrence control stays positive and the baseline is below ceiling. Both validity conditions hold (none = 60 .7% vs. the 7B’s 54.6% on the same seeds; 190/196 memory answers non-copyable; 0 empty predictions; median 20.9 s/solve). Re-sult: the null replicates almost exactly , with ∆ = −3.6
+
+[−8.7, +1.5] (core band [0.60 , 0.85 ]: −2.4 [−8.4, +3.6]), vs. the 7B’s −4.1 . And the control does not merely pass; it amplifies : the 32B exploits near-verbatim memory far better than the 7B (identical +28 .5 [+ 22 .0, +35 .0]∗, para-phrase +22 .5 [+ 16 .5, +29 .0]∗, reaching 86% where the 7B plateaued at 65%), while same-subject and unrelated tiers stay null. Scale steepens the copyability step with-out turning retrieved worked examples into transferable method. (AWQ int4 can shift the absolute level, not the 6Table 7: Similarity sweep and method band across scale (MATH, 
+
+n=200 hard seeds; method band n=196 paired). ∆ vs. no-memory per tier, paired bootstrap 95% CI; ∗ = CI excludes 0. Baselines (none): 7B 53.0% (sweep) / 54.6% (method run); 32B 57.5% / 60.7%. 
+
+Tier (mean cos.) ∆ 7B [CI] ∆ 32B [CI] identical (1.00) +12 .0 [+6.0, +18.0] ∗ +28 .5 [+22.0, +35.0] ∗
+
+paraphrase (0.95) +13 .5 [+7.0, +20.0] ∗ +22 .5 [+16.5, +29.0] ∗
+
+method band (0.72) −4.1 [-9.7, +1.5] −3.6 [-8.7, +1.5] same-subject (0.22) −2.5 [-7.5, +2.5] +0.5 [-5.0, +6.0] unrelated (0.12) −2.5 [-7.0, +2.0] +1.0 [-4.0, +6.0]        
+
+> 00.20.40.60.81
+> 0
+> 20
+> τ≈0.8
+> test ↔memory cosine similarity
+> ∆ accuracy vs. no-memory (pp)  Qwen2.5-7B
+> Qwen2.5-32B (pre-reg.)
+
+Figure 3: The copyability threshold. Memory helps only above cosine ≈0.8 (shaded), where the retrieved case is a near-duplicate. The method band (cosine 0.72: same method, different numbers, non-copyable answer) is null at both scales: a 4.5× larger model 
+
+steepens the step (doubling the near-duplicate payoff) without unlocking method transfer. 
+
+paired within-model ∆s; the remaining open variable is a frontier-class model.) 
+
+# 6 What Actually Moves Accuracy 
+
+## 6.1 Test-time sampling 
+
+Self-consistency [ 20 ] is the one arm in the entire study whose CI clears zero on novel problems ( +3.4 pp 
+
+[+ 0.6, +6.2] at n=500 ; Table 6). Self-consistency working is not news in itself [ 17 ]; its value here is the contrast : un-der matched conditions, the standard test-time lever clears zero while every memory substrate sits in noise. 
+
+## 6.2 Test-time architectures: none beat greedy 
+
+Across the memory experiments the selector/aggregator kept emerging as the bottleneck, so we iterated test-time architectures directly on fixed GPQA sets, paired against greedy chain-of-thought: self-consistency (several tempera-tures), argue-each-option, single-revision, and verifier best-of-N. The first lesson is methodological: the n=20 noise floor is ±10 pp (greedy itself swung 55% ↔ 65% across identical runs), so single-cycle deltas are noise and we refuse to crown a winner from them. With that discipline: 
+
+no test-time architecture reliably beats greedy single CoT for this model on GPQA; self-consistency and revision can hurt (sampling/over-editing breaks already-correct an-swers). The only stable qualitative signal: verifier-based selection is “safe” (it rarely breaks a correct answer). An 
+
+n=40 confirmation gives greedy 52.5% vs. verifier best-of-N 55.0%: +2.5 pp (one problem) at 6.4× the tokens, within noise and not worth the cost. 
+
+## 6.3 The system headline, with its confound stated 
+
+For completeness we report the original system result, with the caveat it requires. The middle arm is ReTreVal [ 6 ], a reasoning-tree framework with validation, critique scoring, and cross-problem memory; GitOfThoughts re-instruments ReTreVal-style tree search on the git substrate of §3, so this comparison is against a full tree-search system, not just plain sampling. On GPQA-Diamond (Qwen3.5-9B, 100 questions, identical model and data across arms, fresh memory on all memory arms, a conservative choice that denies GitOfThoughts any cross-problem advantage): 
+
+Table 8: GPQA-Diamond system comparison. Caution: wall-clock budgets differ across arms (60 s / 180 s / 600 s), so this comparison confounds method with compute. A compute-matched control is future work (§8). 
+
+Arm Acc. Budget Per-Q 
+
+Vanilla (single call) 33.0% 60 s 0.7 s ReTreVal (5 × SC) [6] 34.0% 180 s 127.9 s GitOfThoughts 47.0% 600 s 469.8 s 
+
+The +14 pp gain decomposes, by our own ablations, into MCQ-aware expansion (the largest single lever) plus the larger compute budget, not git and not memory. Of the 53 misses, 46 are timeouts, concentrated in Chemistry’s long synthesis chains. 1 For a fixed model already near its competence ceiling, test-time compute is not the lever; base-model strength is.   
+
+> 1On the 54 questions that completed within budget, accuracy is 87.0% (47/54). We now report this only as a descriptive footnote: conditioning on completion selects the easier-to-finish problems (timeouts correlate with problem length and difficulty), so this number is upward-biased and is not an estimate of accuracy under a larger budget. The unbiased version of this claim requires re-running with a higher cap, which we list as future work.
+
+76.4 Durable execution: measured overhead, not accuracy 
+
+To show the substrate is production-real, each reasoning node can also run as a durable task on a hosted Hatchet queue [ 4 ] (the executor seam of §3.2 swapped for a cloud backend; git remains the shared state). With/without com-parison on a mock harness ( n=12 runs, K=4 branches): node counts and results are identical by construction ; the only cost is ∼249 ms/node of dispatch latency, which amor-tizes when each node’s real work (an LLM call, seconds) dwarfs the dispatch. We report this to be explicit that or-chestration choices, like memory substrate, do not move accuracy; they buy durability and crash-resume. 
+
+Distributed merge: a functional demonstration. The 
+
+distributed variant, which realizes the mergeable-memory claim across processes, has now been exercised end-to-end in a functional run: two worker processes cloned a central bare repository, accumulated lessons on separate branches over disjoint domains, and the orchestrator merged them, with zero conflicts, as expected for disjoint content. Five deliberately contradictory lessons were then injected; all five surfaced as genuine git merge conflicts, while a con-catenation control silently retained all five contradictions with no error signal. One structural caveat emerged: with content-hashed lesson filenames, merges are conflict-free by construction and contradictions coexist silently, the same failure mode as concatenation; conflict surfacing requires a 
+
+keyed layout (one file per topic) so that the merge encodes “same slot, different content.” Git supports both layouts and surfaces the contradiction exactly when the layout en-codes it; concatenation cannot in either. This run exercised the plumbing with stub lessons; the accuracy phase with model-distilled lessons is pre-registered and pending (§9). 
+
+# 7 All Experiments at a Glance 
+
+Table 9 summarizes every experiment, including the trend we retracted and the hypothesis we refuted. The through-line: the accuracy levers are test-time sampling and base-model strength; the value of git is auditability at accuracy parity; and memory pays only above the copyability thresh-old. 
+
+# 8 Discussion and Limitations 
+
+Compute trade-off and the headline confound. 
+
+GitOfThoughts buys its system gain at large wall-clock cost ( ∼470 s/question), and the arms in Table 8 run differ-ent budgets. The practical case is high-stakes reasoning, not latency-sensitive serving. Until a compute-matched control runs (§9), the 47% should be read as a system-plus-compute result. 
+
+What the null does and does not cover. The null is established for short, distilled, answer-free lessons and worked-example retrieval, on two adjacent open-weight backbones, up to n=500 . It does not cover frontier-class models, rich episodic memory (full reasoning traces rather than one-shot distilled lessons, which every arm here under-tests), or multi-agent settings; §9 lays out the experiments that would close each gap. 
+
+Other open items. ScienceWorld’s floor ( ∼12%) and its uniform action-mask scaffolding; a single seed for wall-clock budgets; AWQ int4 quantization on the 32B (affects the absolute level, not paired within-model ∆s); and the controlled-transfer “identical knowledge” assumption holds only for the simple ingest path. 
+
+# 9 Future Work 
+
+Three experiments follow directly from this paper, each to be pre-registered before the first model call. First, and high-est priority, merged-memory accuracy : the functional phase is complete (§6.3); what remains is the pre-registered accuracy phase, in which two agents accumulate model-distilled memory over disjoint domains, the orchestrator merges, and merged memory is compared against each solo memory and a naive concatenation on a mixed-domain test set. Given the copyability threshold, we state up front that we expect the accuracy deltas to be small or null; the op-erational comparison against concatenation is the primary endpoint. Second, a compute-matched system baseline :every GPQA arm at the same wall-clock budget, including budget-saturating self-consistency, which either validates the system headline or converts it into a clean negative re-sult. Third, moving the threshold : we have yet to test this with frontier models, and frontier-class backbones together with rich episodic memory (full reasoning traces rather than distilled lessons) are the two variables most likely to lower τ; we plan to vary them independently, since ei-ther alone could rescue method transfer. Further out: an unbiased high-budget headline run, distributed durable ex-ecution across machines, and cross-episode transfer on a non-floored agent. 
+
+# 10 Conclusion 
+
+LLM reasoning is the last unversioned software process. GitOfThoughts makes every scored reasoning node a git commit (notes for scores, tags for outcomes, branches for memory, git log as the retrieval API), buying prove-nance, replay, diff, merge, and reproducibility at near-zero cost. Beyond the substrate, this paper is an exercise in pre-registered evaluation across five experiments, two backbones, and up to n=500 , and its sharpest product is a boundary: memory helps only above a copyability 
+
+8Table 9: Every experiment, its setup, and its verdict. 
+
+Experiment What we tested Verdict 
+
+1. GPQA headline (9B) GitOfThoughts system vs. vanilla / Re-TreVal (5 × SC) 47% vs. 33% ( +14 pp ), but budgets differ across arms and the gain is driven by MCQ-aware expansion +
+
+compute, not git or memory. 2. Five-substrate study →test (9B, 
+
+n=40, exploratory) none / markdown / vector / graph / git No substrate beats none; git at accuracy parity with the best while uniquely auditable. 3. Memory inside the agent (GPQA n=40 →98 ; Science-World) cross-problem + cross-episode transfer A +15 pp git trend did not replicate (→ +1.0, ranking reshuffled). ScienceWorld is floored ( ∼12%) and ex-cluded from the headline null. 4. Test-time architectures (9B) SC / argue / revise / verifier best-of-N None beat greedy CoT; SC and revision can hurt. The selector is the bottleneck. 5. MATH-500 n=500 + ablations (7B) 9 arms: substrates, static few-shot, SC, content, subject filter, online Self-consistency +3.4 pp ∗ is the only significant lever; relevance and content refuted; no online learning curve. Cross-model robustness (7B, GPQA n=98) re-run the memory null on a 2nd backbone Null holds across two backbones, two benchmarks, and up to n=500 (scope stated precisely in §4.4). Recurrence sweep (7B, MATH, 
+
+n=200) vary test ↔memory similarity Regime-dependent: near-duplicate retrieval (cos ≳ 0.8 )gives +12 to +13 .5 pp ∗; same-subject/disjoint gives nothing ( τ ≈ 0.8). Method transfer (7B, MATH, 
+
+n=200) same method, different numbers (not copyable) Null ( −4.1 [-9.7, +1.5]): the benefit is answer retrieval, not method transfer. Method transfer at scale (32B, 
+
+n=196, pre-registered) rerun on a 4 .5× backbone Null replicates ( −3.6 [-8.7, +1.5]) while the near-duplicate control more than doubles (+22 .5 to 
+
++28 .5 pp ∗); scale steepens copyability, not transfer. Durable execution (Hatchet) each node as a durable cloud task Results identical by construction; cost ∼249 ms/node dispatch: durability, not accuracy. Functional dis-tributed merge run: 5/5 injected contradictions surface as conflicts; concatenation stays silent. Accuracy phase pending. 
+
+threshold (τ ≈ 0.8 ), where the retrieved case is a near-duplicate and the gain ( +12 to +13 .5 pp ∗ at 7B; +22 .5 to 
+
++28 .5 pp ∗ at 32B) is answer retrieval, not method trans-fer; a 4.5× scale-up steepens that step without unlocking abstraction. Below the threshold, no substrate (git, vec-tor, graph, markdown) reliably moves accuracy; the one general lever is test-time sampling ( +3.4 pp ∗). The case for git-as-substrate is therefore auditability, provenance, diff, merge, and reproducibility at accuracy parity , not a retrieval boost. The questions we hand forward are sharp: whether a frontier-class model with rich episodic memory lowers τ, and whether git-mergeable multi-agent memory, the substrate’s one structurally unique operation, delivers where single-agent retrieval cannot. git init the agent. 
+
+# References 
+
+[1] Prateek Chhikara, Dev Khant, Saket Aryan, Taranjeet Singh, and Deshraj Yadav. Mem0: Building production-ready AI agents with scalable long-term memory. arXiv:2504.19413, 2025. [2] Yilun Du, Shuang Li, Antonio Torralba, Joshua B. Tenen-baum, and Igor Mordatch. Improving factuality and rea-soning in language models through multiagent debate. arXiv:2305.14325, 2023. [3] Shibo Hao, Yi Gu, Haodi Ma, Joshua Jiahua Hong, Zhen Wang, Daisy Zhe Wang, and Zhiting Hu. Reasoning with language model is planning with world model. In Proceed-ings of EMNLP , 2023. [4] Hatchet. Hatchet: A distributed, durable task queue (soft-ware). https://github.com/hatchet-dev/hatchet ,2024. [5] Dan Hendrycks, Collin Burns, Saurav Kadavath, Akul Arora, Steven Basart, Eric Tang, Dawn Song, and Jacob Steinhardt. Measuring mathematical problem solving with the MATH dataset. In NeurIPS Datasets and Benchmarks , 2021. [6] Abhishek HS, Pavan C. Shekar, Arpit Jain, and Aswanth Krishnan. ReTreVal: Reasoning tree with validation – a hybrid framework for enhanced LLM multi-step reasoning. arXiv:2601.02880, 2026. [7] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph Gonzalez, Hao Zhang, and Ion Stoica. Efficient memory management for large language model serving with PagedAttention. In Pro-ceedings of SOSP , 2023. [8] Bill Yuchen Lin, Yicheng Fu, Karina Yang, Faeze Brah-man, Shiyu Huang, Chandra Bhagavatula, Prithviraj Am-manabrolu, Yejin Choi, and Xiang Ren. SwiftSage: A 
+
+9generative agent with fast and slow thinking for complex interactive tasks. In NeurIPS , 2023. [9] Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler Hallinan, Luyu Gao, Sarah Wiegreffe, Uri Alon, Nouha Dziri, Shrimai Prabhumoye, Yiming Yang, Shashank Gupta, Bodhisattwa Prasad Majumder, Katherine Hermann, Sean Welleck, Amir Yazdanbakhsh, and Peter Clark. Self-refine: Iterative refinement with self-feedback. In NeurIPS , 2023. [10] Bodhisattwa Prasad Majumder, Bhavana Dalvi Mishra, Pe-ter Jansen, Oyvind Tafjord, Niket Tandon, Li Zhang, Chris Callison-Burch, and Peter Clark. CLIN: A continually learn-ing language agent for rapid task adaptation and generaliza-tion. arXiv:2310.10134, 2023. [11] Sewon Min, Xinxi Lyu, Ari Holtzman, Mikel Artetxe, Mike Lewis, Hannaneh Hajishirzi, and Luke Zettlemoyer. Re-thinking the role of demonstrations: What makes in-context learning work? In Proceedings of EMNLP , 2022. [12] Charles Packer, Sarah Wooders, Kevin Lin, Vivian Fang, Shishir G. Patil, Ion Stoica, and Joseph E. Gonza-lez. MemGPT: Towards LLMs as operating systems. arXiv:2310.08560, 2023. [13] Joon Sung Park, Joseph C. O’Brien, Carrie J. Cai, Mered-ith Ringel Morris, Percy Liang, and Michael S. Bernstein. Generative agents: Interactive simulacra of human behavior. In Proceedings of UIST , 2023. [14] Nils Reimers and Iryna Gurevych. Sentence-BERT: Sen-tence embeddings using siamese BERT-networks. In Pro-ceedings of EMNLP , 2019. [15] David Rein, Betty Li Hou, Asa Cooper Stickland, Jackson Petty, Richard Yuanzhe Pang, Julien Dirani, Julian Michael, and Samuel R. Bowman. GPQA: A graduate-level google-proof Q&A benchmark. arXiv:2311.12022, 2023. [16] Noah Shinn, Federico Cassano, Edward Berman, Ashwin Gopinath, Karthik Narasimhan, and Shunyu Yao. Reflexion: Language agents with verbal reinforcement learning. In 
+
+NeurIPS , 2023. [17] Charlie Snell, Jaehoon Lee, Kelvin Xu, and Aviral Kumar. Scaling LLM test-time compute optimally can be more ef-fective than scaling model parameters. arXiv:2408.03314, 2024. [18] Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Mandlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan, and Anima Anandku-mar. Voyager: An open-ended embodied agent with large language models. arXiv:2305.16291, 2023. [19] Ruoyao Wang, Peter Jansen, Marc-Alexandre Côté, and Prithviraj Ammanabrolu. ScienceWorld: Is your agent smarter than a 5th grader? In Proceedings of EMNLP ,2022. [20] Xuezhi Wang, Jason Wei, Dale Schuurmans, Quoc Le, Ed Chi, Sharan Narang, Aakanksha Chowdhery, and Denny Zhou. Self-consistency improves chain of thought reasoning in language models. In ICLR , 2023. [21] Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc Le, and Denny Zhou. Chain-of-thought prompting elicits reasoning in large language models. In NeurIPS , 2022. [22] Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Juntao Tan, and Yongfeng Zhang. A-MEM: Agentic memory for LLM agents. arXiv:2502.12110, 2025. [23] An Yang, Baosong Yang, Beichen Zhang, et al. Qwen2.5 technical report. arXiv:2412.15115, 2024. [24] Shunyu Yao, Dian Yu, Jeffrey Zhao, Izhak Shafran, Thomas L. Griffiths, Yuan Cao, and Karthik Narasimhan. Tree of thoughts: Deliberate problem solving with large language models. In NeurIPS , 2023. [25] Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. ReAct: Synergizing reasoning and acting in language models. In ICLR , 2023. [26] Mert Yuksekgonul, Federico Bianchi, Joseph Boen, Sheng Liu, Zhi Huang, Carlos Guestrin, and James Zou. TextGrad: Automatic “differentiation” via text. arXiv:2406.07496, 2024. [27] Matei Zaharia, Andrew Chen, Aaron Davidson, Ali Gh-odsi, Sue Ann Hong, Andy Konwinski, Siddharth Murching, Tomas Nykodym, Paul Ogilvie, Mani Parkhe, Fen Xie, and Corey Zumar. Accelerating the machine learning lifecycle with MLflow. IEEE Data Engineering Bulletin , 41(4), 2018. [28] Andrew Zhao, Daniel Huang, Quentin Xu, Matthieu Lin, Yong-Jin Liu, and Gao Huang. ExpeL: LLM agents are experiential learners. In Proceedings of AAAI , 2024. [29] Wanjun Zhong, Lianghong Guo, Qiqi Gao, He Ye, and Yanlin Wang. MemoryBank: Enhancing large language models with long-term memory. In Proceedings of AAAI ,2024. [30] Andy Zhou, Kai Yan, Michal Shlapentokh-Rothman, Hao-han Wang, and Yu-Xiong Wang. Language agent tree search unifies reasoning, acting, and planning in language models. In ICML , 2024. 
+
+10

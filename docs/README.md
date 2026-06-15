@@ -6,64 +6,49 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-14
-- 运行时间：2026-06-14 20:55:00 UTC
+- 最新运行日期：2026-06-15
+- 运行时间：2026-06-15 22:08:38 UTC
 - 运行状态：成功
-- 本次总论文数：14
-- 精读区：7
-- 速读区：7
+- 本次总论文数：9
+- 精读区：4
+- 速读区：5
 
 ### 今日简报（AI）
-今日推荐14篇论文，精读7篇速读7篇，其中两篇高分论文聚焦时序定位与长时记忆优化。  
-最值得关注方向：教学视频时序回答定位的候选感知因果推理（CACR，9.0分）与长时语言智能体可观测安全记忆约束（9.0分）。  
-建议普通读者优先精读这两篇高分论文，掌握因果推理与记忆优化核心思路，后续可尝试将相关方法应用于实际视频问答或智能体系统。
-- 详情：[/202606/14/README](/202606/14/README)
+今日推荐9篇论文，精读聚焦GUI Agent记忆缺陷与流式评估，速读覆盖电商搜索、视频表示与生物行为视频生成。  
+最值得关注：GUI Agent的视觉记忆短板及流式记忆评估基准StreamMemBench。  
+建议关注GUI Agent记忆能力的改进方法，以及面向未来的流式评估技术。
+- 详情：[/202606/15/README](/202606/15/README)
 
 ### 精读区论文标签
-1. [CACR:Reinforcing Temporal Answer Grounding in Instructional Video via Candidate-Aware Causal Reasoning](/202606/14/2606.08436v2-cacrreinforcing-temporal-answer-grounding-in-instructional-video-via-candidate-aware-causal-reasoning)  
-   标签：评分：9.0/10、query:long-video
-   evidence：通过候选感知因果推理进行时间答案定位
-2. [Learning What to Remember: Observability-Safe Memory Retention via Constrained Optimization for Long-Horizon Language Agents](/202606/14/2606.10616v2-learning-what-to-remember-observability-safe-memory-retention-via-constrained-optimization-for-long-horizon-language-agents)  
+1. [Naive Visual Memory is Not Enough: A Failure-Mode Study of GUI Agents](/202606/15/2606.14106v1-naive-visual-memory-is-not-enough-a-failure-mode-study-of-gui-agents)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：面向长周期agent记忆保留的约束优化
-3. [G-Long: Graph-Enhanced Memory Management for Efficient Long-Term Dialogue Agents](/202606/14/2606.13115v1-g-long-graph-enhanced-memory-management-for-efficient-long-term-dialogue-agents)  
+   evidence：GUI代理中视觉记忆的失败模式研究
+2. [StreamMemBench: Streaming Evaluation of Agent Memory for Future-Oriented Assistance](/202606/15/2606.14571v1-streammembench-streaming-evaluation-of-agent-memory-for-future-oriented-assistance)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：面向长期对话智能体的图增强记忆
-4. [Rethinking RAG in Long Videos: What to Retrieve and How to Use It?](/202606/14/2606.13141v1-rethinking-rag-in-long-videos-what-to-retrieve-and-how-to-use-it)  
-   标签：评分：9.0/10、query:long-video
-   evidence：长视频问答的检索增强生成
-5. [WebChallenger: A Reliable and Efficient Generalist Web Agent](/202606/14/2606.10423v1-webchallenger-a-reliable-and-efficient-generalist-web-agent)  
+   evidence：智能体记忆的流式评估基准
+3. [GitOfThoughts: Version-Controlled Reasoning and Agent Memory You Can Replay, Diff, and Merge](/202606/15/2606.14470v1-gitofthoughts-version-controlled-reasoning-and-agent-memory-you-can-replay-diff-and-merge)  
    标签：评分：8.0/10、query:agent-memory
-   evidence：面向web agent的网站结构持久化记忆（PageMem）
-6. [REAL: A Reasoning-Enhanced Graph Framework for Long-Term Memory Management of LLMs](/202606/14/2606.10694v1-real-a-reasoning-enhanced-graph-framework-for-long-term-memory-management-of-llms)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：基于图框架的LLM长期记忆管理
-7. [Iterating Toward Better Search: A Two-Agent Simulation Framework for Evaluating Agentic Search Architectures in E-Commerce](/202606/14/2606.12924v1-iterating-toward-better-search-a-two-agent-simulation-framework-for-evaluating-agentic-search-architectures-in-e-commerce)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：在搜索中评估智能体记忆架构
+   evidence：版本控制的智能体记忆，支持回放、比较和合并
+4. [OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains](/202606/15/2606.14702v1-omnivideo-100k-a-dataset-for-audio-visual-reasoning-through-structured-scripts-and-evidence-chains)  
+   标签：评分：8.0/10、query:long-video
+   evidence：面向长视频推理的音频-视觉QA数据集，带有结构化脚本
 
 ### 速读区论文标签
-1. [ProPlay: Procedural World Models for Self-Evolving LLM Agents](/202606/14/2606.12780v1-proplay-procedural-world-models-for-self-evolving-llm-agents)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：ProPlay提出了一种程序性世界模型，使代理能通过记忆和规划自我演化
-2. [MemRefine: LLM-Guided Compression for Long-Term Agent Memory](/202606/14/2606.13177v1-memrefine-llm-guided-compression-for-long-term-agent-memory)  
-   标签：评分：8.0/10、query:agent-memory
-   evidence：MemRefine: 在存储预算下用LLM指导的长期代理记忆压缩
-3. [SMSR: Certified Defence Against Runtime Memory Poisoning in Persistent LLM Agent Systems](/202606/14/2606.12703v1-smsr-certified-defence-against-runtime-memory-poisoning-in-persistent-llm-agent-systems)  
+1. [Iterating Toward Better Search: A Two-Agent Simulation Framework for Evaluating Agentic Search Architectures in E-Commerce](/202606/15/2606.12924v1-iterating-toward-better-search-a-two-agent-simulation-framework-for-evaluating-agentic-search-architectures-in-e-commerce)  
    标签：评分：7.0/10、query:agent-memory
-   evidence：持久化agent系统中针对记忆投毒的可认证防御
-4. [WISE: A Long-Horizon Agent in Minecraft with Why-Which Reasoning](/202606/14/2606.12852v1-wise-a-long-horizon-agent-in-minecraft-with-why-which-reasoning)  
-   标签：评分：7.0/10、query:agent-memory
-   evidence：带因果事件图记忆的长周期agent架构
-5. [HYDRA-X: Native Unified Multimodal Models with Holistic Visual Tokenizers](/202606/14/2606.13289v1-hydra-x-native-unified-multimodal-models-with-holistic-visual-tokenizers)  
+   evidence：提出双智能体仿真框架，比较滚动窗口记忆与意图提取记忆在对话智能体中的效果
+2. [TSA: Temporal Slot Activation for Persistent Object-Centric Video Representation](/202606/15/2606.13714v1-tsa-temporal-slot-activation-for-persistent-object-centric-video-representation)  
    标签：评分：7.0/10、query:long-video
-   evidence：统一图像和视频标记化
-6. [EvoArena: Tracking Memory Evolution for Robust LLM Agents in Dynamic Environments](/202606/14/2606.13681v1-evoarena-tracking-memory-evolution-for-robust-llm-agents-in-dynamic-environments)  
-   标签：评分：7.0/10、query:agent-memory
-   evidence：EvoArena基准和EvoMem补丁式记忆范式，用于动态环境中的代理
-7. [Arbor: Tree Search as a Cognition Layer for Autonomous Agents](/202606/14/2606.12563v1-arbor-tree-search-as-a-cognition-layer-for-autonomous-agents)  
+   evidence：持久对象中心视频表示用于理解
+3. [BioVid: Autoregressive Video Generation with Biological Behavior Semantic Comprehension](/202606/15/2606.08674v2-biovid-autoregressive-video-generation-with-biological-behavior-semantic-comprehension)  
+   标签：评分：6.0/10、query:long-video
+   evidence：自回归视频生成，学习长视频的自然时间长度分布
+4. [HarnessX: A Composable, Adaptive, and Evolvable Agent Harness Foundry](/202606/15/2606.14249v1-harnessx-a-composable-adaptive-and-evolvable-agent-harness-foundry)  
    标签：评分：6.0/10、query:agent-memory
-   evidence：通过树搜索共享工作记忆
+   evidence：记忆是智能体装备的关键组件；可组合装备架构
+5. [AgentSpec: Understanding Embodied Agent Scaffolds Through Controlled Composition](/202606/15/2606.14674v1-agentspec-understanding-embodied-agent-scaffolds-through-controlled-composition)  
+   标签：评分：6.0/10、query:agent-memory
+   evidence：具身智能体脚手架的模块化规范框架，包含记忆组件
 
 
 <div class="dpr-home-promo-card">
