@@ -1,0 +1,846 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-16T23:04:13.558412+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 14,
+    "deep_cap": 7,
+    "deep_selected": 10,
+    "quick_candidates": 10,
+    "quick_skim_target": 12,
+    "quick_selected": 10
+  },
+  "deep_dive": [
+    {
+      "id": "2606.14702v1",
+      "source": "arxiv",
+      "title": "OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains",
+      "abstract": "Current automated pipelines for audio-visual Question Answering (QA) generally adopt a ``video-caption-QA'' paradigm. However, these methods typically segment videos into short clips and generate separate descriptions for audio and visual modalities. This decoupled processing severs inherent associations between sounds and their visual sources, while independent clip processing often causes inconsistent descriptions of the same entity across segments. Furthermore, coupling long-text comprehension and QA synthesis into a single step often restricts models to localized events, yielding questions lacking long-term temporal connections and deep cross-modal reasoning. To address these issues, we propose an automated data engine featuring two mechanisms: (1) \\textbf{Entity-Anchored Video Scripting} transforms videos into structured scripts, comprising summaries, main entity lists, and segment-wise audio-visual descriptions. The entity list serves as a global prior to ensure cross-segment referential consistency and reconstruct audio-visual associations. (2) \\textbf{Clue-Guided QA Generation} prompts models to first mine cross-segment, multimodal clues from the script, and subsequently generate QA pairs based on these high-value clues. Leveraging this pipeline, we construct the instruction-tuning dataset \\textbf{OmniVideo-100K} and a human-verified test set, \\textbf{OmniVideo-Test}. Fine-tuning VITA-1.5, Qwen2.5-Omni-7B and Qwen3-Omni-30B on OmniVideo-100K yields performance gains of up to 20.59% on OmniVideo-Test, demonstrating strong generalization (up to 12.64% improvements) across established benchmarks like Daily-Omni and JointAVBench.",
+      "authors": [
+        "Xinyue Cai",
+        "Chaoyou Fu",
+        "Yi-Fan Zhang",
+        "Ran He",
+        "Caifeng Shan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-12T17:59:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.14702v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "audio-visual QA on long videos with long-term temporal connections",
+      "llm_evidence_cn": "长视频上的音频-视觉问答，强调长期时间连接",
+      "llm_evidence": "长视频上的音频-视觉问答，强调长期时间连接",
+      "canonical_evidence": "长视频上的音频-视觉问答，强调长期时间连接",
+      "llm_tldr_en": "OmniVideo-100K addresses limitations in audio-visual QA by generating structured scripts and evidence chains that capture long-term temporal and cross-modal reasoning in long videos.",
+      "llm_tldr_cn": "本文针对现有音频-视觉问答方法在长视频中缺乏长期时间连接和深度跨模态推理的问题，提出自动数据引擎OmniVideo-100K，通过结构化脚本和证据链生成，增强长视频问答的时空关联性。该数据集支持更复杂的推理任务，有助于推动长视频理解领域的发展。",
+      "llm_tldr": "本文针对现有音频-视觉问答方法在长视频中缺乏长期时间连接和深度跨模态推理的问题，提出自动数据引擎OmniVideo-100K，通过结构化脚本和证据链生成，增强长视频问答的时空关联性。该数据集支持更复杂的推理任务，有助于推动长视频理解领域的发展。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14762v1",
+      "source": "arxiv",
+      "title": "Scribby: A Multi-Level LLM Framework for Semantic Video Analysis",
+      "abstract": "As video content continues to expand across educational platforms, recorded lectures, and live-streamed entertainment, the need for efficient and structured analysis of long-form footage has increased \\cite{1}. Although many existing AI programs provide high-level video summaries based on AI-generated transcripts \\cite{2,3,4,5}, these approaches are often limited to coarse overviews and lack detailed analysis of a video's structure, thematic progression, and semantic relationships, all of which are required for comprehensive video analysis.   This paper proposes an LLM-based video summarization framework that balances macro-level comprehension with micro-level semantic analysis \\cite{6,12,13}. The first stage of the process indexes the video at a micro level by (1) analyzing the full transcript, (2) analyzing individual transcript sentences, and (3) grouping these sentences by semantic similarity using an LLM as a judge \\cite{6,13}. Contextual continuity is retained during sentence-level processing by incorporating both the global transcript analysis and adjacent sentence information into each evaluation prompt.   This framework establishes a foundation for video analysis tools that visualize semantic chunking and semantic matching through relevance-based heatmaps. Limitations and future expansions of the framework are also discussed.",
+      "authors": [
+        "Julian Abelarde",
+        "Hugo Garrido-Lestache Belinchon"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-08T14:41:00+00:00",
+      "link": "https://arxiv.org/pdf/2606.14762v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multi-level LLM framework for semantic video analysis of long-form footage",
+      "llm_evidence_cn": "多级LLM框架用于长视频的语义分析",
+      "llm_evidence": "多级LLM框架用于长视频的语义分析",
+      "canonical_evidence": "多级LLM框架用于长视频的语义分析",
+      "llm_tldr_en": "Scribby proposes a multi-level LLM framework for semantic video analysis, balancing macro-level comprehension with micro-level semantic details for long-form videos.",
+      "llm_tldr_cn": "针对现有长视频分析工具仅提供粗粒度摘要的局限，本文提出Scribby框架，利用LLM实现宏微观结合的语义分析：宏观理解视频整体结构、主题演进，微观分析具体语义关系。该方法通过视频索引和分层处理，为教育、娱乐等长视频提供了结构化的深入分析能力。",
+      "llm_tldr": "针对现有长视频分析工具仅提供粗粒度摘要的局限，本文提出Scribby框架，利用LLM实现宏微观结合的语义分析：宏观理解视频整体结构、主题演进，微观分析具体语义关系。该方法通过视频索引和分层处理，为教育、娱乐等长视频提供了结构化的深入分析能力。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15200v1",
+      "source": "arxiv",
+      "title": "Keep It in Mind: User Centric Continual Spatial Intelligence Reasoning in Egocentric Video Streams",
+      "abstract": "We introduce UCS-Bench, a dataset spanning 170+ hours of egocentric visual observations with 8.1K+ timestamped questions for diagnosing User-Centric Continual Spatial intelligence in egocentric video streams. UCS-Bench targets a new problem that emphasizes dynamic spatial reasoning, long-term memory, and their alignment with users' real-time locations. We propose DirectMe, a framework that incrementally constructs and maintains a structured spatial memory from streaming egocentric observations. DirectMe enables robust tracking and recall of object locations, all relative to the user's movement over time. By tightly coupling visual perception with memory updates and spatial reasoning, our approach supports long-horizon queries that require recalling interactions, resolving viewpoint-induced ambiguities, and adapting to dynamic scenes. Our experiments show that DirectMe significantly improves the spatial reasoning of leading multimodal LLMs; it also surpasses many spatially aware and long-form streaming video models. We hope our benchmark and solution will advance spatial intelligence research for egocentric AI assistants. Data and code are available at https://github.com/cocowy1/UCS-Bench.",
+      "authors": [
+        "Yun Wang",
+        "Junbin Xiao",
+        "Han Lyu",
+        "Yifan Wang",
+        "Jing Zuo",
+        "Zhanjie Zhang",
+        "Hong Huang",
+        "Dapeng Wu",
+        "Angela Yao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-13T08:50:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.15200v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "targets question answering on long egocentric video streams with spatial reasoning and memory",
+      "llm_evidence_cn": "针对第一视角长视频的问答任务，结合空间推理与长期记忆",
+      "llm_evidence": "针对第一视角长视频的问答任务，结合空间推理与长期记忆",
+      "canonical_evidence": "针对第一视角长视频的问答任务，结合空间推理与长期记忆",
+      "llm_tldr_en": "UCS-Bench dataset and DirectMe framework for continual spatial QA in egocentric videos, leveraging structured spatial memory over long horizons.",
+      "llm_tldr_cn": "该论文针对第一视角长视频中的持续空间问答难题，构建了包含170小时视频和8.1K时间戳问题的UCS-Bench基准，并提出DirectMe框架。DirectMe通过增量构建和维护结构化的空间记忆，紧密耦合视觉感知与记忆更新，实现鲁棒的目标位置跟踪与回忆。实验表明该框架能够有效支持长时域的空间推理问题，为长视频理解中的动态空间问答提供了新范式。",
+      "llm_tldr": "该论文针对第一视角长视频中的持续空间问答难题，构建了包含170小时视频和8.1K时间戳问题的UCS-Bench基准，并提出DirectMe框架。DirectMe通过增量构建和维护结构化的空间记忆，紧密耦合视觉感知与记忆更新，实现鲁棒的目标位置跟踪与回忆。实验表明该框架能够有效支持长时域的空间推理问题，为长视频理解中的动态空间问答提供了新范式。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15320v1",
+      "source": "arxiv",
+      "title": "Conditional Multi-Event Temporal Grounding in Long-Form Video",
+      "abstract": "Multimodal large language models have made rapid progress in video temporal grounding, yet real-world applications routinely require localizing every event that satisfies compositional temporal and spatial conditions. Existing benchmarks fall short: they localize only a single moment per query, count without temporal conditions, or treat grounding and counting as disjoint tasks. We introduce CoMET-Bench for Conditional Multi-Event Temporal Grounding in long-form video, comprising 2789 queries over 600 videos averaging 33.8 minutes across five real-world domains, with each query composed from 4 temporal conditions, 3 spatial conditions, and a dedicated negative-query subset. We further propose a unified evaluation protocol jointly measuring counting, grounding, and negative-query recognition, including a new Rejection-F1 metric that prevents trivial gaming by lazy \"always-empty\" models. Benchmarking a broad suite of MLLMs, agent-based, and grounding-specialized methods reveals that existing approaches remain far from solving this task. Building on these findings, we propose CoMET-Agent, a training-free agentic framework that reformulates the task as structured search-and-aggregate, improving F1@0.5 by 6.1% over GPT-5 purely through structural reasoning. Failure analysis further surfaces three open directions: fine-grained entity tracking, position-uniform retrieval, and causal event pairing.",
+      "authors": [
+        "Yuanhao Zou",
+        "Arthad Kulkarni",
+        "Lucas Tonanez",
+        "Lincoln Spencer",
+        "Guangyu Sun",
+        "Tianxingjian Ding",
+        "Andong Deng",
+        "Yi Li",
+        "Shuangjun Liu",
+        "Yuan Li",
+        "Dashan Gao",
+        "Ning Bi",
+        "Taotao Jing",
+        "Shuai Zhang",
+        "Chen Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-13T14:27:58+00:00",
+      "link": "https://arxiv.org/pdf/2606.15320v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "long-form video temporal grounding with multiple events",
+      "llm_evidence_cn": "长视频多事件时间定位与问答",
+      "llm_evidence": "长视频多事件时间定位与问答",
+      "canonical_evidence": "长视频多事件时间定位与问答",
+      "llm_tldr_en": "Introduces CoMET-Bench for conditional multi-event temporal grounding in long-form video and a unified evaluation protocol for counting and grounding.",
+      "llm_tldr_cn": "该工作针对长视频中满足组合时空条件的多事件定位问题，提出了CoMET-Bench基准测试，包含2789个查询、600个平均33.8分钟的视频，以及统一评估协议。该基准填补了现有方法只能定位单事件或无法同时计数的空白，为长视频理解中的精细问题回答提供了关键评估工具。",
+      "llm_tldr": "该工作针对长视频中满足组合时空条件的多事件定位问题，提出了CoMET-Bench基准测试，包含2789个查询、600个平均33.8分钟的视频，以及统一评估协议。该基准填补了现有方法只能定位单事件或无法同时计数的空白，为长视频理解中的精细问题回答提供了关键评估工具。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15632v1",
+      "source": "arxiv",
+      "title": "Open-World Video Segmentation",
+      "abstract": "While video segmentation has advanced rapidly on short clips and closed-set benchmarks, open-world video segmentation remains largely unexplored. The challenge is twofold: (1) existing methods are not designed to support object discovery and identity maintenance in long videos of dynamic ego-motion, and (2) existing evaluation protocols rely on a rigid 1:1 matching that unfairly penalizes semantically valid predictions with mismatched granularity. To address both gaps, we introduce Savvy, a practical and strong system for zero-shot open-world long-horizon video segmentation. Savvy combines hierarchical mask discovery, deferred admission, and track consolidation to support persistent object discovery, safe track promotion, and stable long-range identity maintenance. We further propose OGA, a granularity-aware evaluation suite for open-world video segmentation. Built on a Granularity-Agnostic (GA) matching protocol, OGA relaxes conventional 1:1 matching to an n:1 mapping, but still enforces temporal rigor by detecting support discontinuities through sever points and scoring each reference object through its dominant coherent fragment. This prevents fragmented or flickering support from being over-rewarded while enabling GA-adapted metrics and structural diagnostics: identity persistence (IP), and identity concentration (IC). On VIPSeg, we show that standard 1:1 evaluation substantially underestimates open-world methods, whereas GA evaluation recovers much of their suppressed performance. On the more realistic long-horizon benchmarks: ScanNet and HM3D, Savvy consistently outperforms strong baselines across both classical and proposed metrics, including STQ, VPQ$_\\infty$, IP and IC. Together, these results establish a practical benchmark and a strong baseline for open-world long-horizon video segmentation.",
+      "authors": [
+        "Qing Su",
+        "Kaiyang Li",
+        "Yuan Zhuang",
+        "Fei Miao",
+        "Shihao Ji"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-14T06:48:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.15632v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "open-world long-horizon video segmentation for understanding long videos",
+      "llm_evidence_cn": "面向长视频理解的开放世界长时视频分割",
+      "llm_evidence": "面向长视频理解的开放世界长时视频分割",
+      "canonical_evidence": "面向长视频理解的开放世界长时视频分割",
+      "llm_tldr_en": "Savvy system for zero-shot open-world long-horizon video segmentation, combining hierarchical mask discovery, deferred admission, and track consolidation for persistent object identity maintenance.",
+      "llm_tldr_cn": "开放世界长视频分割面临对象发现和身份维护挑战。本文提出Savvy系统，通过层级掩码发现、延迟接纳和轨迹合并，在零样本设置下实现长时视频的持久对象发现和稳定身份维持。同时提出新的评估协议OGA，避免粒度不匹配导致的惩罚。Savvy在多个长视频基准上显著优于现有方法，为长视频理解提供了新颖的分割范例。",
+      "llm_tldr": "开放世界长视频分割面临对象发现和身份维护挑战。本文提出Savvy系统，通过层级掩码发现、延迟接纳和轨迹合并，在零样本设置下实现长时视频的持久对象发现和稳定身份维持。同时提出新的评估协议OGA，避免粒度不匹配导致的惩罚。Savvy在多个长视频基准上显著优于现有方法，为长视频理解提供了新颖的分割范例。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15903v1",
+      "source": "arxiv",
+      "title": "Control-Plane Placement Shapes Forgetting: An Architectural Study of Agent Memory Across Thirteen System Configurations",
+      "abstract": "Where an LLM sits in an agent memory pipeline -- between the recall plane that retrieves stored facts (extensively benchmarked) and the control plane that mutates them via supersede, release, purge (largely untested) -- shapes which forgetting failure modes the system recovers. Comparing thirteen system configurations on a 385-case adversarial surface, we observe three placement regimes with partly complementary coverage: deterministic primitives suffice for lexical/temporal categories but fail canonicalization (5% on identifier-obfuscation, 0% on cross-lingual); inscribe-time LLM recovers canonicalization (100%) but cannot help intent-aware deletion (0% on prefix-collision and compound-fact); a mutation-time hook recovers intent-aware deletion (78-85%) and brightens nearly all categories simultaneously (91.7-93.2% overall, $0.17 per 385-case run, 2.3s/case mutation latency vs. 64-191ms/case deterministic, recall path unchanged).   We expose the trade-off via ForgetEval, a 1000-case templated suite plus a 385-case adversarial layer (132 hand-crafted + 253 LLM-drafted oracle-validated) scored by deterministic substring match, paired with a six-method Adapter Protocol with honest N/A scoring that lets heterogeneous memory stores enter in 130 lines. Admission is corroborated by 10-annotator IAA (Fleiss' kappa = 0.958) and a 77-case external-authored subset (four blind contributors) that replicates the canonicalization asymmetry and amplifies the joint-placement lift (+27.8 pt). Production failures are predominantly forgetting failures rather than recall failures, yet existing benchmarks measure only recall. ForgetEval and all adapters are released under MIT.",
+      "authors": [
+        "Dongxu Yang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-14T16:32:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.15903v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "architectural study of agent memory forgetting",
+      "llm_evidence_cn": "智能体记忆遗忘的架构研究",
+      "llm_evidence": "智能体记忆遗忘的架构研究",
+      "canonical_evidence": "智能体记忆遗忘的架构研究",
+      "llm_tldr_en": "Systematic study of how control-plane placement in agent memory pipelines affects forgetting failure modes across 13 configurations on an adversarial surface, revealing complementary coverage of different placements.",
+      "llm_tldr_cn": "智能体记忆系统的遗忘行为受控制平面位置影响。本文通过13种系统配置在385个对抗样本上的实验，确定了三种放置范式：确定性原语、记录时LLM、突变时LLM，它们在不同遗忘模式上具有互补性。该研究为设计抗遗忘智能体记忆架构提供了系统指导。",
+      "llm_tldr": "智能体记忆系统的遗忘行为受控制平面位置影响。本文通过13种系统配置在385个对抗样本上的实验，确定了三种放置范式：确定性原语、记录时LLM、突变时LLM，它们在不同遗忘模式上具有互补性。该研究为设计抗遗忘智能体记忆架构提供了系统指导。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.16285v1",
+      "source": "arxiv",
+      "title": "HiMPO: Hindsight-Informed Memory Policy Optimization for Less-Entangled Credit in Long-Horizon Agents",
+      "abstract": "Long-horizon agents rely on memory mechanisms to compress interaction history, but optimizing memory writing faces a distinct credit assignment challenge: a memory update may be rewarded or penalized due to downstream tool failures, noisy observations, or reasoning errors rather than its own contribution. This causally entangled credit can lead agents to discard useful evidence or preserve irrelevant information. We propose HiMPO, a Hindsight-Informed Memory Policy Optimization framework for assigning less-entangled credit to memory-writing actions in long-horizon agents. HiMPO first estimates the local utility of a memory update by comparing the task-relevant information recoverable from the previous and updated memories under the same pre-write state. It then uses hindsight relevance as a bounded retrospective filter that attenuates memory credit when local utility is not supported by the target outcome. The resulting memory-specific advantage is applied only to memory tokens, while trajectory-level rewards optimize the rest of the agent behavior. Across judge-based open-domain tasks and objective compressive-memory QA, HiMPO improves over strong memory-based and RL-based baselines while preserving compressed-context efficiency. Controlled interventions further show that HiMPO reduces blame leakage from tool-induced errors and improves attribution fidelity of memory updates.",
+      "authors": [
+        "Jiangze Yan",
+        "Yi Shen",
+        "Wenjing Zhang",
+        "Jieyun Huang",
+        "Zhaoxiang Liu",
+        "Ning Wang",
+        "Kai Wang",
+        "Shiguo Lian"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-06-15T06:49:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.16285v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "memory policy optimization for long-horizon agents with less-entangled credit assignment",
+      "llm_evidence_cn": "面向长周期智能体的记忆策略优化，实现更解耦的信用分配",
+      "llm_evidence": "面向长周期智能体的记忆策略优化，实现更解耦的信用分配",
+      "canonical_evidence": "面向长周期智能体的记忆策略优化，实现更解耦的信用分配",
+      "llm_tldr_en": "HiMPO introduces hindsight-informed memory policy optimization to assign less-entangled credit to memory-writing actions in long-horizon agents, improving memory utility.",
+      "llm_tldr_cn": "针对长周期智能体记忆写入面临信用分配纠缠的问题（记忆更新可能因下游错误而被错误奖惩），本文提出HiMPO框架，通过比较更新前后记忆的可恢复信息量来估计局部效用，从而更精确地优化记忆策略。实验证明该方法能有效减少记忆噪声，提升长期任务性能。",
+      "llm_tldr": "针对长周期智能体记忆写入面临信用分配纠缠的问题（记忆更新可能因下游错误而被错误奖惩），本文提出HiMPO框架，通过比较更新前后记忆的可恢复信息量来估计局部效用，从而更精确地优化记忆策略。实验证明该方法能有效减少记忆噪声，提升长期任务性能。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.16353v1",
+      "source": "arxiv",
+      "title": "What Should a Streaming Video Model Remember?",
+      "abstract": "Streaming video understanding models must answer queries at any moment during an ongoing stream, using only what they have observed so far and under fixed memory and computation budgets. Existing methods address this by adding memory banks, retrieval modules, or visual token compression to preserve long-range history. However, strong recent-window baselines show that indiscriminate history injection can dilute current-scene perception, suggesting that the key challenge is not whether to use memory, but how to allocate it selectively. We formulate this as budgeted online latent evidence allocation and propose \\textbf{SelectStream}, a selective latent-memory framework that keeps the current observation directly visible to a frozen VLM while exposing historical information only through a compact, query-conditioned evidence budget. Three coordinated mechanisms govern when to write, what to preserve, and how to retrieve: surprise-driven adaptive windowing, priority-preserving consolidation, and query-conditioned graph reasoning over a fixed-capacity latent memory graph. Retrieved evidence is calibrated and injected as latent tokens for answer generation, without replaying frames or growing the context with stream length. Experimental results show that SelectStream achieves strong online streaming performance and preserves general video understanding, reaching 82.67\\% on StreamingBench, 67.03\\% on OVO-Bench, and 74.4\\% average accuracy on offline video benchmarks, while outperforming strong recent-window baselines and prior streaming memory methods.",
+      "authors": [
+        "Haonan Ge",
+        "Yiwei Wang",
+        "Hang Wu",
+        "Yujun Cai"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-15T07:50:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.16353v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "selective latent-memory framework for streaming video understanding",
+      "llm_evidence_cn": "流视频理解中的选择性潜在记忆框架",
+      "llm_evidence": "流视频理解中的选择性潜在记忆框架",
+      "canonical_evidence": "流视频理解中的选择性潜在记忆框架",
+      "llm_tldr_en": "SelectStream formulates selective memory allocation for streaming video understanding, keeping current observation visible and exposing historical info only when beneficial.",
+      "llm_tldr_cn": "流式视频理解模型需在固定预算下持续回答查询，现有方法因不加区分注入历史而稀释了当前场景感知。SelectStream提出选择性潜在记忆框架，保持当前观察直接可见，仅当历史信息有益时才释放，将问题形式化为预算约束的在线潜在证据分配。在多个流视频基准上，SelectStream在有限记忆下显著提升了理解质量。",
+      "llm_tldr": "流式视频理解模型需在固定预算下持续回答查询，现有方法因不加区分注入历史而稀释了当前场景感知。SelectStream提出选择性潜在记忆框架，保持当前观察直接可见，仅当历史信息有益时才释放，将问题形式化为预算约束的在线潜在证据分配。在多个流视频基准上，SelectStream在有限记忆下显著提升了理解质量。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.16707v1",
+      "source": "arxiv",
+      "title": "User as Code: Executable Memory for Personalized Agents",
+      "abstract": "A personalized AI agent needs a user memory: a persistent model of who the user is, built across many conversations and consulted on each new one. Today this memory is almost always stored as unstructured text, a knowledge graph, or a flat store of facts, and consulted by retrieval -- fetching the entries most similar to the current request. Such \"bag-of-facts\" memory recalls individual facts well, but because storing a fact and acting on it are separate steps, it struggles to resolve contradictions, aggregate over many records, or enforce rules. We argue that user memory should instead be executable. We introduce User as Code (UaC), a paradigm in which an agent's model of a user is a living software project: typed Python objects hold the user's state and ordinary Python functions encode the rules that govern it, so representing and reasoning about the user happen in one medium an interpreter can run. The enabling mechanism is a two-phase pipeline: an append-only log that never discards a fact, periodically checkpointed into typed code.   This changes what memory can do. On standard long-term conversation benchmarks, UaC matches both a full-context upper bound and the strongest prior memory systems on recall (78.8% on LOCOMO). Its advantage emerges where representation matters most. On aggregate questions over a user's history -- \"how many international trips did I take last year?\" -- retrieval-based memory collapses (6-43%) while UaC stays near-perfect (99%), because the answer is a one-line computation over typed state rather than a search over text. And because its rules execute deterministically whenever the state changes, UaC can surface unsolicited, safety-critical alerts -- such as a newly prescribed drug that conflicts with an allergy recorded months earlier -- a capability query-driven memory cannot provide.",
+      "authors": [
+        "Bojie Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-15T13:39:41+00:00",
+      "link": "https://arxiv.org/pdf/2606.16707v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Executable memory paradigm where user memory is a living software project",
+      "llm_evidence_cn": "可执行记忆范式，将用户记忆视为活的软件项目",
+      "llm_evidence": "可执行记忆范式，将用户记忆视为活的软件项目",
+      "canonical_evidence": "可执行记忆范式，将用户记忆视为活的软件项目",
+      "llm_tldr_en": "User as Code proposes executable user memory using typed Python objects, enabling contradiction resolution, aggregation, and rule enforcement.",
+      "llm_tldr_cn": "现有智能体用户记忆多为非结构化文本或知识图谱，存储与行动分离，难以解决矛盾或执行规则。User as Code提出可执行记忆范式，将用户模型表示为活的软件项目，使用类型化Python对象持有状态，并通过编程逻辑实现推理、聚合和约束。这一方法使个性化智能体能够更精确地应用用户信息。",
+      "llm_tldr": "现有智能体用户记忆多为非结构化文本或知识图谱，存储与行动分离，难以解决矛盾或执行规则。User as Code提出可执行记忆范式，将用户模型表示为活的软件项目，使用类型化Python对象持有状态，并通过编程逻辑实现推理、聚合和约束。这一方法使个性化智能体能够更精确地应用用户信息。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17016v1",
+      "source": "arxiv",
+      "title": "TokenPilot: Cache-Efficient Context Management for LLM Agents",
+      "abstract": "As LLM agents are deployed in long-horizon sessions, context accumulation drives up inference costs. Existing approaches utilize text pruning or dynamic memory eviction to minimize token footprints; however, their unconstrained sequence mutations alter layouts, introducing prefix mismatches and cache invalidation. This reveals a critical trade-off between text sparsity and prompt cache continuity. To address this, we present TokenPilot, a dual-granularity context management framework. Globally, Ingestion-Aware Compaction acts as a framework harness to stabilize prompt prefixes and eliminate open-world environmental noise at the ingestion gate. Locally, Lifecycle-Aware Eviction monitors the ongoing residual utility of context segments, enforcing a conservative batch-turn schedule to offload content segments only when task relevance expires. Experiments on PinchBench and Claw-Eval under both isolated and continuous modes demonstrate that TokenPilot reduces costs by 61% and 56% in isolated mode, and 61% and 87% in continuous mode, while maintaining competitive performance compared to prior systems. TokenPilot has been integrated into LightMem2 at https://github.com/zjunlp/LightMem2.",
+      "authors": [
+        "Buqiang Xu",
+        "Zirui Xue",
+        "Dianmou Chen",
+        "Chenyang Fu",
+        "Chiyu Wu",
+        "Caiying Huang",
+        "Chen Jiang",
+        "Jizhan Fang",
+        "Xinle Deng",
+        "Yijun Chen",
+        "Yunzhi Yao",
+        "Xuehai Wang",
+        "Jin Shang",
+        "Gong Yu",
+        "Ningyu Zhang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG",
+        "cs.MA"
+      ],
+      "published": "2026-06-15T17:46:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.17016v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "context management for LLM agents with memory eviction",
+      "llm_evidence_cn": "LLM智能体的上下文管理与内存驱逐",
+      "llm_evidence": "LLM智能体的上下文管理与内存驱逐",
+      "canonical_evidence": "LLM智能体的上下文管理与内存驱逐",
+      "llm_tldr_en": "TokenPilot introduces a dual-granularity context management framework for LLM agents, using ingestion-aware compaction and lifecycle-aware eviction to balance text sparsity and cache continuity, reducing inference costs in long-horizon sessions.",
+      "llm_tldr_cn": "针对LLM智能体在长程会话中上下文累积导致推理成本高的问题，本文提出TokenPilot，一种双粒度上下文管理框架。全局上通过摄入感知压缩稳定提示前缀并消除环境噪声；局部上通过生命周期感知驱逐监控上下文段的剩余效用。该方法在不牺牲缓存连续性的前提下最小化token占用，实验表明显著降低了长会话推理延迟。",
+      "llm_tldr": "针对LLM智能体在长程会话中上下文累积导致推理成本高的问题，本文提出TokenPilot，一种双粒度上下文管理框架。全局上通过摄入感知压缩稳定提示前缀并消除环境噪声；局部上通过生命周期感知驱逐监控上下文段的剩余效用。该方法在不牺牲缓存连续性的前提下最小化token占用，实验表明显著降低了长会话推理延迟。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.09365v3",
+      "source": "arxiv",
+      "title": "Experience Makes Skillful: Enabling Generalizable Medical Agent Reasoning via Self-Evolving Skill Memory",
+      "abstract": "Medical agent systems are increasingly expected to support interactive clinical decision making rather than only static question answering. In such settings, effective agents must reuse prior experience across evolving cases, yet existing memory mechanisms often retain raw historical traces that are redundant, noisy, and difficult to govern. More importantly, they rarely distinguish which memories are truly useful for future reasoning. This limits their ability to accumulate compact and reliable experience for long-horizon clinical reasoning. To close this gap, we propose SkeMex, a post-deployment self-evolution framework that improves medical agents through a skill-based memory without updating model weights. SkeMex distills informative interaction trajectories into structured skills that encode reusable procedural knowledge, and organizes them into a multi-branch repository spanning general, task-specific, and action-level experience. To determine which memories should be reused and retained, SkeMex estimates context-dependent utility from environment feedback and uses it to guide value-aware retrieval and repository governance. A closed-loop ``Read--Write--Assess--Govern\" lifecycle further supports continual evolution by writing new skills, updating utilities, promoting useful memories, and removing harmful entries. Experiments across diverse clinical tasks show that SkeMex consistently outperforms representative memory-based agents in both offline and online settings. It also generalizes across model backbones and supports transferable skill memory. All data and code will be released publicly.",
+      "authors": [
+        "Haoran Sun",
+        "Wenjie Li",
+        "Yujie Zhang",
+        "Zekai Lin",
+        "Fanrui Zhang",
+        "Kaitao Chen",
+        "Xingqi He",
+        "Yichen Li",
+        "Mianxin Liu",
+        "Lei Liu",
+        "Yankai Jiang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-08T11:37:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.09365v3",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "self-evolving skill memory for medical agent reasoning",
+      "llm_evidence_cn": "用于医疗智能体推理的自进化技能记忆",
+      "llm_evidence": "用于医疗智能体推理的自进化技能记忆",
+      "canonical_evidence": "用于医疗智能体推理的自进化技能记忆",
+      "llm_tldr_en": "SkeMex enables medical agents to accumulate reliable skill-based memory from past experiences, improving long-horizon clinical reasoning without model weight updates.",
+      "llm_tldr_cn": "医疗智能体需支持交互式临床决策，但现有记忆机制常保留冗余噪音，且难以判断哪些记忆对推理有用。SkeMex提出一种后部署自进化框架，通过技能记忆库整合既往经验，无需更新模型权重。在多个临床推理任务上，SkeMex显著提升了智能体在长程病例中的推理准确性和泛化能力，为智能体记忆系统设计提供了新范式。",
+      "llm_tldr": "医疗智能体需支持交互式临床决策，但现有记忆机制常保留冗余噪音，且难以判断哪些记忆对推理有用。SkeMex提出一种后部署自进化框架，通过技能记忆库整合既往经验，无需更新模型权重。在多个临床推理任务上，SkeMex显著提升了智能体在长程病例中的推理准确性和泛化能力，为智能体记忆系统设计提供了新范式。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.14667v1",
+      "source": "arxiv",
+      "title": "Memento: Reconstruct to Remember for Consistent Long Video Generation",
+      "abstract": "Long-form video generation requires recurring subjects to remain consistent across various shots, viewpoints, motions, and scene transitions. Existing temporal decomposition methods improve scalability by generating videos shot by shot. However, they mainly focus on optimizing plausible next-shot continuations without verifying whether the historical memory preserves identity-critical subject evidence. Consequently, as generation proceeds, recurring subjects may be diluted, overwritten, or forgotten. In this paper, we propose Memento, a subject-reconstruction-guided framework that treats subject preservation as an explicit identity grounding problem, based on the premise that a memory bank faithfully preserving a subject should support reconstructing that subject from memory alone. Specifically, Memento jointly trains autoregressive next-shot generation with memory-based subject reconstruction, recovering target appearances using historical memory and global story captions. To disentangle long-range subject evidence from short-range cues, Memento introduces a dual-query memory mechanism, where one query retrieves identity-relevant memory and the other selects short-context keyframes for coherent continuation. Additionally, a subject-aware cinematic data pipeline provides precise reconstruction supervision via consistent, pronoun-free subject descriptions. Experiments demonstrate that Memento achieves state-of-the-art performance in long-term subject consistency, cross-shot coherence, and visual quality.",
+      "authors": [
+        "Xuan Wei",
+        "Longbin Ji",
+        "Guan Wang",
+        "Xiangrui Liu",
+        "Zhenyu Zhang",
+        "Shuohuan Wang",
+        "Yu Sun",
+        "Qingqi Hong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-12T17:37:13+00:00",
+      "link": "https://arxiv.org/pdf/2606.14667v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "long video generation with memory for subject consistency",
+      "llm_evidence_cn": "长视频生成中利用记忆保持主体一致性",
+      "llm_evidence": "长视频生成中利用记忆保持主体一致性",
+      "canonical_evidence": "长视频生成中利用记忆保持主体一致性",
+      "llm_tldr_en": "Memento addresses subject consistency in long video generation by treating subject preservation as identity grounding using a memory bank that supports reconstruction.",
+      "llm_tldr_cn": "针对长视频生成中反复出现的主体因记忆衰减而导致不一致的问题，本文提出Memento框架，将主体保持视为显式身份基准问题，通过记忆银行存储关键证据并支持重建。框架在多种视频生成场景中显著提升了主体一致性，为长视频生成中的记忆管理提供了新思路。",
+      "llm_tldr": "针对长视频生成中反复出现的主体因记忆衰减而导致不一致的问题，本文提出Memento框架，将主体保持视为显式身份基准问题，通过记忆银行存储关键证据并支持重建。框架在多种视频生成场景中显著提升了主体一致性，为长视频生成中的记忆管理提供了新思路。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.13861v1",
+      "source": "arxiv",
+      "title": "Temporal Backtracking Search for Test-time Generative Video Reasoning",
+      "abstract": "While test-time scaling has revolutionized reasoning in large language models, generative video reasoning remains bottlenecked by a single-shot paradigm. We demonstrate that searching over denoising steps cannot rescue logically flawed rollouts because spatial trajectories commit early in the diffusion process. Root-level Best-of-N (BoN) sampling is similarly inefficient: reasoning errors cluster early in the temporal axis, and resampling blindly discards verified upstream progress. To unlock effective test-time scaling for video models, we introduce Temporal Backtracking Search (TBS), which shifts the search space to the temporal axis. TBS transforms video generation into an iterative generate-verify-restart loop via three core mechanisms: (1) variable-K conditioning to resume generation from arbitrary clean prefixes; (2) temporal process verification to localize failures and extract valid restart anchors; and (3) prefix-based search to reallocate compute toward extending correct trajectories rather than root resampling. Across algorithmic, navigation, and robotics domains, TBS Pareto-dominates matched-budget BoN. In a strict out-of-distribution setting where one-shot generation collapses (0.7% for BoN), TBS achieves 22.7%, with every solved episode stemming from a restarted branch. Ultimately, TBS reveals that the local reasoning competence of video models far exceeds what single-shot rollouts indicate, providing a scalable test-time framework to unlock it.",
+      "authors": [
+        "Sejoon Jun",
+        "Zheng Ding",
+        "Huangyuan Su",
+        "Weirui Ye",
+        "Yilun Du"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-11T19:41:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.13861v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "test-time scaling for generative video reasoning with backtracking",
+      "llm_evidence_cn": "生成式视频推理中的测试时扩展，与长视频理解相关",
+      "llm_evidence": "生成式视频推理中的测试时扩展，与长视频理解相关",
+      "canonical_evidence": "生成式视频推理中的测试时扩展，与长视频理解相关",
+      "llm_tldr_en": "Proposes Temporal Backtracking Search (TBS) for test-time video reasoning, enabling iterative generate-verify-restart along temporal axis.",
+      "llm_tldr_cn": "该工作针对生成式视频推理单次生成不可逆问题，提出时间回溯搜索方法。通过沿时间轴的可变长度重启、验证和回溯机制，将测试时扩展引入视频领域。虽然面向生成，但其推理框架可迁移至长视频理解中的时序推理任务。",
+      "llm_tldr": "该工作针对生成式视频推理单次生成不可逆问题，提出时间回溯搜索方法。通过沿时间轴的可变长度重启、验证和回溯机制，将测试时扩展引入视频领域。虽然面向生成，但其推理框架可迁移至长视频理解中的时序推理任务。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.15017v1",
+      "source": "arxiv",
+      "title": "Are Online Skill and Memory Modules Always Worth Their Tokens? A Budget-Constrained Study of Web Agents",
+      "abstract": "Online web agents often augment a base actor with memory, workflow, or skill modules. These modules can improve performance, but they also consume test-time tokens, a cost rarely reported alongside the actor's inference cost. We study online augmentation, where this overhead is paid on every task, and re-evaluate its benefits under a fixed total inference budget. We compare AWM, ASI, and ReasoningBank with a token-matched vanilla baseline that uses the same budget for additional actor steps. Across three WebArena domains and three models, Gemini 3 Flash, GPT-5.4-mini, and Qwen 3.6-27B, the vanilla baseline matches or surpasses all three augmentation methods in aggregate success rate while often using fewer total tokens. We observe a similar trend on WorkArena-L1 with Qwen 3.6-27B, indicating that the effect extends to enterprise knowledge-work tasks. Our results suggest that skills and workflow memory can be useful in specific domains, but their apparent gains often vanish against a budget-matched actor. We further show that run-to-run variance materially affects outcomes and should be reported as a core evaluation criterion for online web agents.",
+      "authors": [
+        "Sina Hajimiri",
+        "Masih Aminbeidokhti",
+        "Jose Dolz",
+        "Ismail Ben Ayed",
+        "Issam H. Laradji",
+        "Spandana Gella",
+        "Nicolas Gontier"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-12T23:30:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.15017v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Budget-constrained study of memory modules in web agents",
+      "llm_evidence_cn": "预算受限下Web智能体记忆模块研究",
+      "llm_evidence": "预算受限下Web智能体记忆模块研究",
+      "canonical_evidence": "预算受限下Web智能体记忆模块研究",
+      "llm_tldr_en": "Shows that under fixed token budgets, a vanilla baseline without memory modules often surpasses augmented web agents, questioning the necessity of online skill and memory modules.",
+      "llm_tldr_cn": "在线Web智能体常通过记忆、工作流等模块增强，但消耗额外令牌。本文在固定推理预算下比较增强方法与令牌匹配基线。在三个领域和三种模型上，基线在成功率上达到或超过所有增强方法，总令牌更少，质疑在线增强模块的必要性。",
+      "llm_tldr": "在线Web智能体常通过记忆、工作流等模块增强，但消耗额外令牌。本文在固定推理预算下比较增强方法与令牌匹配基线。在三个领域和三种模型上，基线在成功率上达到或超过所有增强方法，总令牌更少，质疑在线增强模块的必要性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.15275v1",
+      "source": "arxiv",
+      "title": "MamBOA: State-Space Architecture for Video Recognition",
+      "abstract": "Fine-grained action recognition demands temporal reasoning that general-purpose architectures address through different cost-accuracy tradeoffs: 3D dense operators couple computation to the input volume, while difference-based methods approximate motion through rigid, hand-crafted subtraction of uncontextualized features - each reflecting a deliberate design choice with corresponding limitations in expressiveness or flexibility. We present MamBOA, a backbone-agnostic temporal framework built upon a novel interleaved scan structure that recasts the selective state-space recurrence (S6) as a native motion synthesizer. By interleaving consecutive feature representations extracted from a pretrained backbone into a single alternating sequence, the proposed scan structurally drives the recurrence to encode both temporal observations of each position within a shared hidden state, separated by only a single decay step - rendering the inter-frame transition an intrinsic component of the state dynamics rather than an externally computed quantity. A cascade of dedicated alignment and decoding operations then distills this joint encoding into an explicit motion representation, which a dual-path pooling mechanism adaptively aggregates by balancing attention-driven selection with uniform temporal coverage. The framework interfaces seamlessly with CNN, Transformer, and Mamba backbone families, adding only ~2.1 GFLOPs per feature pair. On Diving48, MamBOA achieves 85.02% Top-1 accuracy with an image-pretrained backbone and 86.24% with a video-pretrained backbone processing the entire video in a single forward pass - demonstrating that structurally induced state-space dynamics constitute a principled and general foundation for motion modeling.",
+      "authors": [
+        "Mustafa Bora Çelik"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-13T12:27:06+00:00",
+      "link": "https://arxiv.org/pdf/2606.15275v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "state-space temporal framework for video analysis",
+      "llm_evidence_cn": "用于视频分析的状态空间时间框架",
+      "llm_evidence": "用于视频分析的状态空间时间框架",
+      "canonical_evidence": "用于视频分析的状态空间时间框架",
+      "llm_tldr_en": "MamBOA introduces a backbone-agnostic temporal framework using selective state-space recurrence with interleaved scans to synthesize motion, achieving efficient fine-grained action recognition.",
+      "llm_tldr_cn": "细粒度动作识别需要高效的时间推理。MamBOA提出一种与骨干网络无关的时间框架，通过交错扫描结构将选择性状态空间递归重构为运动合成器，在保持低成本的同时实现了精确的动作识别。实验表明该方法在多个视频识别数据集上具有竞争力。",
+      "llm_tldr": "细粒度动作识别需要高效的时间推理。MamBOA提出一种与骨干网络无关的时间框架，通过交错扫描结构将选择性状态空间递归重构为运动合成器，在保持低成本的同时实现了精确的动作识别。实验表明该方法在多个视频识别数据集上具有竞争力。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.14782v1",
+      "source": "arxiv",
+      "title": "Last But Not Least: Boundary Attention CalibratiON for Multimodal KV Cache Compression",
+      "abstract": "Multimodal Large Language Models (MLLMs) achieve strong vision-language reasoning, but long visual contexts enlarge the KV cache and increase decoding latency. Existing compression methods rely on observation window attention for stable token-importance estimation, yet this aggregation can dilute sparse visual evidence and discard answer-critical tokens under aggressive compression. Therefore, we identify last-query attention as a complementary source for recovering such evidence, but its answer-irrelevant signals can mislead retention. We propose BACON, a plug-and-play method that calibrates observation window attention with last-query evidence and suppresses isolated noise via intra-layer coherence and inter-layer persistence. Across diverse benchmarks, models, budgets, and compression methods, BACON improves multimodal KV compression by 7.5% on average under the most aggressive budget, with gains up to 30.9%.",
+      "authors": [
+        "Tianhao Chen",
+        "Yuheng Wu",
+        "Kelu Yao",
+        "Xiaogang Xu",
+        "Xiaobin Hu",
+        "Dongman Lee"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-06-10T10:09:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.14782v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "compresses KV cache for multimodal LLMs with long visual contexts, aiding long video understanding",
+      "llm_evidence_cn": "压缩多模态大模型在长视觉上下文中的KV缓存，有助于长视频理解",
+      "llm_evidence": "压缩多模态大模型在长视觉上下文中的KV缓存，有助于长视频理解",
+      "canonical_evidence": "压缩多模态大模型在长视觉上下文中的KV缓存，有助于长视频理解",
+      "llm_tldr_en": "BACON calibrates attention weights to preserve critical visual tokens under aggressive KV cache compression for MLLMs.",
+      "llm_tldr_cn": "该论文针对多模态大模型在处理长视觉上下文时KV缓存膨胀导致解码延迟的问题，提出BACON方法。BACON通过校准观测窗口注意力与最后查询注意力，并利用层内一致性和层间持久性抑制噪声，在激进压缩下保留了关键视觉证据。实验表明BACON在多种视觉推理任务上优于现有压缩方法，为长视频理解场景下的高效推理提供了关键技术。",
+      "llm_tldr": "该论文针对多模态大模型在处理长视觉上下文时KV缓存膨胀导致解码延迟的问题，提出BACON方法。BACON通过校准观测窗口注意力与最后查询注意力，并利用层内一致性和层间持久性抑制噪声，在激进压缩下保留了关键视觉证据。实验表明BACON在多种视觉推理任务上优于现有压缩方法，为长视频理解场景下的高效推理提供了关键技术。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.15405v1",
+      "source": "arxiv",
+      "title": "T-Mem: Memory That Anticipates, Not Archives",
+      "abstract": "Long-term memory is essential for conversational agents to remain coherent across extended dialogues, follow through on commitments made many sessions earlier, and adapt their behaviour to each user. Current LLM-backed long-term conversational memory, however, is reachability-bounded by the similarity between a query and stored content, both lexical and dense-vector. The approach is effective when query and memory share surface features such as wording or named entities (we call this descriptive). But it misses another, equally valuable class of cases, where query and memory do not share surface features and are tied only by a latent semantic arc (associative). On this regime prevailing long-term memory systems collectively fail. Covering this other half is what allows an assistant, for the first time, to actively draw on past dialogue as a semantic asset. On the memory side, this is the engineering counterpart of what cognitive science calls episodic future thinking: rehearsing past experience for the future contexts under which it will need to be found. We call these write-time rehearsals triggers. We propose T-Mem, the first long-term conversational memory architecture that covers both descriptive and associative recall. At each of two evidence granularities, single facts and full exchanges, T-Mem instantiates one descriptive trigger family and one associative trigger family, so that every memory remains reachable from both surface-similar and relevance-bound queries. As empirical validation, T-Mem reaches state-of-the-art on both LoCoMo and LoCoMo-Plus.",
+      "authors": [
+        "Weidong Guo",
+        "Dakai Wang",
+        "Zixuan Wang",
+        "Hui Liu",
+        "Yu Xu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-13T17:14:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.15405v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "long-term memory for conversational agents, addressing associative memory beyond surface similarity",
+      "llm_evidence_cn": "针对对话智能体的长期记忆，解决关联性记忆问题",
+      "llm_evidence": "针对对话智能体的长期记忆，解决关联性记忆问题",
+      "canonical_evidence": "针对对话智能体的长期记忆，解决关联性记忆问题",
+      "llm_tldr_en": "T-Mem proposes a long-term memory architecture for LLM-based conversational agents that handles associative memory, enabling retrieval of semantically related but surface-dissimilar information.",
+      "llm_tldr_cn": "当前LLM驱动的对话智能体长期记忆仅能检索与查询表面相似的内容，而忽略了隐含的语义关联。T-Mem提出一种新型记忆架构，通过捕获查询与记忆之间的潜在语义弧来支持关联性记忆，使得智能体能够在表面特征不匹配的情况下仍能回想到相关经验，从而提升多会话连贯性和用户适应性。",
+      "llm_tldr": "当前LLM驱动的对话智能体长期记忆仅能检索与查询表面相似的内容，而忽略了隐含的语义关联。T-Mem提出一种新型记忆架构，通过捕获查询与记忆之间的潜在语义弧来支持关联性记忆，使得智能体能够在表面特征不匹配的情况下仍能回想到相关经验，从而提升多会话连贯性和用户适应性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.14958v1",
+      "source": "arxiv",
+      "title": "MVEB: Massive Video Embedding Benchmark",
+      "abstract": "We introduce the Massive Video Embedding Benchmark (MVEB), a 23-task benchmark for video embeddings spanning classification, zero-shot classification, clustering, pair classification, retrieval, and video-centric question answering. We evaluate 33 models and find that no single model dominates: MLLM-based embeddings lead on classification, clustering, pair classification, and QA; multimodal binding leads on retrieval and zero-shot classification; generative MLLMs without contrastive adaptation collapse on cross-modal tasks. Paired video-only vs. audio+video evaluations show that audio's contribution depends on dataset annotation provenance: audio helps when labels were produced from both modalities and hurts when they were produced from visuals alone, a six-point gap consistent across model families. MVEB is derived from MVEB+, a 184-task pool, and is designed to maintain task diversity while reducing evaluation cost. It integrates into the MTEB ecosystem for unified evaluation across text, image, audio, and video. We release MVEB and all 184 tasks along with code and a leaderboard at https://github.com/embeddings-benchmark/mteb.",
+      "authors": [
+        "Adnan El Assadi",
+        "Roman Solomatin",
+        "Isaac Chung",
+        "Chenghao Xiao",
+        "Deep Shah",
+        "Manan Dey",
+        "Shriya Sudhakar",
+        "Zacharie Bugaud",
+        "Wissam Siblini",
+        "Ayush Sunil Munot",
+        "Yashwanth Devavarapu",
+        "Rakshitha Ireddi",
+        "Michelle Yang",
+        "Márton Kardos",
+        "Niklas Muennighoff",
+        "Kenneth Enevoldsen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.IR",
+        "cs.LG"
+      ],
+      "published": "2026-06-12T21:06:12+00:00",
+      "link": "https://arxiv.org/pdf/2606.14958v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Benchmark for video embeddings including video question answering tasks",
+      "llm_evidence_cn": "视频嵌入基准，包含视频问答任务",
+      "llm_evidence": "视频嵌入基准，包含视频问答任务",
+      "canonical_evidence": "视频嵌入基准，包含视频问答任务",
+      "llm_tldr_en": "MVEB introduces a 23-task benchmark for video embeddings, evaluating 33 models on classification, retrieval, and question answering.",
+      "llm_tldr_cn": "视频嵌入缺乏统一评测标准。MVEB提出涵盖23个任务的视频嵌入基准，包括分类、检索和视频问答。评估33个模型发现：基于多模态大语言模型的嵌入在分类和问答上领先，多模态绑定在检索上最优，而音频的贡献取决于标注来源。该基准为视频理解研究提供了全面评估。",
+      "llm_tldr": "视频嵌入缺乏统一评测标准。MVEB提出涵盖23个任务的视频嵌入基准，包括分类、检索和视频问答。评估33个模型发现：基于多模态大语言模型的嵌入在分类和问答上领先，多模态绑定在检索上最优，而音频的贡献取决于标注来源。该基准为视频理解研究提供了全面评估。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.15609v1",
+      "source": "arxiv",
+      "title": "FragFuse: Bypassing Access Control of Large Language Model Agents via Memory-Based Query Fragmentation and Fusion",
+      "abstract": "Large language model (LLM) agents increasingly rely on long-term memory to support complex task execution, user personalization, and domain adaptation. Meanwhile, emerging access-control mechanisms for LLM agents are being explored to block policy-violating requests and prevent misuse. We reveal a novel attack surface arising from agent memory operations: prohibited content that would trigger access control can be fragmented across interactions, stored in long-term memory in benign-appearing form, and later reconstructed through memory retrieval without appearing explicitly in the final user query. We propose FragFuse, the first attack that enables unprivileged users to bypass agent access control by exploiting this temporal channel introduced by long-term memory. FragFuse operates in three stages: (1) identifying rejection-responsive fragments via black-box adaptive querying with fragment masking; (2) injecting these fragments into memory using marker carrier queries; and (3) retrieving and fusing the stored fragments through a follow-up attack query. Although FragFuse can be instantiated manually for individual agents, we further develop a surrogate-based optimization scheme that tunes fusion instructions and marker designs, enabling automated attack generation without violating the attacker's threat-model assumptions. We evaluate FragFuse across four representative agent settings and task domains, covering three state-of-the-art agent access-control mechanisms. FragFuse achieves an average bypass success rate of 86.3% and an average end-to-end harmful task success rate of 41.1% across all settings, with only 4.4% average task-success degradation compared with configurations without access control. We also show that alternative defenses, including state-of-the-art prompt-injection detectors and perplexity detectors, do not effectively address this attack.",
+      "authors": [
+        "Zixin Rao",
+        "Wentian Zhu",
+        "Chan Aristella Lu",
+        "Zhaorun Chen",
+        "Wei Niu",
+        "Le Guan",
+        "Bo Li",
+        "Zhen Xiang"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR",
+        "cs.AI"
+      ],
+      "published": "2026-06-14T05:31:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.15609v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Attack bypassing access control using memory fragmentation and fusion in LLM agents",
+      "llm_evidence_cn": "利用记忆碎片化与融合绕过LLM智能体访问控制",
+      "llm_evidence": "利用记忆碎片化与融合绕过LLM智能体访问控制",
+      "canonical_evidence": "利用记忆碎片化与融合绕过LLM智能体访问控制",
+      "llm_tldr_en": "FragFuse reveals an attack surface where prohibited content is fragmented across interactions, stored in memory, and reconstructed later to bypass access control.",
+      "llm_tldr_cn": "LLM智能体依赖长期记忆，但现有访问控制机制可能被记忆操作绕过。FragFuse首次展示这一攻击面：用户可将禁止内容碎片化存储于记忆，后续通过检索重建，绕过策略检测。该攻击揭示了记忆系统安全设计的关键漏洞，提醒设计者需考虑记忆回溯攻击。",
+      "llm_tldr": "LLM智能体依赖长期记忆，但现有访问控制机制可能被记忆操作绕过。FragFuse首次展示这一攻击面：用户可将禁止内容碎片化存储于记忆，后续通过检索重建，绕过策略检测。该攻击揭示了记忆系统安全设计的关键漏洞，提醒设计者需考虑记忆回溯攻击。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.17053v1",
+      "source": "arxiv",
+      "title": "Context-Aware RL for Agentic and Multimodal LLMs",
+      "abstract": "Large language models (LLMs) often fail when answering requires identifying a small but decisive piece of evidence within a long or complex context, such as a single line in a tool trace or a subtle detail in an image. We propose ContextRL, a context-aware reinforcement learning (RL) method that improves long-horizon reasoning and multimodal performance through an \\emph{indirect} auxiliary objective. Instead of supervising only the final answer, ContextRL presents the model with a query, an answer, and two highly similar contexts, and rewards it for selecting the context that supports the query--answer pair, thereby encouraging fine-grained grounding. We construct contrastive context data in two domains: for coding agents, trajectories serve as contexts, yielding 1k pairs built via condition filtering; for multimodal reasoning, images serve as contexts, yielding 7K pairs built via generative editing and similarity search. ContextRL achieves average gains of +2.2% over standard GRPO on 5 long-horizon benchmarks, and +1.8% across 12 diverse visual question answering benchmarks. To disentangle the effect of the proposed objective from that of additional data, we compare against data-augmentation baselines that repurpose the same contrastive contexts as standard query--context--answer examples. These baselines provide little to no improvement, showing that the gains arise from the proposed context-selection objective rather than from the contrastive data alone.",
+      "authors": [
+        "Peiyang Xu",
+        "Bangzheng Li",
+        "Sijia Liu",
+        "Karthik R. Narasimhan",
+        "Pramod Viswanath",
+        "Prateek Mittal",
+        "Xingyu Fu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.CV"
+      ],
+      "published": "2026-06-15T17:59:28+00:00",
+      "link": "https://arxiv.org/pdf/2606.17053v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "context-aware RL improves long-horizon reasoning for agents",
+      "llm_evidence_cn": "基于上下文的强化学习提升智能体长程推理，与长期记忆相关",
+      "llm_evidence": "基于上下文的强化学习提升智能体长程推理，与长期记忆相关",
+      "canonical_evidence": "基于上下文的强化学习提升智能体长程推理，与长期记忆相关",
+      "llm_tldr_en": "Proposes ContextRL, a context-aware RL method that improves long-horizon reasoning and multimodal performance by rewarding context selection.",
+      "llm_tldr_cn": "该工作针对LLM在长上下文中难以定位关键证据的问题，提出ContextRL方法。通过让模型区分支持问答的上下文来间接训练细粒度接地，在编码智能体和多模态任务上提升了长程推理能力。该方法可视为增强智能体长期记忆利用的一种训练策略。",
+      "llm_tldr": "该工作针对LLM在长上下文中难以定位关键证据的问题，提出ContextRL方法。通过让模型区分支持问答的上下文来间接训练细粒度接地，在编码智能体和多模态任务上提升了长程推理能力。该方法可视为增强智能体长期记忆利用的一种训练策略。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

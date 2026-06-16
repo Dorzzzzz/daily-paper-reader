@@ -1,0 +1,565 @@
+Title: MamBOA: State-Space Architecture for Video Recognition
+
+URL Source: https://arxiv.org/pdf/2606.15275v1
+
+Published Time: Tue, 16 Jun 2026 00:38:53 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# MamBOA: A State-Space Architecture for Differential Motion Synthesis in Video Recognition 
+
+## Mustafa Bora Çelik a,∗
+
+> a
+
+Ankara Medipol University, Ankara, 06050, Turkey 
+
+A R T I C L E I N F O 
+
+Keywords :Video action recognition State-space models Motion synthesis Temporal modeling Mamba 
+
+A B S T R A C T 
+
+Fine-grained action recognition demands temporal reasoning that general-purpose architectures address through different cost-accuracy tradeoffs: 3D dense operators couple computation to the input volume, while difference-based methods approximate motion through rigid, hand-crafted subtraction of uncontextualized features — each reflecting a deliberate design choice with corresponding limitations in expressiveness or flexibility. We present MamBOA, a backbone-agnostic temporal framework built upon a novel interleaved scan structure that recasts the selective state-space recurrence ( 𝑆 6) as a native motion synthesizer. By interleaving consecutive feature representations extracted from a pretrained backbone into a single alternating sequence, the proposed scan structurally drives the recurrence to encode both temporal observations of each position within a shared hidden state, separated by only a single decay step — rendering the inter-frame transition an intrinsic component of the state dynamics rather than an externally computed quantity. A cascade of dedicated alignment and decoding operations then distills this joint encoding into an explicit motion representation, which a dual-path pooling mechanism adaptively aggregates by balancing attention-driven selection with uniform temporal coverage. The framework interfaces seamlessly with CNN, Transformer, and Mamba backbone families, adding only 
+
+∼2.1 GFLOPs per feature pair. On Diving48, MamBOA achieves 85.02% Top-1 accuracy with an image-pretrained backbone and 86.24% with a video-pretrained backbone processing the entire video in a single forward pass — demonstrating that structurally induced state-space dynamics constitute a principled and general foundation for motion modeling. 
+
+## 1. Introduction 
+
+Video understanding requires not only recognizing what appears in individual spatial representations, but modeling how those representations evolve over time — a prob-lem fundamentally rooted in sequential state dynamics. Appearance-based approaches such as TSN [ 1 ] treat video as an average of independent segments, achieving strong results on coarse recognition tasks while falling short on actions whose discriminative signal lies in temporal dynamics rather than static content. This gap has driven two broad directions in the standalone end-to-end literature. On one side, heavy 3D convolutional networks (e.g., SlowFast [ 2]) and dense self-attention architectures (e.g., TimeSformer [ 3 ], VideoSwin [ 4]) capture rich motion information but introduce a severe parameter footprint or a quadratic computational explosion when capturing long-form interactions. On the other side, lightweight difference methods such as TDN [ 5] approximate motion through rigid explicit subtraction between adjacent feature maps — a fixed, non-learnable operation that cannot adapt to complex or multi-scale motion patterns, and whose discriminative capacity is bounded by the quality of the subtraction signal itself. State-space models [ 6, 7] have recently emerged as a principled framework for efficient sequential modeling, offering continuous hidden state dynamics that can, in principle, natively accumulate and propagate temporal information — yet existing video applications [ 8 , 9 ] largely repurpose their recurrent dynamics 
+
+> ∗
+
+Corresponding author  
+
+> mustafa.celik1@std.ankaramedipol.edu.tr
+
+(M.B. Çelik) 
+
+for appearance aggregation, leaving the motion modeling potential of the state transition itself unexploited. We observe that this tension between parameter cost and temporal expressiveness shares a common root: motion is treated either as a quantity to be computed via heavy dense operators or as a fixed geometric subtraction, rather than a property that can be natively accumulated through the continuous hidden state dynamics of a sequential model. We introduce MamBOA, an architecture built on a different premise. By interleaving patches from two temporal feature maps into a single sequence before state-space processing, we allow the 𝑆 6 recurrence to build an entangled joint encoding of both temporal positions. The motion differential is then natively accumulated and propagated through the evolution of the continuous hidden state dynamics ( ℎ𝑡 ) of the 𝑆 6 recurrence, without requiring explicit geometric subtraction. Unlike traditional methods that subtract raw pixels or uncontextualized features, this mechanism operates on the deeply contextualized hidden states of the recurrence. Furthermore, by handling static spatial appearance in a parallel branch, the motion branch is structurally liberated to strictly capture temporal dynamics without information loss. Crucially, MamBOA is designed as a backbone-agnostic neural primitive that seamlessly integrates into existing architectures at the feature map level, enabling complex temporal reasoning without disrupting pre-trained spatial representations. MamBOA resolves temporal ambiguity by decomposing each feature map pair into a differential motion representation and a complementary spatial representation. The motion branch performs differential representation syn-thesis, mapping the interleaved spatial inputs into a distinct 
+
+1
+
+> arXiv:2606.15275v1 [cs.CV] 13 Jun 2026
+
+temporal subspace through the Interleaved Temporal Phase-shift Synthesis (ITPS) pipeline. Both representations are pro-gressively aligned through bidirectional cross-conditioning within a modular processing stack, and temporal aggregation is performed by a dual-path pooling mechanism that balances global context with attention-weighted critical moments. Designed with efficiency in mind, MamBOA’s differential synthesis operates with a marginal computational overhead of only ∼2.1 GFLOPs per feature pair, providing a lightweight temporal modeling head that scales efficiently with different backbones. We evaluate MamBOA on Diving48 [ 10 ], a strict fine-grained benchmark where categories are defined by com-binations of rapid temporal attributes, requiring models to distinguish actions that are visually identical in static frames but dynamically distinct. To maintain a rigorous evaluation, our benchmark focuses exclusively on standalone end-to-end RGB networks, omitting auxiliary multi-modal inputs. Under standard evaluation protocols, MamBOA demonstrates highly competitive performance across disparate backbone families. The image-pretrained variant achieves 85.02% Top-1 accuracy, while the video-pretrained variant delivers 86.24% Top-1 accuracy over the full video sequence, bridging the gap between state-of-the-art representation capacity and low-overhead modular deployment. Our main contributions are summarized as follows: 
+
+• SSM-Native Differential Representation Synthesis: 
+
+We introduce a novel state-space architecture that directly leverages interleaved sequential transitions to natively synthesize semantically meaningful differen-tial motion representations from a pair of RGB feature maps — without optical flow, without rigid, hand-crafted frame subtraction, and without dense 3D opera-tors. The core mechanism interleaves patches from two temporal feature maps into a single sequence, allowing the 𝑆 6 recurrence to build an entangled joint temporal encoding. The motion differential is then natively accumulated and propagated through the evolution of the continuous hidden state ℎ𝑡 , and subsequently collapsed into a pure temporal representation via a learned projection. The synthesis process is described through four named functional stages (interleaved scan construction, phase-shift alignment, axial interaction, and motion differential computation) solely to facilitate precise exposition; together they constitute one unified pipeline serving this single objective. 
+
+• Clip-Level Extension and Full-Video Coverage: We show that the same differential representation synthesis principle applies at the clip level. Paired represen-tations from a video-pretrained backbone — each encoding a rich multi-frame receptive field within a compact token — retain inter-clip differential structure that the proposed mechanism can resolve without mod-ification. Combined with an adaptive-stride sampling strategy, this enables full-video temporal modeling whose computational cost scales with the number of clip pairs rather than with the total frame count. 
+
+• Backbone-Agnostic Neural Primitive and Hardware-Aware Efficiency: MamBOA serves as a backbone-agnostic neural primitive that can be directly ap-plied to feature maps extracted from diverse ar-chitectural families, including CNN-, Transformer-, and Mamba-based backbones, enabling complex temporal reasoning without disrupting the pre-trained spatial representations. It produces consistent and meaningful differential representations across these heterogeneous representation spaces, establishing a unified temporal modeling principle. This architectural flexibility is achieved with a low computational cost of approximately ∼2.1 GFLOPs per feature-map pair, ensuring lightweight temporal modeling regardless of the underlying backbone footprint. 
+
+## 2. Related Work 
+
+Temporal modeling in video recognition. Early deep architectures for action recognition extended 2D image models along the temporal axis, either by aggregating frame-level predictions through sparse sampling, as in TSN [ 1], or by inflating spatial kernels into spatio-temporal 3D convolutions [11 ]. The latter family, exemplified by SlowFast [ 2], captures rich motion dynamics but couples the computational cost directly to the spatio-temporal input volume. Transformer-based architectures such as TimeSformer [ 3], ViViT [ 12 ], VideoSwin [ 4 ], and MViTv2 [ 13 ] replaced convolutional aggregation with dense self-attention, achieving strong ac-curacy at the price of quadratic complexity in the number of tokens. A complementary line of work pursues efficiency by augmenting 2D backbones with lightweight temporal operators: TSM [ 14 ] shifts channels across time at zero FLOP cost, while GST [ 15 ] decomposes spatial and temporal convolutions into parallel groups. MamBOA follows the efficient end of this spectrum, but differs in deployment philosophy: rather than modifying the backbone internally, it operates as a modular temporal head on extracted feature map pairs, leaving the pre-trained spatial representation intact and keeping the temporal overhead fixed ( ∼2.1 GFLOPs per pair) regardless of the backbone footprint. 
+
+Motion representations and temporal differences. Ex-plicitly representing motion has a long history in action recognition. Two-stream networks [ 16 ] supply optical flow as a separate input modality, at the cost of expensive flow computation and a doubled inference pipeline. To avoid this, difference-based methods approximate motion internally: TDN [ 5 ] computes explicit subtractions between adjacent feature maps at multiple scales, and TEA [ 17 ] uses feature-level differences to excite motion-sensitive channels. While effective, these mechanisms share a structural limitation: the differential operator itself is a fixed, hand-crafted subtraction applied to uncontextualized features, so the quality of the  
+
+> 2Feature F_t
+> Feature
+> F_(t+1)
+> MOTION BRANCH
+> ITPS (B, D, H, W) Projection
+> SPATIAL BRANCH
+> SS2D (B, D, H, W) Projection
+> Cross-Conditioning BOA Block 4× Pair-feature Figure 1: Overview of the proposed MamBOA architecture.
+
+motion signal is bounded by what a rigid pointwise difference can express. MamBOA departs from this paradigm at the representational level. The two temporal observations are first entangled within the hidden state of a selective recurrence, which contextualizes each position with accumulated spatial history and input-dependent gating; the differential is then decoded from this joint encoding by a learnable asymmetric projection. The subtraction in MamBOA therefore acts on deeply contextualized state trajectories rather than raw features, and its scale coefficients are learned rather than fixed. 
+
+State-space models in vision and video. Structured state-space models were introduced for long-sequence modeling by S4 [ 18 ], and Mamba [ 6 ] made the recurrence input-selective, achieving linear-time sequence modeling with content-dependent state transitions. In the visual domain, Vim [ 19 ] and VMamba [ 7] adapted the selective scan to images through bidirectional and multi-directional traversals of the patch grid. For video, ViS4mer [ 9] applies state-space layers to aggregate long-form clip features, and Video-Mamba [ 8] extends the bidirectional scan over the joint spatio-temporal token volume. A common property of these video applications is that the recurrence is employed as an efficient aggregation operator: tokens from all frames are merged into a unified representation in which appearance and motion remain entangled. In contrast, MamBOA exploits a complementary and, to the best of our knowledge, previ-ously unexplored property of the selective recurrence: by structurally arranging the input as an interleaved sequence of temporally paired patches, the hidden state is forced to encode the local transition between two observations of the same spatial location, turning the scan itself into a differential motion synthesizer rather than an appearance aggregator. 
+
+Adapting image models and fine-grained recognition. 
+
+A recent direction reuses strong image-pretrained models for video with minimal modification: SIFAR [ 20 ] rearranges sam-pled frames into a super-image consumed by an unmodified image classifier, and dual-path adaptation methods [ 21 ] attach lightweight temporal adapters to frozen image transformers. While these hybrid and adaptation-based pipelines confirm that pre-trained spatial representations carry substantial value for video, they often rely on specific input format-ting (e.g., heuristic sampling or image rearrangement) or restrict temporal reasoning strictly to adapter capacity. This functionally distinguishes them from foundational end-to-end video architectures. Fine-grained benchmarks expose this limitation most clearly: in Diving48 [ 10 ], categories share nearly identical static appearance and differ only in the composition of rapid temporal attributes, so scene and object cues provide no shortcut [ 10 , 22 ]. MamBOA targets precisely this regime. It preserves the pre-trained spatial representation as a frozen semantic substrate, while a dedicated state-space differential mechanism — operating as a unified temporal head rather than a localized adapter — supplies the temporal discrimination that adaptation-based methods delegate to limited modules. 
+
+## 3. Methodology 
+
+3.1. Overview 
+
+We propose MamBOA, a motion-aware video represen-tation architecture grounded in the sequential state dynamics of selective state-space models. The model operates on pairs of feature maps extracted from consecutive temporal samples and decomposes each pair into two complemen-tary representations: a differential motion representation that performs temporal subspace projection, and a spatial representation that preserves static appearance. Given a pair of samples, the features are extracted from a shared backbone and routed into two parallel branches. The core of our approach lies in the conceptual division of labor between these branches. The motion branch first entangles the two temporal positions via an interleaved scan, allowing the 𝑆 6
+
+recurrence to accumulate a joint temporal encoding through its hidden state evolution. It then isolates the pure motion signal by applying a learned projection that cancels out the shared static background. Crucially, because the parallel spatial branch is dedicated exclusively to modeling spatial                                    
+
+> 3Feature F_t
+> (0,0) (5,0)
+> Feature F_{t+1}
+> (0,0) (5,0)
+> Single-scale interleaved Horizontal Scan (SCI-H) tt+1 tt+1 tt+1 tt+1 ··· (0,0) (0,1) (0,2) (0,3) Single-scale interleaved Vertical Scan (SCI-V) tt+1 tt+1 tt+1 tt+1 (5,0) (4,0) (3,0) (2,0) ··· Multi-scale interleaved Horizontal Scan (MSI-H)
+> (0,0) (0,1) (0,2)
+> t
+> (0,0) (0,1) (0,2)
+> t+1 tt+1 ··· Multi-Scale Pair 1 Multi-Scale Pair 2 Multi-scale interleaved Vertical Scan (MSI-V)
+> (5,0) (4,0) (3,0)
+> t
+> (5,0) (4,0) (3,0)
+> t+1 tt+1 ··· Multi-Scale Pair 1 Multi-Scale Pair 2
+
+Figure 2: Illustration of the single-scale and multi-scale interleaved scan patterns, along with the canonical row-major reordering applied prior to ITPS processing. 
+
+appearance, the motion branch is structurally liberated from preserving static context, allowing it to fully discard non-dynamic information. The two branches are progressively aligned through bidirectional cross-conditioning within BOA blocks, fused into compact pair-level features, and aggregated by a Dual-Path temporal pooling module into a single video-level prediction. An overview of the architecture is illustrated in Fig. 1. 
+
+3.2. Interleaved Scan and Feature Pair Construction 
+
+The model receives pairs of feature maps 𝐅 (0) , 𝐅 (1) ∈
+
+ℝ𝐶 ×𝐻 ×𝑊 extracted from a shared backbone at two temporal positions. For the image-pretrained variant, these correspond to sparsely sampled frames; for the clip-level variant, they correspond to consecutive clip representations. In both cases, the model operates uniformly on these feature map pairs, providing a consistent mechanism for extracting differential motion regardless of whether the inputs are discrete frames or clip-level summaries. To prepare these feature maps for state-space processing, we flatten the spatial grid into a sequence of length 𝐿 (𝐻 × 𝑊 = 𝐿 ), resulting in input tensors of shape ℝ𝐵 ×𝐿 ×𝐶 . We then apply an interleaved scan. Patches from the two temporal positions are interleaved into a single alternating sequence {𝑥 1, 𝑥 2, … , 𝑥 2𝐿 }, forming a joint tensor of shape ℝ𝐵 ×2 𝐿 ×𝐶 , where odd and even positions alternate strictly between 𝐅 (0) and 𝐅 (1) . The S6 recurrence processes this sequence as: 
+
+ℎ𝑘 =̄ 𝐴 𝑘 ℎ𝑘 −1 +̄ 𝐵 𝑘 𝑥 𝑘 , 𝑦 𝑘 = 𝐶 𝑘 ℎ𝑘 (1) We employ two structural variations of this interleaving: a single-scale scan and a multi-scale scan. Both the single-scale and multi-scale structures are scanned in horizontal (row-major) and vertical (column-major) directions, yielding a total of four distinct scan outputs. Reverse scans are deliberately omitted to enforce a strict temporal arrow in the motion representation. While standard spatial vision models rely on bidirectional scans to gather symmetric context, motion is inherently causal. The forward interleaved scan explicitly aligns with this causality by ordering the past observation (𝑡 − 1 ) immediately before the present ( 𝑡 ). Computing reverse scans would simultaneously encode the non-causal backward transition ( 𝑡 → 𝑡 − 1 ). By omitting them, we constrain the network to learn exclusively forward-time dynamics, a structural prior that concurrently halves the computational cost of the scan process. The scan patterns are illustrated in Fig. 2. 
+
+Single-scale scan. In the single-scale variant, consecutive tokens in the sequence correspond to the same spatial location observed at the two temporal positions. Expanding the recurrence at an even step 𝑘 = 2 𝑗 :
+
+ℎ2𝑗 =̄ 𝐴 2𝑗 ̄ 𝐴 2𝑗 −1 ℎ2𝑗 −2 +̄ 𝐴 2𝑗 ̄ 𝐵 2𝑗 −1 𝑥 (0) 2𝑗 −1 +̄ 𝐵 2𝑗 𝑥 (1) 2𝑗 (2) The critical structural property of the interleaved arrangement is that the two temporal observations at the same spatial location 𝑗 — defined in the sequence as 𝑥 (0)  
+
+> 𝑗
+
+≡ 𝑥 (0) 2𝑗 −1 and 
+
+𝑥 (1)  
+
+> 𝑗
+
+≡ 𝑥 (1) 2𝑗 — are always adjacent, separated by exactly one recurrence step. Consequently, 𝑥 (0)  
+
+> 𝑗
+
+contributes to ℎ2𝑗 via the term ̄ 𝐴 2𝑗 ̄ 𝐵 2𝑗 −1 𝑥 (0)  
+
+> 𝑗
+
+, attenuated by only a single decay factor ̄𝐴 2𝑗 . In a standard sequential (position-first) scan, by contrast, the same spatial location of temporal position 𝑡 −1 would be 𝐿 steps away from its counterpart at temporal position 𝑡 ,
+
+4SCI-H MSI-H Horizontal Combined SCI-V MSI-V Vertical Combined 
+
+> LPSA
+> Learnable Phase-Shift Alignment
+> AXI
+> Axial Cross-Interaction
+> MDM
+> Motion Distillation Mechanism
+> Motion Feature Map
+> (B, D, H, W)
+
+Figure 3: Overview of the Interleaved Temporal Phase-shift Synthesis (ITPS) pipeline. 
+
+reducing its cross-position contribution by ̄ 𝐴 𝐿 → 0 for any non-trivial sequence length 𝐿 . The interleaved arrangement therefore structurally guarantees that ℎ2𝑗 is a joint encod-ing of both temporal observations in direct succession: it retains the accumulated spatial context in ℎ2𝑗 −2 alongside the minimally-attenuated, input-gated contributions of both temporal positions. This entangled joint representation is what makes ℎ2𝑗 structurally well-suited for the downstream motion decoding performed by MDM, regardless of whether the inputs are individual frame features or compact clip-level representations. We deliberately omit the native skip connec-tion present in the standard S6 formulation. Reintroducing this residual connection would add a raw single-position patch token directly back to this joint encoding, systematically biasing 𝑦 𝑘 toward per-position appearance at every recurrence step. Since the parallel SS2D branch is dedicated to modeling spatial appearance, the skip term is structurally incompatible with the joint temporal encoding objective. 
+
+Multi-scale scan. The multi-scale variant groups 𝑔 neigh-boring patches from one temporal position before alternating with the corresponding group from the other ( 𝑔 = 3 in our implementation). Within each 2𝑔 -token block, the first 𝑔 
+
+tokens originate from 𝐅 (0) and the next 𝑔 from 𝐅 (1) . The hidden state accumulated after processing the first 𝑔 tokens from temporal position 𝑡 −1 constitutes a pre-transition spatial representation: 
+
+ℎpre =
+
+> 𝑔 −1
+
+∑
+
+> 𝑟 =0
+
+( 𝑔 −1 ∏
+
+> 𝑚 =𝑟 +1
+
+̄𝐴 𝑚 
+
+)̄𝐵 𝑟 𝑥 (0)  
+
+> 𝑟
+
+(3) where the product is empty (equal to 1) when 𝑟 = 𝑔 − 1 . After the full 2𝑔 -token block, the hidden state takes the form: 
+
+ℎpost =
+
+(2𝑔 −1 ∏
+
+> 𝑚 =𝑔
+
+̄𝐴 𝑚 
+
+)
+
+ℎpre 
+
+⏟⏞⏞⏞⏞⏞⏞⏞⏞⏟⏞⏞⏞⏞⏞⏞⏞⏞⏟ 
+
+> decayed spatial prior
+
++
+
+> 𝑔 −1
+
+∑
+
+> 𝑠 =0
+
+( 2𝑔 −1 ∏
+
+> 𝑚 =𝑔 +𝑠 +1
+
+̄𝐴 𝑚 
+
+)̄𝐵 𝑔 +𝑠 𝑥 (1) 
+
+> 𝑠
+
+⏟⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏟⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏞⏟ 
+
+> temporal transition terms
+
+(4) The first term in Eq. 4 is the pre-transition spatial state ℎpre 
+
+decayed by an additional 𝑔 recurrence steps. As 𝑔 grows, ℎpre 
+
+itself integrates a progressively wider spatial neighborhood (Eq. 3) before the cross-position transition occurs. Because the state accumulates more broad spatial context prior to the temporal switch, the representation naturally shifts from being highly temporally-sensitive toward becoming spatially-enriched, while the shared spatial background (the pool, the platform) increasingly cancels in the downstream MDM step. This analysis establishes two boundary conditions on 𝑔 .At the lower bound, 𝑔 = 2 produces a pre-transition state that integrates only two immediately adjacent patches — a spatial footprint so narrow that its accumulated context is nearly indistinguishable from the single-patch accumulation of the single-scale scan, rendering the two scales informationally redundant. At the upper bound, as 𝑔 approaches the spatial extent of the feature map, each group approximates a global spatial summary of an entire temporal position before any temporal interaction occurs, and the resulting representation is dominated by static, position-level appearance. The motivation for simultaneously using single-scale and multi-scale scans is to capture two complementary aspects of video motion dynamics: the single-scale scan targets localized, instantaneous point-wise transitions, while the multi-scale scan exposes structured motion patterns that unfold across a spatial neighborhood — such as regional body trajectories or coherent limb movements spanning multiple patches. This complementarity requires the two representations to be structurally distinct. Group size 𝑔 = 3 
+
+is the minimal configuration that satisfies this requirement: it is wide enough to diverge meaningfully from single-scale behavior and expose genuine neighborhood-level temporal structure, yet narrow enough to preserve the temporal sen-sitivity of the hidden state at the transition boundary. We accordingly adopt 𝑔 = 3 as the multi-scale group size. Before entering the ITPS pipeline, each scan sequence is mapped back to its canonical (𝐻, 𝑊 ) spatial coordinates through an inverse traversal. This operation not only ensures that tokens from horizontal and vertical scans at the same spatial position are aligned, but importantly, maps the outputs of both single- and multi-scale scans back into a strict (position, time) alternating order, cleanly interleaving the two temporal positions at every spatial location. 
+
+3.3. ITPS: Interleaved Temporal Phase-shift Synthesis 
+
+Motion in video is a vector quantity: it has both mag-nitude and direction. The four scan sequences produced in the previous stage capture horizontal and vertical motion components separately, each from two scale perspectives. These are not two independent signals — they are orthogonal 
+
+5projections of the same underlying displacement field. Just as knowing the 𝑥 - and 𝑦 -projections of a displacement vector independently does not reveal the true motion direction without bringing them into a common reference frame, the horizontal and vertical scan outputs must be spatially aligned before their joint interaction can expose multi-directional motion structure. The ITPS pipeline performs this alignment and synthesizes a single differential motion feature map through sequential stages, as illustrated in Fig. 3. 
+
+Scale-axis combination. The single-scale and multi-scale scan outputs along each axis are first merged through learn-able coefficients, producing a single horizontal and a single vertical signal: 
+
+𝑆 𝐻 = 𝛾 𝐻 𝑆 SCI-H + (1 − 𝛾 𝐻 )𝑆 MSI-H (5) 
+
+𝑆 𝑉 = 𝛾 𝑉 𝑆 SCI-V + (1 − 𝛾 𝑉 )𝑆 MSI-V (6) where 𝛾 𝐻 , 𝛾 𝑉 ∈ [0 , 1] are learned per-channel. At this point, 
+
+𝑆 𝐻 and 𝑆 𝑉 contain the horizontal and vertical temporal features. To prepare them for 1D phase shifting, the 2D feature maps 𝑆 𝐻 and 𝑆 𝑉 are flattened into 1D row-major sequences. However, perfectly matching their 1D indices is not enough: because 𝑆 𝐻 was accumulated via a horizontal scan and 𝑆 𝑉 via a vertical scan, the causal 1D S6 filters have inherently skewed their spatial receptive fields in orthogonal directions. Consequently, at any given token index, 𝑆 𝐻 and 
+
+𝑆 𝑉 are functionally centered on slightly different spatial coordinates. This systematic receptive field misalignment must be corrected before the two axes can be meaningfully combined. 
+
+LPSA: Learnable Phase-Shift Alignment. The exact spatial offset between the receptive fields of 𝑆 𝐻 and 𝑆 𝑉 
+
+depends on the scan geometry and is generally a non-integer, channel-dependent quantity. We perform this alignment in the frequency domain. The Fourier shift theorem states that a spatial translation of 𝜏 positions in a 1D sequence of length 
+
+𝐿 seq corresponds to a phase rotation exp (−𝑖 2𝜋𝑓 𝜏 ∕𝐿 seq 
+
+)
+
+at frequency index 𝑓 . We apply a real 1D FFT along the sequence dimension ( 𝐿 seq = 2𝐿 , representing the full interleaved token sequence for the two temporal positions). This approach has three critical advantages. First, the learned parameter 𝜏 is continuous, providing sub-pixel spatial trans-lation precision inaccessible to integer shifts. Second, it is global, operating on the entire spectrum simultaneously. Third, we learn 𝜏 independently per channel, allowing different feature channels to discover their optimal spatial alignment offsets. We hold the horizontal signal 𝑆 𝐻 fixed as the reference anchor and shift only the vertical signal 𝑆 𝑉 . For each frequency index 𝑓 , the channel-wise parameter 𝜏 defines the phase angle: 
+
+𝜃 (𝑓 ) = − 2𝜋𝑓 𝜏 𝐿 seq 
+
+(7) The spectrum is rotated and inverted back to the 1D token domain: ̂𝑆 𝑉 =  −1 ( (𝑆 𝑉 )( 𝑓 ) ⋅ exp ( 𝑖𝜃 (𝑓 )) ) (8) While the 1D Fourier shift naturally imposes a circular boundary condition (wrap-around) on the sequence, the learned translations 𝜏 converge to highly fractional, sub-pixel values (empirical measurements show a mean absolute magnitude of |𝜏 | ≈ 0.35 ). Consequently, any circular wrap-around artifacts are strictly confined to the extreme sequence boundaries, while the vast majority of the tokens benefit from continuous, artifact-free spatial interpolation. Furthermore, while a 1D shift on a row-major sequence primarily constitutes a horizontal spatial translation, this learnable shift successfully corrects the dominant component of the misalignment. After this step, the receptive fields of 
+
+𝑆 𝐻 and ̂ 𝑆 𝑉 are spatially aligned. 
+
+AXI: Axial Interaction. With the receptive fields of the two components aligned, their element-wise product exposes regions of complex, diagonal co-activation. A motion event that activates both 𝑆 𝐻 and ̂ 𝑆 𝑉 simultaneously produces a strong interaction signal, whereas isolated horizontal or vertical motion does not. Rather than explicitly comput-ing geometric angles (which would require operations like 
+
+arctan 2 ), we employ the aligned vertical signal as a spatial gating mechanism. A learnable coefficient 𝛼 blends this co-activation signal with the primary horizontal signal: 
+
+𝑆 AXI = 𝛼 (𝑆 𝐻 ⊙̂ 𝑆 𝑉 ) + (1 − 𝛼 ) 𝑆 𝐻 (9) The parameter 𝛼 controls the strength of this gating. Through this interaction, the network learns to dynamically emphasize regions of multi-directional motion while preserving the foundational horizontal motion representation. 
+
+MDM: Motion Decoding Module. At this stage, 𝑆 AXI 
+
+(still possessing the ℝ𝐵 ×2 𝐿 ×𝐶 sequence shape) jointly en-codes both temporal positions in an entangled state. To collapse this sequence into a single 2D feature map for the subsequent BOA stack, we explicitly de-interleave the alternating sequence to isolate the two temporal positions. Specifically, the sequence is reshaped into ℝ𝐵 ×𝐿 ×2× 𝐶 , where the inner dimension cleanly separates the alternating tokens into past and present. These separated tokens are then projected into a unified tensor via a learnable decoding step: 
+
+𝑀 = 𝜔 1 𝑍 1 − 𝜔 0 𝑍 0 (10) where 𝑍 0 and 𝑍 1 are the perfectly de-interleaved token segments of 𝑆 AXI corresponding to the reference and present feature maps, respectively. It is critical to note that the oper-ation in Equation 10 should not be confused with the rigid, hand-crafted geometric subtractions used in prior difference networks. The actual temporal transitions have already been inherently encoded by the hidden states of the S6 recurrence during the earlier interleaved scan (which generates the entangled states 𝑍 0 and 𝑍 1). Here, the learnable projection  
+
+> 6BOA Block SMFiLM Processing Block FiLM ···
+> S′
+> M′
+> Spatial (S) Motion (M)
+> Pair-Features (B, T, D) MEAN PATH Mean Pool ATTENTION PATH Attention Pool Dynamic Fusion Cosine Classifier Prediction
+
+(a) BOA block architecture. BOA Block SMFiLM Processing Block FiLM ···  
+
+> S′
+> M′
+> Spatial (S) Motion (M)
+> Pair-Features (B, T, D) MEAN PATH Mean Pool ATTENTION PATH Attention Pool Dynamic Fusion Cosine Classifier Prediction
+
+(b) Dual-Path Temporal Pooling mechanism. 
+
+Figure 4: Detailed schematic of the MamBOA architecture components. 
+
+serves as the primary motion extraction stage: because both 
+
+𝑍 0 and 𝑍 1 share the same accumulated spatial context, their subtraction effectively cancels out static spatial interference (e.g., unchanged background or static objects), isolating the pure temporal change. While one might consider standard downsampling methods (such as mean or max pooling) to collapse the sequence, they are structurally inadequate: motion is fundamentally an asymmetric, directional quantity. Symmetric pooling would blur 𝑍 0 and 𝑍 1 into a static spatial summary, obliterating the temporal directionality. By utilizing a learnable, asymmetric projection, MDM successfully cancels the static spatial context and collapses the sequence into a 2D motion feature map 𝐌 ∈ ℝ𝐶 ×𝐻 ×𝑊 ,fully preserving the signed differential dynamics. This 2D spatial representation is then passed to the subsequent BOA stack. 
+
+3.4. Spatial Branch 
+
+In parallel, the spatial branch explicitly isolates the tokens belonging to the present temporal position from the interleaved sequences. These present-position tokens are restored to a 2D grid and processed by a standard S6 state-space scan in four directions (SS2D), whose outputs are averaged to produce a clean spatial feature map. By extracting only the tokens of the present feature map, the spatial branch specializes in modeling the rich 2D structural appearance. Since our core architectural contribution lies in differential motion extraction, we employ a standard multi-directional S6 configuration for this spatial branch without further modification, acting as a straightforward but effective complement to the motion branch. 
+
+3.5. BOA Block 
+
+Before deep fusion, both branches are projected into a shared latent space. Within each BOA block, the spatial features are modulated by parameters (scale and shift) derived from the motion features, and the motion features are likewise conditioned by the spatial features. This bidirectional FiLM [23 ] conditioning lets the two representations gradually recog-nize and align with one another. Formally, this bidirectional modulation is defined as: 
+
+𝑆 ′ = 𝛾 𝑠 ⋅ Norm (𝑆 ) + 𝛽 𝑠 , 𝛾 𝑠 , 𝛽 𝑠 = Linear (𝑀 ) (11) 
+
+𝑀 ′ = 𝛾 𝑚 ⋅ Norm (𝑀 ) + 𝛽 𝑚 , 𝛾 𝑚 , 𝛽 𝑚 = Linear (𝑆 ) (12) where Norm denotes Layer Normalization, and Linear represents linear projections. Following modulation, the features 𝑆 ′ and 𝑀 ′ are not immediately concatenated; rather, they are independently passed through a modern processing block to refine their respective representations. A defining characteristic of BOA module is its processing-block-agnostic design; its formulation does not rely on paradigm-specific operations. While the framework is designed to seamlessly integrate with various block topologies, we adopt the ConvNeXt-V2 block [ 24 ] as the primary instantiation in our architecture due to its strong empirical performance. As demonstrated in our ablation studies, this flexibility allows the BOA module to operate effectively with modern blocks from diverse architectural families without requiring structural modifications. This sequence of bidirectional conditioning followed by parallel block processing constitutes a single BOA layer. The detailed schematic of the BOA block ar-chitecture is shown in Fig. 4a. The entire stack is repeated four times, allowing progressively deeper and more intricate interactions between the motion and spatial representations before they are finally concatenated in the deep fusion stage. 
+
+Feature Fusion. The final spatial and motion features are concatenated along the channel dimension and fused by a 1×1 
+
+convolution with normalization and activation, preserving the 2D spatial structure. This joint representation encodes the local transitions of the temporal feature-map pair at every spatial location, and is subsequently passed to the spatial-aware pooling and classification stages. 
+
+3.6. Dual-Path Temporal Pooling 
+
+Repeating the above for every sampled pair yields a temporal sequence of feature vectors {𝐅 𝑡 }𝑇 𝑡 =1 . Reducing this sequence to a single summary is non-trivial: pure mean pooling drowns the few critical moments in the surrounding static content, while pure attention pooling tends to collapse onto one or two pairs and discard global context. We therefore adopt a dual-path scheme, as illustrated in Fig. 4b. The attention path computes per-timestep scores 𝑠 𝑡 ,normalizes them with a softmax function to obtain attention weights 𝛼 𝑡 , and produces a weighted sum 𝑓 attn that isolates 
+
+7Video Input 
+
+N Clips 
+
+> Clip 1 Clip 2 Clip 3
+
+⋮
+
+> Clip N −1Clip N Clip N+1 Video PreTrained Backbone
+
+MamBOA 
+
+Pair-Features Pair-Feature ₁ 
+
+> Pair-Feature ₂
+> Pair-Feature ₃
+> Pair-Feature ₄
+> Pair-Feature ₅
+> Pair-Feature ₆
+> Dual Path Temporal Pool Figure 5: Clip-level extension of the MamBOA architecture.
+
+the most decisive moments: 
+
+𝑠 𝑡 = Linear (𝐅 𝑡 ), 𝛼 𝑡 = exp( 𝑠 𝑡 )
+
+∑𝑖 exp( 𝑠 𝑖 ) (13) 
+
+𝑓 attn =
+
+> 𝑇
+
+∑
+
+> 𝑡 =1
+
+𝛼 𝑡 𝐅 𝑡 (14) In parallel, the mean path averages all timesteps, summarizing temporally invariant structure such as athlete appearance and scene: 
+
+𝑓 mean = 1
+
+𝑇 
+
+> 𝑇
+
+∑
+
+> 𝑡 =1
+
+𝐅 𝑡 (15) The two paths are blended through: 
+
+𝑓 final = 𝑓 attn + 2 𝜎 (𝛽 ) ⋅ 𝑓 mean (16) where 𝛽 is an unbounded learnable scalar, and 𝜎 (⋅) is the sigmoid function, making the effective weighting coefficient 
+
+2𝜎 (𝛽 ) bounded in (0 , 2) . The network thus learns the trade-off between static and dynamic context: when the discriminative signal is highly concentrated in a few specific temporal moments, the optimization drives 𝛽 → −∞ , minimizing the mean path contribution so that attention dominates. Conversely, when global background context is informative, 
+
+𝛽 increases to draw heavily on the mean path. To prevent the attention weights from collapsing onto a single frame, we apply an entropy regularization term on the attention weights during training. 
+
+Cosine Classifier. The pooled feature is classified by a cosine classifier, which 𝐿 2-normalizes both the feature and the weight matrix before producing logits. As is standard practice in fine-grained visual recognition literature [ 20 ], this normalization stabilizes the magnitude of the logits and significantly improves separation between classes by reducing intra-class variance. 
+
+3.7. Adaptive Clip-Level Temporal Coverage 
+
+Rather than operating on a fixed set of sparsely sampled frames, the video-pretrained variant extends the proposed differential framework to the clip level, as illustrated in Fig. 5. Given a video, 𝑁 temporal clips are extracted using an adaptive-stride sampling strategy and processed by a shared backbone. The resulting clip representations are then treated analogously to feature-map pairs, allowing the same MamBOA differential mechanism and temporal aggregation pipeline to operate at the clip level. Conventional video recognition architectures typically process a fixed number of frames (e.g., 8 or 16), causing computational cost to scale directly with the number of sampled frames while leaving a large portion of long videos unobserved. In contrast, the proposed formulation decouples temporal coverage from the backbone input length. Instead of selecting a small subset of frames, clips are distributed across the entire video duration, enabling substantially broader temporal coverage. For a video containing 𝑇 frames, clip starting positions are computed dynamically according to the video length. Let 𝐿 𝑐 denote the temporal receptive field of a clip. The maximum valid starting position is 
+
+𝑠 max = 𝑇 − 𝐿 𝑐 (17) and the interval between adjacent clips is defined as 
+
+Δ𝑠 = 𝑠 max 
+
+𝑁 − 1 . (18) Consequently, clip locations automatically expand or contract according to the video duration, ensuring approximately uniform temporal coverage regardless of video length. During training, temporal jitter is applied around each nominal clip position for regularization, whereas deterministic positions are used during inference. Each clip contributes a prediction token that participates in the Dual-Path Temporal Pooling module, where temporal evidence from different parts of the video is aggregated into a unified representation. As a result, the computational cost 
+
+> 8
+
+of the temporal aggregation stage scales primarily with the number of clip-level prediction tokens rather than the total number of frames in the original video. This enables broad temporal coverage while maintaining a single-pass inference pipeline. To illustrate the coverage gain concretely: while con-ventional approaches observe only a fixed, small subset of frames, the proposed method distributes 𝑁 clips across the full temporal extent, each contributing a multi-frame receptive field. The resulting 𝑁 − 1 consecutive clip pairs thus aggregate temporal evidence from substantially more of the video than any single fixed-window sampling strategy could provide. As shown in the ablation study, increasing the number of clip-level Pair-Features consistently improves recognition accuracy, suggesting that richer temporal evidence accumu-lation directly benefits action understanding. 
+
+## 4. Experiments 
+
+4.1. Dataset and Evaluation Protocol 
+
+We evaluate MamBOA on Diving48 [ 10 ], comprising 16,997 video clips across 48 categories defined by complex temporal attributes. While prominent datasets like Kinetics [ 11 ] and Something-Something V2 [ 22 ] are excellent for general representation learning, benchmark selection here is strictly driven by our core objective: isolating pure motion ex-traction. Since modern backbones already excel at extracting static cues, we require a testbed that nullifies spatial shortcuts. Diving48 shares a uniform visual environment across all classes, forcing the model to rely exclusively on long-range temporal dynamics rather than scene bias [ 10 ]. This makes it the ideal environment to validate MamBOA’s differential capabilities. We report Top-1 accuracy on the official test split (15,027 train / 1,970 test). This single-dataset focus is a deliberate experimental design decision. Because all 48 categories share an identical background (a diving pool), spatial shortcuts are structurally eliminated by the dataset’s construction. As a consequence, every measured performance gain can be causally attributed to temporal modeling quality, yielding a controlled envi-ronment for deep mechanism validation. Evaluating gen-eralization across broader dataset distributions is a natural complement to this mechanistic analysis and is left for future work. 
+
+4.2. Implementation Details 
+
+For both variants, features are extracted from intermediate layers of the backbones to maintain an optimal balance between high-level semantic context and the spatial resolution necessary for fine-grained motion modeling. 
+
+Image-pretrained variant. The backbone is VMamba-Base [ 7] with depths [2, 2, 4], pretrained on ImageNet-1K. Features are extracted from the output of the third stage. Input frames are resized to 224 ×224 with standard augmentation (random resized crop, horizontal flip, color jitter) during training and center-cropped during inference. We train for 50 epochs using AdamW [ 25 ] (backbone learning rate of 1e-5, head learning rate of 1e-4), cosine decay, and batch size 16. Online Hard Example Mining (OHEM) [ 26 ] is applied from epoch 18 with keep ratio 0.7. MixUp augmentation is used with 𝛼 = 0 .2. The BOA stack consists of 4 ConvNeXt-V2 processing blocks. Inference uses 30 views (10 temporal × 3spatial crops). 
+
+Video-pretrained variant. The backbone is MViT-V2-S [13 ] pretrained on Kinetics-400, with features hooked at block 13. During training, we extract 7 temporal clips ( 𝑁 = 7 ), each with 16 frames and a stride of 2. The model is trained for 45 epochs with a batch size of 32 using AdamW [ 25 ](backbone learning rate of 1e-5, head learning rate of 1e-4), utilizing a SequentialLR scheduler with a 5-epoch warmup and cosine decay. The backbone is frozen for the first 5 epochs. Augmentation and regularization follow the image variant, with label smoothing set to 0.1. OHEM is applied starting from epoch 18 (with a warmup of 5 epochs and a keep ratio of 0.7). A Spatial-Aware Temporal Attention Pool (reducing the temporal dimension 𝑇 = 8 → 1, where the 16-frame input with stride 2 is inherently reduced to 𝑇 = 8 by MViT’s temporal downsampling, via a zeros-initialized 3D Conv with kernel size 1, no bias, and softmax weighting) is used to project backbone features. No test-time view ensembling is applied; predictions are aggregated in a single forward pass. 
+
+Attribute-specific pooling and hierarchical loss. Div-ing48 provides compositional action labels decomposed into four attribute dimensions: takeoff style, somersault count, twist count, and entry position. To exploit this structure, we augment the shared dual-path pool with four additional attribute-specific attention heads, each producing an indepen-dent pooled representation from the same logit sequence. A lightweight linear classifier is attached to each attribute head (takeoff: tk , somersault: som , twist: tw , entry position: pos )and supervised by the corresponding attribute label during training. The combined training objective is: 
+
+ = main +0 .2 tk +0 .3 som +0 .3 tw +0 .2 pos +𝜆 ent ent 
+
+(19) The auxiliary weights sum exactly to 1.0 ( 0.2 + 0 .3 + 0 .3 + 0.2 = 1.0). This constitutes a deliberate mathematical scale normalization (convex combination) that prevents the hierarchical loss from artificially inflating the total gradient magnitude, ensuring stable optimization without requiring global learning rate adjustments. The higher weights for somersault and twist reflect their more complex temporal dynamics compared to takeoff and entry position. Here, 
+
+ent = − ∑𝑡 𝛼 𝑡 log 𝛼 𝑡 is the entropy regularization term applied to the temporal attention weights to prevent collapse onto a single frame, and 𝜆 ent = 0 .1 is its scaling hyperparam-eter. All attribute heads and their classifiers are discarded at inference; only the main dual-path pool and its classifier are retained.                                                                              
+
+> 9Table 1
+> Comparison with state-of-the-art methods on Diving48. NA denotes not reported. Model / Architecture Backbone Frames Computational Cost (GFLOPs) Top-1 Accuracy (%) Top-5 Accuracy (%) TSN (baseline) [1] ResNet-50 16 33.0 79.0 NA GST [15] ResNet-50 16 58.4 78.9 NA TSM [14] ResNet-50 16 65.0 83.2 NA SlowFast (16 ×8) [2] ResNet-101 64+16 213.0 77.6 NA TDN (Base) [5] ResNet-50 16 72.0 84.6 NA TimeSformer-HR [3] Transformer 16 170.3 78.0 NA TimeSformer-L [3] Transformer 96 2,380.0 81.0 NA VideoSwin-B [4] Transformer 32 963.0 69.6 92.7 ViViT-L [12] Transformer 32 7,248.0 80.6 92.7 SIFAR-B-12+ [20] Swin-B 16 189.0 85.3 98.3 SIFAR-B-14+ [20] Swin-B 16 263.0 87.3 98.8 MamBOA (Ours, Image) VMamba-B [7] 30 ×16 30 ×132.5 a85.02 98.53
+> MamBOA (Ours, Video) MViT-V2-S [13] Full-video 407.6 86.24 97.72
+> aMamBOA (Image-backbone) is evaluated using 10 temporal views × 3 spatial crops multi-view inference. Several baseline models were not originally evaluated on Diving48 in their respective publications; their results on this benchmark are as reported in [20] and [21].
+
+4.3. Comparison with State of the Art 
+
+Table 1 compares MamBOA against published methods on Diving48. We group methods by pretraining strategy (image vs. video) and report the total inference FLOPs to enable a fair efficiency comparison. While the image-pretrained MamBOA variant features a high total GFLOPs count in Table 1, this overall footprint is a direct consequence of multiplying a single-view forward pass by the standard 30-view inference protocol ( 10 temporal × 3 spatial ) commonly used to evaluate image-pretrained models on video tasks. This multi-view inference bottleneck is what our clip-level video variant directly resolves by processing the full sequence in a single 407.6 GFLOP pass. To ensure a rigorous and equitable evaluation, our benchmark is strictly limited to foundational end-to-end architectures. Consequently, we exclude hybrid pipelines that rely on auxiliary frame-selection or heuristic filtering modules prior to the core network. Furthermore, all reported baselines exclusively utilize RGB frames as input, ensuring a controlled comparison devoid of optical flow or multi-modal computational overhead. Although the evaluation is conducted on a single bench-mark, the generality of the proposed method is systematically validated along three independent architectural axes within that benchmark. First, the backbone-agnostic experiments (Table 3) demonstrate consistent temporal modeling across three structurally distinct backbone families: CNN, Trans-former, and Mamba. Second, the processing-block-agnostic experiments (Table 4) show that the BOA module retains its function regardless of the internal block family. Third, two independent pretraining regimes (image-pretrained frame-pair and video-pretrained clip-pair) confirm that the differen-tial synthesis principle holds across temporal granularities. Taken together, these axes constitute generalization evidence of structural scope that is complementary to dataset diversity. This empirical breadth is further corroborated by mechanistic evidence: the temporal shuffling experiments (Section 4.8) confirm that the model’s performance is causally grounded in temporal ordering rather than static appearance, the 𝜔 
+
+convergence analysis (Section 4.8) demonstrates that the differential extraction mechanism operates as theoretically intended without explicit inductive forcing, and the attention visualizations show that the dual-path pooling dynamically discovers discriminative moments rather than exploiting fixed positional biases. 
+
+4.4. Efficiency Analysis 
+
+The defining computational advantage of MamBOA lies in its architectural efficiency and strictly bounded operational overhead. Consequently, the primary computational footprint of the entire network is strictly dictated by the chosen base backbone, rather than the temporal modeling mechanism itself. MamBOA is designed with computational efficiency in mind. The differential synthesis and dual-path pooling operate with a very low computational cost of merely ∼2.1 GFLOPs per feature pair (measured with ConvNeXt-V2 as the BOA processing block). The temporal head itself is computationally lightweight and contains only 34.63M parameters, which are loaded independently of the choice of spatial backbone. Because this deep temporal alignment incurs only a min-imal processing penalty, the overall efficiency of MamBOA dynamically scales with the chosen underlying network. This strict parameter isolation allows the architecture to process the entire video sequence in a single forward pass without the severe computational bottlenecks inherent to dense 3D networks, as detailed in Table 2. To put this in concrete terms: VideoSwin-B and ViViT-L consume 963 and 7,248 GFLOPs respectively for a fixed 32-frame window, whereas MamBOA achieves full-video coverage at 407.6 GFLOPs total—of which only 12.6 GFLOPs ( 2.1 × 6 pairs) are attributable to the temporal framework itself. 
+
+> 10
+
+Table 2 
+
+Computational efficiency comparison. MamBOA isolates its temporal computational footprint from the spatial backbone, enabling full-sequence coverage at a fraction of the cost of dense 3D architectures. Method Frames Total FLOPs (G) VideoSwin-B [4] 32 963 ViViT-L [12] 32 7248 
+
+MamBOA (MViT-V2-S) All Frames 407.6 (12.6 a + 395)    
+
+> aThe MamBOA architecture processes 6 temporal feature pairs in this configuration, requiring merely ∼2.1 GFLOPs per pair (measured with ConvNeXt-V2 as the BOA processing block;
+> 2.1 × 6 = 12 .6GFLOPs total for the temporal framework). The remaining 395 GFLOPs are strictly native to the underlying MViTV2-S video-pretrained backbone.
+
+4.5. Backbone Agnostic Architecture 
+
+Our proposed MamBOA framework is inherently backbone-agnostic. Its temporal modeling mechanism can be seamlessly integrated with various spatial architectures. As demonstrated in Table 3, we evaluate the framework across different backbone families, including Convolutional Neural Networks (CNN), Transformers, and Mamba-based architectures, yield-ing competitive performance regardless of the underlying spatial backbone. 
+
+Table 3 
+
+Performance of MamBOA across different backbone families on Diving48. Backbone Top-1 Acc (%) 
+
+CNN Family 
+
+ConvNeXt-V2-B a [24] 82.49 
+
+Transformer Family 
+
+Swin-B a [27] 78.33 
+
+Mamba Family 
+
+VMamba-B 85.02         
+
+> aNote that the objective of this analysis is to demonstrate structural compatibility (plug-and-play capability), not to establish state-of-the-art performance for every architecture. Swin-B and ConvNeXt-V2 were evaluated using hyperparameters and depths optimized for VMamba (specifically, depths [2 ,2,6] for Swin-B and
+> [3 ,3,9] for ConvNeXt-V2), without any backbone-specific tuning.
+
+4.6. Processing Block Agnostic Design 
+
+To demonstrate that the processing block within the BOA module is independent of the backbone architecture, we evaluate the framework using the VMamba-B spatial backbone while substituting the internal processing block with modern blocks from three different architectural families. As shown in Table 4, the framework maintains its robust temporal modeling capabilities regardless of the chosen processing block, confirming its modular design. Notably, optimal performance is achieved when pairing the SSM-based VMamba backbone with a CNN-based ConvNeXt block inside the BOA module, rather than the VSS block. This cross-family synergy empirically proves that the framework’s performance stems from genuine architectural complemen-tarity rather than an inherent bias toward homogeneous SSM structures. 
+
+Table 4 
+
+Performance of MamBOA on Diving48 with different processing blocks instantiated within the BOA module, using VMamba-B as the spatial backbone. Processing Block Top-1 Acc (%) 
+
+CNN Family 
+
+ConvNeXt-V2 Block [24] 85.02 
+
+Transformer Family 
+
+Standard ViT (Vision Transformer) Block 82.39 
+
+Mamba Family 
+
+VSS Block 82.94 
+
+4.7. Ablation Studies on Network Dynamics 
+
+To investigate the contribution of each architectural component to the learned representations, we conduct a systematic network dynamics analysis, as summarized in Table 5. Each variant isolates a specific design decision by removing or replacing a single module while holding all other training conditions fixed. As shown in the table, the removal of the multi-scale scan or the learnable phase shift results in a performance drop of over 2.2%, while omitting the dual-path pooling mechanism causes the most significant degradation (up to 3.7%), demonstrating the critical role of each component in the framework’s overall efficacy. 
+
+Table 5 
+
+Component ablation on Diving48 (image-pretrained). All variants share the same training configuration. Δ denotes the change relative to the full model. Configuration Top-1 (%) Δ
+
+Full model (MamBOA) 85.02 –w/o Multi-Scale Scan (Only Single-Scale) 82.79 −2.23 w/o Learnable Phase Shift (no 𝜏 ) 82.64 −2.38 w/o FiLM [23] (unidirectional) 82.23 −2.79 w/o dual-path pool (mean only) 81.32 −3.70 w/o dual-path pool (Attention only) 81.68 −3.34 w/o Attribute-specific heads 83.20 −1.82 w/o OHEM [26] 84.21 −0.81 
+
+4.8. Temporal Sensitivity Analysis 
+
+The foundational objective of the MamBOA framework is to explicitly capture and leverage temporal dynamics. In datasets like Diving48, where diverse action categories share nearly identical static visual contexts (e.g., diving boards and water splashes) and are distinguished solely by sequential motion variations (e.g., the exact number of aerial twists), structural temporal sensitivity is paramount. To rigorously 
+
+11 MamBOA Dual-Path Temporal Pooling Responses (a) 
+
+> First Frame
+
+# ⋯
+
+> High-Attention Frames
+
+# ⋯              
+
+> Last Frame
+> 0.0 0.1 0.2 0.3 012345678910 11 12 13 14
+> First Frame Score Last Frame Score Maximum Attention (Peak)
+> Attention Score
+
+(b) 
+
+> First Frame
+
+# ⋯
+
+> High-Attention Frames
+
+# ⋯              
+
+> Last Frame
+> 0.0 0.1 0.2 0.3 012345678910 11 12 13 14
+> First Frame Score Last Frame Score Maximum Attention (Peak)
+> Temporal Frames (Total 15 Frame Pairs) Attention Score
+
+Figure 6: Attention response curves ( 𝛼 𝑡 ) from the dual-path pooling mechanism for two Diving48 instances. Peak attention dynamically aligns with the discriminative execution phases (e.g., pair 7 in (a) and pair 11 in (b)). 
+
+quantify MamBOA’s reliance on temporal ordering versus static appearance, we conduct targeted temporal shuffling experiments. For the image-pretrained variant, randomly shuffling the sequence of input frames collapses the Top-1 accuracy to 48.48% (a severe degradation from 85.02%). This catas-trophic drop confirms that the architecture does not overfit to spatial background cues. Instead, the Interleaved Temporal Phase-shift Synthesis (ITPS) pipeline inherently relies on strict chronological ordering to compute accurate differential macro-motion. For the video-pretrained variant, the underlying MViT-V2-S backbone is already fundamentally motion-aware due to its Kinetics-400 pretraining, possessing a robust 32-frame local receptive field per clip. However, when we apply a clip-level shuffle—disrupting the global sequence order while fully preserving the local 32-frame motion dynamics within each clip—the accuracy still experiences a substantial drop to 72.30% (down from 86.24%). This significant degradation mathematically isolates and highlights MamBOA’s criti-cal architectural contribution: the framework successfully establishes and aggregates long-range, inter-clip temporal connections. It proves that the dual-path pooling mechanism actively models the holistic temporal logic of the entire video sequence, rather than merely relying on the backbone’s localized motion fragments. Furthermore, we observed that the learnable projection coefficients in the Motion Decoding Module ( 𝜔 1𝑍 1 − 𝜔 0𝑍 0)consistently converge to approximately equal, positive values during training (e.g., 𝜔 1 ≈ 0.998 , 𝜔 0 ≈ 1.000 ). This empirical finding is highly significant: it confirms that without any structural forcing or explicit inductive bias, the network autonomously discovers that a direct, equal-weighted subtraction is the optimal strategy to cancel static spatial interference and extract the differential motion signal. 
+
+4.9. Visualizing Temporal Pooling Dynamics 
+
+Diving48 is a fine-grained benchmark in which all 48 action categories share highly similar visual contexts and are predominantly differentiated by the temporal composition of the aerial phase, including the sequence and number of somersaults and twists performed between takeoff and 
+
+12 water entry. Although the pre-takeoff preparation and water-entry phases may contain auxiliary contextual information, they are comparatively less informative for distinguishing action categories. In contrast, the airborne execution window contains the richest category-specific motion patterns and therefore represents the primary source of discriminative temporal information. We visualize the attention response curves ( 𝛼 𝑡 ) of the dual-path pooling mechanism across 15 temporal frame pairs in Fig. 6. The resulting curves exhibit a behaviorally interpretable pattern that aligns precisely with this data structure. During the pre-takeoff preparation and the post-entry phases — segments that are visually stereotypical and category-invariant — the attention weights remain consistently suppressed. In sharp contrast, the attention response rises sharply and peaks precisely during the aerial execution window, where the discriminative somersault and twist dynamics unfold. For instance, the attention peak accurately aligns with a mid-sequence aerial execution in Fig. 6a (pair 7) and adapts to a late-sequence rotation in Fig. 6b (pair 11). This structure did not arise from any explicit supervision over temporal localization — the model was trained only on category labels. The emergence of phase-selective attention therefore constitutes direct behavioral evidence that the dual-path pooling mechanism learns to suppress category-invariant context and selectively weight the temporally localized, category-discriminative motion events without being guided to do so. 
+
+4.10. Adaptive Stride (For Video Backbone) 
+
+We analyze the impact of the number of temporal feature pairs on computational complexity and recognition accuracy. While an increased number of feature pairs incurs a higher computational cost, it provides a crucial boost in performance. As shown in Table 6, increasing the number of pairs from 1 to 6 yields consistently higher accuracy. Assuming an average video in Diving48 contains approxi-mately 150–220 frames, a single temporal clip from the video backbone covers a 16 × 2 receptive field (32 frames). When 6 pairs (generated from 7 overlapping clips) are utilized, the model achieves near-complete coverage of the entire video, capturing the full action sequence. Conversely, configurations with 1 or 3 pairs only observe a partial fraction of the video, depriving the network of the holistic temporal context necessary for accurate recognition.         
+
+> Table 6
+> Effect of the number of clips and feature pairs on Top-1 accuracy. Clips Pair Features Top-1 Acc (%) 2145.28 4376.90 7686.24
+
+## 5. Discussion and Limitations 
+
+What the evidence establishes. Taken together, the ex-perimental results support a specific causal chain. Temporal shuffling eliminates chronology while preserving all spatial content and collapses accuracy in both variants, ruling out appearance-based shortcuts. The convergence of the MDM coefficients ( 𝜔 1 ≈ 𝜔 0 ≈ 1 ) confirms that the decoding stage exploits precisely the cancellation structure that motivated its design. The component ablations show that no single module carries the architecture alone, and the attention visualizations confirm that temporal aggregation responds to content rather than position — the behavior the dual-path formulation was constructed to produce. 
+
+Cross-family complementarity. An initially counter-intuitive finding deserves comment: the best processing block inside the BOA module is not the architecturally homogeneous VSS block but the CNN-based ConvNeXt-V2 block (Table 4). We interpret this as a division of inductive labor. The selective scan stages of MamBOA already supply global, content-dependent sequential mixing; what the post-scan refinement stage benefits from most is a complementary inductive prior rather than a second global mixing operator of the same family. Notably, the distinguishing structural component of ConvNeXt-V2 relative to the VSS block is not depthwise spatial convolution — which both architectures share — but the Global Response Normalization (GRN) layer, which performs cross-channel feature competition by normalizing each channel’s activation against the global 
+
+𝓁 2 norm of all channels. We hypothesize that this cross-channel competitive suppression is particularly beneficial in the post-scan context: it can selectively amplify the most salient differential motion channels while suppressing redundant or noisy ones, providing a form of channel-wise sparsification that global sequential mixing alone cannot achieve. A similar asymmetry appears in the backbone-agnostic results (Table 3): the framework remains functional across CNN, Transformer, and Mamba backbones, but the accuracy spread between them is non-trivial. We emphasize that these transfer experiments reuse the hyperparameters and truncated depths optimized for VMamba without any backbone-specific tuning; the results should therefore be read as evidence of structural compatibility, not as the performance ceiling of each backbone family. Characterizing which properties of a spatial representation make it most amenable to differential synthesis — feature smoothness, effective receptive field, or pretraining objective — is an open question raised, but not answered, by these experiments. 
+
+Limitations. Several limitations bound the scope of the present study, and we state them explicitly. First, all quanti-tative conclusions are drawn from a single benchmark. As argued in the evaluation protocol, Diving48 was selected because its shared visual environment structurally elimi-nates spatial shortcuts, maximizing the causal attribution of performance to temporal modeling; this controlled depth, 
+
+> 13
+
+however, is purchased at the cost of breadth. The architectural-axis experiments (backbone families, processing blocks, and pretraining regimes) provide generalization evidence that is orthogonal to dataset diversity, but they do not substitute for it: whether the demonstrated mechanisms transfer to domains with different motion statistics — object-centric interactions, egocentric viewpoints, or multi-actor scenes — remains an empirical question that we leave to future work. Second, the differential formulation is strictly pairwise. Motion is synthesized from two temporal positions at a time, and higher-order temporal patterns spanning multiple transitions are delegated to the downstream pooling stage rather than captured within the recurrence itself; phenomena defined by acceleration or rhythm, rather than displacement, are therefore modeled only indirectly. Third, the multi-scale group size 𝑔 = 3 is justified by the structural boundary analysis of Eqs. 3–4 rather than by an exhaustive empirical sweep; while the analysis constrains the plausible range, intermediate values were not exhaustively enumerated due to computational budget. Fourth, the LPSA stage corrects the dominant component of the receptive-field misalignment through a 1D phase shift; a full 2D alignment operator could in principle capture residual vertical offsets, at the cost of additional parameters and a more complex frequency-domain formulation. Fifth, the image-pretrained variant inherits the 30-view inference protocol standard for image backbones on video tasks, and its total inference cost is therefore dominated by view replication; although the clip-level variant resolves this bottleneck, single-pass inference for image-pretrained backbones remains an open efficiency problem. None of these limitations undermines the central claim — that a selective recurrence over an interleaved sequence can serve as a differential motion synthesizer — but they delineate the conditions under which that claim has, and has not yet, been tested. 
+
+## 6. Conclusion 
+
+In this work, we presented MamBOA, a backbone-agnostic temporal framework that rethinks motion extraction for fine-grained video understanding. Rather than relying on computationally heavy 3D dense operators or rigid, hand-crafted geometric subtraction, MamBOA demonstrates that differential motion can be synthesized directly from the struc-tural arrangement of the input: by interleaving consecutive spatial feature maps into a single alternating sequence, the selective state-space recurrence ( 𝑆 6) is structurally driven to build a joint encoding of both temporal positions, from which a learnable asymmetric projection decodes the motion signal. On Diving48, this principle yields 85.02% Top-1 accuracy with an image-pretrained backbone and 86.24% with a video-pretrained backbone operating over the full video sequence, while the temporal head itself adds only ∼2.1 GFLOPs per feature pair. Beyond raw accuracy, the temporal shuffling experiments, the convergence of the decoding coefficients to the theoretically predicted equal-weighted subtraction, and the content-driven behavior of the dual-path attention jointly confirm that the mechanism operates as designed rather than exploiting appearance shortcuts. Furthermore, the framework establishes that state-space differential synthesis can interface with disparate architectural families — including Vision Transformers and standard CNNs — acting as a modular temporal head whose cost is decoupled from the backbone footprint. Future work will extend MamBOA to long-form, untrimmed video — most concretely, through temporal action segmenta-tion. The clip-level pair features developed here are naturally suited to this task: within a single action, consecutive clip representations are similar and the differential encoding remains small, whereas at an action boundary the two clips encode different activities and the differential signal peaks. The magnitude of the decoded motion feature thus behaves as an intrinsic boundary indicator, providing exactly the transition-sensitive signal that segmentation requires. Under this formulation, a sliding window of consecutive pair features would yield a structured sequence of short-range action transitions, from which a lightweight sequence model could infer segment boundaries and class assignments at clip-stride temporal granularity. Realizing this direction will require replacing the global dual-path pooling with a localized, windowed variant that preserves per-segment outputs rather than collapsing the sequence into a single summary, and adapting the hierarchical loss formulation to segment-level supervision. In parallel, we aim to broaden the empirical scope of the framework along two axes: validation on additional fine-grained benchmarks with different motion statistics, and a systematic characterization of which spatial-prior properties make a backbone most amenable to state-space differential synthesis. 
+
+## Reproducibility and Code Availability 
+
+To support the reproducibility of this work, the source code and configuration files required to implement MamBOA are publicly available at: https://github.com/BOA-clk/MamBOA 
+
+## Acknowledgements 
+
+The author has no acknowledgments to declare. 
+
+## CRediT authorship contribution statement 
+
+Mustafa Bora Çelik: Conceptualization, Methodology, Software, Validation, Writing - Original draft preparation. 
+
+## References    
+
+> [1] Wang, L., Xiong, Y., Wang, Z., Qiao, Y., Lin, D., Tang, X., Van Gool, L., 2016. Temporal segment networks: Towards good practices for deep action recognition. In: Proceedings of the European Conference on Computer Vision (ECCV). [2] Feichtenhofer, C., Fan, H., Malik, J., He, K., 2019. Slowfast networks for video recognition. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). [3] Bertasius, G., Wang, H., Torresani, L., 2021. Is space-time attention all you need for video understanding? In: International Conference on Machine Learning (ICML).
+> 14
+
+[4] Liu, Z., Ning, J., Cao, Y., Wei, Y., Zhang, Z., Lin, S., Hu, H., 2022. Video swin transformer. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [5] Wang, L., Tong, Z., Ji, B., Wu, G., 2021. TDN: Temporal difference networks for efficient action recognition. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [6] Gu, A., Dao, T., 2023. Mamba: Linear-time sequence modeling with selective state spaces. arXiv preprint arXiv:2312.00752. [7] Liu, Y., Tian, Y., Zhao, Y., Yu, H., Xie, L., Wang, Y., Ye, Q., Jiao, J., Liu, Y., 2024. VMamba: Visual state space model. arXiv preprint arXiv:2401.10166. [8] Li, K., Li, X., Wang, Y., He, Y., Wang, Y., Wang, L., Qiao, Y., 2024. VideoMamba: State space model for efficient video understanding. In: Proceedings of the European Conference on Computer Vision (ECCV). [9] Islam, M.M., Bertasius, G., 2022. Long movie clip classification with state-space video models. In: Proceedings of the European Conference on Computer Vision (ECCV). [10] Li, Y., Li, Y., Vasconcelos, N., 2018. Resound: Towards action recog-nition without representation bias. In: Proceedings of the European Conference on Computer Vision (ECCV). [11] Carreira, J., Zisserman, A., 2017. Quo vadis, action recognition? A new model and the kinetics dataset. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [12] Arnab, A., Dehghani, M., Heigold, G., Sun, C., Lučić, M., Schmid, C., 2021. ViViT: A video vision transformer. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). [13] Li, Y., Wu, C.Y., Fan, H., Mangalam, K., Xiong, B., Malik, J., Feicht-enhofer, C., 2022. MViTv2: Improved multiscale vision transformers for classification and detection. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [14] Lin, J., Gan, C., Han, S., 2019. TSM: Temporal shift module for efficient video understanding. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). [15] Luo, C., Yuille, A., 2019. Grouped spatial-temporal aggregation for efficient action recognition. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). [16] Simonyan, K., Zisserman, A., 2014. Two-stream convolutional net-works for action recognition in videos. In: Advances in Neural Information Processing Systems (NIPS). [17] Li, Y., Ji, B., Shi, X., Zhang, J., Kang, B., Wang, L., 2020. TEA: Temporal excitation and aggregation for action recognition. In: Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [18] Gu, A., Goel, K., Ré, C., 2022. Efficiently modeling long sequences with structured state spaces. In: International Conference on Learning Representations (ICLR). [19] Zhu, L., Liao, B., Zhang, Q., Wang, X., Liu, W., Wang, X., 2024. Vision Mamba: Efficient visual representation learning with bidirectional state space model. In: International Conference on Machine Learning (ICML). [20] Fan, Q., Chen, C.F., Panda, R., 2022. Can an image classifier suffice for action recognition? In: International Conference on Learning Representations (ICLR). [21] Park, J., Lee, J., Sohn, K., 2023. Dual-path adaptation from image to video transformers. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [22] Goyal, R., Ebrahimi Kahou, S., Michalski, V., Materzynska, J., Westphal, S., Kim, H., Haenel, V., Fruend, I., Yianilos, P., Mueller-Freitag, M., Hoppe, F., Thurau, C., Bax, I., Memisevic, R., 2017. The "something something" video database for learning and evaluating visual common sense. In: Proceedings of the IEEE International Conference on Computer Vision (ICCV). [23] Perez, E., Strub, F., de Vries, H., Dumoulin, V., Courville, A., 2018. FiLM: Visual reasoning with a general conditioning layer. In: Proceedings of the AAAI Conference on Artificial Intelligence. [24] Woo, S., Debnath, S., Hu, R., Chen, X., Liu, Z., Kweon, I.S., Xie, S., 2023. ConvNeXt V2: Co-designing and scaling convnets with masked autoencoders. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [25] Loshchilov, I., Hutter, F., 2019. Decoupled weight decay regularization. In: International Conference on Learning Representations (ICLR). [26] Shrivastava, A., Gupta, A., Girshick, R., 2016. Training region-based object detectors with online hard example mining. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR). [27] Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., Lin, S., Guo, B., 2021. Swin transformer: Hierarchical vision transformer using shifted windows. In: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV). 
+
+15
