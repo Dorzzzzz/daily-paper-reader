@@ -1,0 +1,497 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-17T21:50:10.613140+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 5,
+    "quick_skim_target": 12,
+    "quick_selected": 5
+  },
+  "deep_dive": [
+    {
+      "id": "2606.10616v3",
+      "source": "arxiv",
+      "title": "Learning What to Remember: Observability-Safe Memory Retention via Constrained Optimization for Long-Horizon Language Agents",
+      "abstract": "Long-horizon language agents accumulate observations, reasoning traces, and retrieved facts that exceed their context windows, making memory retention -- what to keep, discard, or later recover under a fixed budget -- central to sustained performance. Most systems score memories with local rules such as recency or relevance, ignoring the delayed costs of retention: future retrieval failures, recomputation, and stale-information use. We formulate retention as a constrained, partially observable stochastic optimization problem in which current decisions shape information demands revealed only later, and prove its single-step version NP-hard. Since exact optimization is intractable and future demands unknown, we develop \\textbf{OSL-MR} (Observability-Safe Learning for Memory Retention), a learning-augmented approximation for deployable memory control. Its core principle is observability separation: deployed decisions use only online-observable signals, while supervision from evidence realized after an interaction is used solely for offline learning. OSL-MR pairs a budget-aware Mixed-Score heuristic (a cold-start policy and inductive prior) with an evidence learner predicting which memories later serve as evidence. As the cumulative objective is non-decomposable and combinatorial, the learner is trained on evidence-membership signals rather than reward, a tractable, deployable target. On LoCoMo and LongMemEval, OSL-MR consistently outperforms strong heuristic and imitation-learning baselines, especially under tight budgets, and is robust across cost settings. On exactly-solvable instances, retention is genuinely multi-step: a perfect single-step optimizer is far from optimal, whereas OSL-MR stays near the dynamic-programming optimum. These results establish constrained stochastic optimization and optimization-guided learning as a scalable foundation for memory in long-horizon agents.",
+      "authors": [
+        "Qingcan Kang",
+        "Liu Mingyang",
+        "Shixiong Kai",
+        "Kaichao Liang",
+        "Tao Zhong",
+        "Mingxuan Yuan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-09T09:15:33+00:00",
+      "link": "https://arxiv.org/pdf/2606.10616v3",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "memory retention constrained optimization for long-horizon language agents",
+      "llm_evidence_cn": "面向长程语言智能体的记忆保留约束优化",
+      "llm_evidence": "面向长程语言智能体的记忆保留约束优化",
+      "canonical_evidence": "面向长程语言智能体的记忆保留约束优化",
+      "llm_tldr_en": "This paper formulates memory retention as a constrained stochastic optimization problem, proving NP-hardness, and proposes an observability-safe method for long-horizon language agents.",
+      "llm_tldr_cn": "针对长程语言智能体在固定预算下记忆保留（取舍）的核心挑战，提出将记忆保留建模为约束部分可观察随机优化问题，证明其单步版本是NP难的，并开发了可观测性安全的近似方法。实验表明该方法在信息保持和计算效率上优于局部规则基线。",
+      "llm_tldr": "针对长程语言智能体在固定预算下记忆保留（取舍）的核心挑战，提出将记忆保留建模为约束部分可观察随机优化问题，证明其单步版本是NP难的，并开发了可观测性安全的近似方法。实验表明该方法在信息保持和计算效率上优于局部规则基线。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.11838v1",
+      "source": "arxiv",
+      "title": "Plan-and-Verify Video Reward Reasoning with Spatio-Temporal Scene Graph Grounding",
+      "abstract": "Reward models for text-to-video (T2V) generation guide post-training but often fail at fine-grained semantic alignment. We trace this to two structural weaknesses in existing reasoning-based reward models: they do not systematically verify every condition described in the prompt, and the visual evidence supporting each judgment remains implicit in their free-form reasoning. We propose SG-PVR, a video reward model that addresses these limitations through plan-and-verify reasoning grounded in spatio-temporal scene graphs. The verification plan decomposes the prompt into atomic claims, ensuring every requirement is checked. The spatio-temporal scene graph, encoding entities, attributes, and temporally-grounded relations, is extracted from the video and maintained as a persistent structured visual reference throughout reasoning. Each claim is verified against both the video and the scene graph, anchoring judgments in explicit visual evidence. SG-PVR achieves strong performance on semantic alignment, including fine-grained temporal semantics. As a test-time reranker, it further enhances compositional alignment in T2V generation.",
+      "authors": [
+        "Hyomin Kim",
+        "Junghye Kim",
+        "Joanie Hayoun Chung",
+        "Yoonjin Oh",
+        "Kyungjae Lee",
+        "Sungbin Lim",
+        "Sungwoong Kim"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-10T09:18:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.11838v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "plan-and-verify video reward reasoning with spatio-temporal scene graphs",
+      "llm_evidence_cn": "基于时空场景图的规划-验证视频奖励推理",
+      "llm_evidence": "基于时空场景图的规划-验证视频奖励推理",
+      "canonical_evidence": "基于时空场景图的规划-验证视频奖励推理",
+      "llm_tldr_en": "SG-PVR decomposes prompt into atomic claims and grounds verification in spatio-temporal scene graphs for fine-grained video reward modeling.",
+      "llm_tldr_cn": "现有文本到视频生成奖励模型因未系统验证所有条件且视觉证据隐含，导致细粒度语义对齐不足。本文提出SG-PVR，将提示分解为原子声明，并提取视频的时空场景图作为验证依据，实现规划-验证推理。实验证明该奖励模型在多种视频生成评价指标上显著优于现有方法，并可用于指导后训练。",
+      "llm_tldr": "现有文本到视频生成奖励模型因未系统验证所有条件且视觉证据隐含，导致细粒度语义对齐不足。本文提出SG-PVR，将提示分解为原子声明，并提取视频的时空场景图作为验证依据，实现规划-验证推理。实验证明该奖励模型在多种视频生成评价指标上显著优于现有方法，并可用于指导后训练。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.15903v2",
+      "source": "arxiv",
+      "title": "Control-Plane Placement Shapes Forgetting: An Architectural Study of Agent Memory Across Thirteen System Configurations",
+      "abstract": "Where an LLM sits in an agent memory pipeline -- between the recall plane that retrieves stored facts (extensively benchmarked) and the control plane that mutates them via supersede, release, purge (largely untested) -- shapes which forgetting failure modes the system recovers. Comparing thirteen system configurations on a 385-case adversarial surface, we observe three placement regimes with partly complementary coverage: deterministic primitives suffice for lexical/temporal categories but fail canonicalization (5% on identifier-obfuscation, 0% on cross-lingual); inscribe-time LLM recovers canonicalization (100%) but cannot help intent-aware deletion (0% on prefix-collision and compound-fact); a mutation-time hook recovers intent-aware deletion (78-85%) and brightens nearly all categories simultaneously (91.7-93.2% overall, $0.17 per 385-case run, 2.3s/case mutation latency vs. 64-191ms/case deterministic, recall path unchanged).   We expose the trade-off via ForgetEval, a 1000-case templated suite plus a 385-case adversarial layer (132 hand-crafted + 253 LLM-drafted oracle-validated) scored by deterministic substring match, paired with a six-method Adapter Protocol with honest N/A scoring that lets heterogeneous memory stores enter in 130 lines. Admission is corroborated by 10-annotator IAA (Fleiss' kappa = 0.958) and a 77-case external-authored subset (four blind contributors) that replicates the canonicalization asymmetry and amplifies the joint-placement lift (+27.8 pt). Production failures are predominantly forgetting failures rather than recall failures, yet existing benchmarks measure only recall. ForgetEval and all adapters are released under MIT.",
+      "authors": [
+        "Dongxu Yang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-14T16:32:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.15903v2",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Architectural study of agent memory across configurations",
+      "llm_evidence_cn": "智能体记忆架构的跨配置系统研究",
+      "llm_evidence": "智能体记忆架构的跨配置系统研究",
+      "canonical_evidence": "智能体记忆架构的跨配置系统研究",
+      "llm_tldr_en": "This paper studies where LLM placement in agent memory pipeline affects forgetting, comparing thirteen configurations and identifying three placement regimes with complementary failure mode coverage.",
+      "llm_tldr_cn": "本文系统研究了LLM在智能体记忆管道中的放置位置对遗忘行为的影响，比较了十三种配置。发现确定性基元可处理词汇/时间遗忘，但无法处理规范化；而LLM在写入时能恢复规范化，但无法处理意图感知删除。该工作为智能体记忆架构设计提供了重要指导。",
+      "llm_tldr": "本文系统研究了LLM在智能体记忆管道中的放置位置对遗忘行为的影响，比较了十三种配置。发现确定性基元可处理词汇/时间遗忘，但无法处理规范化；而LLM在写入时能恢复规范化，但无法处理意图感知删除。该工作为智能体记忆架构设计提供了重要指导。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17328v1",
+      "source": "arxiv",
+      "title": "MemTrace: Probing What Final Accuracy Misses in Long-Term Memory",
+      "abstract": "LLM agents increasingly maintain long-term memory of user facts across sessions. Yet such memory is usually evaluated by aggregating accuracy over question rows or episodes. Because this approach scores question rows independently, even when several questions probe the same fact, it cannot show how that fact behaves as conditions change. We introduce MemTrace, a benchmark whose unit of measurement is the knowledge point: a single typed fact about the user, rather than an individual question. MemTrace probes each fact along three controlled dimensions: memory age, defined by how many sessions ago the fact appeared in the history; question type, covering current state, earlier state, and trajectory of change; and evidence condition, covering present, missing, and contradicted-by-false-premise settings. Evaluating 13 memory-system configurations across four paradigms, we find that similar pooled accuracy hides different failures: recovering a fact's current and earlier states does not imply tracking how it changed, and safe abstention does not imply correcting a false premise. The dominant bottleneck is evidence use, not retrieval: when systems fail, the evidence was retrievable 10 times more often than it was missing. These results suggest that improving long-term memory requires better use of reachable evidence, not simply more storage or retrieval.",
+      "authors": [
+        "Xianxuan Long",
+        "Zhikai Chen",
+        "Shenglai Zeng",
+        "Shouren Wang",
+        "Kai Guo",
+        "Jiliang Tang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-15T22:21:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.17328v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark for probing long-term memory in LLM agents",
+      "llm_evidence_cn": "用于探测LLM智能体长期记忆的基准",
+      "llm_evidence": "用于探测LLM智能体长期记忆的基准",
+      "canonical_evidence": "用于探测LLM智能体长期记忆的基准",
+      "llm_tldr_en": "MemTrace introduces a knowledge-point-based benchmark to probe how LLM agent long-term memory behaves across age, question type, and evidence conditions, revealing limitations of aggregate accuracy metrics.",
+      "llm_tldr_cn": "现有LLM智能体长期记忆评估通常聚合问题行准确率，忽略了同一知识点在不同条件下的行为变化。MemTrace以知识点为基本单位，沿记忆年龄、问题类型和证据条件三个维度探测每个事实，揭示了聚合评估掩盖的缺陷。该基准为细致评估长期记忆提供了新工具。",
+      "llm_tldr": "现有LLM智能体长期记忆评估通常聚合问题行准确率，忽略了同一知识点在不同条件下的行为变化。MemTrace以知识点为基本单位，沿记忆年龄、问题类型和证据条件三个维度探测每个事实，揭示了聚合评估掩盖的缺陷。该基准为细致评估长期记忆提供了新工具。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17798v1",
+      "source": "arxiv",
+      "title": "LiveStarPro: Proactive Streaming Video Understanding with Hierarchical Memory for Long-Horizon Streams",
+      "abstract": "Despite the remarkable progress of Video Large Language Models (Video-LLMs), current online architectures still struggle to simultaneously process continuous video streams, decide autonomously when to respond, and preserve long-horizon contextual memory. These obstacles undermine real-time responsiveness and cause severe forgetting throughout prolonged interactions. In this work, we introduce LiveStarPro, a live streaming assistant that is designed for proactive video understanding over long-horizon streams. The design of LiveStarPro rests on three complementary components. The first component is Streaming Verification Decoding (SVeD), an inference framework that identifies the appropriate response timing through single-pass perplexity verification, thereby eliminating the dependency on explicit silence tokens. The second component is Streaming Causal Attention Masks (SCAM), a training strategy that enforces incremental video-language alignment over variable-length streams. The third component is Tree-Structured Hierarchical Memory (TSHM), a recursive memory architecture that organizes evicted historical information into event chains and consequently enables efficient retrieval from effectively unbounded video streams. To facilitate a comprehensive evaluation under realistic online conditions, we further present OmniStarPro, a large-scale benchmark that spans 15 diverse real-world scenarios and that extends to hour-scale streams for the assessment of long-term recall. Extensive experiments demonstrate that LiveStarPro consistently surpasses existing methods, attaining a 28.9% improvement in semantic correctness and an 18.2% reduction in timing error, while its streaming key-value cache further yields a 1.58x inference speedup over the same model without caching. The model and the code are publicly available at https://github.com/sotayang/LiveStarPro.",
+      "authors": [
+        "Zhenyu Yang",
+        "Kairui Zhang",
+        "Bing Wang",
+        "Shengsheng Qian",
+        "Changsheng Xu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-16T11:18:05+00:00",
+      "link": "https://arxiv.org/pdf/2606.17798v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proactive streaming video understanding with hierarchical memory",
+      "llm_evidence_cn": "具有分层记忆的主动流式视频理解",
+      "llm_evidence": "具有分层记忆的主动流式视频理解",
+      "canonical_evidence": "具有分层记忆的主动流式视频理解",
+      "llm_tldr_en": "LiveStarPro enables real-time video understanding with hierarchical memory to prevent forgetting.",
+      "llm_tldr_cn": "当前在线视频LLM架构难以同时处理连续流、自主决定响应时机并保持长期上下文记忆。本文提出LiveStarPro，一种面向长时流量的主动视频理解助手，包含流式验证解码（SVeD）等组件，能够自适应确定响应时刻，并通过分层记忆架构减轻遗忘。实验表明LiveStarPro在长时流式视频理解任务上显著优于现有模型，为实时视频交互提供了可行方案。",
+      "llm_tldr": "当前在线视频LLM架构难以同时处理连续流、自主决定响应时机并保持长期上下文记忆。本文提出LiveStarPro，一种面向长时流量的主动视频理解助手，包含流式验证解码（SVeD）等组件，能够自适应确定响应时刻，并通过分层记忆架构减轻遗忘。实验表明LiveStarPro在长时流式视频理解任务上显著优于现有模型，为实时视频交互提供了可行方案。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17546v1",
+      "source": "arxiv",
+      "title": "SEAGym: An Evaluation Environment for Self-Evolving LLM Agents",
+      "abstract": "Self-evolving LLM-based agents improve mainly by changing their agent harness: the structured execution layer around a base model, including prompts, memory, tools, middleware, runtime state, and the model-tool interaction loop. Existing evaluations often reduce this process to isolated task scores or a single sequential curve, obscuring whether an update produces reusable improvement, overfits recent tasks, increases cost, or harms older behavior. We introduce SEAGym, an evaluation environment for measuring agent harness updates across training, validation, test, replay, and cost records. SEAGym turns Harbor-compatible benchmarks into dynamic self-evolution task sources with train batches, frozen update-validation, held-out ID and OOD transfer views, replay diagnostics, and saved snapshot and metric records. Instantiating SEAGym on Terminal-Bench 2.0 and HLE, we compare ACE, TF-GRPO, and AHE under a shared epoch/batch protocol. The results show that these evaluation views provide complementary signals about the evolution process: frequent updates may fail to improve held-out performance, useful intermediate snapshots may collapse later, and source diversity and model backend can affect harness reliability.",
+      "authors": [
+        "Congjie Zheng",
+        "Chuanyi Xue",
+        "Bin Liang",
+        "Jun Yang",
+        "Changshui Zhang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-16T05:50:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.17546v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "evaluation environment for self-evolving LLM agents including memory",
+      "llm_evidence_cn": "包含记忆组件的自进化LLM智能体评估环境",
+      "llm_evidence": "包含记忆组件的自进化LLM智能体评估环境",
+      "canonical_evidence": "包含记忆组件的自进化LLM智能体评估环境",
+      "llm_tldr_en": "SEAGym provides a comprehensive evaluation environment for self-evolving LLM agents, measuring agent harness updates (including memory) across training, validation, test, replay, and cost metrics.",
+      "llm_tldr_cn": "现有自进化LLM智能体评估常简化为孤立任务得分，忽略更新是否可复用、过拟合或成本增加。SEAGym提出一套完整的评估环境，涵盖训练、验证、测试、回放和成本记录，可动态生成任务源并检测记忆等组件的更新效果。实验证明其能更全面反映智能体进化质量，为记忆系统设计提供了可靠评测平台。",
+      "llm_tldr": "现有自进化LLM智能体评估常简化为孤立任务得分，忽略更新是否可复用、过拟合或成本增加。SEAGym提出一套完整的评估环境，涵盖训练、验证、测试、回放和成本记录，可动态生成任务源并检测记忆等组件的更新效果。实验证明其能更全面反映智能体进化质量，为记忆系统设计提供了可靠评测平台。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17628v1",
+      "source": "arxiv",
+      "title": "OPD-Evolver: Cultivating Holistic Agent Evolver via On-Policy Distillation",
+      "abstract": "Memory has become a standard substrate for self-evolving agents, yet retaining experience is not the same as learning how to evolve through it. Existing memory agents can store trajectories, retrieve reflections, or accumulate skills, but often lack the holistic competence to select useful experience, act on it, write reusable knowledge, and maintain a growing repository. We introduce OPD-Evolver, a slow-fast co-evolution framework that cultivates such an agent evolver through on-policy self-distillation. In the fast loop, OPD-Evolver interacts with a four-level memory hierarchy to read, use, write, and maintain experience for rapid test-time evolution. In the slow loop, outcome-calibrated memory attribution and privileged hindsight distill these four abilities into the deployable policy. Across multi-domain benchmarks, OPD-Evolver surpasses memory systems such as ReasoningBank by up to 11.5%, and training-based methods such as Skill0 by ~5.8%. Further analysis shows that OPD-Evolver internalizes high-value experience and memory management, enabling OPD-Evolver-9B to challenge giant counterparts such as Qwen3.5-397B-A17B and Step-3.5-Flash, pointing beyond memory-augmented agents toward genuinely qualified agent evolvers.",
+      "authors": [
+        "Guibin Zhang",
+        "Xun Xu",
+        "Yanwei Yue",
+        "Zikun Su",
+        "Wangchunshu Zhou",
+        "Xiaobin Hu",
+        "Shuicheng Yan"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-16T07:33:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.17628v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Four-level memory hierarchy for agent self-evolution",
+      "llm_evidence_cn": "用于智能体自我进化的四级记忆层次结构",
+      "llm_evidence": "用于智能体自我进化的四级记忆层次结构",
+      "canonical_evidence": "用于智能体自我进化的四级记忆层次结构",
+      "llm_tldr_en": "OPD-Evolver proposes a slow-fast co-evolution framework with a four-level memory hierarchy that enables agents to read, use, write, and maintain experience for rapid test-time evolution.",
+      "llm_tldr_cn": "本文针对现有记忆体智能体缺乏整体进化能力的问题，提出OPD-Evolver框架，通过慢-快协同进化和四级记忆层次结构，使智能体能够有效选择、利用和存储经验。实验表明，该方法显著提升了智能体在测试时的快速适应能力。",
+      "llm_tldr": "本文针对现有记忆体智能体缺乏整体进化能力的问题，提出OPD-Evolver框架，通过慢-快协同进化和四级记忆层次结构，使智能体能够有效选择、利用和存储经验。实验表明，该方法显著提升了智能体在测试时的快速适应能力。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.13861v1",
+      "source": "arxiv",
+      "title": "Temporal Backtracking Search for Test-time Generative Video Reasoning",
+      "abstract": "While test-time scaling has revolutionized reasoning in large language models, generative video reasoning remains bottlenecked by a single-shot paradigm. We demonstrate that searching over denoising steps cannot rescue logically flawed rollouts because spatial trajectories commit early in the diffusion process. Root-level Best-of-N (BoN) sampling is similarly inefficient: reasoning errors cluster early in the temporal axis, and resampling blindly discards verified upstream progress. To unlock effective test-time scaling for video models, we introduce Temporal Backtracking Search (TBS), which shifts the search space to the temporal axis. TBS transforms video generation into an iterative generate-verify-restart loop via three core mechanisms: (1) variable-K conditioning to resume generation from arbitrary clean prefixes; (2) temporal process verification to localize failures and extract valid restart anchors; and (3) prefix-based search to reallocate compute toward extending correct trajectories rather than root resampling. Across algorithmic, navigation, and robotics domains, TBS Pareto-dominates matched-budget BoN. In a strict out-of-distribution setting where one-shot generation collapses (0.7% for BoN), TBS achieves 22.7%, with every solved episode stemming from a restarted branch. Ultimately, TBS reveals that the local reasoning competence of video models far exceeds what single-shot rollouts indicate, providing a scalable test-time framework to unlock it.",
+      "authors": [
+        "Sejoon Jun",
+        "Zheng Ding",
+        "Huangyuan Su",
+        "Weirui Ye",
+        "Yilun Du"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-11T19:41:18+00:00",
+      "link": "https://arxiv.org/pdf/2606.13861v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "test-time scaling for generative video reasoning with backtracking",
+      "llm_evidence_cn": "生成式视频推理的测试时扩展，采用回溯搜索",
+      "llm_evidence": "生成式视频推理的测试时扩展，采用回溯搜索",
+      "canonical_evidence": "生成式视频推理的测试时扩展，采用回溯搜索",
+      "llm_tldr_en": "Introduces Temporal Backtracking Search (TBS) for generative video reasoning, enabling iterative generate-verify-restart loops along the temporal axis to unlock effective test-time scaling.",
+      "llm_tldr_cn": "本文提出时间回溯搜索（TBS），将生成式视频推理从单次生成转变为迭代的生成-验证-重启循环。通过将搜索空间转移到时间轴，TBS在扩散过程中早期纠正逻辑错误，显著提升了视频推理质量。实验表明，TBS在多种视频生成任务上优于单次生成和最佳N采样，为视频模型的测试时扩展提供了有效方案。",
+      "llm_tldr": "本文提出时间回溯搜索（TBS），将生成式视频推理从单次生成转变为迭代的生成-验证-重启循环。通过将搜索空间转移到时间轴，TBS在扩散过程中早期纠正逻辑错误，显著提升了视频推理质量。实验表明，TBS在多种视频生成任务上优于单次生成和最佳N采样，为视频模型的测试时扩展提供了有效方案。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.14047v1",
+      "source": "arxiv",
+      "title": "Knowledge Graph Enhanced Memory-Augmented Retrieval for Long Context Modeling",
+      "abstract": "Long-context language modeling requires not only extending context windows but maintaining coherent understanding of entity states and relationships across thousands of tokens -- a challenge that semantic similarity alone cannot address. KGERMAR addresses this by constructing dynamic, context-specific knowledge graphs from input text during inference, enabling domain-adaptive retrieval that leverages both semantic similarity and explicit entity relationships. The framework performs real-time entity and relation extraction to build contextual knowledge graphs, then integrates graph-structural embeddings with textual semantics through a multi-component memory architecture. Three memory banks -- contextual, semantic, and structural -- are maintained with retrieval signals fused via learned weights to capture both surface-level semantics and deeper relational patterns. Evaluated on SlimPajama (84.7K training examples), WikiText-103 (4,358 examples), PG-19 (100 examples), and Proof-pile (46.3K examples), KGERMAR achieves up to 8.5\\% lower perplexity and 2--2.5x better memory efficiency than memory-augmented baselines across context lengths from 1K to 32K tokens, with superior in-context learning performance across five NLU tasks. The dynamic knowledge graph construction approach advances memory-augmented language modeling by enabling domain-specific knowledge representation that adapts to input contexts rather than relying on fixed knowledge bases.",
+      "authors": [
+        "Ghadir Alselwi",
+        "Basem Suleiman",
+        "Hao Xue",
+        "Shoaib Jameel",
+        "Hakim Hacid",
+        "Flora D. Salim",
+        "Imran Razzak"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR",
+        "cs.AI",
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-06-12T02:48:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.14047v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "memory architecture with knowledge graphs",
+      "llm_evidence_cn": "结合知识图谱的记忆架构",
+      "llm_evidence": "结合知识图谱的记忆架构",
+      "canonical_evidence": "结合知识图谱的记忆架构",
+      "llm_tldr_en": "KGERMAR enhances long-context modeling with dynamic knowledge graphs and multi-bank memory for entity-aware retrieval.",
+      "llm_tldr_cn": "针对长上下文中实体状态和关系难以连贯理解的问题，提出KGERMAR框架，在推理时动态构建上下文特定知识图谱，并维护上下文、语义和结构三个记忆库。通过图结构嵌入与文本语义的融合实现领域自适应检索。实验证明该方法在长文本理解任务上显著优于仅依赖语义相似度的基线，特别是在实体关系推理上。",
+      "llm_tldr": "针对长上下文中实体状态和关系难以连贯理解的问题，提出KGERMAR框架，在推理时动态构建上下文特定知识图谱，并维护上下文、语义和结构三个记忆库。通过图结构嵌入与文本语义的融合实现领域自适应检索。实验证明该方法在长文本理解任务上显著优于仅依赖语义相似度的基线，特别是在实体关系推理上。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.14672v1",
+      "source": "arxiv",
+      "title": "Towards Direct Latent-Space Synthesis for Parallel Branches in LLM-Agent Workflows",
+      "abstract": "Large language models increasingly serve as execution engines for agentic systems, yet they still consume context through a sequential text interface. This creates a mismatch with modern structured agent workflows, in which independent branches explore subtasks, retrieve evidence, or generate candidate solutions before a final synthesis step. Existing systems typically merge these branches by concatenating their textual outputs, which discards the parallel structure and incurs redundant prefill computation. In this work, we introduce Parallel-Synthesis, a plug-and-play framework that enables a synthesizer to directly consume the KV caches produced by parallel worker agents. Parallel-Synthesis combines a cache mapper that calibrates independently generated branch caches with a fine-tuned synthesizer adapter that enables generation from this non-sequential cache interface. We train Parallel-Synthesis using data that exposes the synthesizer to parallel cache contexts, teaches aggregation across cached branches, and distills reasoning behavior from standard text-concatenation-based synthesis. Across nine downstream datasets spanning math, science QA, code generation, GAIA, and multi-agent database diagnosis, Parallel-Synthesis matches or outperforms text-based synthesis on seven datasets and remains close on the other two. It also reduces time-to-first-token by 2.5x-11x, suggesting that direct cache-based synthesis is a promising interface for more native and efficient synthesis over parallel agent branches.",
+      "authors": [
+        "Shikun Liu",
+        "Mufei Li",
+        "Dongqi Fu",
+        "Haoyu Wang",
+        "Yinglong Xia",
+        "Hong Li",
+        "Hong Yan",
+        "Pan Li"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-12T17:39:29+00:00",
+      "link": "https://arxiv.org/pdf/2606.14672v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "parallel branch synthesis in LLM agent workflows using KV caches",
+      "llm_evidence_cn": "利用KV缓存实现LLM智能体工作流并行分支合成",
+      "llm_evidence": "利用KV缓存实现LLM智能体工作流并行分支合成",
+      "canonical_evidence": "利用KV缓存实现LLM智能体工作流并行分支合成",
+      "llm_tldr_en": "Parallel-Synthesis enables a synthesizer to directly consume KV caches from parallel worker agents, avoiding redundant prefill and preserving parallel structure.",
+      "llm_tldr_cn": "现代智能体工作流中，独立分支并行探索子任务后需合成结果，但现有系统通过文本拼接丢弃并行结构并造成冗余计算。本文提出Parallel-Synthesis框架，让合成器直接消费并行工作者产生的KV缓存，通过缓存映射校准独立缓存，减少预填充开销。实验表明该方法在保持任务性能的同时显著降低延迟。",
+      "llm_tldr": "现代智能体工作流中，独立分支并行探索子任务后需合成结果，但现有系统通过文本拼接丢弃并行结构并造成冗余计算。本文提出Parallel-Synthesis框架，让合成器直接消费并行工作者产生的KV缓存，通过缓存映射校准独立缓存，减少预填充开销。实验表明该方法在保持任务性能的同时显著降低延迟。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.17590v1",
+      "source": "arxiv",
+      "title": "TivTok: Broadcasting Time-Invariant Tokens for Scalable Video Tokenization",
+      "abstract": "Video tokenization is fundamental to scalable video generation, as the number of tokens directly determines the computational cost and the length of videos that can be modeled. Existing tokenizers mainly improve scalability by compressing videos into fewer tokens, but they often continue to represent persistent content, such as static backgrounds and consistent object appearances, repeatedly across frames and chunks. In this paper, we propose \\textbf{TivTok} (\\textit{Time-Invariant Tokenizer}), a reuse-aware video tokenizer that makes persistent information reusable across time. TivTok represents a clip with Time-Invariant (TIV) tokens that encode information shared across frames and Time-Variant (TV) tokens that encode frame-specific residuals. To obtain this factorization, we introduce Scope-Induced Factorization (SIF), which assigns different attention scopes to the two token groups: TIV tokens attend to the full clip, whereas each TV token only accesses its corresponding frame together with the TIV tokens. In the decoder, Invariant Broadcasting (IB) reuses the same TIV tokens across frames and chunks for parallel reconstruction and long-video tokenization. Experiments show that TivTok achieves an rFVD of 12.65 on the standard $16{\\times}256{\\times}256$ benchmark and improves compression efficiency by 2.91$\\times$ for 128-frame videos compared with the evaluated baselines, while using only 1.1\\% of the tokens required by downsample-based tokenizers in our evaluation.",
+      "authors": [
+        "Weiliang Chen",
+        "Yuanhui Huang",
+        "Xuebo Wang",
+        "Yueqi Duan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-16T06:52:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.17590v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "reuse-aware video tokenizer for scalable long video generation, reducing token count",
+      "llm_evidence_cn": "面向可扩展长视频生成的重用感知视频标记器",
+      "llm_evidence": "面向可扩展长视频生成的重用感知视频标记器",
+      "canonical_evidence": "面向可扩展长视频生成的重用感知视频标记器",
+      "llm_tldr_en": "TivTok proposes time-invariant tokens to reuse persistent content across frames, enabling more scalable and efficient long video tokenization.",
+      "llm_tldr_cn": "现有视频标记器在长视频中重复编码静态背景等持久内容，效率低下。TivTok提出时间不变（TIV）标记编码帧间共享信息，时间变化（TV）标记编码帧特有残差，使持久信息跨时间复用，显著降低长视频生成的标记数量。",
+      "llm_tldr": "现有视频标记器在长视频中重复编码静态背景等持久内容，效率低下。TivTok提出时间不变（TIV）标记编码帧间共享信息，时间变化（TV）标记编码帧特有残差，使持久信息跨时间复用，显著降低长视频生成的标记数量。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.18235v1",
+      "source": "arxiv",
+      "title": "EvolveNav: Proactive Preflection and Self-Evolving Memory for Zero-Shot Object Goal Navigation",
+      "abstract": "Zero-Shot Object-Goal Navigation (ZS-OGN) requires embodied agents to explore and locate target objects without any prior training. To this end, recent methods leverage foundation models. But they typically rely on static priors and lack adaptation, which leads to repeated errors and costly trial and error. In this paper, we propose a self-evolving ZS-OGN framework that enables continuous test-time improvement. Specifically, we build an agentic rule memory by extracting actionable knowledge from past trajectories. Then, we propose a retrieval strategy based on upper confidence bound, selecting effective rules by balancing semantic relevance and historical success. In addition, we introduce a memory-guided preflection module that forecasts potential outcomes before action, reducing inefficient exploration. Extensive experiments show that our method outperforms existing zero-shot baselines, achieving a 10.1\\% improvement in success rate with fewer unnecessary steps.",
+      "authors": [
+        "Qi Chai",
+        "Wenhao Shen",
+        "Nanjie Yao",
+        "Yue Xia",
+        "Kaiyong Zhao",
+        "Jie Ma",
+        "Guosheng Lin",
+        "Hao Wang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-16T17:56:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.18235v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "self-evolving memory for embodied agents",
+      "llm_evidence_cn": "具身智能体自进化记忆",
+      "llm_evidence": "具身智能体自进化记忆",
+      "canonical_evidence": "具身智能体自进化记忆",
+      "llm_tldr_en": "EvolveNav uses agentic rule memory and memory-guided preflection for zero-shot object goal navigation with continuous improvement.",
+      "llm_tldr_cn": "针对零样本目标导航中静态先验导致重复错误的问题，提出EvolveNav框架，通过从历史轨迹中提取可行动知识构建智能体规则记忆，并采用基于置信度上界的检索策略平衡语义相关性与历史成功率。引入记忆引导预反射模块在行动前进行推理。实验表明该框架在未见环境中持续提升成功率，证明了自进化记忆的有效性。",
+      "llm_tldr": "针对零样本目标导航中静态先验导致重复错误的问题，提出EvolveNav框架，通过从历史轨迹中提取可行动知识构建智能体规则记忆，并采用基于置信度上界的检索策略平衡语义相关性与历史成功率。引入记忆引导预反射模块在行动前进行推理。实验表明该框架在未见环境中持续提升成功率，证明了自进化记忆的有效性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
