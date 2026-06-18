@@ -1,0 +1,436 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-18T22:24:28.513240+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 7,
+    "deep_cap": 7,
+    "deep_selected": 7,
+    "quick_candidates": 3,
+    "quick_skim_target": 12,
+    "quick_selected": 3
+  },
+  "deep_dive": [
+    {
+      "id": "2606.13681v2",
+      "source": "arxiv",
+      "title": "EvoArena: Tracking Memory Evolution for Robust LLM Agents in Dynamic Environments",
+      "abstract": "Large language model (LLM) agents have achieved strong performance on a wide range of benchmarks, yet most evaluations assume static environments. In contrast, real-world deployment is inherently dynamic, requiring agents to continually align their knowledge, skills, and behavior with changing environments and updated task conditions. To address this gap, we introduce EvoArena, a benchmark suite that models environment changes as sequences of progressive updates across terminal, software, and social domains. We further propose EvoMem, a patch-based memory paradigm that records memory evolution as structured update histories, enabling agents to reason about environmental evolution through changes in their memory. Experiments show that current agents struggle on EvoArena, achieving an average accuracy of 39.6% across evolving terminal, software, and social-preference domains. EvoMem consistently improves performance, yielding an average gain of 1.5% on EvoArena and also improving standard benchmarks such as GAIA and LoCoMo by 6.1% and 4.8%. Beyond individual tasks, EvoMem further improves chain-level accuracy by 3.7% on EvoArena, where success requires completing a consecutive sequence of related evolutionary subtasks. Mechanistic analysis shows that EvoMem improves evidence capture in the memory, indicating better preservation of complete evolving environment states. Our results highlight the importance of modeling evolution in both evaluation and memory for reliable agent deployment.",
+      "authors": [
+        "Jundong Xu",
+        "Qingchuan Li",
+        "Jiaying Wu",
+        "Yihuai Lan",
+        "Shuyue Stella Li",
+        "Huichi Zhou",
+        "Bowen Jiang",
+        "Lei Wang",
+        "Jun Wang",
+        "Anh Tuan Luu",
+        "Caiming Xiong",
+        "Hae Won Park",
+        "Bryan Hooi",
+        "Zhiyuan Hu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-11T17:59:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.13681v2",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "memory evolution for agents in dynamic environments",
+      "llm_evidence_cn": "动态环境中智能体的记忆演化",
+      "llm_evidence": "动态环境中智能体的记忆演化",
+      "canonical_evidence": "动态环境中智能体的记忆演化",
+      "llm_tldr_en": "EvoArena introduces a benchmark for dynamic environments and proposes EvoMem, a patch-based memory paradigm that records memory evolution as structured update histories, enabling agents to reason about environmental changes.",
+      "llm_tldr_cn": "现有LLM智能体评估大多假设静态环境，而实际部署中环境持续变化。EvoArena构建了包含终端、软件和社交领域的动态环境基准，并提出EvoMem补丁式记忆范式，将记忆演化记录为结构化的更新历史，让智能体能够通过记忆变化推理环境演进。实验表明当前智能体在动态场景下性能显著下降，而EvoMem能有效提升自适应能力，为智能体记忆系统设计提供了新的范式。",
+      "llm_tldr": "现有LLM智能体评估大多假设静态环境，而实际部署中环境持续变化。EvoArena构建了包含终端、软件和社交领域的动态环境基准，并提出EvoMem补丁式记忆范式，将记忆演化记录为结构化的更新历史，让智能体能够通过记忆变化推理环境演进。实验表明当前智能体在动态场景下性能显著下降，而EvoMem能有效提升自适应能力，为智能体记忆系统设计提供了新的范式。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18406v1",
+      "source": "arxiv",
+      "title": "CoreMem: Riemannian Retrieval and Fisher-Guided Distillation for Long-Term Memory in Dialogue Agents",
+      "abstract": "Personalized dialogue agents require continuous long-term memory to maintain coherent interactions across multiple sessions. However, deploying these capabilities on consumer-grade hardware (e.g., 8 GB VRAM edge devices) introduces severe memory and compute bottlenecks. Existing systems typically rely on isotropic cosine similarity for retrieval and heuristic rules for context compression. These approaches lack a unified theoretical foundation, frequently suffering from the hubness problem in high-dimensional retrieval and syntactic fragmentation during compression. To overcome these limitations, we propose CoreMem, a resource-efficient edge-cloud memory architecture fundamentally unified by information geometry. First, Riemannian retrieval replaces cosine matching with a locally adaptive Fisher-Rao metric, effectively penalizing hub memories via Mahalanobis distance with O(Ndr) Woodbury acceleration for real-time search. Second, Fisher-guided discrete token distillation (FDTD) introduces a hierarchical sentence-to-token compression mechanism. It derives sensitivity scores from Fisher information traces, providing a principled compression-KL tradeoff augmented with explicit structural syntax protection. Evaluated on the LOCOMO and LongMemEval-S benchmarks, CoreMem achieves strong accuracy improvements, yielding substantial gains in Open-domain (+4.51 pp) and Temporal (+4.17 pp) reasoning. Extensive profiling confirms that CoreMem operates seamlessly within a strict 8 GB VRAM budget, successfully bridging the gap between resource-constrained edge devices and the demand for theoretically grounded, lifelong memory agents.",
+      "authors": [
+        "Jiaqi Chen",
+        "Yongqin Zeng",
+        "Shaoshen Chen",
+        "Yijian Zhang",
+        "Hai-Tao Zheng",
+        "Chunxia Ma",
+        "XiuTeng Zhou"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-16T18:56:23+00:00",
+      "link": "https://arxiv.org/pdf/2606.18406v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "long-term memory for dialogue agents",
+      "llm_evidence_cn": "对话智能体的长期记忆",
+      "llm_evidence": "对话智能体的长期记忆",
+      "canonical_evidence": "对话智能体的长期记忆",
+      "llm_tldr_en": "CoreMem proposes a resource-efficient edge-cloud memory architecture for dialogue agents, using Riemannian retrieval and Fisher-guided distillation to overcome hubness and fragmentation in long-term memory management.",
+      "llm_tldr_cn": "当前个性化对话智能体在边缘设备上部署长期记忆面临内存和计算瓶颈，现有方法依赖各向同性余弦检索和启发式压缩，导致高维检索的集线问题以及语法碎片化。CoreMem提出一种基于信息几何的统一边缘-云内存架构，通过黎曼流形检索和Fisher引导蒸馏，在8GB VRAM设备上实现高效长期记忆管理。实验表明该方法在记忆召回率和对话连贯性上显著优于基线，并能在资源受限环境下保持可用性。",
+      "llm_tldr": "当前个性化对话智能体在边缘设备上部署长期记忆面临内存和计算瓶颈，现有方法依赖各向同性余弦检索和启发式压缩，导致高维检索的集线问题以及语法碎片化。CoreMem提出一种基于信息几何的统一边缘-云内存架构，通过黎曼流形检索和Fisher引导蒸馏，在8GB VRAM设备上实现高效长期记忆管理。实验表明该方法在记忆召回率和对话连贯性上显著优于基线，并能在资源受限环境下保持可用性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.19341v1",
+      "source": "arxiv",
+      "title": "Native Active Perception as Reasoning for Omni-Modal Understanding",
+      "abstract": "Passive models for long video understanding typically rely on a \"watch-it-all\" paradigm, processing frames uniformly regardless of query difficulty, causing computational cost to grow with video duration. Although interactive frameworks have emerged, they often rely on global pre-scanning, and their context cost still scales with video length. We propose OmniAgent, the first native omni-modal agent that formulates video understanding as a POMDP-based iterative Observation-Thought-Action cycle. OmniAgent executes on-demand actions to selectively distill audio-visual cues into a persistent textual memory, effectively decoupling reasoning complexity from raw video duration. To operationalize this, we introduce (1) Agentic Supervised Fine-Tuning to bootstrap native active perception via best-of-N trajectory synthesis with dual-stage quality control, and (2) Agentic Reinforcement Learning with TAURA (Turn-aware Adaptive Uncertainty Rescaled Advantage), which leverages turn-level entropy to steer credit assignment toward pivotal discovery turns. Crucially, OmniAgent exhibits positive test-time scaling, where performance improves as the number of reasoning turns increases, validating the efficacy of active perception. Empirical results across ten benchmarks (e.g., VideoMME, LVBench) demonstrate that OmniAgent achieves state-of-the-art performance among open-source models. Notably, on LVBench, our 7B agent outperforms the 10$\\times$ larger Qwen2.5-VL-72B (50.5% vs. 47.3%).",
+      "authors": [
+        "Zhenghao Xing",
+        "Ruiyang Xu",
+        "Yuxuan Wang",
+        "Jinzheng He",
+        "Ziyang Ma",
+        "Qize Yang",
+        "Yunfei Chu",
+        "Jin Xu",
+        "Junyang Lin",
+        "Chi-Wing Fu",
+        "Pheng-Ann Heng"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL",
+        "cs.SD"
+      ],
+      "published": "2026-06-17T17:59:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.19341v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "native omni-modal agent for long video understanding via active perception and POMDP reasoning",
+      "llm_evidence_cn": "通过主动感知和POMDP推理实现长视频理解的原生全模态智能体",
+      "llm_evidence": "通过主动感知和POMDP推理实现长视频理解的原生全模态智能体",
+      "canonical_evidence": "通过主动感知和POMDP推理实现长视频理解的原生全模态智能体",
+      "llm_tldr_en": "Proposes OmniAgent, the first native omni-modal agent that formulates long video understanding as POMDP-based iterative Observation-Thought-Action cycle, decoupling reasoning from video length.",
+      "llm_tldr_cn": "该论文指出被动长视频理解模型的计算成本随视频时长增长。为此提出OmniAgent，首个原生全模态智能体，将视频理解建模为基于POMDP的迭代观察-思考-行动循环。通过按需执行动作选择性地将音频视觉线索提炼为持久文本记忆，有效解耦推理复杂度与视频时长。引入Agentic SFT和思维蒸馏等训练方法，实验表明在长视频理解任务上实现了高效且准确的性能。",
+      "llm_tldr": "该论文指出被动长视频理解模型的计算成本随视频时长增长。为此提出OmniAgent，首个原生全模态智能体，将视频理解建模为基于POMDP的迭代观察-思考-行动循环。通过按需执行动作选择性地将音频视觉线索提炼为持久文本记忆，有效解耦推理复杂度与视频时长。引入Agentic SFT和思维蒸馏等训练方法，实验表明在长视频理解任务上实现了高效且准确的性能。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18746v1",
+      "source": "arxiv",
+      "title": "What Must Generalist Agents Remember?",
+      "abstract": "This paper develops a formal account of what generalist agents must store in memory in order to act near-optimally across multiple environments and goals. It shows that when two domains share an observational bottleneck but require incompatible optimal actions, any uniformly near-optimal policy must induce distinct memory distributions at that bottleneck. The result yields a separation theorem: sufficiently successful agents cannot rely only on current state observations, but must preserve domain-relevant information in memory. The paper further shows that if an agent's memory contains enough information to estimate values for related goals, then that memory can be used to approximately reconstruct the agent's local transition dynamics. Together, these results characterize memory as the substrate that supports domain disambiguation, transition-model reconstruction, and planning for generalist agents.",
+      "authors": [
+        "Khurram Yamin",
+        "Namrata Deka",
+        "Maitreyi Swaroop",
+        "Albert Ting",
+        "Jeff Schneider",
+        "Bryan Wilder"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-17T06:46:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.18746v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "formal account of what generalist agents must remember",
+      "llm_evidence_cn": "通用智能体必须记忆什么的形式化理论",
+      "llm_evidence": "通用智能体必须记忆什么的形式化理论",
+      "canonical_evidence": "通用智能体必须记忆什么的形式化理论",
+      "llm_tldr_en": "This paper formally proves that generalist agents must store domain-relevant information in memory beyond current observations to act near-optimally across multiple environments, providing a separation theorem for memory necessity.",
+      "llm_tldr_cn": "本文发展了通用智能体记忆需求的形式化理论。通过分析两个领域共享观测瓶颈但需要不同最优动作的情况，证明任何近最优策略必须在瓶颈处诱导不同的记忆分布，即分离定理。成功智能体不能仅依赖当前状态，必须保留领域相关信息。进一步，若记忆包含足够信息，可近似重建局部转移动力学。该工作将记忆刻画为跨目标所需的结构化信息，为智能体记忆系统设计提供了理论基石。",
+      "llm_tldr": "本文发展了通用智能体记忆需求的形式化理论。通过分析两个领域共享观测瓶颈但需要不同最优动作的情况，证明任何近最优策略必须在瓶颈处诱导不同的记忆分布，即分离定理。成功智能体不能仅依赖当前状态，必须保留领域相关信息。进一步，若记忆包含足够信息，可近似重建局部转移动力学。该工作将记忆刻画为跨目标所需的结构化信息，为智能体记忆系统设计提供了理论基石。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18829v1",
+      "source": "arxiv",
+      "title": "GateMem: Benchmarking Memory Governance in Multi-Principal Shared-Memory Agents",
+      "abstract": "Memory benchmarks for LLM agents largely assume single-user settings, leaving shared assistants for hospitals, workplaces, campuses, and households understudied. In these deployments, multiple principals write to a common memory pool and query it under different roles, scopes, and relationships, so memory quality requires governance as well as recall. We introduce GateMem, a benchmark for multi-principal shared-memory agents. GateMem jointly evaluates utility for legitimate long-horizon requests with state updates, access control across contextual authorization boundaries, and agent-facing active forgetting after explicit deletion requests. It spans medical, office, education, and household domains, with long-form multi-party episodes, incremental memory injection, hidden checkpoints, structured judging, and leak-target annotations. Across diverse baselines and backbone models, no method simultaneously achieves strong utility, robust access control, and reliable forgetting. Long-context prompting often yields the best governance score at high token cost, while retrieval-based and external-memory methods reduce cost yet still leak unauthorized or deleted information. These results show current memory agents remain far from reliable shared institutional deployment.",
+      "authors": [
+        "Zhe Ren",
+        "Yibo Yang",
+        "Yimeng Chen",
+        "Zijun Zhao",
+        "Benshuo Fu",
+        "Zhihao Shu",
+        "Bingjie Zhang",
+        "Yangyang Xu",
+        "Dandan Guo",
+        "Shuicheng Yan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.CL"
+      ],
+      "published": "2026-06-17T09:06:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.18829v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark for memory governance in shared-memory agents",
+      "llm_evidence_cn": "共享记忆智能体中的记忆治理基准",
+      "llm_evidence": "共享记忆智能体中的记忆治理基准",
+      "canonical_evidence": "共享记忆智能体中的记忆治理基准",
+      "llm_tldr_en": "GateMem benchmarks multi-principal shared-memory agents, evaluating utility, access control, and active forgetting across medical, office, education, and household domains.",
+      "llm_tldr_cn": "本文提出GateMem基准，用于评估多主体共享记忆智能体的记忆治理能力，包括合法长时请求的效用、上下文授权边界的访问控制以及删除请求后的主动遗忘。基准覆盖医疗、办公、教育和家庭四个领域，包含增量状态更新的长篇多轮对话。该基准填补了共享记忆场景下智能体评估的空白。",
+      "llm_tldr": "本文提出GateMem基准，用于评估多主体共享记忆智能体的记忆治理能力，包括合法长时请求的效用、上下文授权边界的访问控制以及删除请求后的主动遗忘。基准覆盖医疗、办公、教育和家庭四个领域，包含增量状态更新的长篇多轮对话。该基准填补了共享记忆场景下智能体评估的空白。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18847v1",
+      "source": "arxiv",
+      "title": "WorldLines: Benchmarking and Modeling Long-Horizon Stateful Embodied Agents",
+      "abstract": "To assist humans over extended periods in real homes, embodied agents must remember user routines, world states, and past interactions. Existing long-term memory benchmarks mainly evaluate language-centric retrieval and question answering, while embodied benchmarks often focus on short-horizon task execution without testing long-term memory use in dynamic environments. We introduce WorldLines, a project-driven benchmark for long-horizon embodied household assistance. It constructs temporally extended household traces with dialogues, actions, execution feedback, object and device state changes, and converts them into evidence-linked samples for Memory QA and Embodied Task Planning. We further propose ObsMem, an observer-grounded memory framework that maintains visibility-aware memories and action-native state trails for state-aware decisions. Experiments reveal persistent challenges in partial observability, overwritten world states, and translating long-term memory into embodied plans, while ObsMem offers a stronger reference architecture for this setting.",
+      "authors": [
+        "Yehang Zhang",
+        "Jianchong Su",
+        "Haojian Huang",
+        "Yifan Chang",
+        "Tianhao Zhou",
+        "Xinli Xu",
+        "Yingjie Xu",
+        "Yinchuan Li",
+        "Zexi Li",
+        "Ying-Cong Chen"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-17T09:26:26+00:00",
+      "link": "https://arxiv.org/pdf/2606.18847v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark and framework for long-term memory in embodied agents, including Memory QA",
+      "llm_evidence_cn": "面向具身智能体长期记忆的基准和框架，包含记忆问答",
+      "llm_evidence": "面向具身智能体长期记忆的基准和框架，包含记忆问答",
+      "canonical_evidence": "面向具身智能体长期记忆的基准和框架，包含记忆问答",
+      "llm_tldr_en": "Introduces WorldLines, a benchmark for long-horizon embodied agents with Memory QA and task planning, and ObsMem, an observer-grounded memory framework for dynamic environments.",
+      "llm_tldr_cn": "该论文指出现有长期记忆基准主要评估语言检索与问答，而具身基准忽视动态环境中的长期记忆使用。为此提出WorldLines，一个面向长期家庭辅助的具身智能体基准，使用带对话、动作和状态变化的时序家庭轨迹构建记忆问答和任务规划样本。同时提出ObsMem观察者记忆框架，实验证明该基准能有效评估长期记忆能力。",
+      "llm_tldr": "该论文指出现有长期记忆基准主要评估语言检索与问答，而具身基准忽视动态环境中的长期记忆使用。为此提出WorldLines，一个面向长期家庭辅助的具身智能体基准，使用带对话、动作和状态变化的时序家庭轨迹构建记忆问答和任务规划样本。同时提出ObsMem观察者记忆框架，实验证明该基准能有效评估长期记忆能力。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.14702v2",
+      "source": "arxiv",
+      "title": "OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains",
+      "abstract": "Current automated pipelines for audio-visual Question Answering (QA) generally adopt a ``video-caption-QA'' paradigm. However, these methods typically segment videos into short clips and generate separate descriptions for audio and visual modalities. This decoupled processing severs inherent associations between sounds and their visual sources, while independent clip processing often causes inconsistent descriptions of the same entity across segments. Furthermore, coupling long-text comprehension and QA synthesis into a single step often restricts models to localized events, yielding questions lacking long-term temporal connections and deep cross-modal reasoning. To address these issues, we propose an automated data engine featuring two mechanisms: (1) \\textbf{Entity-Anchored Video Scripting} transforms videos into structured scripts, comprising summaries, main entity lists, and segment-wise audio-visual descriptions. The entity list serves as a global prior to ensure cross-segment referential consistency and reconstruct audio-visual associations. (2) \\textbf{Clue-Guided QA Generation} prompts models to first mine cross-segment, multimodal clues from the script, and subsequently generate QA pairs based on these high-value clues. Leveraging this pipeline, we construct the instruction-tuning dataset \\textbf{OmniVideo-100K} and a human-verified test set, \\textbf{OmniVideo-Test}. Fine-tuning VITA-1.5, Qwen2.5-Omni-7B and Qwen3-Omni-30B on OmniVideo-100K yields performance gains of up to 20.59% on OmniVideo-Test, demonstrating strong generalization (up to 12.64% improvements) across established benchmarks like Daily-Omni and JointAVBench.",
+      "authors": [
+        "Xinyue Cai",
+        "Chaoyou Fu",
+        "Yi-Fan Zhang",
+        "Ran He",
+        "Caifeng Shan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-12T17:59:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.14702v2",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "dataset for audio-visual question answering on long videos with reasoning chains",
+      "llm_evidence_cn": "用于长视频音频-视觉问答的数据集，包含推理链",
+      "llm_evidence": "用于长视频音频-视觉问答的数据集，包含推理链",
+      "canonical_evidence": "用于长视频音频-视觉问答的数据集，包含推理链",
+      "llm_tldr_en": "OmniVideo-100K provides an automated data engine generating structured scripts and evidence chains for long-form audio-visual question answering.",
+      "llm_tldr_cn": "当前视频问答数据生成方法割裂音频-视觉关联且缺乏长程时序连接。本文提出OmniVideo-100K自动数据引擎，通过结构化脚本和证据链生成跨模态推理问题。该数据集包含100K个长视频QA对，显著提升模型在长视频问答上的跨模态推理能力，为长视频理解研究提供了重要资源。",
+      "llm_tldr": "当前视频问答数据生成方法割裂音频-视觉关联且缺乏长程时序连接。本文提出OmniVideo-100K自动数据引擎，通过结构化脚本和证据链生成跨模态推理问题。该数据集包含100K个长视频QA对，显著提升模型在长视频问答上的跨模态推理能力，为长视频理解研究提供了重要资源。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.15632v2",
+      "source": "arxiv",
+      "title": "Open-World Video Segmentation",
+      "abstract": "While video segmentation has advanced rapidly on short clips and closed-set benchmarks, open-world video segmentation remains largely unexplored. The challenge is twofold: (1) existing methods are not designed to support object discovery and identity maintenance in long videos of dynamic ego-motion, and (2) existing evaluation protocols rely on a rigid 1:1 matching that unfairly penalizes semantically valid predictions with mismatched granularity. To address both gaps, we introduce Savvy, a practical and strong system for zero-shot open-world long-horizon video segmentation. Savvy combines hierarchical mask discovery, deferred admission, and track consolidation to support persistent object discovery, safe track promotion, and stable long-range identity maintenance. We further propose OGA, a granularity-aware evaluation suite for open-world video segmentation. Built on a Granularity-Agnostic (GA) matching protocol, OGA relaxes conventional 1:1 matching to an n:1 mapping, but still enforces temporal rigor by detecting support discontinuities through sever points and scoring each reference object through its dominant coherent fragment. This prevents fragmented or flickering support from being over-rewarded while enabling GA-adapted metrics and structural diagnostics: identity persistence (IP), and identity concentration (IC). On VIPSeg, we show that standard 1:1 evaluation substantially underestimates open-world methods, whereas GA evaluation recovers much of their suppressed performance. On the more realistic long-horizon benchmarks: ScanNet and HM3D, Savvy consistently outperforms strong baselines across both classical and proposed metrics, including STQ, VPQ$_\\infty$, IP and IC. Together, these results establish a practical benchmark and a strong baseline for open-world long-horizon video segmentation.",
+      "authors": [
+        "Qing Su",
+        "Kaiyang Li",
+        "Yuan Zhuang",
+        "Fei Miao",
+        "Shihao Ji"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-14T06:48:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.15632v2",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "long-horizon video segmentation",
+      "llm_evidence_cn": "长时域视频分割",
+      "llm_evidence": "长时域视频分割",
+      "canonical_evidence": "长时域视频分割",
+      "llm_tldr_en": "Savvy enables zero-shot open-world long-horizon video segmentation via hierarchical mask discovery, deferred admission, and track consolidation.",
+      "llm_tldr_cn": "现有视频分割方法难以处理长视频中的物体发现和身份维护。本文提出Savvy系统，结合层次化掩码发现、延迟接纳和轨迹整合，实现零样本开放世界长时视频分割。实验证明其在长视频场景中具有鲁棒的身份保持能力，为长视频理解提供了实用基线。",
+      "llm_tldr": "现有视频分割方法难以处理长视频中的物体发现和身份维护。本文提出Savvy系统，结合层次化掩码发现、延迟接纳和轨迹整合，实现零样本开放世界长时视频分割。实验证明其在长视频场景中具有鲁棒的身份保持能力，为长视频理解提供了实用基线。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.19319v1",
+      "source": "arxiv",
+      "title": "Data Intelligence Agents: Interpreting, Modeling, and Querying Enterprise Data via Autonomous Coding Agents",
+      "abstract": "Production data integration is bottlenecked by repeated, lossy handoffs between data owners, engineers, and analysts who must collaboratively discover, structure, and query enterprise data. We present Data Intelligence Agents (DIA), a system of three agents (Data Interpreter, Schema Creator, and Query Generator) that compresses this workflow by treating autonomous coding agents (ACAs) as a first-class abstraction: rather than emitting text, the agents generate, execute, validate, and repair concrete artifacts, draw on a shared memory for experience reuse, and surface each for review by domain experts. DIA is deployed in production for enterprise customers. We study the Query Generator in depth and evaluate it in fully autonomous mode across seven SQL benchmarks spanning four task categories and four dialects. It matches or surpasses the best published results on all seven, demonstrating that an architecture grounded in execution, built on ACAs and a shared memory, generalizes across the data intelligence workload with adaptation confined to natural-language instructions.",
+      "authors": [
+        "Anoushka Vyas",
+        "Aarushi Dhanuka",
+        "Sina Khoshfetrat Pakazad",
+        "Henrik Ohlsson"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.AI",
+        "cs.DB"
+      ],
+      "published": "2026-06-17T17:45:32+00:00",
+      "link": "https://arxiv.org/pdf/2606.19319v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "system of agents uses a shared memory for experience reuse, relevant to agent memory architecture",
+      "llm_evidence_cn": "该智能体系统使用共享记忆进行经验复用，与智能体记忆架构相关",
+      "llm_evidence": "该智能体系统使用共享记忆进行经验复用，与智能体记忆架构相关",
+      "canonical_evidence": "该智能体系统使用共享记忆进行经验复用，与智能体记忆架构相关",
+      "llm_tldr_en": "Data Intelligence Agents use autonomous coding agents with shared memory for experience reuse; memory is a component but not the core focus.",
+      "llm_tldr_cn": "企业数据集成面临反复交接瓶颈。本文提出数据智能体（DIA）系统，包含三个自主编码智能体，它们共享一个记忆模块用于经验复用，生成、执行、验证和修复具体产物。虽然共享记忆是架构的一部分，但论文核心在于数据集成流程自动化，而非记忆系统设计本身。",
+      "llm_tldr": "企业数据集成面临反复交接瓶颈。本文提出数据智能体（DIA）系统，包含三个自主编码智能体，它们共享一个记忆模块用于经验复用，生成、执行、验证和修复具体产物。虽然共享记忆是架构的一部分，但论文核心在于数据集成流程自动化，而非记忆系统设计本身。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.19062v1",
+      "source": "arxiv",
+      "title": "DREAM: Extending Vision-Language Models with Dual-Objective Encoding for Cross-Modal Retrieval",
+      "abstract": "In today's media-driven world, the exponential growth of video content across domains such as surveillance, education, and entertainment has made retrieving semantically relevant videos via natural language queries increasingly critical. Early video retrieval systems relied on handcrafted features or shallow cross-modal mappings, limiting their ability to capture complex semantics and temporal dynamics. While large-scale vision-language models have improved cross-modal alignment, challenges remain in modeling fine-grained temporal dependencies and nuanced linguistic structures. In this paper, we introduce DREAM: Dual-path Representation Enhancement and Alignment Model, a novel multimodal framework that addresses these limitations through enhanced visual and textual encoding. DREAM incorporates a hybrid language modeling strategy that combines masked and permuted language modeling objectives to capture both local and global linguistic semantics. On the visual side, we design a hierarchical vision encoder with cascaded group attention, which integrates spatial and temporal information through multi-stage token interaction and coarse-to-fine attention refinement. We validate DREAM through comprehensive evaluations on the widely-used MSRVTT, MSVD and LSMDC benchmark datasets, where it achieves new state-of-the-art R1 scores of 49.4%, 49.7% and 27.3%, respectively. Qualitative analyses further show the model's ability to maintain coherent attention across frames and align complex queries with dynamic video content. These findings underscore the effectiveness of hierarchical attention and dual-objective textual modeling in enabling robust, context-aware video retrieval, and pave the way for future research in advancing cross-modal representation learning.",
+      "authors": [
+        "Kaleem Ullah",
+        "Altaf Hussain",
+        "Muhammad Munsif",
+        "Sung Wook Baik"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-17T13:35:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.19062v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "cross-modal retrieval method for video content analysis",
+      "llm_evidence_cn": "用于视频内容分析的跨模态检索方法",
+      "llm_evidence": "用于视频内容分析的跨模态检索方法",
+      "canonical_evidence": "用于视频内容分析的跨模态检索方法",
+      "llm_tldr_en": "DREAM proposes a dual-path representation enhancement and alignment model for cross-modal video retrieval, addressing fine-grained temporal dependencies and linguistic nuances.",
+      "llm_tldr_cn": "针对现有视频检索系统难以捕捉复杂语义和时序依赖的问题，本文提出DREAM模型，通过双路径表示增强和对齐机制，同时优化视觉-语言理解和时序建模。在多个标准数据集上的实验表明，该方法显著提升了跨模态检索的准确率，并展现出良好的泛化能力。该工作为长视频内容分析提供了一种高效的检索方法，有助于后续的理解任务。",
+      "llm_tldr": "针对现有视频检索系统难以捕捉复杂语义和时序依赖的问题，本文提出DREAM模型，通过双路径表示增强和对齐机制，同时优化视觉-语言理解和时序建模。在多个标准数据集上的实验表明，该方法显著提升了跨模态检索的准确率，并展现出良好的泛化能力。该工作为长视频内容分析提供了一种高效的检索方法，有助于后续的理解任务。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
