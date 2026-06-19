@@ -1,0 +1,340 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-19T20:50:52.996685+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 6,
+    "deep_cap": 7,
+    "deep_selected": 6,
+    "quick_candidates": 2,
+    "quick_skim_target": 12,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.19706v1",
+      "source": "arxiv",
+      "title": "NEST: Narrative Event Structures in Time for Long Video Understanding",
+      "abstract": "Recent progress in vision-language models has enabled the processing of increasingly long video sequences, but the ability to handle extended token streams does not translate to understanding of narrative structure in long videos. Existing long video benchmarks focus on needle-in-a-haystack retrieval rather than evaluating how low-level actions form events, how events interact across time, and how narratives progress, for example, whether a model can connect an early setback, such as a job loss to a later relationship breakup, despite long gaps, intervening scenes, or flashbacks that reframe what occurred. We introduce NEST (Narrative Event Structures in Time for Long Video Understanding), a dataset of 1005 full-length movies (avg. 98 minutes), each annotated with 102 multimodal narrative events grounded in visual content, dialogue, and audio. NEST captures multimodal narrative events with structured annotations grounded in visual content, dialogue, and audio, and links them through relations that reflect narrative structure, including temporal ordering, hierarchical composition, and long-range dependencies. We introduce baselines for event trigger detection (ETD), event localization (EL), event argument extraction (EAE), and event relation extraction (ERE). The benchmark is highly challenging for grounded event discovery, with ETD below 8%, EL under 6%, and EAE below 11%. In contrast, ERE is more tractable once events are given, reaching 35.45% F1 zero-shot and 44.42% F1 after fine-tuning.",
+      "authors": [
+        "Ali Asgarov",
+        "Kaushik Narasimhan",
+        "Najibul Haque Sarker",
+        "Hani Alomari",
+        "Chia-Wei Tang",
+        "Anushka Sivakumar",
+        "Zaber Ibn Abdul Hakim",
+        "Shaurya Mallampati",
+        "Chris Thomas"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-06-18T02:05:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.19706v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "long video understanding, narrative event structures",
+      "llm_evidence_cn": "长视频理解，叙事事件结构",
+      "llm_evidence": "长视频理解，叙事事件结构",
+      "canonical_evidence": "长视频理解，叙事事件结构",
+      "llm_tldr_en": "Introduces NEST, a dataset of 1005 full-length movies for evaluating narrative structure understanding in long videos, beyond needle-in-a-haystack retrieval.",
+      "llm_tldr_cn": "现有长视频基准多关注细粒度检索，忽略了叙事结构理解。本文提出NEST数据集，包含1005部完整电影（平均98分钟），标注了事件层级和时间关系，旨在评估模型能否理解低层动作如何形成事件、事件间如何交互以及叙事如何推进。实验表明现有模型在NEST上表现不佳，揭示了长视频理解的新挑战。该数据集为长视频叙事理解研究提供了标准化评估平台。",
+      "llm_tldr": "现有长视频基准多关注细粒度检索，忽略了叙事结构理解。本文提出NEST数据集，包含1005部完整电影（平均98分钟），标注了事件层级和时间关系，旨在评估模型能否理解低层动作如何形成事件、事件间如何交互以及叙事如何推进。实验表明现有模型在NEST上表现不佳，揭示了长视频理解的新挑战。该数据集为长视频叙事理解研究提供了标准化评估平台。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.19847v1",
+      "source": "arxiv",
+      "title": "AtomMem: Building Simple and Effective Memory System for LLM Agents via Atomic Facts",
+      "abstract": "Large language models (LLMs) demonstrate strong reasoning and generation abilities, but their fixed context windows limit long-term information accumulation and reuse across multi-session interactions. Existing memory-augmented systems often construct memory in a coarse and unstable manner, relying on inefficient memory representations or unstable unconstrained updates. To address these challenges, we propose AtomMem, a long-term memory system designed for value-dense storage and stable memory evolution. AtomMem introduces a Fact Executor, which selectively extracts high value atomic facts from long form interactions to serve as highly efficient memory representations. Subsequently, AtomMem organizes these facts into hierarchical event structures and temporal profiles, capturing coherent episodic contexts and tracking dynamically evolving user attributes over time. During retrieval, the system activates an associative memory graph to connect fragmented memories. Experiments on the LoCoMo benchmark confirm that AtomMem achieves state-of-the-art performance across various reasoning tasks, offering a scalable and economically viable solution for deploying intelligent personalized agents.",
+      "authors": [
+        "Yanyu Yao",
+        "Shangze Li",
+        "Zhi Zheng",
+        "Hui Zheng",
+        "Qi Liu",
+        "Tong Xu",
+        "Enhong Chen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-18T06:56:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.19847v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "explicit agent memory system via atomic facts",
+      "llm_evidence_cn": "通过原子事实构建智能体记忆系统",
+      "llm_evidence": "通过原子事实构建智能体记忆系统",
+      "canonical_evidence": "通过原子事实构建智能体记忆系统",
+      "llm_tldr_en": "AtomMem proposes a long-term memory system for LLM agents using atomic facts extracted from interactions, enabling value-dense storage and stable updates for multi-session tasks.",
+      "llm_tldr_cn": "AtomMem针对大语言模型智能体的长期记忆问题，提出基于原子事实的记忆系统。系统通过事实执行器从长程交互中提取高价值原子事实作为高效记忆表示，并组织成层次化事件结构。实验表明该方法在多个会话任务中提升了记忆稳定性和信息利用率，为智能体记忆设计提供了简洁有效的方案。",
+      "llm_tldr": "AtomMem针对大语言模型智能体的长期记忆问题，提出基于原子事实的记忆系统。系统通过事实执行器从长程交互中提取高价值原子事实作为高效记忆表示，并组织成层次化事件结构。实验表明该方法在多个会话任务中提升了记忆稳定性和信息利用率，为智能体记忆设计提供了简洁有效的方案。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "research papers on agent memory system design",
+      "matched_requirement_id": "req-9",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.19911v1",
+      "source": "arxiv",
+      "title": "Multi-Agent Transactive Memory",
+      "abstract": "The decentralized deployment of LLM agents with diverse capabilities across diverse tasks motivates infrastructure for knowledge sharing across heterogeneous agent populations. Just as search engines index human-generated artifacts to support human problem solving, retrieval systems can organize agent-generated artifacts for reuse across agent populations. We extend retrieval-augmented generation - which demonstrates the value of human-authored artifacts to individual agents - to retrieval of agent-generated artifacts supporting a population of agents. In particular, agent trajectories encode reusable procedural knowledge, yet these artifacts are typically discarded after a single use or retained only by the producing agent, forcing newly instantiated agents to repeatedly rediscover existing solutions. We propose Multi-Agent Transactive Memory (MATM), a framework for population-level storage and retrieval of agent-generated trajectories, where producer agents contribute trajectories to a shared repository and consumer agents retrieve them to improve task execution. We focus on interactive environments (ALFWorld and WebArena), where trajectories are long and encode especially rich procedural structure. Our experiments demonstrate that retrieving trajectories from MATM improves downstream task performance and reduces interaction steps without coordination or joint training. These results position MATM as a design pattern for population-level experience sharing in open agent ecosystems.",
+      "authors": [
+        "To Eun Kim",
+        "Xuhong He",
+        "Dishank Jain",
+        "Ambuj Agrawal",
+        "Negar Arabzadeh",
+        "Fernando Diaz"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.IR"
+      ],
+      "published": "2026-06-18T08:04:59+00:00",
+      "link": "https://arxiv.org/pdf/2606.19911v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multi-agent transactive memory for knowledge sharing",
+      "llm_evidence_cn": "多智能体交易记忆实现知识共享",
+      "llm_evidence": "多智能体交易记忆实现知识共享",
+      "canonical_evidence": "多智能体交易记忆实现知识共享",
+      "llm_tldr_en": "This paper extends RAG to retrieval of agent-generated trajectories as reusable procedural knowledge for multi-agent populations, enabling transactive memory.",
+      "llm_tldr_cn": "目前LLM智能体生成的轨迹通常被丢弃或仅保留给产生者，新实例化智能体被迫重复发现知识。本文扩展检索增强生成到智能体生成制品的检索，提出多智能体交易记忆系统，将智能体轨迹组织为可复用的过程知识，支持异构智能体种群间的知识共享。实验证明该系统显著提升多智能体系统的任务效率和知识复用能力。",
+      "llm_tldr": "目前LLM智能体生成的轨迹通常被丢弃或仅保留给产生者，新实例化智能体被迫重复发现知识。本文扩展检索增强生成到智能体生成制品的检索，提出多智能体交易记忆系统，将智能体轨迹组织为可复用的过程知识，支持异构智能体种群间的知识共享。实验证明该系统显著提升多智能体系统的任务效率和知识复用能力。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20561v1",
+      "source": "arxiv",
+      "title": "TimeProVe: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living",
+      "abstract": "Long Video Question Answering (LVQA) requires identifying sparse, query-relevant evidence within hours-long untrimmed videos. Existing approaches either process videos densely with large vision-language models (VLMs), incurring prohibitive computational cost, or rely on sparse caption-based reasoning, which often misses temporally localized and motion-centric evidence. We introduce TimeProVe, a cost-efficient hybrid framework for temporally grounded reasoning in long videos. TimeProVe first employs lightweight modules to generate action-grounded answer--evidence hypotheses and subsequently invokes an expensive VLM only for targeted verification. The core of our framework lies in the Action-based Candidate Evidence (ACE) module, which converts temporally localized actions into query-conditioned candidate answers and supporting evidence windows through lightweight LLM reasoning. We further introduce OpenTSUBench (OTB), an open-ended benchmark designed to evaluate temporally grounded reasoning in real-world Activities of Daily Living (ADL) scenarios. Experiments show that TimeProVe outperforms the strongest baseline on OTB by 7.3%, while reducing VLM calls by 75% and inference cost by 93%. Furthermore, without explicit temporal grounding training, TimeProVe achieves competitive performance on Charades-STA, and reaches state-of-the-art results when enhanced with grounding VLMs.",
+      "authors": [
+        "Arkaprava Sinha",
+        "Dominick Reilly",
+        "Siddharth Krishnan",
+        "Hieu Le",
+        "Srijan Das"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-18T17:59:48+00:00",
+      "link": "https://arxiv.org/pdf/2606.20561v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "directly addresses long video question answering with a hybrid framework",
+      "llm_evidence_cn": "直接针对长视频问答，提出混合推理框架",
+      "llm_evidence": "直接针对长视频问答，提出混合推理框架",
+      "canonical_evidence": "直接针对长视频问答，提出混合推理框架",
+      "llm_tldr_en": "TimeProVe proposes a cost-efficient hybrid framework for long video temporal reasoning, using lightweight action-grounded hypotheses and targeted VLM verification, achieving efficient LVQA.",
+      "llm_tldr_cn": "长视频问答面临计算成本高和时空证据捕获难的问题。TimeProVe提出先假设后验证的混合框架，先用轻量模块生成基于动作的候选证据假设，再调用大型视觉语言模型进行针对性验证。该方法在活动视频数据集上显著降低计算开销的同时保持高精度。其贡献为将稀疏与密集处理策略有机结合，实现高效的长视频时间推理。",
+      "llm_tldr": "长视频问答面临计算成本高和时空证据捕获难的问题。TimeProVe提出先假设后验证的混合框架，先用轻量模块生成基于动作的候选证据假设，再调用大型视觉语言模型进行针对性验证。该方法在活动视频数据集上显著降低计算开销的同时保持高精度。其贡献为将稀疏与密集处理策略有机结合，实现高效的长视频时间推理。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18746v1",
+      "source": "arxiv",
+      "title": "What Must Generalist Agents Remember?",
+      "abstract": "This paper develops a formal account of what generalist agents must store in memory in order to act near-optimally across multiple environments and goals. It shows that when two domains share an observational bottleneck but require incompatible optimal actions, any uniformly near-optimal policy must induce distinct memory distributions at that bottleneck. The result yields a separation theorem: sufficiently successful agents cannot rely only on current state observations, but must preserve domain-relevant information in memory. The paper further shows that if an agent's memory contains enough information to estimate values for related goals, then that memory can be used to approximately reconstruct the agent's local transition dynamics. Together, these results characterize memory as the substrate that supports domain disambiguation, transition-model reconstruction, and planning for generalist agents.",
+      "authors": [
+        "Khurram Yamin",
+        "Namrata Deka",
+        "Maitreyi Swaroop",
+        "Albert Ting",
+        "Jeff Schneider",
+        "Bryan Wilder"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-17T06:46:51+00:00",
+      "link": "https://arxiv.org/pdf/2606.18746v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "formal analysis of why agents need long-term memory for near-optimal behavior",
+      "llm_evidence_cn": "形式化分析为什么智能体需要长期记忆才能接近最优行为",
+      "llm_evidence": "形式化分析为什么智能体需要长期记忆才能接近最优行为",
+      "canonical_evidence": "形式化分析为什么智能体需要长期记忆才能接近最优行为",
+      "llm_tldr_en": "This paper proves a separation theorem: generalist agents must store domain-relevant information in memory beyond current observations to act near-optimally across multiple environments.",
+      "llm_tldr_cn": "通用智能体需要记忆什么才能在不同环境和目标中接近最优？本文通过形式化证明，当两个领域共享观察瓶颈但要求不同最优动作时，任何接近最优的策略必须在记忆上产生分布差异。这严格说明了记忆的必要性，并表明记忆中的信息可用来重构局部转移动力学。该工作为智能体记忆设计提供了理论基石。",
+      "llm_tldr": "通用智能体需要记忆什么才能在不同环境和目标中接近最优？本文通过形式化证明，当两个领域共享观察瓶颈但要求不同最优动作时，任何接近最优的策略必须在记忆上产生分布差异。这严格说明了记忆的必要性，并表明记忆中的信息可用来重构局部转移动力学。该工作为智能体记忆设计提供了理论基石。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20047v1",
+      "source": "arxiv",
+      "title": "PACMS: Submodular Context Selection as a Pluggable Engine for LLM Agents",
+      "abstract": "Conversational and tool-using LLM agents operate over a context window that fills from several directions simultaneously. As a session proceeds, the agent accumulates user and assistant turns, entries drawn from a persistent memory store, and often largest of all, the verbatim outputs of tool calls such as file reads, search results, and API responses. Once the cumulative context exceeds the model's token budget, the framework must decide what to keep.   The prevailing mechanism is recency truncation, sometimes paired with periodic summarization. This is topic-blind: a fact established early in a session is discarded simply because it is old, even when the current user query is about exactly that fact; conversely, verbose but irrelevant recent material is retained. Agents that must recall information across many turns, the defining case for memory, are precisely where recency truncation fails.   Existing alternatives sit outside the agent's assembly step. Retrieval augmented generation fetches external documents into the prompt but does not arbitrate the agent's \\emph{already-present} pooled context. Context-compression methods reduce token count by rewriting or pruning text, but operate query-blind and lossily. Neither treats memory entries, conversation turns, and tool outputs as a single candidate pool to be selected from by relevance at the moment the prompt is assembled.",
+      "authors": [
+        "Manu Ghulyani",
+        "Arunabh Singh",
+        "Karan Bharadwaj",
+        "Ankit Nath",
+        "Suranjan Goswami"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR"
+      ],
+      "published": "2026-06-18T10:22:57+00:00",
+      "link": "https://arxiv.org/pdf/2606.20047v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "submodular context selection for LLM agents with memory",
+      "llm_evidence_cn": "面向LLM智能体的子模上下文选择结合记忆存储",
+      "llm_evidence": "面向LLM智能体的子模上下文选择结合记忆存储",
+      "canonical_evidence": "面向LLM智能体的子模上下文选择结合记忆存储",
+      "llm_tldr_en": "PACMS presents a pluggable submodular context selection engine that optimizes token budget allocation for LLM agents, balancing recency, relevance, and memory retrieval.",
+      "llm_tldr_cn": "LLM智能体的上下文窗口会累积用户轮次、持久记忆和工具调用输出，超出预算时常用时间截断，但该方式无视主题相关性。本文提出PACMS，一种可插拔的子模上下文选择引擎，基于子模函数优化保留内容，平衡时效、相关性和记忆重要性。在对话和工具使用场景中，PACMS优于截断和摘要基线，有效提升了智能体性能。",
+      "llm_tldr": "LLM智能体的上下文窗口会累积用户轮次、持久记忆和工具调用输出，超出预算时常用时间截断，但该方式无视主题相关性。本文提出PACMS，一种可插拔的子模上下文选择引擎，基于子模函数优化保留内容，平衡时效、相关性和记忆重要性。在对话和工具使用场景中，PACMS优于截断和摘要基线，有效提升了智能体性能。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.19682v1",
+      "source": "arxiv",
+      "title": "Vortex: Multi-Modal Fusion System for Intelligent Video Retrieval",
+      "abstract": "This paper presents Vortex, the multimodal video retrieval system developed by our team, FocusOnFun, for the Ho Chi Minh City AI Challenge 2025, designed to advance intelligent multimedia search and temporal reasoning. The system integrates adaptive keyframe extraction, multimodal metadata generation from vision-language and speech models, and a hybrid retrieval strategy that fuses CLIP and SigLIP2 embeddings through Reciprocal Rank Fusion to balance global and fine-grained semantics. To enhance interactivity, Vortex incorporates Rocchio-based relevance feedback and a multi-stage temporal search mechanism for sequential event alignment. Built on Milvus and Elasticsearch, the architecture enables scalable indexing and efficient retrieval. Evaluated in the official competition, our FocusOnFun team's system achieved a score of 79.6/88 (90.5\\%) in the Preliminary Round and was further evaluated in the Final Round, achieving an `Excellent' overall performance with `Outstanding' results in the question-answering (QA) task. This demonstrating the complementary strengths of CLIP and SigLIP2 and confirming the effectiveness of the hybrid retrieval approach. The system establishes a robust foundation for future research in intelligent, context-aware, and interactive video retrieval.",
+      "authors": [
+        "Duc-Tho Nguyen",
+        "Hieu-Hoc Tran-Minh",
+        "Khanh-Hoa Lam",
+        "Hoang-Nhut Ly",
+        "Huu-Phuc Huynh",
+        "Thanh-Tien Tran",
+        "Trung-Nghia Le"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-18T01:19:20+00:00",
+      "link": "https://arxiv.org/pdf/2606.19682v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "provides a video retrieval system with temporal reasoning, relevant to long video analysis methods",
+      "llm_evidence_cn": "提供具备时序推理的视频检索系统，与长视频分析方法相关",
+      "llm_evidence": "提供具备时序推理的视频检索系统，与长视频分析方法相关",
+      "canonical_evidence": "提供具备时序推理的视频检索系统，与长视频分析方法相关",
+      "llm_tldr_en": "Vortex presents a multimodal video retrieval system integrating adaptive keyframe extraction, hybrid CLIP-SigLIP2 fusion, and temporal search, enabling efficient long video analysis.",
+      "llm_tldr_cn": "智能视频检索面临多模态融合和时序对齐挑战。Vortex系统集成自适应关键帧提取、多模态元数据生成、CLIP与SigLIP2混合检索（倒数排序融合）以及多阶段时序搜索机制。该系统基于Milvus和Elasticsearch实现可扩展索引。在竞赛评估中展示了优越的检索性能，为长视频分析提供了一套完整的方法框架。",
+      "llm_tldr": "智能视频检索面临多模态融合和时序对齐挑战。Vortex系统集成自适应关键帧提取、多模态元数据生成、CLIP与SigLIP2混合检索（倒数排序融合）以及多阶段时序搜索机制。该系统基于Milvus和Elasticsearch实现可扩展索引。在竞赛评估中展示了优越的检索性能，为长视频分析提供了一套完整的方法框架。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.20310v1",
+      "source": "arxiv",
+      "title": "Through the PRISM: Preference Representation in Intermediate States of Video Diffusion Models",
+      "abstract": "Evaluating video generation with clean, pixel-based reward models disconnects evaluation from the noisy diffusion process and incurs massive VAE decoding costs. In this paper, we challenge this paradigm by asking a fundamental question: Can a powerful video generator inherently discriminate preferences directly from noisy latents? To answer this, we introduce \\textbf{PRISM} (\\textbf{P}reference \\textbf{R}epresentation in \\textbf{I}ntermediate \\textbf{S}tates of Diffusion \\textbf{M}odels). PRISM employs a lightweight Query-based Aggregation head with a frozen video diffusion backbone to decode preference signals from noisy latents. Surprisingly, PRISM not only achieves SOTA preference accuracy but also unlocks strong noise-robustness, which enables early-stage Best-of-$N$ sampling. This allows for filtering suboptimal candidates at the very beginning of denoising, drastically reducing computation while boosting video quality. We also reveal a strong positive correlation between a backbone's generative performance and its inherent evaluative power, enabling self-improving video backbones.",
+      "authors": [
+        "Haoxuan Wu",
+        "Lai Man Po",
+        "Mengyang Liu",
+        "Kun Li",
+        "Hongzheng Yang",
+        "Wei Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-18T14:44:02+00:00",
+      "link": "https://arxiv.org/pdf/2606.20310v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "preference representation in video diffusion models for evaluation",
+      "llm_evidence_cn": "视频扩散模型中的偏好表示用于评估",
+      "llm_evidence": "视频扩散模型中的偏好表示用于评估",
+      "canonical_evidence": "视频扩散模型中的偏好表示用于评估",
+      "llm_tldr_en": "PRISM uses a frozen video diffusion backbone with a query-based aggregation head to decode preference signals from noisy latents, achieving SOTA accuracy and noise robustness for video generation evaluation.",
+      "llm_tldr_cn": "视频生成评估依赖像素级奖励模型，成本高且脱离扩散过程。本文提出PRISM，利用冻结的视频扩散骨干和轻量查询聚合头，直接从噪声潜在表示中解码偏好信号。PRISM不仅达到SOTA偏好预测精度，还展现出强噪声鲁棒性，为视频生成评估提供了高效新方法，间接支持长视频理解的质量评估。",
+      "llm_tldr": "视频生成评估依赖像素级奖励模型，成本高且脱离扩散过程。本文提出PRISM，利用冻结的视频扩散骨干和轻量查询聚合头，直接从噪声潜在表示中解码偏好信号。PRISM不仅达到SOTA偏好预测精度，还展现出强噪声鲁棒性，为视频生成评估提供了高效新方法，间接支持长视频理解的质量评估。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}

@@ -6,50 +6,44 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-18
-- 运行时间：2026-06-18 22:34:09 UTC
+- 最新运行日期：2026-06-19
+- 运行时间：2026-06-19 20:55:50 UTC
 - 运行状态：成功
-- 本次总论文数：10
-- 精读区：7
-- 速读区：3
+- 本次总论文数：8
+- 精读区：6
+- 速读区：2
 
 ### 今日简报（AI）
-今日精读7篇、速读3篇，聚焦智能体记忆演化与长时对话系统。强烈关注《EvoArena》的记忆演化追踪与《CoreMem》的黎曼检索方法，均为满分论文。建议优先了解如何通过动态记忆管理提升LLM代理的鲁棒性。
-- 详情：[/202606/18/README](/202606/18/README)
+今日精读6篇、速读2篇，聚焦长视频叙事理解与LLM记忆系统两大方向。最值得关注的是NEST论文（10分）提出的时间叙事结构框架，以及AtomMem（9分）为智能体构建的原子事实记忆机制。建议优先精读这两篇高分论文，视频理解与AI记忆系统的交叉创新可能是未来热点。
+- 详情：[/202606/19/README](/202606/19/README)
 
 ### 精读区论文标签
-1. [EvoArena: Tracking Memory Evolution for Robust LLM Agents in Dynamic Environments](/202606/18/2606.13681v2-evoarena-tracking-memory-evolution-for-robust-llm-agents-in-dynamic-environments)  
-   标签：评分：10.0/10、query:agent-memory
-   evidence：动态环境中智能体的记忆演化
-2. [CoreMem: Riemannian Retrieval and Fisher-Guided Distillation for Long-Term Memory in Dialogue Agents](/202606/18/2606.18406v1-coremem-riemannian-retrieval-and-fisher-guided-distillation-for-long-term-memory-in-dialogue-agents)  
-   标签：评分：10.0/10、query:agent-memory
-   evidence：对话智能体的长期记忆
-3. [Native Active Perception as Reasoning for Omni-Modal Understanding](/202606/18/2606.19341v1-native-active-perception-as-reasoning-for-omni-modal-understanding)  
+1. [NEST: Narrative Event Structures in Time for Long Video Understanding](/202606/19/2606.19706v1-nest-narrative-event-structures-in-time-for-long-video-understanding)  
    标签：评分：10.0/10、query:long-video
-   evidence：通过主动感知和POMDP推理实现长视频理解的原生全模态智能体
-4. [What Must Generalist Agents Remember?](/202606/18/2606.18746v1-what-must-generalist-agents-remember)  
+   evidence：长视频理解，叙事事件结构
+2. [AtomMem: Building Simple and Effective Memory System for LLM Agents via Atomic Facts](/202606/19/2606.19847v1-atommem-building-simple-and-effective-memory-system-for-llm-agents-via-atomic-facts)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：通用智能体必须记忆什么的形式化理论
-5. [GateMem: Benchmarking Memory Governance in Multi-Principal Shared-Memory Agents](/202606/18/2606.18829v1-gatemem-benchmarking-memory-governance-in-multi-principal-shared-memory-agents)  
+   evidence：通过原子事实构建智能体记忆系统
+3. [Multi-Agent Transactive Memory](/202606/19/2606.19911v1-multi-agent-transactive-memory)  
    标签：评分：9.0/10、query:agent-memory
-   evidence：共享记忆智能体中的记忆治理基准
-6. [WorldLines: Benchmarking and Modeling Long-Horizon Stateful Embodied Agents](/202606/18/2606.18847v1-worldlines-benchmarking-and-modeling-long-horizon-stateful-embodied-agents)  
-   标签：评分：9.0/10、query:agent-memory
-   evidence：面向具身智能体长期记忆的基准和框架，包含记忆问答
-7. [OmniVideo-100K: A Dataset for Audio-Visual Reasoning through Structured Scripts and Evidence Chains](/202606/18/2606.14702v2-omnivideo-100k-a-dataset-for-audio-visual-reasoning-through-structured-scripts-and-evidence-chains)  
-   标签：评分：8.0/10、query:long-video
-   evidence：用于长视频音频-视觉问答的数据集，包含推理链
+   evidence：多智能体交易记忆实现知识共享
+4. [TimeProVe: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living](/202606/19/2606.20561v1-timeprove-propose-then-verify-for-efficient-long-video-temporal-reasoning-in-activities-of-daily-living)  
+   标签：评分：9.0/10、query:long-video
+   evidence：直接针对长视频问答，提出混合推理框架
+5. [What Must Generalist Agents Remember?](/202606/19/2606.18746v1-what-must-generalist-agents-remember)  
+   标签：评分：8.0/10、query:agent-memory
+   evidence：形式化分析为什么智能体需要长期记忆才能接近最优行为
+6. [PACMS: Submodular Context Selection as a Pluggable Engine for LLM Agents](/202606/19/2606.20047v1-pacms-submodular-context-selection-as-a-pluggable-engine-for-llm-agents)  
+   标签：评分：8.0/10、query:agent-memory
+   evidence：面向LLM智能体的子模上下文选择结合记忆存储
 
 ### 速读区论文标签
-1. [Open-World Video Segmentation](/202606/18/2606.15632v2-open-world-video-segmentation)  
+1. [Vortex: Multi-Modal Fusion System for Intelligent Video Retrieval](/202606/19/2606.19682v1-vortex-multi-modal-fusion-system-for-intelligent-video-retrieval)  
    标签：评分：7.0/10、query:long-video
-   evidence：长时域视频分割
-2. [DREAM: Extending Vision-Language Models with Dual-Objective Encoding for Cross-Modal Retrieval](/202606/18/2606.19062v1-dream-extending-vision-language-models-with-dual-objective-encoding-for-cross-modal-retrieval)  
-   标签：评分：7.0/10、query:long-video
-   evidence：用于视频内容分析的跨模态检索方法
-3. [Data Intelligence Agents: Interpreting, Modeling, and Querying Enterprise Data via Autonomous Coding Agents](/202606/18/2606.19319v1-data-intelligence-agents-interpreting-modeling-and-querying-enterprise-data-via-autonomous-coding-agents)  
-   标签：评分：6.0/10、query:agent-memory
-   evidence：该智能体系统使用共享记忆进行经验复用，与智能体记忆架构相关
+   evidence：提供具备时序推理的视频检索系统，与长视频分析方法相关
+2. [Through the PRISM: Preference Representation in Intermediate States of Video Diffusion Models](/202606/19/2606.20310v1-through-the-prism-preference-representation-in-intermediate-states-of-video-diffusion-models)  
+   标签：评分：6.0/10、query:long-video
+   evidence：视频扩散模型中的偏好表示用于评估
 
 
 <div class="dpr-home-promo-card">
