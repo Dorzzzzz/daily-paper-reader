@@ -1,0 +1,69 @@
+{
+  "label": "2026-06-20",
+  "date": "2026-06-20",
+  "generated_at": "2026-06-20T21:35:26",
+  "count": 4,
+  "papers": [
+    {
+      "paper_id": "202606/20/2606.17183v1-vl-memkng-hybrid-memory-with-a-spatio-temporal-knowledge-graph-for-question-answering-over-long-egocentric-navigation-trajectories",
+      "section": "deep",
+      "title_en": "VL-MemKnG: Hybrid Memory with a Spatio-Temporal Knowledge Graph for Question Answering over Long Egocentric Navigation Trajectories",
+      "authors": "Svetlana Lukina, Mohamad Al Mdfaa, Gloria Haro, Sergey Zagoruyko, Gonzalo Ferrer",
+      "date": "2026-06-15",
+      "pdf": "https://arxiv.org/pdf/2606.17183v1",
+      "score": "10.0",
+      "evidence": "长自我中心视频上的问答",
+      "tldr": "针对长期自我中心导航视频问答中证据分散、现有方法成本高或忽视上下文的问题，提出VL-MemKnG混合记忆框架，融合时空知识图谱与分段级上下文记忆，通过混合检索推理联合利用两种记忆。在WalkieKnowledgeT+基准上，Top-1检索准确率从58%提升至67%，Recall@1从34.50%提升至40.55%，尤其在时间全局和分散聚合问题上优势显著。该方法在保持高效推理的同时，验证了结构化记忆与上下文记忆结合的有效性。",
+      "tags": "query:long-video",
+      "abstract_en": "Answering navigation-relevant questions over long egocentric videos requires retrieving and organizing evidence distributed across distant temporal moments while maintaining spatial and contextual consistency. Although long-context vision--language models can achieve strong answer quality, they are computationally expensive for long trajectories and inefficient for repeated querying. Recent graph-based approaches such as VL-KnG address this challenge through persistent spatio-temporal knowledge graphs, but graph-centric retrieval alone may underrepresent broader temporal continuity and contextual cues. We present VL-MemKnG, a hybrid memory framework that extends VL-KnG by combining a spatio-temporal knowledge graph with persistent segment-level contextual memory. The knowledge graph captures structured relational information and long-range object associations, while segment-level memory preserves broader temporal context for long-horizon evidence retrieval. A hybrid retrieval-and-reasoning module jointly operates over both memory representations to produce evidence-grounded answers and temporally organized supporting evidence. We also introduce WalkieKnowledgeT+, an extension of WalkieKnowledge for long-horizon navigation-oriented video question answering. The benchmark includes temporally distributed reasoning tasks requiring evidence aggregation across multiple non-cooccurring moments. On WalkieKnowledgeT+, VL-MemKnG improves Top-1 retrieval accuracy from 58% to 67% and Recall@1 from 34.50% to 40.55%, outperforming all compared methods, including Gemini 2.5 Pro and Qwen 3.5+. The gains are particularly pronounced on temporal-global and temporally scattered aggregation questions, demonstrating the benefits of combining structured relational memory with segment-level contextual memory while maintaining efficient query-time inference.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/20/2606.15476v1-farm-find-anything-using-relational-spatial-memory",
+      "section": "deep",
+      "title_en": "FARM: Find Anything using Relational Spatial Memory",
+      "authors": "Siming He, Leo Huang, Adam Lilja, Fabio Hubel, Jonas Frey, Marco Pavone, S. Shankar Sastry, Jitendra Malik, Claire Tomlin",
+      "date": "2026-06-13",
+      "pdf": "https://arxiv.org/pdf/2606.15476v1",
+      "score": "8.0",
+      "evidence": "面向机器人的关系空间记忆系统",
+      "tldr": "机器人需要借助空间关系（如“在飞镖盘下面、海报左边的高灯”）找到特定物体，现有记忆系统难以处理此类复杂查询。FARM实时构建紧凑、开放词汇的物体级记忆，包含几何、视觉语言描述和视角证据；查询时使用VLM解析查询并评分视觉证据，同时通过物体符号和关系谓词显式约束空间条件。在44k语言查询实验中，Recall@5和Recall@10分别提升164%和224%，最终VLM重排序使Accuracy@1提升35%，并成功部署在四足机器人上。该方法实现了高效且鲁棒的基于空间关系的物体检索。",
+      "tags": "query:agent-memory",
+      "abstract_en": "Robots operating in homes, warehouses, and other object-rich environments need memory systems that can find specific object instances on demand. Object-level memory alone is often insufficient: scenes contain many plausibly matching objects, and users refer to the target through relations to landmarks and surrounding objects (e.g. ``the tall lamp below the dartboard and to the left of the poster''), demanding a relational spatial memory that supports retrieval through semantic, appearance, and spatial predicates over objects. To achieve this, we present FARM (Find Anything using Relational Spatial Memory), which builds, in real time at 5-10 Hz, a compact, open-vocabulary, object-level memory with geometry, visual-language descriptors, and viewpoint evidence. At query time, FARM uses VLMs to parse the query and score visual evidence, while grounding spatial constraints explicitly through object symbols and relational predicates. This structured use of VLMs enables more accurate and robust retrieval than end-to-end reasoning over frame histories or scene-graph context. In experiments on 44k language queries spanning 67 indoor and outdoor scenes, ranging from 15 to 15,000 m^2, FARM improves Recall@5 and Recall@10 over prior methods by 164% and 224%, and a final VLM reranking stage improves Accuracy@1 by 35%, while running in real time. We further demonstrate closed-loop deployment on a quadrupedal robot using onboard sensors and compute.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/20/2606.19849v1-vicostream-streaming-videollms-can-run-beyond-100-fps-with-stage-wise-coordinated-inference",
+      "section": "quick",
+      "title_en": "ViCoStream: Streaming VideoLLMs Can Run Beyond 100 FPS with Stage-Wise Coordinated Inference",
+      "authors": "Yang Tan, Junlong Tong, Linan Yue, Hao Wu, Pengfei Fang, Xiaoyu Shen",
+      "date": "2026-06-18",
+      "pdf": "https://arxiv.org/pdf/2606.19849v1",
+      "score": "7.0",
+      "evidence": "面向实时长视频处理的流式框架",
+      "tldr": "流式视频大模型需要高吞吐和低延迟，但现有加速方法缺乏系统级协调。ViCoStream提出阶段协调推理框架，通过分块执行、CUDA流重叠、视觉token控制、有界注意力及查询侧检索，在Qwen2.5-VL模型上实现134 FPS视频吞吐和低于50ms首token延迟，精度接近全历史基线。",
+      "tags": "query:long-video",
+      "abstract_en": "Streaming VideoLLMs must continuously process incoming video while maintaining low query latency, making both video-ingestion throughput and query-time responsiveness critical for real-time deployment. Existing methods largely focus on accelerating individual modules, such as visual encoding, token pruning, or KV-cache compression, but provide limited insight into whether the resulting system can sustain real-time streaming performance. We formulate streaming VideoLLM inference as a coordinated pipeline spanning visual preprocessing, visual encoding, token dropping, and LLM prefilling/decoding. Building on this formulation, we propose ViCoStream (Video Coordinated Streaming), a stage-wise coordinated streaming framework that combines chunk-wise execution, CUDA-stream overlap, visual token control, bounded visual attention, and query-side retrieval to bound per-chunk computation and memory costs. We further provide a systematic study of bottleneck migration, revealing how chunk size, token retention, attention locality, and retrieval scope shape the throughput-accuracy trade-off. Experiments with Qwen2.5-VL-3B/7B-Instruct across multiple streaming benchmarks show that ViCoStream achieves 134 FPS video throughput and less than 50 ms TTFT on a single A100 GPU while maintaining accuracy close to full-history baselines.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "paper_id": "202606/20/2606.19927v1-care-competence-aware-reward-shaping-for-adaptive-reasoning-length-in-video-mllms",
+      "section": "quick",
+      "title_en": "CARE: Competence-Aware Reward Shaping for Adaptive Reasoning Length in Video-MLLMs",
+      "authors": "Chengwen Liu, Hao Peng, Jisheng Dang, Hong Peng, Bin Hu, Tat-Seng Chua",
+      "date": "2026-06-18",
+      "pdf": "https://arxiv.org/pdf/2606.19927v1",
+      "score": "7.0",
+      "evidence": "视频多模态模型的适应性推理优化",
+      "tldr": "多模态视频推理中强化学习方法使用固定策略控制推理长度，不适应模型能力变化。本文提出CARE框架，通过平滑能力估计和训练阶段划分，自适应调整奖励偏好从探索到效率。在多个视频推理基准上，CARE提升推理准确率和token效率，训练中推理长度呈倒U型轨迹，收敛后更简洁。",
+      "tags": "query:long-video",
+      "abstract_en": "In multimodal video reasoning, reinforcement learning-based methods typically rely on simplistic and inflexible reasoning-length control strategies that fail to adapt to the model's evolving competence. This mismatch may suppress necessary exploration at early stages, while encouraging redundant reasoning and inefficient decoding once the model becomes more competent. In this paper, we propose CARE, a competence-aware reward shaping framework for adaptive reasoning length optimization in multimodal reasoning. Specifically, CARE maintains a smoothed competence estimate via an exponential moving average of pass rates, and uses it to route training into progressive stages that shift the reward preference from exploration-oriented long-form reasoning to efficiency-oriented concise reasoning. To avoid conflating verbosity with intrinsic task complexity, CARE further normalizes reasoning effort with batch-level statistics, and introduces a posterior amplifier to strengthen reward signals for unexpectedly strong performance on historically difficult samples. The proposed mechanism is seamlessly integrated into the GRPO training pipeline and incurs no additional inference-time overhead. Extensive experiments on multiple video reasoning and general video understanding benchmarks demonstrate that CARE consistently improves reasoning accuracy, stabilizes reinforcement learning, and significantly enhances token efficiency. Moreover, CARE exhibits a characteristic inverted-U trajectory of reasoning length during training, and yields shorter yet more informative reasoning traces at convergence, indicating effective adaptive allocation of reasoning budget. We provide the source code for our proposed CARE framework and experiments at https://github.com/1Pansy/Video-CARE.",
+      "source": "arxiv",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "errors": []
+}
