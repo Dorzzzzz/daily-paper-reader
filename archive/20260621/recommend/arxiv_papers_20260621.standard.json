@@ -1,0 +1,250 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-21T20:52:26.593990+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 4,
+    "deep_cap": 7,
+    "deep_selected": 4,
+    "quick_candidates": 2,
+    "quick_skim_target": 12,
+    "quick_selected": 2
+  },
+  "deep_dive": [
+    {
+      "id": "2606.17162v1",
+      "source": "arxiv",
+      "title": "MemSlides: A Hierarchical Memory Driven Agent Framework for Personalized Slide Generation with Multi-turn Local Revision",
+      "abstract": "Personalized presentation generation requires more than conditioning on a current prompt or template: agents must preserve stable user preferences across tasks, retain newly introduced preferences and constraints during multi-turn revision, and carry out local edits reliably. We propose MemSlides, a hierarchical memory framework for personalized presentation agents that separates long-term memory from working memory and further divides long-term memory into user profile memory and tool memory. User profile memory stores intent-conditioned profiles for round-0 personalization, working memory carries active preferences and session constraints across revision rounds, and tool memory stores reusable execution experience for reliable localized editing. MemSlides pairs this memory design with scoped slide-local revision, so targeted updates act on the smallest affected region instead of repeatedly regenerating the full deck. In controlled experiments, user profile memory improves persona-alignment judgments on a multi-persona, multi-intent profile bank, tool-memory injection improves closed-loop modify behavior in diagnostic matched-pair settings, and qualitative cases illustrate working memory's ability to carryover preferences. Taken together, these results suggest that effective personalization in presentation authoring depends on separating persistent user profiles, session-level working memory, and reusable execution experience across generation and localized revision.",
+      "authors": [
+        "Ye Jin",
+        "Yangyang Xu",
+        "Jun Zhu",
+        "Yibo Yang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.HC",
+        "cs.MA"
+      ],
+      "published": "2026-06-15T18:02:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.17162v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "hierarchical memory framework for personalized agent with long-term and working memory",
+      "llm_evidence_cn": "为个性化智能体设计的分层记忆框架，包括长期和工作记忆",
+      "llm_evidence": "为个性化智能体设计的分层记忆框架，包括长期和工作记忆",
+      "canonical_evidence": "为个性化智能体设计的分层记忆框架，包括长期和工作记忆",
+      "llm_tldr_en": "MemSlides proposes a hierarchical memory framework separating long-term (user profile and tool memory) and working memory for personalized slide generation agents, enabling multi-turn local revision while preserving user preferences.",
+      "llm_tldr_cn": "个性化演示生成需要智能体跨任务保持稳定偏好并支持多轮局部修改。MemSlides提出分层记忆框架，将长期记忆分为用户画像记忆和工具记忆，工作记忆承载会话约束。在演示生成任务中，该框架有效保留了用户偏好并支持局部修订，验证了层次化记忆设计在智能体系统中的应用价值。",
+      "llm_tldr": "个性化演示生成需要智能体跨任务保持稳定偏好并支持多轮局部修改。MemSlides提出分层记忆框架，将长期记忆分为用户画像记忆和工具记忆，工作记忆承载会话约束。在演示生成任务中，该框架有效保留了用户偏好并支持局部修订，验证了层次化记忆设计在智能体系统中的应用价值。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20475v1",
+      "source": "arxiv",
+      "title": "Marginal Advantage Accumulation for Memory-Driven Agent Self-Evolution",
+      "abstract": "In batch-style trace distillation, the same memory operation may receive contradictory feedback across different batches. Existing methods lack a cross-batch, operation-level evidence accumulation mechanism, making it impossible to distinguish stably effective operations from accidental hits. This paper formalizes the requirement as two structural conditions, alignability and comparability, and proposes Marginal Advantage Accumulation (MAA). MAA constructs differential signals to make them comparable across batches, accumulates signed evidence per operation via EMA, and ensures cross-batch traceability through semantic identity merging. As a post-processing architecture, MAA achieves the best results in 14 out of 16 settings across 4 benchmarks and 4 target models, consistently outperforming existing batch-level distillation baselines and matching or surpassing online alternatives in most settings, while reducing optimization-phase token consumption by approximately 75%.",
+      "authors": [
+        "Mingyu Yang",
+        "Keye Zheng",
+        "Congchao Cheng",
+        "Yujie Liu",
+        "Xingkang Lu",
+        "Fan Jiang",
+        "Yefei Zheng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-18T16:54:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.20475v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "memory-driven agent self-evolution with evidence accumulation",
+      "llm_evidence_cn": "记忆驱动的智能体自我进化与证据积累",
+      "llm_evidence": "记忆驱动的智能体自我进化与证据积累",
+      "canonical_evidence": "记忆驱动的智能体自我进化与证据积累",
+      "llm_tldr_en": "Marginal Advantage Accumulation (MAA) enables cross-batch evidence accumulation for memory operations, improving agent self-evolution across 14/16 settings.",
+      "llm_tldr_cn": "批量式痕迹蒸馏中同一记忆操作可能收到矛盾反馈。本文提出边际优势累积（MAA），通过差分信号构建、EMA累积和语义身份合并，实现跨批次可比较的证据积累。在4个基准14/16设置中取得最佳结果。",
+      "llm_tldr": "批量式痕迹蒸馏中同一记忆操作可能收到矛盾反馈。本文提出边际优势累积（MAA），通过差分信号构建、EMA累积和语义身份合并，实现跨批次可比较的证据积累。在4个基准14/16设置中取得最佳结果。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.17182v1",
+      "source": "arxiv",
+      "title": "Verified Detection and Prevention of Concurrency Anomalies in Multi-Agent Large Language Model Systems",
+      "abstract": "Multi-agent LLM systems share state through memory stores, vector indices, and tool registries. We model such sharing as long-running read-generate-write operations under deterministic-generation semantics -- the regime durable-execution engines enforce by deterministic replay -- and formalize four concurrency anomalies in TLA+: stale-generation, phantom-tool, causal-cascade, and tool-effect reordering, structural analogues of classical isolation anomalies, each with a TLC counter-example. The exclusion lattice over these anomalies is trivial; the contribution is the mechanically verified realizability and strict separation of one maximal chain within it, $L_0 \\subsetneq \\cdots \\subsetneq L_4$, to our knowledge the first machine-checked consistency hierarchy for such runtimes. A development of 274 Verus obligations (zero assume, zero admit; trust base: two structural axioms and a mutex correspondence) proves the detectors sound and complete against the specifications and each runtime its avoidance set. Three deployed Rust runtimes realize L0-L1 (pessimistic locking, serializable snapshot isolation, default-SI), each verified against stale-generation and refined to its state machine; L2-L4 are exec-mode-verified with dependency-free prevention twins (A3, A6, A2: 0/1000 versus 1000/1000), and L2 is run live across three model families (A3 prevented in all 120 retracted sessions). We reproduce a silent lost update in ByteDance's deer-flow, formalizing its fix as a verified $L_0 \\to L_1$ refinement, and exhibit tool-effect reordering in LangGraph's ToolNode on unmodified output, removed by an L3 commit-order sequencer. The verified detector, refinements, and realizability artifacts are the contribution; the phenomena and lattice are classical.",
+      "authors": [
+        "Sajjad Khan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.DC",
+        "cs.LO",
+        "cs.MA",
+        "cs.PL"
+      ],
+      "published": "2026-06-15T18:19:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.17182v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multi-agent memory sharing and concurrency anomalies",
+      "llm_evidence_cn": "多智能体记忆共享与并发异常",
+      "llm_evidence": "多智能体记忆共享与并发异常",
+      "canonical_evidence": "多智能体记忆共享与并发异常",
+      "llm_tldr_en": "Formalizes concurrency anomalies in multi-agent LLM systems with shared memory stores, providing verified detection and prevention methods.",
+      "llm_tldr_cn": "本文研究了多智能体大语言模型系统中通过记忆存储、向量索引和工具注册表进行状态共享时出现的并发异常。作者将这种共享建模为长运行时读-生成-写操作，并形式化了四种并发异常（过时生成、幻影工具、因果级联和工具效应重排序），这些异常是经典隔离异常的结构类似物。通过TLA+和TLC反例验证了异常的可实现性和严格分离，首次建立了异常排布格中一个最大链的机械可验证实现。该工作为构建可靠的多智能体记忆系统提供了理论基础。",
+      "llm_tldr": "本文研究了多智能体大语言模型系统中通过记忆存储、向量索引和工具注册表进行状态共享时出现的并发异常。作者将这种共享建模为长运行时读-生成-写操作，并形式化了四种并发异常（过时生成、幻影工具、因果级联和工具效应重排序），这些异常是经典隔离异常的结构类似物。通过TLA+和TLC反例验证了异常的可实现性和严格分离，首次建立了异常排布格中一个最大链的机械可验证实现。该工作为构建可靠的多智能体记忆系统提供了理论基础。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20529v1",
+      "source": "arxiv",
+      "title": "LedgerAgent: Structured State for Policy-Adherent Tool-Calling Agents",
+      "abstract": "Policy-adherent tool-calling agents in customer-service domains must maintain task states across turns while calling tools and obeying domain policies. Task states consist of relevant facts, identifiers, constraints, and conditions observed through user interaction and tool calls. In standard agents, task states are not represented separately. Observations, tool returns, and policy instructions are placed in the prompt, leaving agents to reconstruct the relevant states from the prompt each time they decide what to do next. This design makes state management implicit, creating two common failure modes. An agent may retrieve the right facts but later ground its decision in stale, missing, or incorrect information; and a syntactically valid tool call may still violate a domain policy that depends on the current task state. We introduce \\textsc{LedgerAgent}, an inference-time method for tool-calling agents that maintains observed task states in a separate ledger and renders the states into the prompt. The ledger is also used to check state-dependent policy constraints before environment-changing tool calls are executed, blocking policy violations. Across four customer-service domains and a mixed panel of open- and closed-weight models, \\textsc{LedgerAgent} improves average pass\\textasciicircum{}k over a standard prompt-based tool-calling approach, with the largest gains under stricter multi-trial consistency metrics.",
+      "authors": [
+        "Md Nayem Uddin",
+        "Amir Saeidi",
+        "Eduardo Blanco",
+        "Chitta Baral"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-18T17:41:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.20529v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "structured state management for agent memory",
+      "llm_evidence_cn": "智能体记忆的结构化状态管理",
+      "llm_evidence": "智能体记忆的结构化状态管理",
+      "canonical_evidence": "智能体记忆的结构化状态管理",
+      "llm_tldr_en": "LedgerAgent introduces explicit structured state representation for policy-adherent tool-calling agents, reducing failures from implicit state management.",
+      "llm_tldr_cn": "现有智能体隐式管理状态，导致事实过时或工具调用不合规。本文提出LedgerAgent，通过账本结构显式表示任务状态，包括事实、标识符、约束和条件，实现政策合规的工具调用。实验证明该方法有效减少了状态管理失败。",
+      "llm_tldr": "现有智能体隐式管理状态，导致事实过时或工具调用不合规。本文提出LedgerAgent，通过账本结构显式表示任务状态，包括事实、标识符、约束和条件，实现政策合规的工具调用。实验证明该方法有效减少了状态管理失败。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.17298v1",
+      "source": "arxiv",
+      "title": "Reasoning Text-to-Video Retrieval for Operating Room Clips via Action-Driven Digital Twins",
+      "abstract": "Text-to-video retrieval in operating rooms (OR) is an enabling technology for OR safety, as it allows stakeholders to retrieve and inspect recordings of specific events. However, because the most safety-critical events may not follow the common structure, to unlock its full potential text-to-video retrieval must be able to handle implicit queries that require reasoning to identify the right video (e.g., the step right before clipping). However, existing methods rely on global embeddings that cannot reason over such queries. We propose OR3, a text-to-video retrieval method that converts clips into action-driven digital twins (ActDTs), grouping concurrent subject-action-object triplets under non-overlapping temporal intervals. Moreover, rather than cross-modal matching through paired encoders, OR3 performs imagination-based retrieval where an LLM generates hypothetical ActDTs from queries. This enables intra-modal matching via a single encoder trained with ActDT-tailored hard negatives. Finally, evidence-grounded refinement revises imagined ActDTs based on discrepancies with top candidates to capture procedure-specific patterns. We construct a benchmark from MM-OR with 276 implicit queries across four reasoning categories over 386 clips from robotic knee procedures. OR3 achieves 57.6 R@1 and 77.3 R@5, outperforming the strongest baseline. These results demonstrate that OR3 enables fine-grained discrimination between visually similar OR video clips through temporal action reasoning.",
+      "authors": [
+        "Yiqing Shen",
+        "Hao Ding",
+        "Mathias Unberath"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-15T21:06:53+00:00",
+      "link": "https://arxiv.org/pdf/2606.17298v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "reasoning-based text-to-video retrieval for understanding video clips",
+      "llm_evidence_cn": "基于推理的文本到视频检索，用于理解视频片段",
+      "llm_evidence": "基于推理的文本到视频检索，用于理解视频片段",
+      "canonical_evidence": "基于推理的文本到视频检索，用于理解视频片段",
+      "llm_tldr_en": "OR3 proposes a reasoning text-to-video retrieval method that converts clips into action-driven digital twins, grouping subject-action-object triplets under temporal intervals to handle implicit queries.",
+      "llm_tldr_cn": "手术室视频检索需要处理隐含查询，现有基于全局嵌入的方法无法推理。OR3将视频片段转换为动作驱动的数字孪生，将主体-动作-客体三元组分组成非重叠时间区间，支持复杂查询。该方法在手术室视频检索任务上展示了优于全局嵌入方法的性能，为视频理解中的细粒度推理提供了新思路。",
+      "llm_tldr": "手术室视频检索需要处理隐含查询，现有基于全局嵌入的方法无法推理。OR3将视频片段转换为动作驱动的数字孪生，将主体-动作-客体三元组分组成非重叠时间区间，支持复杂查询。该方法在手术室视频检索任务上展示了优于全局嵌入方法的性能，为视频理解中的细粒度推理提供了新思路。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.16184v1",
+      "source": "arxiv",
+      "title": "Closed-Loop Triplet Synergistic Generation for Long-Form Video",
+      "abstract": "Multi-shot long-form video generation remains challenging due to identity drift and compounding inconsistencies across shots. While storyboard-driven pipelines improve controllability, they are often executed in a feed-forward manner, with limited mechanisms to incorporate generated visual evidence back into subsequent conditioning. We propose CoTriSyGen, an agentic framework that formulates multi-shot long video generation as a closed-loop visual-text-memory synergy process, where planned intent, persistent memory, and generated visuals are jointly leveraged for iterative correction and long-range coherence. A vision-language-model-based analyzer reasons over this triplet and produces updates to both prompts and memory along two pathways: (i) intra-shot refinement, which triggers targeted regeneration when semantic or compositional violations are detected and refines image-to-video prompt for coherent motions; and (ii) inter-shot refinement, which rewrites subsequent-shot prompts to propagate newly manifested entities or attributes and improve prompt quality (e.g., compositional grounding and cinematic fluency) based on generated evidence. The loop is grounded in an entity-centric memory modeled as a mutable visual state that evolves as the story progresses, which is continuously updated by both the generator and the analyzer by adding new and evolved entities to reflect appearance changes, accumulated multi-view evidence, and multi-entity compositions. Experiments on our curated StoryBench benchmark demonstrate substantial improvements in cross-shot consistency, prompt adherence, and cinematic continuity over representative methods.",
+      "authors": [
+        "Xinlei Yin",
+        "Xiulian Peng",
+        "Xiao Li",
+        "Zhiwei Xiong",
+        "Yan Lu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.MM"
+      ],
+      "published": "2026-06-15T03:56:43+00:00",
+      "link": "https://arxiv.org/pdf/2606.16184v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "long-form video generation with memory for coherence",
+      "llm_evidence_cn": "长视频生成中的记忆与一致性机制",
+      "llm_evidence": "长视频生成中的记忆与一致性机制",
+      "canonical_evidence": "长视频生成中的记忆与一致性机制",
+      "llm_tldr_en": "CoTriSyGen formulates multi-shot long video generation as closed-loop visual-text-memory synergy, using persistent memory to reduce identity drift and inconsistencies.",
+      "llm_tldr_cn": "多镜头长视频生成面临身份漂移和跨镜头不一致问题。本文提出CoTriSyGen智能体框架，将生成过程构建为视觉-文本-记忆闭环协同，利用持久记忆进行迭代纠正，实现长程一致性。实验表明该方法在长视频生成中提升了连贯性。",
+      "llm_tldr": "多镜头长视频生成面临身份漂移和跨镜头不一致问题。本文提出CoTriSyGen智能体框架，将生成过程构建为视觉-文本-记忆闭环协同，利用持久记忆进行迭代纠正，实现长程一致性。实验表明该方法在长视频生成中提升了连贯性。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
