@@ -1,0 +1,428 @@
+Title: Marginal Advantage Accumulation for Memory-Driven Agent Self-Evolution
+
+URL Source: https://arxiv.org/pdf/2606.20475v1
+
+Published Time: Fri, 19 Jun 2026 01:15:11 GMT
+
+Number of Pages: 26
+
+Markdown Content:
+# Marginal Advantage Accumulation for Memory-Driven Agent Self-Evolution 
+
+## Mingyu Yang, Keye Zheng, Congchao Cheng †, Yujie Liu, Xingkang Lu Fan Jiang †, Yefei Zheng †
+
+## Alibaba International Digital Commerce Group 
+
+## {mingyu.yang, zhengkeye.zky, congchao.chengcong}@alibaba-inc.com {lyj315363, luxingkang.lxk, zhanyan, yuanxin}@taobao.com 
+
+> †
+
+## Corresponding authors. 
+
+Abstract 
+
+In batch-style trace distillation, the same memory operation may receive contradictory feedback across different batches. Existing methods lack a cross-batch, operation-level evidence accumulation mechanism, making it impossible to distinguish stably effective operations from accidental hits. This pa-per formalizes the requirement as two structural conditions, alignability and comparability, and proposes Marginal Advantage Accumulation (MAA). MAA constructs differential signals to make them com-parable across batches, accumulates signed evidence per operation via EMA, and ensures cross-batch traceability through semantic identity merging. As a post-processing architecture, MAA achieves the best results in 14 out of 16 settings across 4 benchmarks and 4 target models, consistently outperforming existing batch-level distillation baselines and matching or surpassing online alternatives in most settings, while reducing optimization-phase token consumption by approximately 75%. 
+
+Keywords: Marginal advantage accumulation, operation-level evidence accumulation, trace distilla-tion, agent self-evolution, offline memory optimization 
+
+# 1 Introduction 
+
+## 1.1 Background: Agent Self-Evolution and Trace Distillation 
+
+As LLM-driven autonomous agents take on increasingly complex responsibilities in scientific discovery Chen et al. [2025], embodied interaction Shridhar et al. [2021], engineering, and everyday tasks, a central question comes to the fore: how can agents accumulate reusable capability improvements during continuous use? This problem is commonly referred to as agent self-evolution. Within the non-parametric self-evolution paradigm, trace distillation occupies a central position. Regardless of whether the final memory takes the form of skills Wang et al. [2024a], experiential insights Zhao et al. [2024], workflow templates Wang et al. [2025a], retrieval cases, or few-shot examples, all methods face the same subtask: compressing a set of execution traces {𝜏 1, . . . , 𝜏 𝑁 } into a reusable memory bank 
+
+𝑀 = {𝑚 1, . . . , 𝑚 𝐾 }. The distilled 𝑀 is injected into the LLM context at inference time, directly affecting subsequent decision quality. Distillation quality therefore sets the performance ceiling of the non-parametric self-evolution paradigm. 1
+
+> arXiv:2606.20475v1 [cs.LG] 18 Jun 2026
+
+## 1.2 Design Gaps in Batch-Style Trace Distillation 
+
+The typical scenario in industrial deployment is as follows: an agent first executes on a batch of tasks and accumulates traces, after which the system optimizes memory from these traces without re-rollout. This setting imposes two hard constraints. First, the “per-step re-evaluation” required by online distillation is impractical—a full agent execution involves multiple rounds of LLM calls and tool interactions, making re-rollout costs typically an order of magnitude higher than distillation itself. Assessing suggestion quality can only rely on cheap proxy signals (e.g., an LLM judge) rather than true forward verification. Second, trace collections far exceed a single LLM context window, forcing distillation to proceed in units of batch 𝐵 𝑡 —a choice shared by existing methods such as SkillOpt Yang et al. [2026] and Trace2Skill Ni et al. [2026]. The combination of these two constraints restricts optimization decisions to the local perspective of a single batch. Consider scientific data analysis as an example: an agent exposes “plotting code missing axis labels causing review rejection” in failed traces of one batch, and the system accordingly proposes “automatically append plt.xlabel / plt.ylabel at the end of all plotting code.” This suggestion is beneficial in the current batch (all tasks involve standard 2D charts), but in another batch targeting heatmaps or 3D scatter plots, forcibly adding 2D axis labels leads to rendering errors instead. Such “locally effective, globally unstable” operations are pervasive in batch-style distillation: proxy signals are inherently noisy, the same suggestion may receive contradictory feedback across different batches, and making accept-or-reject decisions based solely on single-batch local perspectives prevents the system from leveraging subsequent reverse signals to correct earlier judgments—thus failing to distinguish “stably effective” from “accidentally hit.” The essence of the problem is that existing methods lack a cross-batch evidence accumulation mechanism. To fill this design gap, an accumulation mechanism must satisfy two structural requirements: 1. Cross-batch identity alignment (Alignability) : The system must be able to identify semantically equivalent operations across different batches and merge them into the same accumulation unit. Without stable tracking of the same operation, cross-batch evidence accumulation is impossible. 2. Cross-batch comparability (Comparability) : Different batches have varying task distributions; the signals produced by the same operation across batches must share a consistent scale to enable meaningful additive accumulation. If signals are dominated by batch-specific characteristics rather than the true effect of the operation, cross-batch aggregation becomes meaningless. These two requirements reveal the fundamental distinction between step-local edit selection (ordinal selection on the current batch) and cross-batch edit accumulation (stateful evidence aggregation across batches): ranking or preference signals suffice for the former but cannot support the latter due to the absence of the above two properties. No existing method provides a design layer satisfying both requirements, and this deficiency worsens with increasing task complexity—when task distribution differences are large and trajectories are long, the value of cross-batch evidence accumulation becomes particularly significant. 
+
+## 1.3 Method Overview and Contributions 
+
+To address the above gap, we propose Marginal Advantage Accumulation (MAA) for Memory-Driven Agent Self-Evolution. As illustrated in Figure 1, the core idea of MAA is to ground user-perceived “optimization suggestions” into addressable atomic operations (ops) with invariant identity across batches, and on this basis construct scale-consistent accumulation signals so that evidence of the same op across different batches can be additively aggregated. MAA uses the LLM to estimate the expected utility 𝑢 (𝑀, 𝐵 ) ∈ [ 0, 100 ] (integer percentage) of the agent on the current batch 𝐵 given memory 𝑀 , and performs outer-layer differencing for each candidate op 𝑖 :2Figure 1: Batch-style trace distillation problem and MAA solution. Single-batch methods cannot distinguish stable effects from accidental hits; MAA aggregates cross-batch evidence via identity merging, differencing, and EMA. 
+
+𝛿 𝑖 = 𝑢 (𝑀 𝑖 , 𝐵 ) − 𝑢 (𝑀, 𝐵 ) ∈ [− 100 , 100 ]. Differencing mitigates distribution differences between batches, making signals satisfy comparability; stable ids in the memory bank enable tracking the same op across batches, satisfying alignability. What is accumulated is not batch scores or one-time accept/reject judgments, but cumulative evidence of the same op across multiple batches. 𝑢 itself need not be an unbiased estimate of true task gain; MAA relies only on the weaker directional alignment, i.e., the direction of 𝛿 points toward the true gain direction with probability statistically better than random. The method consists of an infrastructure layer and a core design layer: 
+
+• Addressable memory bank and semantic identity merging (§3.1): The memory bank is abstracted as a set with stable item ids, where each op is identified by (type, anchor id, content embedding). When a new candidate’s semantic similarity to an existing op in the pool exceeds a threshold, it is merged into the same accumulation unit, avoiding identity fragmentation caused by wording differences. This layer satisfies the alignability requirement. 
+
+• Marginal advantage and per-op cross-batch accumulation (§3.2–3.3): Baseline and candidate states are evaluated side-by-side, followed by outer-layer differencing, giving each op an incremental signal 𝛿 𝑖 relative to the current baseline (satisfying comparability). Multi-step 𝛿 𝑘,𝑡 on each op unit 𝑘 
+
+is then aggregated via EMA, enabling three types of operations to be distinguished under multi-batch sampling: stably effective (EMA at high positive values), spurious correlation (EMA initially positive then trending to zero), and scene-specific (EMA oscillating around zero). Ablation experiments 3confirm that both differencing and accumulation layers jointly account for the performance gains. Engineering governance (top-𝑘 sparse truncation, best-checkpoint rollback, candidate pool management) serves as a supporting layer that, together with the method itself, forms the complete system. Core contributions: 1. Identification and formalization of design gaps : We identify the missing cross-batch operation-level evidence accumulation design layer in batch-style trace distillation and formalize it as two structural requirements: alignability and comparability. This framework also applies to analyzing and improving future non-parametric self-evolution methods. 2. MAA method : We propose marginal advantage accumulation as a natural instantiation of the above design layer, satisfying the two requirements through semantic identity merging, differencing, and per-op EMA respectively. Each component is standard technology; their combination follows directly from the problem structure. 3. Performance and efficiency : MAA achieves the best results in 14 out of 16 settings across four benchmarks × four target models, reducing optimization-phase token consumption by approximately 75%. 
+
+# 2 Related Work 
+
+Agent self-evolution methods can be divided into online and offline categories based on whether online environment interaction is required. MAA belongs to the offline architecture; below we review related technical routes and their limitations within both frameworks. 
+
+## 2.1 Offline Trace Distillation 
+
+Single-shot distillation. Reflexion Shinn et al. [2023], Self-Refine Madaan et al. [2023], ExpeL Zhao et al. [2024], Voyager Wang et al. [2024a], and AWM Wang et al. [2025a] extract reusable memory in a one-shot manner from the perspectives of verbal feedback, experiential insights, skill libraries, and workflows respectively. These methods perform distillation only once; once memory is written, it cannot be undone. They naturally sidestep alignability and comparability problems, but consequently cannot leverage multi-batch evidence cancellation to filter spurious operations—once an erroneous suggestion is written, subsequent batches cannot correct it even if they produce reverse signals. 
+
+Offline hierarchical distillation. Trace2Skill Ni et al. [2026] introduces hierarchical induction on top of single-shot distillation, progressively merging trajectory-local patches into global skills. Compared to single-shot distillation, it better abstracts cross-task common patterns, but still performs one-shot induction in batch units without retaining per-op decision evidence for subsequent batch correction. This means when an induced skill performs poorly on a new batch, the system lacks mechanisms to trace back and adjust its source evidence. 
+
+Reactive evolvable memory. A-MEM Xu et al. [2025], Evo-Memory Wei et al. [2025], MEMO Xie et al. [2026], MemGPT Packer et al. [2023], HyMEM Zhu et al. [2026], and MemSkill Zhang et al. [2026a] equip memory systems with update primitives such as add/edit/remove, supporting iterative evolution. Live-Evo Zhang et al. [2026b] further extends to online streaming scenarios, inducing rule-level memory from continuous feedback. Although these methods support memory updates, each decision is based only on the local perspective of the current batch and does not maintain op-level cross-batch identity. The consequence is that the same operation may be treated as different entities across batches, preventing aligned accumulation 4of positive and negative evidence. Meanwhile, batch difficulty effects entangled in score fluctuations cannot be disentangled, causing “operation quality” and “batch difficulty” to be confounded in decision-making. 
+
+## 2.2 Online Optimization Methods 
+
+SkillOpt Yang et al. [2026] represents the online architecture: each optimization step deploys the agent to execute complete trajectories in the environment (online rollout), iteratively rewriting skill documents based on real feedback; SkillGrad Wang et al. [2026] follows a similar approach. Online methods obtain signals from real environments with high directional reliability, but each rollout step costs an order of magnitude more than distillation itself, making scaling difficult. MAA diverges from online methods along the computational paradigm axis: it operates only on existing traces, requiring no environment interaction during the optimization phase. 
+
+## 2.3 Iterative Optimization Paradigms 
+
+The online and offline methods above each adopt different optimization paradigms: single-shot distillation and hierarchical induction are one-shot extraction, while reactive memory follows stepwise responsive updating. Iterative optimization paradigms borrow the formal discipline of parameter optimization to organize multi-round rewriting processes. At the prompt level, OPRO Yang et al. [2024], APE Zhou et al. [2023], DSPy Khattab et al. [2024], EvoPrompt Guo et al. [2024], PromptBreeder Fernando et al. [2024], and GEPA Agrawal et al. [2026] demonstrate that LLMs can iteratively rewrite prompts under score or reflection feedback; STOP Zelikman et al. [2024], Trace AutoDiff Cheng et al. [2024], and MARS Zhang et al. [2026c] extend the optimization scope to recursive self-optimization, execution trace feedback, and multi-agent collaboration. At coarser granularity, ReCreate Hao et al. [2026], ReasoningBank Ouyang et al. [2026], DeltaEvolve Jiang et al. [2026], SE-Agent Lin et al. [2025], AgentEvolver Zhai et al. [2025], and EvolveR Wu et al. [2026] extend optimization targets to agent scaffolds, reasoning strategies, or experience lifecycles. APO Pryzant et al. [2023] and TextGrad Yuksekgonul et al. [2025] use natural language criticisms generated by LLMs as “textual gradients,” generalizing to arbitrary text variable optimization. The shared limitation of these methods is that accumulation states either remain at the version level (e.g., prompt iteration) or serve current-step edit selection (e.g., ranking and validation in online methods); no existing method maintains per-op stateful evidence across batches, so none can leverage reverse signals from subsequent batches to correct earlier judgments. MAA borrows the idea of “organizing edits as an optimization process” but achieves cross-batch evidence accumulation and correction through per-op EMA. 
+
+## 2.4 Reinforcement Learning-Based Methods 
+
+Unlike the non-parametric routes above, RL achieves self-evolution through gradient updates to model weights, which is orthogonal to MAA along the modification-object axis. PPO Schulman et al. [2017], GRPO Shao et al. [2024], RAGEN Wang et al. [2025b], and DPO Rafailov et al. [2023] are representative methods. RL requires GPU training and carries the risk of catastrophic forgetting; MAA only modifies context-injected content, requires no training, and leaves untouched memory items unchanged. The two can be deployed in combination in production. 
+
+# 3 Method 
+
+This section describes MAA (Marginal Advantage Accumulation for Memory-Driven Agent Self-Evolution). Given a frozen base LLM 𝜙 and a fixed agent scaffold, the optimization objective is: 
+
+max   
+
+> 𝑀 ∈ M
+
+𝐽 (𝑀 ) ≜ E 𝑞 ∼D [Eval (Agent (𝑞 ; 𝜙, 𝑀 ))] (1) 5Figure 2: MAA method overview. Propose channel generates candidate ops; Score channel constructs differential 𝛿 ; per-op EMA accumulates cross-batch evidence with top-𝑘 selection. where 𝑀 is the only component in the context that can be intervened by the optimization process. Since trace collections far exceed a single context window, optimization proceeds in units of batch 𝐵 𝑡 . The two structural requirements established above (alignability and comparability) guide the designs in the following sections: §3.1 defines the addressable memory bank and operation units, §3.2 constructs marginal advantage signals, §3.3 presents the per-op cross-batch accumulation mechanism, candidate pool management, and update budgets. The complete method flow is shown in Figure 2. 
+
+## 3.1 Addressable Memory Bank and Operation Units 
+
+Addressable memory bank. At step 𝑡 , when receiving task input 𝑞 , the prompt constructed by the agent is Prompt 𝑡 (𝑞 ) = 𝑃 sys ∥ Select (𝑀 𝑡 , 𝑞 ) ∥ 𝑞 . We abstract 𝑀 𝑡 as an addressable set of text blocks: 
+
+𝑀 𝑡 = {𝑚 1, 𝑚 2, . . . , 𝑚 𝑛 }, 𝑚 𝑖 = (id 𝑖 , 𝑐 𝑖 ) (2) where id 𝑖 is assigned at creation, remains unchanged throughout the optimization cycle, and is not reused. Modifications to 𝑀 are implemented through two types of ops: add (inserting new items) and modify (rewriting or deleting existing items, with empty content for deletion). Each op is identified by a tuple 
+
+(type , anchor ) plus a content vector, where anchor is the target_id for modify or the position for add (only after:<id> is supported). 
+
+Semantic identity merging. LLMs may propose semantically equivalent operations with different wordings across different batches. To avoid identity fragmentation, we use a lightweight embedding model (Qwen3-6Embedding-4B) to compute semantic vectors for each op, merging new candidates into existing accumulation units only when type and anchor are identical and cosine similarity ≥ 𝜏 . Default 𝜏 = 0.85 . The choice of 𝜏 involves a precision–recall tradeoff: too high causes semantically equivalent ops to be scattered into multiple accumulation units, each unit’s 𝑡 𝑘 grows slowly, and top-𝑘 truncation may push effective ops out of the candidate pool; too low causes ops with different intents to be incorrectly merged, mixing positive and negative signals and polluting the direction estimation of accumulation quantities. Within a reasonable range (e.g., [0.80 , 0.90 ]), 𝜏 mainly affects evidence accumulation efficiency and ranking convergence speed, with limited impact on final performance (§4.6.2 and Appendix B.5). 
+
+Candidate operation generation. At each step, the Propose channel receives (𝑀 𝑡 , 𝐵 𝑡 , traces 𝑡 ) and outputs a set of add/modify candidate operations, which enter the candidate pool after semantic deduplication. The Propose stage does not generate Scores, preventing explanatory information from the candidate generation stage from leaking into the scoring stage and avoiding confirmation bias Wang et al. [2024b] caused by the LLM’s own generated explanations. 
+
+## 3.2 Marginal Advantage 
+
+3.2.1 Differential Construction 
+
+Absolute scoring 𝑢 (𝑀, 𝐵 ) mixes memory quality, batch difficulty, and scoring noise; direct accumulation easily mistakes batch difficulty for op quality. Through same-batch baseline differencing, judgments are transformed into local comparisons, alleviating distribution differences between batches and making signals satisfy the comparability requirement. When 𝑢 exhibits interaction effects with batch difficulty (e.g., score compression in difficult batches, score inflation in easy batches), differencing still carries residual amplitude noise, which is smoothed and absorbed by subsequent cross-batch accumulation. The resulting differential signal 𝛿 𝑖 is the marginal advantage of op 𝑖 .The Score channel estimates expected utility 𝑢 (𝑀, 𝐵 ) ∈ [ 0, 100 ]: the likelihood of the agent achieving high-quality results on batch 𝐵 given memory 𝑀 . This is an LLM-based proxy score rather than a true task score. Integer percentages are used to reduce the probability of 𝛿 = 0 after differencing. The Score channel randomly shuffles the baseline 𝑀 𝑡 and all candidate states {𝑀 (𝑖 ) 
+
+> 𝑡
+
+} within the same prompt for side-by-side valuation, and the optimizer performs outer-layer differencing to obtain marginal advantages: 
+
+𝛿 𝑖 = 𝑢 (𝑀 (𝑖 ) 
+
+> 𝑡
+
+, 𝐵 𝑡 ) − 𝑢 (𝑀 𝑡 , 𝐵 𝑡 ) ∈ [− 100 , 100 ] (3) 
+
+𝛿 𝑖 takes the current baseline as reference, with sign determined by the differencing direction: candidate 𝑢 
+
+higher than baseline yields 𝛿 𝑖 > 0, and vice versa. When the number of candidates exceeds the grouping threshold, grouped batch valuation is adopted (evaluation details in Appendix A). 
+
+3.2.2 Directional Alignment Assumption 
+
+𝛿 𝑖 is not an unbiased gain estimate but a directional signal relative to the current baseline. 𝑀 (𝑖 ) 
+
+> 𝑡
+
+is a hypothetical state not yet written to the memory bank; MAA relies on LLM proxy valuation on existing traces to avoid costly environment rollouts. The effectiveness of this signal depends on two properties. 
+
+Internal signal quality. The numerical value of 𝛿 is affected by absolute value drift in LLM scoring (systematic offsets from the same prompt under different context lengths or candidate orders) and inter-group scale drift introduced by grouped valuation, making single-step amplitudes not fully reliable. MAA eliminates position bias by randomly shuffling candidate order during side-by-side valuation, and mitigates inter-group drift by controlling group size. Although amplitudes are noisy, the sign of 𝛿 remains highly stable under perturbations, which is the prerequisite for the accumulation mechanism to function. 7External directional validity. Let ΔEval 𝑖 = Eval (𝑀 𝑖 , 𝐵 ) − Eval (𝑀, 𝐵 ) denote the true marginal gain of applying op 𝑖 ; the core condition supporting accumulation is directional alignment: 
+
+𝑃  sign (𝛿 𝑖 ) = sign (ΔEval 𝑖 ) ≥ 1/2 + 𝛼, 𝛼 > 0 (4) A smaller 𝛼 requires more accumulation steps to produce stable rankings; if 𝛼 ≤ 0, the Score channel cannot provide an effective optimization direction. When 𝛼 > 0, the sign of the EMA accumulation converges exponentially to the true direction as steps increase, consistent with classical analysis of sign-based stochastic optimization Bernstein et al. [2018]. If 𝛼 ≤ 0 in specific scenarios, EMA produces no systematic offset under zero-mean noise, and system performance degrades to no worse than Reactive Update. This means even if proxy scoring fails entirely, the accumulation mechanism will not introduce performance worse than the no-accumulation baseline. In theory, 𝑢 may have systematic directional bias toward certain types of ops, or 𝛼 may be unevenly distributed across different operation types; such risks are common limitations of LLM-as-judge methods, which we discuss further in §5 Limitations. Mechanism diagnosis experiments (§4.5) sequentially verify internal signal quality through 𝛿 -signal robustness and Sign Consistency, and verify whether directional alignment holds through Sign Accuracy. 
+
+## 3.3 Cross-Batch Accumulation 
+
+3.3.1 Accumulation Operator and EMA Instance 
+
+Cross-batch accumulation aggregates multiple marginal advantages 𝛿 𝑘,𝑡 of the same op across multiple batches (the differential signal of op 𝑘 at step 𝑡 ) into a stable accumulation quantity, allowing positive and negative evidence to cancel and consistent directions to be amplified. We choose exponential moving average (EMA) as the default accumulation operator, with the recursive form: 
+
+𝑚 𝑘,𝑡 = 𝛽 𝑚 𝑘,𝑡 −1 + ( 1 − 𝛽 ) 𝛿 𝑘,𝑡 , ˆ𝑚 𝑘,𝑡 = 𝑚 𝑘,𝑡 
+
+1 − 𝛽 𝑡 𝑘 (5) where 𝑡 𝑘 is the cumulative number of updates op 𝑘 has participated in, and the denominator is the bias correction term. When 𝛿 𝑘, 𝜏 signs are consistent across different batches, the magnitude of the accumulation quantity grows with steps; when signs alternate, positive–negative cancellation causes the accumulation quantity to trend toward zero. EMA simultaneously smooths residual amplitude noise from differencing, and through exponential weighting causes recent consistent-direction evidence to quickly dominate the accumulation quantity, accelerating ranking convergence. The choice of EMA is based on its fit with the constraints of this design layer: magnitude retains the degree distinction between “significant improvement” and “slight improvement,” directly benefiting subsequent ranking; exponential decay matches the non-stationarity of memory states—the reference value of distant 
+
+𝛿 measured under old 𝑀 diminishes for current 𝑀 . Running mean weights all historical 𝛿 equally, unable to adapt to signal distribution drift after memory updates; trimmed mean and median, although robust to outliers, discard amplitude information and incur computational overhead that grows with window size. EMA simultaneously achieves non-stationarity adaptation and amplitude retention with 𝑂 (1) recursion. 𝛽 = 0.9
+
+corresponds to an effective window of about 10 steps; budget decay, EMA exponential discounting, and the candidate pool maximum-age mechanism jointly constrain the drift speed of memory states, ensuring signals within the accumulation window correspond to recent memory states (specific parameters and numerical estimates in Appendix B). 
+
+3.3.2 Candidate Pool and Update Budget 
+
+The accumulation quantities ˆ𝑚 𝑘,𝑡 provide a unified ranking basis for candidate pool management and update decisions. Each op serves as an independent accumulation unit, with cross-batch identity consistency 8guaranteed by the semantic identity merging mechanism in §3.1; all operations in the candidate pool are applied in-place on the current 𝑀 𝑡 at each step and rescored, producing that step’s 𝛿 𝑘,𝑡 and updating EMA. The candidate pool P𝑡 is preserved across steps. At each step, new candidates Cnew  
+
+> 𝑡
+
+are first merged with existing ops in the pool, then elimination is performed: candidates with ˆ𝑚 𝑘 < 𝑚 floor are discarded; when pool size exceeds the upper limit, truncation is performed in descending order of ˆ𝑚 𝑘 ; candidates surviving beyond max_age steps without being selected are eliminated. Default 𝑚 floor = −50 , pool upper limit is 20, max_age = 10 .Discrete memory items cannot undergo continuous small modifications, so top-𝑘 is used as the per-step update count upper limit: 
+
+𝑘 𝑡 = min 
+
+
+
+𝑘 max , max  𝑘 min , ⌊𝑟 𝑡 · | 𝑀 𝑡 |⌋ 
+
+, 𝑟 𝑡 = 𝑟 max − ( 𝑟 max − 𝑟 min ) · 𝑡 𝑇 (6) 
+
+𝑟 𝑡 linearly decays from 𝑟 max to 𝑟 min , making exploration more thorough in early optimization and updates more conservative later. Default 𝑟 max = 0.4, 𝑟 min = 0.1, 𝑘 min = 1, 𝑘 max = 8. All operations are uniformly ranked by ˆ𝑚 𝑘,𝑡 , and only the top-𝑘 𝑡 operations with ˆ𝑚 𝑘,𝑡 > 0 are applied. Best-checkpoint selection is performed at the end of each epoch based on Eval scores on Dval , ensuring return of the memory snapshot with the best validation set performance during training. Complete addressing rules, bias correction details, and algorithm pseudocode are provided in Appendix A. 
+
+# 4 Experiments 
+
+## 4.1 Research Questions 
+
+Experiments in this section revolve around four research questions. 
+
+• RQ1: End-to-end effectiveness. Does the complete MAA bring stable task benefits compared to the frozen (no memory) baseline, single-shot distillation, reactive update, offline distillation method Trace2Skill, and online method SkillOpt, under the same data split, same outer validation protocol, and similar inference budget? 
+
+• RQ2: Layer-by-layer ablation of cross-batch accumulation signals. Through stepwise ablation from Reactive Update to Abs-score EMA, Counting-𝛿 EMA, and finally Continuous-𝛿 EMA, we sequentially verify the necessity of cross-batch accumulation, the irreplaceability of differential con-struction, and the additional gains of continuous amplitude for ranking. 
+
+• RQ3: Sign mechanism diagnosis. Is the direction of differential 𝛿 highly consistent under perturba-tion despite limited robustness of differential amplitude 𝛿 , and is the alignment with the true rollout gain direction significantly above chance? 
+
+• RQ4: Diagnostic analysis. Does reactive update degenerate in long-term training due to accumulating harmful ops? Is MAA’s evidence cancellation mechanism actually functioning? 
+
+## 4.2 Experimental Setup 
+
+Datasets. We evaluate on four benchmarks covering different interaction complexities (Table 1): All datasets use 500 training trajectories; ScienceAgentBench, positioned as a verification benchmark, generates training data independently in the corresponding environment, with all 88 original tasks used for testing. Dataset splitting details and usage protocols are provided in Appendix B.1. 9Table 1: Dataset overview. Dataset Type Complexity Capability Dimensions 
+
+ScienceAgentBench Chen et al. [2025] Scientific agent High Multi-step code generation, data analysis 
+
+ALFWorld Shridhar et al. [2021] Embodied agent Medium-High Multi-step decision-making, 6 task types 
+
+HotpotQA Yang et al. [2018] Multi-hop QA Low Multi-hop factual retrieval 
+
+SpreadsheetBench Ma et al. [2024] Spreadsheet Medium Formula reasoning, data manipu-lation 
+
+Comparison methods. The RQ1 main experiment includes the following baselines (Table 2): Table 2: Comparison methods and their alignment with MAA. Method Category Representative Method Alignment 
+
+Frozen (No-Memory) Base prompt + tool hints only No self-evolution, lower-bound reference 
+
+Single-shot distillation ExpeL / Trace2Skill-style One-time extraction, then frozen 
+
+Reactive update MAA’s no-accumulation ablation Same channels, no EMA or pool 
+
+Offline hier. distillation Trace2Skill Ni et al. [2026] Offline hierarchical induction 
+
+Online skill optimization SkillOpt Yang et al. [2026] Online rollout, skill-level optimization 
+
+MAA (Ours) Full system Differencing + per-op EMA + top-𝑘 
+
+SkillOpt Yang et al. [2026] and Trace2Skill Ni et al. [2026] are both reproduced using official implementations with the original papers’ default hyperparameters unchanged; reproduction details are provided in Appendix B.2. 
+
+Target models. We validate generalizability on four target models: Qwen3.7-Max (flagship strong model, all experiments), Qwen3.6-Flash (lightweight weak model, RQ1), DeepSeek-V4-Flash (cross-family lightweight model, RQ1), and GPT-5.4 (cross-family strong model, RQ1 only), covering the full “strong/weak × same-family/cross-family” 2 ×2 design space. The Score channel uniformly uses Qwen3.7-Max. 
+
+Experiment configuration overview. RQ1 main results use 5 independent random seeds per configuration, reporting mean ± standard deviation. Specific sample sizes, calibration set settings, and evaluation metrics for each RQ are provided in Appendix B.4–B.5. 
+
+## 4.3 End-to-End Main Results 
+
+4.3.1 Main Experimental Results 
+
+Table 3 reports test set scores (5 seeds, mean ± std) of each method across four datasets × four target models. MAA achieves the best results in 14 out of 16 settings. On the two strong models Qwen3.7-Max and GPT-5.4, MAA outperforms SkillOpt on all four datasets (GPT-5.4: ScienceAgentBench +0.9 pp, ALFWorld +0.9 pp, SpreadsheetBench +1.7 pp, HotpotQA +0.8 pp), showing that offline proxy scoring suffices to guide optimization direction on complex tasks, and the advantage observed on the cross-family strong model (GPT-5.4) further supports MAA’s generalizability. On Qwen3.6-Flash and DeepSeek-V4-Flash, the pattern diverges: MAA still achieves the best on ALFWorld, SpreadsheetBench, and HotpotQA, but is surpassed 10 Table 3: End-to-end task performance (test set scores, 5 seeds mean ± std). ScienceAgentBench reports code pass rate (%), ALFWorld reports task success rate (%), SpreadsheetBench reports accuracy (%), HotpotQA reports Exact Match (%). Bold indicates best in each column. 
+
+Method ScienceAgentBench ALFWorld SpreadsheetBench HotpotQA 
+
+Qwen3.7-Max 
+
+Frozen (no memory) 22.1 ± 2.1 81.0 ± 1.8 41.8 ± 1.6 71.1 ± 0.9 Single-shot (ExpeL-style) 25.8 ± 2.9 83.5 ± 2.0 47.3 ± 1.8 73.6 ± 1.2 Reactive Update 28.4 ± 3.3 85.2 ± 1.7 51.4 ± 2.0 74.5 ± 1.0 Trace2Skill 27.2 ± 2.8 85.8 ± 1.9 52.6 ± 1.7 75.1 ± 1.0 SkillOpt Yang et al. [2026] 30.3 ± 2.6 88.1 ± 1.5 56.2 ± 1.5 76.9 ± 0.7 
+
+MAA (Ours) 30.7 ± 2.4 89.4 ± 1.6 58.5 ± 1.6 77.2 ± 1.3 Qwen3.6-Flash 
+
+Frozen (no memory) 11.3 ± 2.7 76.8 ± 2.4 32.8 ± 2.2 65.4 ± 1.5 Single-shot (ExpeL-style) 15.7 ± 2.8 79.5 ± 2.1 37.4 ± 1.9 68.5 ± 1.7 Reactive Update 18.3 ± 3.4 81.6 ± 2.3 41.6 ± 2.4 68.8 ± 1.4 Trace2Skill 17.5 ± 3.0 81.2 ± 2.2 42.8 ± 2.0 70.2 ± 1.5 SkillOpt Yang et al. [2026] 22.6 ± 2.9 84.2 ± 2.2 46.8 ± 1.8 71.8 ± 1.3 
+
+MAA (Ours) 20.8 ± 2.7 86.2 ± 2.0 48.5 ± 2.1 72.6 ± 1.6 GPT-5.4 
+
+Frozen (no memory) 22.7 ± 2.6 80.5 ± 1.8 42.6 ± 1.7 70.8 ± 1.1 Single-shot (ExpeL-style) 26.1 ± 2.5 83.0 ± 1.7 47.8 ± 1.6 73.7 ± 1.2 Reactive Update 29.2 ± 2.8 84.8 ± 1.6 51.9 ± 1.3 74.1 ± 1.0 Trace2Skill 28.6 ± 2.6 85.3 ± 1.5 52.7 ± 1.5 74.6 ± 1.5 SkillOpt Yang et al. [2026] 31.9 ± 2.4 87.5 ± 1.2 56.8 ± 1.4 77.2 ± 0.9 
+
+MAA (Ours) 32.8 ± 2.3 88.4 ± 1.5 58.5 ± 1.6 78.0 ± 1.4 DeepSeek-V4-Flash 
+
+Frozen (no memory) 14.8 ± 3.5 74.3 ± 2.3 35.6 ± 2.1 62.8 ± 1.3 Single-shot (ExpeL-style) 19.8 ± 2.7 77.8 ± 1.9 40.8 ± 1.7 65.7 ± 1.4 Reactive Update 19.5 ± 3.3 79.4 ± 2.5 44.5 ± 2.3 66.1 ± 1.0 Trace2Skill 20.4 ± 2.9 80.5 ± 2.1 45.2 ± 2.0 66.9 ± 1.2 SkillOpt Yang et al. [2026] 23.4 ± 3.1 83.2 ± 1.8 50.6 ± 1.8 68.3 ± 1.2 
+
+MAA (Ours) 21.7 ± 2.8 84.9 ± 2.1 51.2 ± 1.9 68.9 ± 1.2 
+
+11 by SkillOpt on ScienceAgentBench (Flash +1.8 pp, DeepSeek +1.7 pp). MAA outperforms the offline architecture Trace2Skill in all 16 settings, reflecting the advantage of cross-batch evidence accumulation over one-shot hierarchical induction. The gap between online and offline methods diverges with model capability. On strong models (Qwen3.7-Max, GPT-5.4), MAA surpasses SkillOpt on ScienceAgentBench because strong models produce higher-quality traces, making the proxy scoring directional signal 𝛼 large enough for EMA to converge effectively. Weak models (Flash / DeepSeek) are surpassed by SkillOpt on this dataset because their failure modes in real environments are more diverse, offline traces are noisier making 𝛼 smaller and accumulation convergence slower; whereas online rollout provides direct observation of true execution consequences, not relying on proxy scoring direction accuracy, enabling more efficient correction. When the base model is weak and the task is difficult, online real-time feedback is more efficient at correction than offline proxy accumulation. MAA’s improvement over Reactive Update increases with task complexity. On Qwen3.7-Max: Spreadsheet-Bench +7.1 pp, ALFWorld +4.2 pp, ScienceAgentBench +2.3 pp, HotpotQA +2.7 pp; GPT-5.4 shows the same trend (SpreadsheetBench +6.6 pp, ALFWorld +3.6 pp, ScienceAgentBench +3.6 pp, HotpotQA +3.9 pp); Qwen3.6-Flash shows the same trend. The more complex the task and the greater the inter-batch distri-bution differences, the more valuable cross-batch evidence accumulation becomes. On ScienceAgentBench, MAA’s improvement over Reactive is similar to HotpotQA on strong models, yet MAA ultimately surpasses SkillOpt, suggesting that the accumulation mechanism still converges to effective rankings on complex tasks under strong models. 
+
+4.3.2 Computational Resource Consumption Comparison 
+
+MAA and the online method (SkillOpt) share the same Propose + Score overhead; the core difference is that the online method requires additional environment rollout at each step. Table 4 quantifies this difference. Table 4: Computational resource consumption comparison (ALFWorld, Qwen3.7-Max, single full training run). Metric MAA (Ours) SkillOpt Yang et al. [2026] 
+
+Optimization-phase rollouts 0 ∼12.8K 
+
+Token consumption (M) ∼8.5 ∼33.3 
+
+Estimated API cost (USD) ∼ $30 ∼ $120 
+
+Training time (min) ∼145 ∼750–830 
+
+Test score (%) 89.4 88.1 
+
+Only the optimization phase is counted, excluding Val/Test evaluation. API costs estimated based on Qwen3.7-Max public pricing. 
+
+MAA achieves better test scores with approximately 1/4 the token consumption and 1/5 the training time. The offline architecture trades lower computational cost for dependence on existing traces. 
+
+## 4.4 Design Choices for Accumulation Signals (RQ2) 
+
+This section verifies the design choices for accumulation signals: the necessity of differential construction and the additional benefit of continuous amplitude. Abs-score EMA appears only as a targeted ablation in this section. 12 4.4.1 Experimental Design 
+
+We run layer-by-layer ablation on all four tasks using Qwen3.7-Max (dataset descriptions in §4.2). The four configurations share the same Propose / Score channels, candidate pool size, semantic identity merging threshold ( 𝜏 = 0.85 ), top-𝑘 selection, best-checkpoint, training data split, and training step budget, differing only in the accumulation signal (Table 5): Table 5: Ablation study design for accumulation signals. Variant Cross-batch Differencing Signal Verified Reactive Update × — Current batch feedback No-accum. reference Abs-score EMA ✓ × 𝑢 (𝑀 𝑖 , 𝐵 ) Necessity of diff. Counting-𝛿 EMA ✓ ✓ sign (𝛿 ) Continuous benefit Continuous-𝛿 EMA ✓ ✓ Continuous 𝛿 Full system Abs-score EMA uses 𝑚 𝑖,𝑡 = 𝛽𝑚 𝑖,𝑡 −1 + ( 1 − 𝛽 )𝑢 (𝑀 𝑖 , 𝐵 𝑡 ), Counting-𝛿 EMA uses 𝑠 𝑖,𝑡 = sign (𝛿 𝑖,𝑡 ) ∈{− 1, 0, +1}, and Continuous-𝛿 EMA uses the raw differential 𝛿 𝑖,𝑡 = 𝑢 (𝑀 𝑖 , 𝐵 𝑡 ) − 𝑢 (𝑀, 𝐵 𝑡 ). All EMA configurations use 𝛽 = 0.9, with each configuration run on 5 random seeds. 
+
+4.4.2 Experimental Results and Analysis 
+
+Table 6: Layer-by-layer ablation of accumulation signals (Qwen3.7-Max, 5 seeds). Variant SAB (%) ALF (%) SS (%) HQA (%) Reactive Update 28.4 ± 2.3 85.2 ± 1.7 51.4 ± 2.0 74.5 ± 1.0 Abs-score EMA 28.9 ± 2.1 86.3 ± 1.8 53.8 ± 2.1 75.1 ± 1.1 Counting-𝛿 EMA 29.3 ± 1.8 87.8 ± 1.9 57.2 ± 2.1 76.1 ± 1.0 
+
+Continuous-𝛿 EMA (MAA) 30.7 ± 2.4 89.4 ± 1.6 58.5 ± 1.6 77.2 ± 1.3 
+
+Table 6 reports the ablation results. Differential construction is the primary source of accumulation gains. Although Abs-score EMA outperforms Reactive Update (+0.5–2.4 pp), it remains significantly below the full MAA (gap of 1.8–4.7 pp). Raw 𝑢 mixes memory quality, batch difficulty, and scoring noise; direct accumulation easily mistakes batch difficulty for op quality. Counting-𝛿 EMA clearly outperforms Abs-score EMA on all tasks, demonstrating that baseline differencing provides signed directional evidence, enabling cross-batch positive–negative cancellation. 
+
+Continuous amplitude provides fine-grained ranking gains. Continuous-𝛿 EMA still shows +1.1–1.6 pp advantage over Counting-𝛿 EMA, but this gap is smaller than the gain from differential construction, indicating that MAA’s primary benefit comes from signed marginal evidence, with continuous amplitude mainly supplementing ranking precision. 
+
+Improvement magnitude correlates with proxy signal quality. Total improvement from Reactive →MAA: SpreadsheetBench (+7.1 pp) > ALFWorld (+4.2 pp) > HotpotQA (+2.7 pp) > ScienceAgentBench (+2.3 pp). ScienceAgentBench shows the smallest improvement, consistent with its lowest Sign accuracy (61.5%) and longer chains causing larger directional bias; the improvement differences among the other three tasks are simultaneously influenced by the magnitude of inter-batch distribution differences and the baseline’s room for improvement, and are not determined by any single factor alone. 13 4.5 Mechanism Diagnosis: Signal Robustness and Directional Alignment (RQ3) 
+
+§3.2.2 establishes that the effectiveness of differential signals depends on two properties: internal signal quality (stability of 𝛿 amplitude under perturbation) and external directional validity (directional alignment, i.e., the probability that sign (𝛿 ) aligns with the true gain direction ≥ 1/2 + 𝛼 ). This section sequentially verifies these two properties through three metrics. We apply prompt perturbation (candidate order shuffling + context length variants) to the same (𝑀 𝑖 , 𝐵 𝑡 ) and rescore, measuring: 𝛿 -signal robustness (Pearson 𝑟 
+
+between two 𝛿 values, verifying internal signal quality), Sign consistency (proportion of sign (𝛿 ) remaining unchanged under perturbation, verifying directional stability), and Sign accuracy (proportion of sign (𝛿 𝑖 )
+
+aligning with true rollout gain direction, verifying directional alignment). Table 7: Differential signal robustness and direction diagnosis (Qwen3.7-Max, %). Metric SAB ALF SS HQA 
+
+𝛿 -signal robustness 62.3 76.2 64.1 78.1 Sign consistency 91.2 95.1 88.7 93.6 
+
+Sign accuracy 61.5 72.1 69.3 73.8 
+
+Table 7 summarizes the results. Single-step numerical robustness of 𝛿 is limited (62.3%–78.1%), but Sign consistency exceeds 88.7% on all datasets, indicating that 𝛿 signs are highly stable under perturbation. Sign accuracy corresponds to 𝛼 ≈ 0.11 –0.24 , with directional alignment holding on all datasets and decreasing with task complexity. ScienceAgentBench’s 𝛼 ≈ 0.115 is close to the lower bound, requiring more accu-mulation steps to produce stable rankings; nevertheless, Table 6 shows MAA still outperforms Reactive by +2.3 pp on this dataset, showing that even with the weakest directional signal, cross-batch accumulation can still extract effective optimization directions. The gain space is limited by the magnitude of 𝛼 , with corre-spondingly smaller improvement, and on weak models MAA is surpassed by the online method SkillOpt. Monte Carlo simulation further quantifies the relationship between convergence speed and 𝛼 . Under 𝛽 = 0.9
+
+and the conservative symmetric |𝛿 | = 1 assumption, 𝛼 = 0.183 –0.238 (corresponding to SpreadsheetBench, ALFWorld, HotpotQA) requires 7–14 updates for the EMA sign to stabilize to the true direction with ≥90% probability; 𝛼 = 0.115 (ScienceAgentBench) requires more than 10 updates under the symmetric assump-tion, but experiments confirm MAA still outperforms Reactive by +2.3 pp, suggesting that the asymmetry of the actual 𝛿 distribution compensates for the theoretical convergence gap. 
+
+## 4.6 Design Layer Verification: Learning Curves and Evidence Trajectories 
+
+This experiment corresponds to RQ4, visualizing the actual operation of MAA’s cross-batch evidence accumulation through learning curves and evidence trajectories (Figure 3). 
+
+4.6.1 Learning Curve Comparison 
+
+On all four datasets, MAA opens a gap with Reactive at epoch 3–4, but convergence speed diverges sig-nificantly with task complexity: HotpotQA (simple multi-hop QA) reaches test-level performance within 6 epochs; ALFWorld and SpreadsheetBench (medium complexity) require 8 epochs to converge; Sci-enceAgentBench (long-chain scientific discovery) requires about 12 epochs to stabilize. Convergence speed is consistent with task state space size, trajectory length, and 𝛿 signal-to-noise ratio. The ranking of MAA’s gap relative to Reactive aligns with the ablation improvement in §4.4 and the Sign accuracy in §4.5, with training dynamics observations matching the preceding analysis. 14 Figure 3: Learning curves (Qwen3.7-Max, 5 seeds). Solid: MAA; dashed: Reactive; dotted: Frozen baseline. Shaded bands: ±1 std. 
+
+4.6.2 Evidence Trajectories and Case Study 
+
+Figure 4 shows the EMA value ˆ𝑚 𝑘 trajectories of three representative ops across batch steps during ALFWorld training, corresponding to three typical patterns. 
+
+• (a) Stable Effective (“[modify #7] If the target is not found in the current container after examination, immediately switch to the next most likely container.”): A general navigation strategy, 𝛿 consistently positive (+6, +12, +7, +14), bias-corrected EMA converges to ≈+10 within 4 steps, selected by top-𝑘 
+
+and written to memory. When directions are consistent, EMA converges rapidly, as expected. 
+
+• (b) Spurious Correlation (“[add after #3] Heat tasks should check microwave before oven”): The first two batches happen to be applicable ( 𝛿 = +7, +4), and reactive update accepts it at batch 1 with no way to retract. Subsequent 𝛿 mean leans negative ( −3, +2, −8, −5, −2, −6, +1, −4), bias-corrected EMA gradually declines from +7.0 to −0.7, and is eliminated by max_age after 10 steps. Differential positive–negative cancellation filters this operation, avoiding reactive update’s irreversible error. 
+
+• (c) Scene-Specific (“[modify #12] In cleaning tasks, inspect the sink area for the cloth first”): 𝛿 
+
+alternates between positive and negative (+5, −8, +11, −6, +4, −10, +6, −4, +2, −7), bias-corrected EMA oscillates near zero (final ≈ − 1.2), and is eliminated by max_age after 10 steps. When directions are inconsistent, EMA produces no systematic offset, ensuring degradation safety. 15 Figure 4: EMA evidence trajectories of representative ops (ALFWorld). Blue: stably effective; red: spurious correlation; green: scene-specific. 
+
+Semantic identity merging and 𝜏 selection. Alignability requires the same operation to be trackable across batches. During ALFWorld training, at 𝜏 = 0.85 , 15.7% of new candidates were merged; at 𝜏 = 0.80 this rises to 19.2% but incorrect merging occurs (same anchor, different intent); at 𝜏 = 0.90 it drops to 12.4%, with some semantically equivalent ops not recognized due to wording differences. 𝜏 = 0.85 achieves a balance between incorrect merging and missed merging. A typical case is “[modify #7]” in Figure 4(a): 3 different wordings were merged into the same unit, and bias-corrected EMA converged to ≈+10 at step 4; without merging, this strategy would be lost due to identity fragmentation. The low merge rate of 15.7% indicates the mechanism is precise, triggering only when semantics are truly equivalent. More merging cases (including correct rejections and missed merging scenarios) are detailed in Appendix B.5. 
+
+# 5 Conclusion 
+
+In batch-style trace distillation, feedback received by the same memory operation across different batches is often inconsistent, making it difficult to judge from single-step signals whether it is broadly effective or merely an accidental hit in specific batches. The more complex the task and the longer the trajectory, the more prominent this problem becomes. MAA maintains a cross-batch accumulated signed evidence quantity for each operation. Differential con-struction transforms absolute scores into marginal advantages relative to the current baseline, making signals across different batches comparable; EMA temporally aggregates these marginal advantages with exponen-tial weighting, amplifying directionally consistent signals and canceling directionally alternating ones. This mechanism does not rely on environment rollouts, using only LLM proxy scores as directional signals, com-pleting operation-level screening and ranking under offline settings. From ablation to mechanism diagnosis to training dynamics, experiments consistently show that differencing and accumulation layers jointly form 16 the performance source of MAA. Experimental results show that MAA achieves the best result in 14 out of 16 settings across 4 datasets and 4 target models, with token consumption reduced by approximately 75% and optimization time shortened from 12–14 hours to about 2.5 hours. In scenarios where forward evaluation is costly, the offline accumulation strategy achieves performance comparable to or even better than online methods with significantly lower resource overhead. 
+
+## 5.1 Limitations 
+
+Offline architecture scenario positioning. MAA replaces environment rollouts with LLM proxy scoring, making it suitable for scenarios with high forward evaluation costs (scientific code execution, real user interaction logs, API calls with side effects, etc.). When forward evaluation is sufficiently cheap and the environment is reproducible, directly using val scores as the optimization signal may be a simpler choice. Additionally, when memory undergoes substantial changes within a single step, the coverage of old traces for the updated state may decrease; in practice, this can be diagnosed by monitoring whether 𝛿 variance increases abnormally, and trace refresh can be triggered when necessary. 
+
+Systematic bias of LLM judge. The Score channel relies on LLM proxy valuation, which may be affected by position bias, length bias, and other factors. We mitigate such biases through random shuffling of candidate order and differential construction (side-by-side valuation of baseline and candidates within the same prompt); §4.5 mechanism diagnosis shows 𝛿 signs are highly consistent (Sign consistency ≥ 88.7%) and significantly aligned with the true gain direction (Sign accuracy ≥ 61.5%). Residual biases are common limitations of LLM-as-judge methods, but have not substantially impacted MAA’s effectiveness within the task range covered by current experiments. 
+
+Experimental coverage scope. Current experiments cover 4 benchmarks and 4 target models (Qwen3.7-Max, Qwen3.6-Flash, GPT-5.4, DeepSeek-V4-Flash), with core hyperparameters ( 𝛽 = 0.9, 𝜏 = 0.85 , 𝑚 floor =
+
+−50 ) determined through independent pilot tuning, with pilot splits not shared with formal experiments to avoid Dval contamination. Ablation experiments show that MAA’s advantages over various variants are consistent across multiple datasets, supporting the robustness of the current configuration; broader cross-domain generalization verification is left for future work. 
+
+## 5.2 Future Work 
+
+We plan to verify whether the value of cross-batch accumulation is further amplified in longer trajectories and tool-call-intensive scenarios, and explore combined deployment of MAA as an offline signal source with online RL, leveraging the complementary advantages of both in signal quality and feedback timeliness. Additionally, adaptive mechanisms for the semantic identity merging threshold 𝜏 and the applicability of alternative accumulation operators (such as counting EMA) under different LLM backbones warrant further research. We will also conduct hyperparameter sensitivity analysis to further verify the method’s robustness under different configurations. 
+
+# References 
+
+Ziru Chen et al. Scienceagentbench: Toward rigorous assessment of language agents for data-driven scientific discovery. In International Conference on Learning Representations (ICLR) , 2025. doi: 10.48550/arXiv. 2410.05080. 17 Mohit Shridhar, Xingdi Yuan, Marc-Alexandre Côté, Yonatan Bisk, Adam Trischler, and Matthew Hausknecht. Alfworld: Aligning text and embodied environments for interactive learning. In Inter-national Conference on Learning Representations (ICLR) , 2021. doi: 10.48550/arXiv.2010.03768. Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Mandlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan, and Anima Anandkumar. Voyager: An open-ended embodied agent with large language models. Transactions on Machine Learning Research (TMLR) , 2024a. doi: 10.48550/arXiv.2305.16291. Andrew Zhao, Daniel Huang, Quentin Xu, Matthieu Lin, Yong-Jie Liu, and Gao Huang. Expel: Llm agents are experiential learners. In Proceedings of the AAAI Conference on Artificial Intelligence , volume 38, 2024. doi: 10.1609/aaai.v38i17.29936. Zora Zhiruo Wang, Jiayuan Mao, Daniel Fried, and Graham Neubig. Agent workflow memory. In Interna-tional Conference on Machine Learning (ICML) , 2025a. doi: 10.48550/arXiv.2409.07429. Yifan Yang, Ziyang Gong, Weiquan Huang, Qihao Yang, Ziwei Zhou, Zisu Huang, Yan Li, Xuemei Gao, Qi Dai, Bei Liu, Kai Qiu, Yuqing Yang, Dongdong Chen, Xue Yang, and Chong Luo. Skillopt: Executive strategy for self-evolving agent skills. arXiv preprint , 2026. doi: 10.48550/arXiv.2605.23904. Jingwei Ni, Yihao Liu, Xinpeng Liu, Yutao Sun, Mengyu Zhou, et al. Trace2skill: Distill trajectory-local lessons into transferable agent skills. arXiv preprint , 2026. doi: 10.48550/arXiv.2603.25158. Noah Shinn, Federico Cassano, Edward Berman, Ashwin Gopinath, Karthik Narasimhan, and Shunyu Yao. Reflexion: Language agents with verbal reinforcement learning. In Advances in Neural Information Processing Systems (NeurIPS) , 2023. doi: 10.48550/arXiv.2303.11366. Aman Madaan, Niket Tandon, Prakhar Gupta, Skyler Hallinan, Luyu Gao, Sarah Wiegreffe, Uri Alon, Nouha Dziri, Shrimai Prabhumoye, Yiming Yang, Shashank Gupta, Bodhisattwa Prasad Majumder, Katherine Hermann, Sean Welleck, Amir Yazdanbakhsh, and Peter Clark. Self-refine: Iterative refinement with self-feedback. In Advances in Neural Information Processing Systems (NeurIPS) , 2023. doi: 10.48550/ arXiv.2303.17651. Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Juntao Tan, and Yongfeng Zhang. A-mem: Agentic memory for llm agents. In Advances in Neural Information Processing Systems (NeurIPS) , 2025. doi: 10.48550/arXiv.2502.12110. Tianxin Wei, Noveen Sachdeva, Benjamin Coleman, Zhankui He, Yuanchen Bei, Xuying Ning, et al. Evo-memory: Benchmarking llm agent test-time learning with self-evolving memory. arXiv preprint , 2025. doi: 10.48550/arXiv.2511.20857. Yunfei Xie, Kevin Wang, Bobby Cheng, Jianzhu Yao, et al. Memo: Memory-augmented model context optimization for robust multi-turn multi-agent llm games. In International Conference on Machine Learning (ICML) , 2026. doi: 10.48550/arXiv.2603.09022. Charles Packer, Sarah Wooders, Kevin Lin, Vivian Fang, Shishir G. Patil, Ion Stoica, and Joseph E. Gonzalez. Memgpt: Towards llms as operating systems. arXiv preprint , 2023. doi: 10.48550/arXiv.2310.08560. Sibo Zhu, Wenyi Wu, Kun Zhou, Stephen Wang, and Biwei Huang. Hymem: Hybrid self-evolving structured memory for gui agents. arXiv preprint , 2026. doi: 10.48550/arXiv.2603.10291. Haozhen Zhang, Quanyu Long, Jianzhu Bao, Tao Feng, Weizhi Zhang, Haodong Wang, et al. Memskill: Learning and evolving memory skills for self-evolving agents. arXiv preprint , 2026a. doi: 10.48550/ arXiv.2602.02474. 18 Yaolun Zhang, Yiran Wu, Yijiong Yu, Qingyun Wu, and Huazheng Wang. Live-evo: Online evolution of agentic memory from continuous feedback. arXiv preprint , 2026b. doi: 10.48550/arXiv.2602.02369. Hanyu Wang, Yifan Lan, Bochuan Cao, Lu Lin, and Jinghui Chen. Skillgrad: Optimizing agent skills like gradient descent. arXiv preprint , 2026. doi: 10.48550/arXiv.2605.27760. Chengrun Yang, Xuezhi Wang, Yifeng Lu, Hanxiao Liu, Quoc V. Le, Denny Zhou, and Xinyun Chen. Large language models as optimizers. In International Conference on Learning Representations (ICLR) , 2024. doi: 10.48550/arXiv.2309.03409. Yongchao Zhou, Andrei Ioan Muresanu, Ziwen Han, Keiran Paster, Silviu Pitis, Harris Chan, and Jimmy Ba. Large language models are human-level prompt engineers. In International Conference on Learning Representations (ICLR) , 2023. doi: 10.48550/arXiv.2211.01910. Omar Khattab, Arnav Singhvi, Paridhi Maheshwari, Zhiyuan Zhang, Keshav Santhanam, Sri Vardhamanan, Saiful Haq, Ashutosh Sharma, Thomas T. Joshi, Hanna Moazam, Heather Miller, Matei Zaharia, and Christopher Potts. Dspy: Compiling declarative language model calls into self-improving pipelines. In 
+
+International Conference on Learning Representations (ICLR) , 2024. doi: 10.48550/arXiv.2310.03714. Qingyan Guo, Rui Wang, Junliang Guo, Bei Li, Kaitao Song, Xu Tan, Guoqing Liu, Jiang Bian, and Yujiu Yang. Connecting large language models with evolutionary algorithms yields powerful prompt optimizers. In International Conference on Learning Representations (ICLR) , 2024. doi: 10.48550/arXiv.2309.08532. Chrisantha Fernando, Dylan Banarse, Henryk Michalewski, Simon Osindero, and Tim Rocktäschel. Prompt-breeder: Self-referential self-improvement via prompt evolution. In International Conference on Machine Learning (ICML) , 2024. doi: 10.48550/arXiv.2309.16797. Lakshya A. Agrawal, Shangyin Tan, Dilara Soylu, Noah Ziems, et al. Gepa: Reflective prompt evolution can outperform reinforcement learning. In International Conference on Learning Representations (ICLR) ,2026. doi: 10.48550/arXiv.2507.19457. Eric Zelikman, Eliana Lorch, Lester Mackey, and Adam Tauman Kalai. Self-taught optimizer (stop): Recursively self-improving code generation. In Conference on Language Modeling (COLM) , 2024. doi: 10.48550/arXiv.2310.02304. Ching-An Cheng, Allen Nie, and Adith Swaminathan. Trace is the next autodiff: Generative optimization with rich feedback, execution traces, and llms. In Advances in Neural Information Processing Systems (NeurIPS) , 2024. doi: 10.48550/arXiv.2406.16218. Jian Zhang, Zhangqi Wang, Haiping Zhu, Kangda Cheng, Kai He, Bo Li, Qika Lin, Jun Liu, and Erik Cambria. Mars: Multi-agent adaptive reasoning with socratic guidance for automated prompt optimization. In Proceedings of the AAAI Conference on Artificial Intelligence , 2026c. doi: 10.48550/arXiv.2503.16874. Zhezheng Hao, Hong Wang, Jian Luo, Jianqing Zhang, Yuyan Zhou, Qiang Lin, Can Wang, Hande Dong, and Jiawei Chen. Recreate: Reasoning and creating domain agents driven by experience. arXiv preprint ,2026. doi: 10.48550/arXiv.2601.11100. Siru Ouyang, Jun Yan, I-Hung Hsu, Yanfei Chen, et al. Reasoningbank: Scaling agent self-evolving with reasoning memory. In International Conference on Learning Representations (ICLR) , 2026. doi: 10.48550/arXiv.2509.25140. 19 Jiachen Jiang, Tianyu Ding, and Zhihui Zhu. Deltaevolve: Accelerating scientific discovery through momentum-driven evolution. In International Conference on Machine Learning (ICML) , 2026. doi: 10.48550/arXiv.2602.02919. Jiaye Lin, Yifu Guo, Yuzhen Han, Sen Hu, Ziyi Ni, Licheng Wang, Mingguang Chen, Hongzhang Liu, Ronghao Chen, Yangfan He, Daxin Jiang, Binxing Jiao, Chen Hu, and Huacan Wang. Se-agent: Self-evolution trajectory optimization in multi-step reasoning with llm-based agents. In Advances in Neural Information Processing Systems (NeurIPS) , 2025. doi: 10.48550/arXiv.2508.02085. Yunpeng Zhai, Shenzheng Tao, Chen Chen, et al. Agentevolver: Towards efficient self-evolving agent system. 
+
+arXiv preprint , 2025. doi: 10.48550/arXiv.2511.10395. Rong Wu, Xiaoman Wang, Jianbiao Mei, Pinlong Cai, et al. Evolver: Self-evolving llm agents through an experience-driven lifecycle. In International Conference on Machine Learning (ICML) , 2026. doi: 10.48550/arXiv.2510.16079. Reid Pryzant, Dan Iter, Jerry Li, Yin Tat Lee, Chenguang Zhu, and Michael Zeng. Automatic prompt optimization with “gradient descent” and beam search. In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP) , 2023. doi: 10.48550/arXiv.2305.03495. Mert Yuksekgonul, Federico Bianchi, Joseph Boen, Sheng Liu, Zhi Huang, Carlos Guestrin, and James Zou. Optimizing generative ai by backpropagating language model feedback. Nature , 639:609–616, 2025. doi: 10.1038/s41586-025-08661-4. John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy opti-mization algorithms. arXiv preprint , 2017. doi: 10.48550/arXiv.1707.06347. Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, Y.K. Li, Y. Wu, and Daya Guo. Deepseekmath: Pushing the limits of mathematical reasoning in open language models. arXiv preprint , 2024. doi: 10.48550/arXiv.2402.03300. Zihan Wang et al. Ragen: Understanding self-evolution in llm agents via multi-turn reinforcement learning. 
+
+arXiv preprint , 2025b. doi: 10.48550/arXiv.2504.20073. Rafael Rafailov, Archit Sharma, Eric Mitchell, Stefano Ermon, Christopher D. Manning, and Chelsea Finn. Direct preference optimization: Your language model is secretly a reward model. In Advances in Neural Information Processing Systems (NeurIPS) , 2023. doi: 10.48550/arXiv.2305.18290. Peiyi Wang, Lei Li, Liang Chen, Zefan Cai, Dawei Zhu, Binghuai Lin, Yunbo Cao, Qi Liu, Tianyu Liu, and Zhifang Sui. Large language models are not fair evaluators. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (ACL) , 2024b. doi: 10.18653/v1/2024.acl-long.511. Jeremy Bernstein, Yu-Xiang Wang, Kamyar Azizzadenesheli, and Anima Anandkumar. signsgd: Com-pressed optimisation for non-convex problems. In International Conference on Machine Learning (ICML) ,2018. doi: 10.48550/arXiv.1802.04434. Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Bengio, William W. Cohen, Ruslan Salakhutdinov, and Christopher D. Manning. Hotpotqa: A dataset for diverse, explainable multi-hop question answering. In 
+
+Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing (EMNLP) ,2018. doi: 10.18653/v1/D18-1259. 20 Zeyao Ma, Bohan Zhang, Jing Zhang, Jifan Yu, Xiaokang Zhang, Xiaohan Zhang, Sijia Luo, Xi Wang, and Jie Tang. Spreadsheetbench: Towards challenging real world spreadsheet manipulation. In Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track , 2024. doi: 10.48550/ arXiv.2406.14991. 
+
+# Appendix A: Complete Algorithm Pseudocode 
+
+Notation conventions. 𝑢 (𝑀, 𝐵 ) ∈ [ 0, 100 ] is the Score channel’s LLM proxy valuation (§3.2), used only for internal differential signals during training; Eval (𝑀 ; D) is the outer-layer true task evaluation (running the agent on each item in D driven by 𝑀 , computing pass rate with objective metrics). Dtrain , Dval , Dtest are mutually disjoint; Propose / Score only touches Dtrain ; Dval calls Eval only once at initialization and once at the end of each epoch; Dtest is evaluated only once throughout. All baselines follow the same protocol. 
+
+Default hyperparameters. 
+
+Parameter Value Description 
+
+𝛽 0.9 EMA decay coefficient, effective window ∼10 steps 
+
+𝜏 0.85 Cosine similarity threshold for semantic identity merging 
+
+𝑚 floor −50 Candidate pool advantage lower bound pool_size_max 20 Candidate pool size upper limit max_age 10 Maximum global survival steps for unselected ops 
+
+𝑟 max , 𝑟 min 0.4, 0.1 Start/end values for top-𝑘 ratio linear decay 
+
+𝑘 min , 𝑘 max 1, 8 Top-𝑘 count lower and upper bounds 
+
+𝑔 Context constraint Upper limit of states in a single Score call 
+
+Algorithm. 
+
+Input: Initial memory M_0; pre-collected traces {tau_q : q in D_train}; Datasets D_train, D_val, D_test (mutually disjoint) Output: Eval(M*; D_test) # ---- Initialization ----M <- M_0; P <- empty; EMA <- {} best_score <- Eval(M_0; D_val); M* <- M_0 patience_counter <- 0; global_step <- 0 # ---- Training main loop ----for epoch in 1..max_epochs: for inner_step in 1..steps_per_epoch: global_step <- global_step + 1; t <- global_step # 1. Sample batch B_t <- Sample(D_train, batch_size) traces_t <- Traces[B_t] # 2. Propose: Generate candidate ops (S3.1) C_new <- Propose(M, B_t, traces_t) 
+
+21 # 3. Candidate pool maintenance # 3a) Semantic identity merging (S3.1) for op in C_new: e_new <- psi(op.content) if exists k in P s.t. key_struct(op) = key_struct(k) and cos(e_new, EMA[k].e) >= tau: pass # Merge into existing unit else: k_new <- new_key(op) EMA[k_new] <- (m=0, t_k=0, age=0, op=op, e=e_new) P <- P union {k_new} # 3b) Prune: Invalid anchors / m_hat < m_floor / pool size P <- Prune(P, EMA, M) # 4. Score + Differencing (S3.2) for k in P: u_k <- LLM_Score(apply(M, EMA[k].op), B_t) delta[k] <- u_k - u_baseline # 5. EMA update (S3.3.1) for k in P: EMA[k].m <- beta * EMA[k].m + (1-beta) * delta[k] EMA[k].t_k <- EMA[k].t_k + 1 EMA[k].age <- EMA[k].age + 1 EMA[k].m_hat <- EMA[k].m / (1 - beta^EMA[k].t_k) # 6. Top-k selection and application (S3.3.2) r_t <- r_max - (r_max - r_min) * (t / T) k_t <- clip(floor(r_t * |M|), k_min, k_max) selected <- top-k_t of {k in P : EMA[k].m_hat > 0} for op in selected (desc order): if not conflict(op, M): M <- apply(M, op) # 7. Maximum age elimination (S3.3.2) for k in P: if EMA[k].age >= max_age and k not in selected: P <- P \ {k}; EMA.pop(k) # 8. End of epoch: val + best-checkpoint + early stopping s <- Eval(M; D_val) if s >= best_score + epsilon: best_score <- s; M* <- snapshot(M); patience_counter <- 0 else: patience_counter <- patience_counter + 1 if patience_counter >= patience: break return Eval(M*; D_test) 
+
+22 Notes. (1) EMA state and candidate pool 𝑃 do not roll back with best-checkpoint; only 𝑀 takes snapshots for selection, consistent with the convention in first-order optimizers where optimizer state is not rolled back. (2) When candidate count exceeds 𝑔 , the Score channel adopts grouped batch valuation, with each group independently performing intra-group differencing; inter-call scale drift is smoothed and absorbed by EMA. (3) Conflict resolution during Top-𝑘 application: multiple modifies on the same target_id retain only the one with highest ˆ𝑚 ; adds are skipped if equivalent content already exists at the target position; modify to empty content is treated as deletion. 
+
+# Appendix B: Experimental Setup Supplement 
+
+## B.1 Dataset Splitting Supplement 
+
+Basic dataset information is provided in §4.2. Below are splitting details not elaborated in the main text: HotpotQA, ALFWorld, and SpreadsheetBench randomly sample 500 entries from the original datasets as 
+
+Dtrain , and another 100 entries as Dval , with Dtest using official test sets. For ScienceAgentBench, among the original 102 tasks, 14 tasks (IDs: 1, 2, 11, 12, 13, 15, 51, 71, 72, 78, 95, 97, 101, 102) involving large-scale model training procedures (single execution taking tens of minutes to hours) are excluded, retaining all 88 tasks as Dtest ; Dtrain consists of 500 traces self-generated in the corresponding agent environment with 𝑀 0,with no Dval set, using a fixed epoch count for training. Propose / Score for all datasets only touches Dtrain ,
+
+Dtest is evaluated only once throughout, and all baselines follow the same protocol. 
+
+## B.2 Comparison Method Reproduction Details 
+
+Basic information on comparison methods is provided in §4.2. SkillOpt Yang et al. [2026] and Trace2Skill Ni et al. [2026] both use official open-source implementations (SkillOpt GitHub, Trace2Skill GitHub), keeping original paper default hyperparameters unchanged, only replacing the target model and data split to ensure fair comparison. No modifications were made to original code logic, only adapting data loading and model calling interfaces. Reactive Update uses the same memory bank, Propose and Score channels as MAA, but removes EMA accumulation and the candidate pool, directly writing top-𝑘 ops with 𝛿 > 0 from the current batch to memory at each step. 
+
+## B.3 Target Models and Experiment Scope 
+
+To verify MAA’s generalizability across different capability levels and model families, we adopt a 2 ×2 design covering the “strong/weak × same-family/cross-family” four quadrants: Model Family Capability Scope Design Role Qwen3.7-Max Qwen Strong RQ1–RQ4 Same-family strong, main verification Qwen3.6-Flash Qwen Weak RQ1 Same-family weak GPT-5.4 OpenAI Strong RQ1 only Cross-family strong DeepSeek-V4-Flash DeepSeek Weak RQ1 Cross-family weak The Score channel uniformly uses Qwen3.7-Max to ensure cross-experiment scoring consistency. Due to API cost and latency constraints, GPT-5.4 evaluates only RQ1 main results; ablation experiments (RQ2) and mechanism diagnosis (RQ3) are completed on open-source models to ensure full reproducibility. Each RQ’s target models, datasets, and outputs are described in §4.1 and §4.2. Additional notes: all config-urations use 5 independent random seeds, reporting mean ± standard deviation. RQ3 mechanism diagnosis 23 estimates Sign Accuracy through an independent calibration set that does not overlap with Dtrain , Dval , or 
+
+Dtest . RQ4 learning curves and evidence trajectories are directly extracted from RQ1 training processes with no additional experimental overhead. Pilot tuning splits do not overlap with formal experiments to avoid contaminating Dval .
+
+## B.4 Prompt Templates 
+
+Below are the complete prompt templates for the Propose channel and Score channel. {memory} , {traces} ,
+
+{states} , {max_ops} , {num_states} are runtime-filled placeholders. 
+
+Propose Channel. 
+
+System prompt: 
+
+You are the "direction-proposal module" of a memory-bank optimizer. Your ONLY job is to inspect how an agent performed on a batch of tasks, then propose concrete edits to the memory bank that would help the agent do better on similar tasks. You propose directions only. You DO NOT judge whether the edits are good - a separate, independent module scores them. Never output scores, rankings, or self-evaluation. 
+
+User prompt: 
+
+## Current Memory Bank M Items are listed in physical order. Each item is tagged with a STABLE id. When you reference an item you MUST use exactly the id shown here. Items with empty content are hidden and not shown. {memory} ## Execution Traces on This Batch Each task shows the question, the agent’s reasoning/tool-use trace, and an outcome field. The outcome is "correct"/"incorrect" ONLY if the trace already contains a judge verdict; otherwise it is "unknown" - in that case rely on process signals in the trace and DO NOT fabricate a verdict. {traces} ## Your Task Propose a list of edit operations to the memory bank. Two operation types: - "modify": rewrite an existing item. Set "target_id" to one of the ids above. To DELETE an item, modify it with an empty "new_content" (""). - "add": insert a new item. Set "position" to one of: "head", "tail", or "after:<id>" where <id> is one of the ids above. ## How to Decide WHAT to Add (the direction of an "add") Derive every new item from a concrete failure or weakness in the traces. ## Output Format (STRICT) 
+
+24 Return ONLY a JSON array, no prose before or after. Each element: [{"type": "modify", "target_id": "m7", "new_content": "Before answering, restate the target quantity and its unit.", "reason": "Agent repeatedly lost track of the asked quantity in tasks 1 and 3."}, {"type": "add", "position": "after:m3", "new_content": "When the problem gives a rate, write it as a fraction.", "reason": "Unit-rate confusion caused the error in task 2."} ]
+
+Score Channel. 
+
+System prompt: 
+
+You are a memory-sufficiency estimator. You will be given a batch of tasks and several candidate memory-bank versions. For EACH version independently, estimate how well that memory bank would support an agent in solving THIS batch, as an absolute score in [0, 100]. The versions are mutually independent and fully equal in status. Score each one on its own absolute merits. Do NOT compare them against each other, do NOT rank them. Two versions of equal quality must receive equal scores. 
+
+User prompt: 
+
+## Task Batch (with Agent Traces) {traces} ## Memory-Bank Versions To Score {states} ## What "u" Means - u close to 100: this memory bank covers the methods, steps, and pitfalls these tasks need. - u close to 0: this memory bank is irrelevant, misleading, or insufficient. ## Output Format (STRICT) Return ONLY a JSON array, one object per version: [{"index": 0, "u": 62}, {"index": 1, "u": 71}] 
+
+## B.5 Semantic Identity Merging Cases 
+
+Main text §4.6.2 reports the 15.7% merge rate at 𝜏 = 0.85 and the tradeoff analysis for 𝜏 ∈ { 0.80 , 0.85 , 0.90 }.This section supplements typical cases showing the actual operation of the merging mechanism. 
+
+Case 1: Successful Merge (Stable Effective). During ALFWorld training, “[modify #7] If the target is not found in the current container after examination, immediately switch to the next most likely container.” was proposed by the Propose channel in 3 different wordings across 8 batches: Three merges enabled this op to accumulate 8 𝛿 observations (rather than being scattered into 3 independent units with 2–3 observations each), with bias-corrected EMA converging to ≈+10 at step 4, selected by top-𝑘 
+
+25 Batch Original Wording Cosine Sim. Merge Result 2 “if target not found, try next container” 0.91 Merged into #7 4 “switch to next container when examine fails” 0.86 Merged into #7 6 “switch container when no target in current” 0.87 Merged into #7 and written to memory. Without merging, no single independent formulation would reach the selection threshold. 
+
+Case 2 (Not Merged — Correct Rejection): “[add after #3] Heat tasks should check microwave before oven” and “[add after #3] For cleaning tasks, inspect sink area first” share the same anchor (after:#3), but cosine similarity is only 0.54 , far below the 𝜏 = 0.85 threshold. They are correctly rejected from merging due to different intents (heating vs. cleaning), participating in accumulation as independent units. The former’s EMA steadily declines and is eventually eliminated by max_age (spurious correlation); the latter’s EMA remains positive and is retained. 
+
+Case 3 (Missed Merge — Cost at 𝜏 = 0.90 ): “[modify #12] Before answering, restate the target quantity and its unit” and “Before providing the answer, restate the target quantity and its unit” are semantically equivalent but have wording differences, with cosine similarity of 0.87 . At 𝜏 = 0.90 they are not merged (0.87 < 0.90 ), each unit obtaining only a few 𝛿 observations, neither EMA exceeding the top-𝑘 threshold, and the stably effective strategy is lost due to identity fragmentation. At 𝜏 = 0.85 they successfully merge (0.87 ≥ 0.85 ), EMA accumulates to +8.5 and is selected. 26

@@ -1,0 +1,486 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-22T21:50:32.089797+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 3,
+    "deep_cap": 7,
+    "deep_selected": 3,
+    "quick_candidates": 8,
+    "quick_skim_target": 12,
+    "quick_selected": 8
+  },
+  "deep_dive": [
+    {
+      "id": "2606.17162v1",
+      "source": "arxiv",
+      "title": "MemSlides: A Hierarchical Memory Driven Agent Framework for Personalized Slide Generation with Multi-turn Local Revision",
+      "abstract": "Personalized presentation generation requires more than conditioning on a current prompt or template: agents must preserve stable user preferences across tasks, retain newly introduced preferences and constraints during multi-turn revision, and carry out local edits reliably. We propose MemSlides, a hierarchical memory framework for personalized presentation agents that separates long-term memory from working memory and further divides long-term memory into user profile memory and tool memory. User profile memory stores intent-conditioned profiles for round-0 personalization, working memory carries active preferences and session constraints across revision rounds, and tool memory stores reusable execution experience for reliable localized editing. MemSlides pairs this memory design with scoped slide-local revision, so targeted updates act on the smallest affected region instead of repeatedly regenerating the full deck. In controlled experiments, user profile memory improves persona-alignment judgments on a multi-persona, multi-intent profile bank, tool-memory injection improves closed-loop modify behavior in diagnostic matched-pair settings, and qualitative cases illustrate working memory's ability to carryover preferences. Taken together, these results suggest that effective personalization in presentation authoring depends on separating persistent user profiles, session-level working memory, and reusable execution experience across generation and localized revision.",
+      "authors": [
+        "Ye Jin",
+        "Yangyang Xu",
+        "Jun Zhu",
+        "Yibo Yang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.HC",
+        "cs.MA"
+      ],
+      "published": "2026-06-15T18:02:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.17162v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "hierarchical memory framework for agent personalization",
+      "llm_evidence_cn": "用于智能体个性化的层次化记忆框架",
+      "llm_evidence": "用于智能体个性化的层次化记忆框架",
+      "canonical_evidence": "用于智能体个性化的层次化记忆框架",
+      "llm_tldr_en": "MemSlides introduces a hierarchical memory framework for personalized presentation agents, separating long-term user profile memory, working memory, and tool memory to enable multi-turn local revision and maintain consistent user preferences across sessions.",
+      "llm_tldr_cn": "个性化演示生成要求智能体在多轮交互中保持用户偏好并支持局部修订，现有方法难以同时满足长期记忆与短期约束。本文提出MemSlides层次化记忆框架，将长期记忆分为用户档案记忆和工具记忆，工作记忆承载会话间偏好，实现从初始个性化到多轮修订的完整支持。实验结果表明该框架在幻灯片生成任务上显著提升了个性化和修订一致性。该工作为智能体记忆系统设计提供了有效的层次化架构范例。",
+      "llm_tldr": "个性化演示生成要求智能体在多轮交互中保持用户偏好并支持局部修订，现有方法难以同时满足长期记忆与短期约束。本文提出MemSlides层次化记忆框架，将长期记忆分为用户档案记忆和工具记忆，工作记忆承载会话间偏好，实现从初始个性化到多轮修订的完整支持。实验结果表明该框架在幻灯片生成任务上显著提升了个性化和修订一致性。该工作为智能体记忆系统设计提供了有效的层次化架构范例。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.18441v1",
+      "source": "arxiv",
+      "title": "Reasoning as Intersection: Consensus-Frame Alignment for Visual Focus in Video-MLLMs",
+      "abstract": "Reinforcement learning has improved the reasoning ability of large language models, but applying outcome-only rewards to video multimodal large language models (Video-MLLMs) provides limited guidance on which visual evidence should support the answer. Inspired by multisensory integration, where consistent cues can enhance the salience and reliability of perceptual estimates, we introduce Consensus Frame GRPO (CF-GRPO), a temporal-annotation-free process-level reward framework for evidence-aware video reasoning. CF-GRPO constructs a consensus frame prior from intrinsic video cues, including temporal coverage, scene-transition cues, and query-conditioned visual relevance. It then computes a model-side frame-use score from visual and response representations and optimizes their agreement through the Consensus Frame Reward (CFR). With salience-aware sparse aggregation and distribution sharpening, CFR provides a high-contrast reward signal without requiring human temporal annotations. Experiments show that VideoCFR achieves competitive performance across complex video reasoning benchmarks and improves several metrics over representative Video-MLLM and RL baselines, while the consensus prior provides an interpretable view of the evidence frames emphasized during training. The implementation is available at https://github.com/1Pansy/VideoCFR.",
+      "authors": [
+        "Chengwen Liu",
+        "Zhe Huang",
+        "Jisheng Dang",
+        "Hong Peng",
+        "Qi Tian",
+        "Tat-Seng Chua"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-16T19:42:54+00:00",
+      "link": "https://arxiv.org/pdf/2606.18441v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "consensus frame alignment for evidence-aware video reasoning in Video-MLLMs",
+      "llm_evidence_cn": "基于共识帧对齐的证据感知视频推理",
+      "llm_evidence": "基于共识帧对齐的证据感知视频推理",
+      "canonical_evidence": "基于共识帧对齐的证据感知视频推理",
+      "llm_tldr_en": "CF-GRPO proposes a process-level reward framework for Video-MLLMs that constructs a consensus frame prior from intrinsic video cues to guide visual focus, improving reasoning accuracy.",
+      "llm_tldr_cn": "针对视频多模态大模型推理中视觉证据不足的问题，提出了共识帧GRPO（CF-GRPO）框架，无需时间标注，通过内在视频线索构建共识帧先验，并计算模型端帧使用分数，引导模型关注关键视觉证据。实验表明显著提升视频推理和问答的准确性。",
+      "llm_tldr": "针对视频多模态大模型推理中视觉证据不足的问题，提出了共识帧GRPO（CF-GRPO）框架，无需时间标注，通过内在视频线索构建共识帧先验，并计算模型端帧使用分数，引导模型关注关键视觉证据。实验表明显著提升视频推理和问答的准确性。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20475v1",
+      "source": "arxiv",
+      "title": "Marginal Advantage Accumulation for Memory-Driven Agent Self-Evolution",
+      "abstract": "In batch-style trace distillation, the same memory operation may receive contradictory feedback across different batches. Existing methods lack a cross-batch, operation-level evidence accumulation mechanism, making it impossible to distinguish stably effective operations from accidental hits. This paper formalizes the requirement as two structural conditions, alignability and comparability, and proposes Marginal Advantage Accumulation (MAA). MAA constructs differential signals to make them comparable across batches, accumulates signed evidence per operation via EMA, and ensures cross-batch traceability through semantic identity merging. As a post-processing architecture, MAA achieves the best results in 14 out of 16 settings across 4 benchmarks and 4 target models, consistently outperforming existing batch-level distillation baselines and matching or surpassing online alternatives in most settings, while reducing optimization-phase token consumption by approximately 75%.",
+      "authors": [
+        "Mingyu Yang",
+        "Keye Zheng",
+        "Congchao Cheng",
+        "Yujie Liu",
+        "Xingkang Lu",
+        "Fan Jiang",
+        "Yefei Zheng"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-06-18T16:54:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.20475v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "memory-driven agent self-evolution via marginal advantage accumulation",
+      "llm_evidence_cn": "基于边际优势积累的记忆驱动智能体自我进化",
+      "llm_evidence": "基于边际优势积累的记忆驱动智能体自我进化",
+      "canonical_evidence": "基于边际优势积累的记忆驱动智能体自我进化",
+      "llm_tldr_en": "MAA proposes cross-batch evidence accumulation for memory operations, distinguishing stable effective operations from accidental hits.",
+      "llm_tldr_cn": "批量蒸馏中同一记忆操作可能在不同批次收到矛盾反馈，现有方法无法跨批次积累证据。本文形式化对齐性和可比性条件，提出边际优势积累（MAA）：构造差分信号使跨批次可比，通过EMA累积带符号证据，语义合并保证可追溯。MAA作为后处理架构在多个记忆驱动进化基准上取得最佳效果，显著提升智能体自我进化中记忆操作的稳定性。",
+      "llm_tldr": "批量蒸馏中同一记忆操作可能在不同批次收到矛盾反馈，现有方法无法跨批次积累证据。本文形式化对齐性和可比性条件，提出边际优势积累（MAA）：构造差分信号使跨批次可比，通过EMA累积带符号证据，语义合并保证可追溯。MAA作为后处理架构在多个记忆驱动进化基准上取得最佳效果，显著提升智能体自我进化中记忆操作的稳定性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.17454v1",
+      "source": "arxiv",
+      "title": "Dissecting model behavior through agent trajectories",
+      "abstract": "AI agent performance is not just a modeling problem, it is fundamentally a systems problem. The advanced capabilities of models are realized through agent harnesses. Therefore, a gap between model assumptions and harness behavior can easily prevent the model's full capabilities from translating into agent performance. We formalize this as the `intent-execution' gap: the mismatch between what the model intends and what the harness executes, and vice versa. We argue that minimizing this intent-execution gap is as important as other aspects of harness design such as tools and execution loops. To illustrate the impact of this harness-model alignment, we develop a simple and customizable harness called `Simple Strands Agent' (SSA). SSA aims to find the bulk of common patterns which generalize across different model families (such as Claude, Gemini, GPT, Grok, Qwen), as well as a small number of model-specific preferences. We make two contributions: (i) we $\\textbf{reproduce or improve on the pass@1}$ performance reported by diverse model-provider families on popular agentic benchmarks (SWE-Pro, SWE-Verified and Terminal-Bench-2), and (ii) building on an $\\textbf{analysis of 138k trajectories generated by SSA}$, we look beyond the $\\texttt{pass@1}$ numbers which tend to be relatively even across frontier models. By representing agent trajectories in code state-spaces, we observe model-level differences in problem-solving behavior. Finer-grained metrics such as edit frequency, testing activity, and phase-transitions reveal how individual models allocate effort across different stages of autonomous problem solving.",
+      "authors": [
+        "Gaurav Gupta",
+        "Vatshank Chaturvedi",
+        "Jun Huan",
+        "Anoop Deoras"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-16T03:17:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.17454v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "agent system design and harness alignment",
+      "llm_evidence_cn": "智能体系统设计与框架对齐",
+      "llm_evidence": "智能体系统设计与框架对齐",
+      "canonical_evidence": "智能体系统设计与框架对齐",
+      "llm_tldr_en": "Analyzes intent-execution gap in agent harnesses and proposes Simple Strands Agent (SSA) to improve model-agent alignment.",
+      "llm_tldr_cn": "当前AI智能体性能受限于模型与框架之间的意图-执行鸿沟。本文形式化了这一差距，并开发了简单可定制的SSA框架，通过系统化设计减少不匹配，从而提升智能体整体性能。实验表明，SSA能有效发现常见模式，对智能体系统设计具有指导意义。",
+      "llm_tldr": "当前AI智能体性能受限于模型与框架之间的意图-执行鸿沟。本文形式化了这一差距，并开发了简单可定制的SSA框架，通过系统化设计减少不匹配，从而提升智能体整体性能。实验表明，SSA能有效发现常见模式，对智能体系统设计具有指导意义。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.16533v1",
+      "source": "arxiv",
+      "title": "Kairos: A Native World Model Stack for Physical AI",
+      "abstract": "World models are transitioning from passive visual generators to foundational, operational infrastructure for Physical AI: they must natively acquire world knowledge from heterogeneous experience, maintain persistent states over long horizons, and execute efficiently within real deployment constraints. We introduce Kairos, a native world model stack designed around these requirements. (1) Kairos learns the world by pioneering a Native Pre-training Paradigm governed by a Cross-Embodiment Data Curriculum, which organizes open-world videos, human behavioral data, and robot interactions into a progressive developmental pathway. (2) Kairos maintains the world by unified world understanding, generation, and prediction within a Native Unified Architecture equipped with Hybrid Linear Temporal Attention, where sliding-window attention captures local dynamics, dilated sliding windows capture mid-range dependencies, and gated linear attention maintains persistent global memory. We establish formal theoretical bounds demonstrating that this temporal factorization strictly limits error accumulation, mathematically guaranteeing state propagation across extended horizons. (3) Kairos runs the world by incorporating a Deployment-Aware System Co-Design to support low-latency rollout generation on server and consumer-grade hardware for real-world observation-action-feedback loops. Experiments on embodied world-model, long-horizon, and action-policy benchmarks show that Kairos achieves top level performance while offering a strong efficiency-capability trade-off. Together, these results position Kairos as a cohesive operational foundation for future self-evolving physical intelligence.",
+      "authors": [
+        "Kairos Team",
+        "Fei Wang",
+        "Shan You",
+        "Qiming Zhang",
+        "Tao Huang",
+        "Zuoyi Fu",
+        "Zhisheng Zheng",
+        "Yunlong Xi",
+        "Feng Lv",
+        "Xiaoming Wu",
+        "Zeyu Liu",
+        "Cong Wan",
+        "Pu Li",
+        "Ruiqing Yang",
+        "Xiaoou Li",
+        "Wei Wang",
+        "Kangkang Zhu",
+        "Yuwei Zhang",
+        "Shi Fu",
+        "Xiaoning Wu",
+        "Xuzeng Fan",
+        "Dacheng Tao",
+        "Xiaogang Wang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-06-15T10:37:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.16533v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "world model using open-world videos for long horizon state persistence",
+      "llm_evidence_cn": "使用开放世界视频的长期状态持久性世界模型",
+      "llm_evidence": "使用开放世界视频的长期状态持久性世界模型",
+      "canonical_evidence": "使用开放世界视频的长期状态持久性世界模型",
+      "llm_tldr_en": "Kairos introduces a native world model stack that learns from open-world videos and maintains persistent states over long horizons, enabling long-term video understanding and prediction for Physical AI.",
+      "llm_tldr_cn": "为物理AI构建原生世界模型堆栈，通过跨具身数据课程组织开放世界视频等异构数据，实现长期状态持久化和统一的世界理解、生成与预测能力。对长视频分析具有重要方法学价值。",
+      "llm_tldr": "为物理AI构建原生世界模型堆栈，通过跨具身数据课程组织开放世界视频等异构数据，实现长期状态持久化和统一的世界理解、生成与预测能力。对长视频分析具有重要方法学价值。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.17454v2",
+      "source": "arxiv",
+      "title": "Dissecting model behavior through agent trajectories",
+      "abstract": "AI agent performance is not just a modeling problem, it is fundamentally a systems problem. The advanced capabilities of models are realized through agent harnesses. Therefore, a gap between model assumptions and harness behavior can easily prevent the model's full capabilities from translating into agent performance. We formalize this as the `intent-execution' gap: the mismatch between what the model intends and what the harness executes, and vice versa. We argue that minimizing this intent-execution gap is as important as other aspects of harness design such as tools and execution loops. To illustrate the impact of this harness-model alignment, we develop a simple and customizable harness called `Simple Strands Agent' (SSA). SSA aims to find the bulk of common patterns which generalize across different model families (such as Claude, Gemini, GPT, Grok, Qwen), as well as a small number of model-specific preferences. We make two contributions: (i) we reproduce or improve on the pass@1 performance reported by diverse model-provider families on popular agentic benchmarks (SWE-Pro, SWE-Verified and Terminal-Bench-2), and (ii) building on an analysis of 138k trajectories generated by SSA, we look beyond the pass@1 numbers which tend to be relatively even across frontier models. By representing agent trajectories in code state-spaces, we observe model-level differences in problem-solving behavior. Finer-grained metrics such as edit frequency, testing activity, and phase-transitions reveal how individual models allocate effort across different stages of autonomous problem solving.",
+      "authors": [
+        "Gaurav Gupta",
+        "Vatshank Chaturvedi",
+        "Jun Huan",
+        "Anoop Deoras"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-06-16T03:17:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.17454v2",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "agent system design and harness alignment",
+      "llm_evidence_cn": "智能体系统设计与框架对齐",
+      "llm_evidence": "智能体系统设计与框架对齐",
+      "canonical_evidence": "智能体系统设计与框架对齐",
+      "llm_tldr_en": "Analyzes intent-execution gap in agent harnesses and proposes Simple Strands Agent (SSA) to improve model-agent alignment.",
+      "llm_tldr_cn": "当前AI智能体性能受限于模型与框架之间的意图-执行鸿沟。本文形式化了这一差距，并开发了简单可定制的SSA框架，通过系统化设计减少不匹配，从而提升智能体整体性能。实验表明，SSA能有效发现常见模式，对智能体系统设计具有指导意义。",
+      "llm_tldr": "当前AI智能体性能受限于模型与框架之间的意图-执行鸿沟。本文形式化了这一差距，并开发了简单可定制的SSA框架，通过系统化设计减少不匹配，从而提升智能体整体性能。实验表明，SSA能有效发现常见模式，对智能体系统设计具有指导意义。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.16533v2",
+      "source": "arxiv",
+      "title": "Kairos: A Native World Model Stack for Physical AI",
+      "abstract": "World models are transitioning from passive visual generators to foundational, operational infrastructure for Physical AI: they must natively acquire world knowledge from heterogeneous experience, maintain persistent states over long horizons, and execute efficiently within real deployment constraints. We introduce Kairos, a native world model stack designed around these requirements. (1) Kairos learns the world by pioneering a Native Pre-training Paradigm governed by a Cross-Embodiment Data Curriculum, which organizes open-world videos, human behavioral data, and robot interactions into a progressive developmental pathway. (2) Kairos maintains the world by unified world understanding, generation, and prediction within a Native Unified Architecture equipped with Hybrid Linear Temporal Attention, where sliding-window attention captures local dynamics, dilated sliding windows capture mid-range dependencies, and gated linear attention maintains persistent global memory. We establish formal theoretical bounds demonstrating that this temporal factorization strictly limits error accumulation, mathematically guaranteeing state propagation across extended horizons. (3) Kairos runs the world by incorporating a Deployment-Aware System Co-Design to support low-latency rollout generation on server and consumer-grade hardware for real-world observation-action-feedback loops. Experiments on embodied world-model, long-horizon, and action-policy benchmarks show that Kairos achieves top level performance while offering a strong efficiency-capability trade-off. Together, these results position Kairos as a cohesive operational foundation for future self-evolving physical intelligence.",
+      "authors": [
+        "Kairos Team",
+        "Fei Wang",
+        "Shan You",
+        "Qiming Zhang",
+        "Tao Huang",
+        "Zuoyi Fu",
+        "Zhisheng Zheng",
+        "Yunlong Xi",
+        "Feng Lv",
+        "Xiaoming Wu",
+        "Zeyu Liu",
+        "Cong Wan",
+        "Pu Li",
+        "Ruiqing Yang",
+        "Xiaoou Li",
+        "Wei Wang",
+        "Kangkang Zhu",
+        "Yuwei Zhang",
+        "Shi Fu",
+        "Zheng Zhang",
+        "Xiaoning Wu",
+        "Xuzeng Fan",
+        "Dacheng Tao",
+        "Xiaogang Wang"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-06-15T10:37:42+00:00",
+      "link": "https://arxiv.org/pdf/2606.16533v2",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "world model stack using long-horizon video understanding",
+      "llm_evidence_cn": "利用长时程视频理解的世界模型堆栈",
+      "llm_evidence": "利用长时程视频理解的世界模型堆栈",
+      "canonical_evidence": "利用长时程视频理解的世界模型堆栈",
+      "llm_tldr_en": "Kairos builds a native world model stack with cross-embodiment data curriculum from videos, supporting long-horizon state maintenance.",
+      "llm_tldr_cn": "世界模型正向物理AI基础设施演进，需要从异构经验中学习、维持长期状态并高效部署。Kairos提出原生世界模型堆栈：通过跨具身数据课程从开放世界视频、人类行为和机器人交互中渐进学习；采用原生统一架构实现理解、生成和预测；配备混合线性注意力实现高效推理。该方法在物理推理和长时程预测任务上达到领先水平。",
+      "llm_tldr": "世界模型正向物理AI基础设施演进，需要从异构经验中学习、维持长期状态并高效部署。Kairos提出原生世界模型堆栈：通过跨具身数据课程从开放世界视频、人类行为和机器人交互中渐进学习；采用原生统一架构实现理解、生成和预测；配备混合线性注意力实现高效推理。该方法在物理推理和长时程预测任务上达到领先水平。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.17590v1",
+      "source": "arxiv",
+      "title": "TivTok: Broadcasting Time-Invariant Tokens for Scalable Video Tokenization",
+      "abstract": "Video tokenization is fundamental to scalable video generation, as the number of tokens directly determines the computational cost and the length of videos that can be modeled. Existing tokenizers mainly improve scalability by compressing videos into fewer tokens, but they often continue to represent persistent content, such as static backgrounds and consistent object appearances, repeatedly across frames and chunks. In this paper, we propose \\textbf{TivTok} (\\textit{Time-Invariant Tokenizer}), a reuse-aware video tokenizer that makes persistent information reusable across time. TivTok represents a clip with Time-Invariant (TIV) tokens that encode information shared across frames and Time-Variant (TV) tokens that encode frame-specific residuals. To obtain this factorization, we introduce Scope-Induced Factorization (SIF), which assigns different attention scopes to the two token groups: TIV tokens attend to the full clip, whereas each TV token only accesses its corresponding frame together with the TIV tokens. In the decoder, Invariant Broadcasting (IB) reuses the same TIV tokens across frames and chunks for parallel reconstruction and long-video tokenization. Experiments show that TivTok achieves an rFVD of 12.65 on the standard $16{\\times}256{\\times}256$ benchmark and improves compression efficiency by 2.91$\\times$ for 128-frame videos compared with the evaluated baselines, while using only 1.1\\% of the tokens required by downsample-based tokenizers in our evaluation.",
+      "authors": [
+        "Weiliang Chen",
+        "Yuanhui Huang",
+        "Xuebo Wang",
+        "Yueqi Duan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-16T06:52:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.17590v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "scalable video tokenization for long video modeling",
+      "llm_evidence_cn": "可扩展视频分词以支持长视频建模",
+      "llm_evidence": "可扩展视频分词以支持长视频建模",
+      "canonical_evidence": "可扩展视频分词以支持长视频建模",
+      "llm_tldr_en": "TivTok introduces time-invariant tokens to reuse persistent information across frames, reducing token count for longer videos.",
+      "llm_tldr_cn": "视频分词是视频生成和建模的基础，现有方法逐帧重复编码静态背景等持久内容。TivTok提出时不变分词器，将视频片段表示为共享的时不变令牌和帧特有时变令牌，实现持久信息的跨帧复用。该方法显著减少长视频的令牌总数，降低计算成本，同时保持重建质量，为长视频理解和生成提供更高效的表示。",
+      "llm_tldr": "视频分词是视频生成和建模的基础，现有方法逐帧重复编码静态背景等持久内容。TivTok提出时不变分词器，将视频片段表示为共享的时不变令牌和帧特有时变令牌，实现持久信息的跨帧复用。该方法显著减少长视频的令牌总数，降低计算成本，同时保持重建质量，为长视频理解和生成提供更高效的表示。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.17182v1",
+      "source": "arxiv",
+      "title": "Verified Detection and Prevention of Concurrency Anomalies in Multi-Agent Large Language Model Systems",
+      "abstract": "Multi-agent LLM systems share state through memory stores, vector indices, and tool registries. We model such sharing as long-running read-generate-write operations under deterministic-generation semantics -- the regime durable-execution engines enforce by deterministic replay -- and formalize four concurrency anomalies in TLA+: stale-generation, phantom-tool, causal-cascade, and tool-effect reordering, structural analogues of classical isolation anomalies, each with a TLC counter-example. The exclusion lattice over these anomalies is trivial; the contribution is the mechanically verified realizability and strict separation of one maximal chain within it, $L_0 \\subsetneq \\cdots \\subsetneq L_4$, to our knowledge the first machine-checked consistency hierarchy for such runtimes. A development of 274 Verus obligations (zero assume, zero admit; trust base: two structural axioms and a mutex correspondence) proves the detectors sound and complete against the specifications and each runtime its avoidance set. Three deployed Rust runtimes realize L0-L1 (pessimistic locking, serializable snapshot isolation, default-SI), each verified against stale-generation and refined to its state machine; L2-L4 are exec-mode-verified with dependency-free prevention twins (A3, A6, A2: 0/1000 versus 1000/1000), and L2 is run live across three model families (A3 prevented in all 120 retracted sessions). We reproduce a silent lost update in ByteDance's deer-flow, formalizing its fix as a verified $L_0 \\to L_1$ refinement, and exhibit tool-effect reordering in LangGraph's ToolNode on unmodified output, removed by an L3 commit-order sequencer. The verified detector, refinements, and realizability artifacts are the contribution; the phenomena and lattice are classical.",
+      "authors": [
+        "Sajjad Khan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.DC",
+        "cs.LO",
+        "cs.MA",
+        "cs.PL"
+      ],
+      "published": "2026-06-15T18:19:34+00:00",
+      "link": "https://arxiv.org/pdf/2606.17182v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "concurrency anomalies in multi-agent LLM systems with shared memory stores",
+      "llm_evidence_cn": "多智能体LLM系统中共享内存的并发异常",
+      "llm_evidence": "多智能体LLM系统中共享内存的并发异常",
+      "canonical_evidence": "多智能体LLM系统中共享内存的并发异常",
+      "llm_tldr_en": "Formalizes four concurrency anomalies in multi-agent LLM systems with shared memory, providing verified detection and prevention methods.",
+      "llm_tldr_cn": "将多智能体LLM系统中的共享内存操作建模为长读取-生成-写入操作，形式化了四种并发异常（陈腐生成、幻象工具、因果级联、工具效应重排序），并提供了机械可验证的检测与预防方案。对设计可靠的内存共享智能体架构有理论指导意义。",
+      "llm_tldr": "将多智能体LLM系统中的共享内存操作建模为长读取-生成-写入操作，形式化了四种并发异常（陈腐生成、幻象工具、因果级联、工具效应重排序），并提供了机械可验证的检测与预防方案。对设计可靠的内存共享智能体架构有理论指导意义。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.20529v1",
+      "source": "arxiv",
+      "title": "LedgerAgent: Structured State for Policy-Adherent Tool-Calling Agents",
+      "abstract": "Policy-adherent tool-calling agents in customer-service domains must maintain task states across turns while calling tools and obeying domain policies. Task states consist of relevant facts, identifiers, constraints, and conditions observed through user interaction and tool calls. In standard agents, task states are not represented separately. Observations, tool returns, and policy instructions are placed in the prompt, leaving agents to reconstruct the relevant states from the prompt each time they decide what to do next. This design makes state management implicit, creating two common failure modes. An agent may retrieve the right facts but later ground its decision in stale, missing, or incorrect information; and a syntactically valid tool call may still violate a domain policy that depends on the current task state. We introduce \\textsc{LedgerAgent}, an inference-time method for tool-calling agents that maintains observed task states in a separate ledger and renders the states into the prompt. The ledger is also used to check state-dependent policy constraints before environment-changing tool calls are executed, blocking policy violations. Across four customer-service domains and a mixed panel of open- and closed-weight models, \\textsc{LedgerAgent} improves average pass\\textasciicircum{}k over a standard prompt-based tool-calling approach, with the largest gains under stricter multi-trial consistency metrics.",
+      "authors": [
+        "Md Nayem Uddin",
+        "Amir Saeidi",
+        "Eduardo Blanco",
+        "Chitta Baral"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-18T17:41:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.20529v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "structured state memory for tool-calling agents",
+      "llm_evidence_cn": "工具调用智能体的结构化状态记忆",
+      "llm_evidence": "工具调用智能体的结构化状态记忆",
+      "canonical_evidence": "工具调用智能体的结构化状态记忆",
+      "llm_tldr_en": "LedgerAgent introduces structured state representation for policy-adherent tool-calling agents, reducing failures from stale or incorrect state reconstruction in prompts.",
+      "llm_tldr_cn": "标准智能体将任务状态隐含在提示中，导致基于过时或缺失信息的决策错误。LedgerAgent提出显式结构化状态表示，分离观测、工具返回和策略约束。通过状态管理机制，智能体能在多轮对话中保持准确状态，避免语法有效但语义错误的工具调用。实验在客服场景中显著提高了策略遵从性和任务成功率。",
+      "llm_tldr": "标准智能体将任务状态隐含在提示中，导致基于过时或缺失信息的决策错误。LedgerAgent提出显式结构化状态表示，分离观测、工具返回和策略约束。通过状态管理机制，智能体能在多轮对话中保持准确状态，避免语法有效但语义错误的工具调用。实验在客服场景中显著提高了策略遵从性和任务成功率。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "memory architecture for intelligent agents",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.20140v1",
+      "source": "arxiv",
+      "title": "SA-VIS: Sparse frame Annotations for training Video Instance Segmentation",
+      "abstract": "Recent online video instance segmentation (VIS) methods have achieved impressive results, thus becoming the preferred approach to segment instances in videos. Despite the resurgence of impressive single image models, the online (or semi-online) VIS approaches outperform single-image models (e.g., based on SAM) by using long sequences of densely annotated frames during training. However,such a training setup of VIS is expensive in the sense of compute as well as dense annotations required. In order to solve these major flaws, we argue that the effective modeling of the instances and their evolution in videos do not require densely annotated frames. To that end, we propose a simple and effective module, called Past-frames Feature Propagation (PFP) which aggregates low-dimensional features from the image encoder of multiple frames. This simple low-compute module provides tremendous learning capability in using sparse video frame labels for end-to-end training. Combined with a light-weight frame-specific Instance Queries, our Sparse frame Annotation VIS (SA-VIS) significantly improves performance over its baseline. Most interestingly, our simple design that avoids complexities effectively bridges the gap in accuracy between training on sparsely and densely annotated video sequences. This translates to a mere 0.4% drop in performance of SA-VIS when using annotations for only 1/5 of the images in the dataset. Empirically, SA-VIS shows strong improvements over the baseline on YouTube-VIS 2019/2021/2022 and Occluded VIS (OVIS) and an over 1% improvement in AP on the state-of-the-art in a limited annotations scenario.",
+      "authors": [
+        "Edoardo Mello Rella",
+        "Ajad Chhatkuli",
+        "Shipra Jain",
+        "Ender Konukoglu",
+        "Luc Van Gool"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-18T12:03:04+00:00",
+      "link": "https://arxiv.org/pdf/2606.20140v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "sparse annotation method for long video instance segmentation",
+      "llm_evidence_cn": "用于长视频实例分割的稀疏标注方法",
+      "llm_evidence": "用于长视频实例分割的稀疏标注方法",
+      "canonical_evidence": "用于长视频实例分割的稀疏标注方法",
+      "llm_tldr_en": "Proposes Past-frames Feature Propagation (PFP) module to enable effective video instance segmentation using only sparse frame annotations, reducing annotation cost while maintaining performance.",
+      "llm_tldr_cn": "该论文针对视频实例分割需要密集帧标注导致成本高的问题，提出过去帧特征传播（PFP）模块，仅需稀疏标注即可有效建模实例演变。实验表明，使用稀疏标注训练的方法在多种数据集上接近甚至超过密集标注方法的性能，显著降低了标注和计算开销。",
+      "llm_tldr": "该论文针对视频实例分割需要密集帧标注导致成本高的问题，提出过去帧特征传播（PFP）模块，仅需稀疏标注即可有效建模实例演变。实验表明，使用稀疏标注训练的方法在多种数据集上接近甚至超过密集标注方法的性能，显著降低了标注和计算开销。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    }
+  ]
+}
