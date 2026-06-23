@@ -1,0 +1,822 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-23T21:53:23.054240+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 16,
+    "deep_cap": 7,
+    "deep_selected": 11,
+    "quick_candidates": 9,
+    "quick_skim_target": 12,
+    "quick_selected": 9
+  },
+  "deep_dive": [
+    {
+      "id": "2606.21734v1",
+      "source": "arxiv",
+      "title": "HPP: Hierarchical Programmatic Probing for Long Video Understanding by Decoupling Perception and Reasoning",
+      "abstract": "Understanding long videos requires fine-grained perception and multi-step, higher-order reasoning over complex, long-range spatio-temporal dynamics. Vision-language models (VLMs) encode video frames into visual tokens and attempt to perform both perception and multi-step planning latently, within a single forward pass. This coupled formulation, however, is bottlenecked by the LLM's limited capacity to discover and execute multi-step strategies in its latent representations. To address this bottleneck, we propose Hierarchical Programmatic Probing (HPP), a framework that decouples semantic perception from higher-order temporal reasoning by reformulating long video understanding as iterative, programmatic exploration of a hierarchically segmented video. Specifically, a coding-capable LLM plans and executes a multi-step strategy in an interactive coding environment, probing the video for information and invoking a VLM for localized perception on demand. To make probing tractable over long videos, we introduce three components: information-density-aware hierarchical segmentation, late-interaction semantic retrieval, and structured probing functions for coarse-to-fine temporal localization. We validate HPP on LongVideoBench, which requires both fine-grained perception and long-range relational reasoning, and show that decoupling the two via iterative programmatic probing yields substantial gains. Further results on EgoSchema, VideoMME, and MLVU demonstrate the effectiveness of our approach across diverse long-video benchmarks.",
+      "authors": [
+        "Awais Rauf",
+        "Ahmed Hasssan",
+        "Greg Slabaugh"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-19T20:43:49+00:00",
+      "link": "https://arxiv.org/pdf/2606.21734v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "hierarchical programmatic probing for long video understanding by decoupling perception and reasoning",
+      "llm_evidence_cn": "通过解耦感知与推理实现长视频理解的分层程序化探测",
+      "llm_evidence": "通过解耦感知与推理实现长视频理解的分层程序化探测",
+      "canonical_evidence": "通过解耦感知与推理实现长视频理解的分层程序化探测",
+      "llm_tldr_en": "HPP decouples perception from reasoning in long video understanding by reformulating it as iterative programmatic exploration, overcoming LLM's latent reasoning bottleneck.",
+      "llm_tldr_cn": "长视频理解需要精细的感知和多步高阶推理，但现有VLM将两者耦合在单一前向传播中，受限于LLM的潜在推理能力。本文提出分层程序化探测（HPP）框架，将长视频理解重构为迭代的程序化探索过程，解耦语义感知与高阶时间推理。该方法通过显式程序化步骤逐步探索视频内容，有效缓解了推理瓶颈，在多个长视频理解基准上取得显著提升。",
+      "llm_tldr": "长视频理解需要精细的感知和多步高阶推理，但现有VLM将两者耦合在单一前向传播中，受限于LLM的潜在推理能力。本文提出分层程序化探测（HPP）框架，将长视频理解重构为迭代的程序化探索过程，解耦语义感知与高阶时间推理。该方法通过显式程序化步骤逐步探索视频内容，有效缓解了推理瓶颈，在多个长视频理解基准上取得显著提升。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20726v1",
+      "source": "arxiv",
+      "title": "How Well Can Your Video Model Remember? Measuring Memory-Budget Trade-offs in Long Video Understanding",
+      "abstract": "We introduce a compact empirical model that quantifies how answer accuracy degrades as a function of frame budget B and temporal distance D in long video understanding -- analyzing performance when recalling content from D seconds in the past using a fraction B of total frames. Long-form models operate under strict budgets, yet no prior framework predicts how accuracy degrades as B shrinks and events recede. We fit a weighted least-squares model on ~155,000 binary predictions across ten models and three sampling strategies, deriving a law where logit-accuracy scales linearly in log-budget with a distance-dependent exponent that decays log-linearly with distance. This budget exponent α(D) captures the marginal value of extra frames at distance D. The law achieves cell-level weighted R^2 = 0.05-0.75 across models. Notably, budget effectiveness at D = 1000 s differs by \\approx 7.4\\times between the best streaming and base models. STREAMINGVLM achieves α(1000) = 1.26 (95% CI: [1.06, 1.58]), meaning a tenfold budget increase substantially improves long-distance accuracy, while the best Qwen3-VL base model reaches only α(1000) = 0.17 (CI: [0.04, 0.34]). In accuracy space, a 10\\times budget increase at D = 1000 s yields +29 percentage points for STREAMINGVLM versus +4 pp for the base model. Sampling strategies show model-dependent trade-offs: random sampling yields higher base sensitivity but steeper distance decay. We demonstrate how α(D) enables principled budget allocation, including a model-ranking reversal at long distance, and propose it as a diagnostic metric for streaming video models.",
+      "authors": [
+        "Yixian Tian"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-17T03:30:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.20726v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "long video understanding memory-budget tradeoffs",
+      "llm_evidence_cn": "长视频理解中的记忆预算权衡",
+      "llm_evidence": "长视频理解中的记忆预算权衡",
+      "canonical_evidence": "长视频理解中的记忆预算权衡",
+      "llm_tldr_en": "Measures how accuracy degrades with frame budget and temporal distance in long video understanding, fitting a law across models.",
+      "llm_tldr_cn": "现有长视频模型在有限帧预算下性能退化缺乏预测框架。本文基于约15.5万次预测，拟合出准确率随帧预算和时距衰减的经验定律，揭示了预算指数与时距的对数线性关系。该工作为长视频理解系统的资源分配提供了理论指导。",
+      "llm_tldr": "现有长视频模型在有限帧预算下性能退化缺乏预测框架。本文基于约15.5万次预测，拟合出准确率随帧预算和时距衰减的经验定律，揭示了预算指数与时距的对数线性关系。该工作为长视频理解系统的资源分配提供了理论指导。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.20954v1",
+      "source": "arxiv",
+      "title": "Learning What Not to Forget: Long-Horizon Agent Memory from a Few Kilobytes of Learning",
+      "abstract": "Long-running language-model systems accumulate interaction history that outgrows the context window, so they must continually evict. When an eviction policy drops a load-bearing detail, for example an access token issued at login or a path the next call needs, the action fails. We present LRE (Learned Relevance Eviction), a few kilobytes, CPU-only, language-model-free scorer that learns which units of history are load-bearing and keeps them by verbatim extraction. Under a matched-budget comparison, in our experiment, no baseline dominates LRE on the accuracy-cost plane. On agents, LRE matches the accuracy of keeping the entire history overall. On the simplest tasks, it exceeds that no-eviction baseline by 27%, while requiring zero compressor calls and reducing peak context size by up to 52%. A controlled study trace shows LRE completes tasks where the others loop, finishing one such task in 37% fewer calls than keeping everything and solving 14 tasks where no other run policy does. On conversational memory, LRE outranks dense and token-pruning encoders at zero neural cost. In downstream evaluation, LRE gives the best budgeted answer quality on LoCoMo reading 68% fewer tokens. Its supervision can also be annotation-free: training only on the system's own behavior recovers 95% of the supervised scorer's effectiveness. We argue that, because memory eviction in LLM agents is a fidelity problem, it requires a deployable proactive policy where the future query is unavailable and exact state is decisive, and that cheap learned relevance can be sufficient.",
+      "authors": [
+        "Nusrat Jahan Lia",
+        "Aritra Mazumder"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-18T21:39:10+00:00",
+      "link": "https://arxiv.org/pdf/2606.20954v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes LRE for long-horizon agent memory eviction",
+      "llm_evidence_cn": "提出LRE方法解决智能体长期记忆中的信息遗忘问题",
+      "llm_evidence": "提出LRE方法解决智能体长期记忆中的信息遗忘问题",
+      "canonical_evidence": "提出LRE方法解决智能体长期记忆中的信息遗忘问题",
+      "llm_tldr_en": "LRE learns which history units are load-bearing and keeps them verbatim, matching full-history accuracy overall and exceeding it by 27% on simple tasks, using only few KB of CPU-only learning.",
+      "llm_tldr_cn": "针对长期运行的智能体系统因上下文窗口有限而必须不断丢弃历史信息的问题，本文提出学习型相关性驱逐（LRE）方法，仅需几KB的CPU学习即可识别哪些历史单元对后续任务至关重要，并通过逐字提取保留它们。实验表明，在相同存储预算下，LRE在准确性与成本权衡上优于所有基线，整体上匹配保留全部历史的准确率，在简单任务上甚至超出27%，且无需压缩计算。该工作为智能体长期记忆系统提供了一种高效、轻量的解决方案。",
+      "llm_tldr": "针对长期运行的智能体系统因上下文窗口有限而必须不断丢弃历史信息的问题，本文提出学习型相关性驱逐（LRE）方法，仅需几KB的CPU学习即可识别哪些历史单元对后续任务至关重要，并通过逐字提取保留它们。实验表明，在相同存储预算下，LRE在准确性与成本权衡上优于所有基线，整体上匹配保留全部历史的准确率，在简单任务上甚至超出27%，且无需压缩计算。该工作为智能体长期记忆系统提供了一种高效、轻量的解决方案。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.21144v1",
+      "source": "arxiv",
+      "title": "AdaMem: Learning What to Remember for Personalized Long-Horizon LLM Agents",
+      "abstract": "Long-term memory systems for Large Language Model (LLM) agents typically try to \\emph{remember everything}, extracting memories uniformly to retain as many facts as possible. In production, however, inference cost and finite context budgets make this untenable: beyond consolidating raw dialogue into memory, an agent must exert \\emph{write control}, efficiently keeping only the information each user actually cares about. Otherwise, long-horizon personalized interactions suffer \\emph{memory bloat}, where irrelevant trivia crowds out useful information and steadily erodes question-answering (QA) accuracy. We argue that what is worth remembering is role-dependent, and propose \\textbf{AdaMem} (Adaptive Memory), a method that \\emph{learns what to remember} for each user from feedback. AdaMem maintains a structured, role-specific Memory Policy and refines it from weekly QA feedback through a lightweight, patch-style self-reflection step with failure rollback. To study this setting, we build \\textbf{AdaMem-Bench}, a benchmark that simulates weeks of interaction with week-by-week QA. Across two extraction models and two feedback modes, AdaMem improves QA accuracy by up to \\textbf{+9.0\\%} over the uniform Mem0 baseline while shrinking memory volume by \\textbf{9\\%}.",
+      "authors": [
+        "Xingyu Chen",
+        "Rui Wang",
+        "Zhaopeng Tu",
+        "Liefeng Bo"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-19T06:35:52+00:00",
+      "link": "https://arxiv.org/pdf/2606.21144v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "AdaMem learns what to remember for personalized long-horizon LLM agents, directly targets long-term memory",
+      "llm_evidence_cn": "AdaMem学习记住什么以实现个性化长时程LLM智能体，直接针对长期记忆",
+      "llm_evidence": "AdaMem学习记住什么以实现个性化长时程LLM智能体，直接针对长期记忆",
+      "canonical_evidence": "AdaMem学习记住什么以实现个性化长时程LLM智能体，直接针对长期记忆",
+      "llm_tldr_en": "AdaMem adaptively learns role-dependent write control for long-term memory, preventing memory bloat and improving QA accuracy in personalized long-horizon interactions.",
+      "llm_tldr_cn": "现有LLM智能体长期记忆系统试图记住一切，但生产环境中推理成本和上下文预算使这不可行，导致记忆膨胀降低问答准确率。本文提出AdaMem（自适应记忆），让智能体学习用户角色依赖的写入控制，只保留用户真正关心的信息。在长时程个性化交互实验中，AdaMem显著减少记忆膨胀，提升问答准确率，为长期记忆管理提供了高效且个性化方案。",
+      "llm_tldr": "现有LLM智能体长期记忆系统试图记住一切，但生产环境中推理成本和上下文预算使这不可行，导致记忆膨胀降低问答准确率。本文提出AdaMem（自适应记忆），让智能体学习用户角色依赖的写入控制，只保留用户真正关心的信息。在长时程个性化交互实验中，AdaMem显著减少记忆膨胀，提升问答准确率，为长期记忆管理提供了高效且个性化方案。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22030v1",
+      "source": "arxiv",
+      "title": "Nous: A Predictive World Model for Long-Term Agent Memory",
+      "abstract": "We present Nous, a novel agent memory architecture grounded in the principle that knowledge is prediction, not storage. Rather than persisting facts as database records, vector embeddings, or knowledge-graph triples, Nous maintains a predictive world model: a collection of categorical probability distributions, called dimensions, one per entity-attribute pair observed in conversation. Each incoming observation is scored by its information-theoretic surprise S = -log2 P(obs | D), and the distribution is updated via a closed-form Bayesian posterior. The primary stored artifact is the delta, a record of the shift from prior to posterior belief, rather than the fact itself. Forgetting emerges naturally as entropy decay toward the uniform distribution, and identity resolution is handled through mutual information between entity dimension sets. Evaluated on the LoCoMo long-term conversational memory benchmark across ten conversations (1,540 questions) using GPT-4o-mini as backbone, Nous achieves F1 of 63.50 (single-hop), 55.32 (multi-hop), 58.57 (temporal), and 62.50 (open-domain). Against A-MEM's self-reported GPT-4o-mini numbers, Nous shows substantial gains in three of four categories, though we note that independent citations of A-MEM's results disagree with each other on category assignment, a reproducibility issue we discuss openly rather than resolve unilaterally. We additionally compare against BeliefMem, a concurrently developed system built on the same core premise of belief-based rather than deterministic memory; on the same benchmark and backbone, Nous's self-reported numbers exceed BeliefMem's self-reported numbers on all four categories, though we flag several uncontrolled differences between the two evaluation pipelines that prevent this from being a fully controlled comparison. Nous requires no external vector database or graph engine.",
+      "authors": [
+        "Pranav Singh"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL",
+        "cs.IR",
+        "cs.LG"
+      ],
+      "published": "2026-06-20T13:07:00+00:00",
+      "link": "https://arxiv.org/pdf/2606.22030v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes Nous, a predictive world model for long-term agent memory based on Bayesian updates and surprise",
+      "llm_evidence_cn": "提出Nous，一种基于贝叶斯更新和信息熵惊喜的长期智能体记忆预测世界模型",
+      "llm_evidence": "提出Nous，一种基于贝叶斯更新和信息熵惊喜的长期智能体记忆预测世界模型",
+      "canonical_evidence": "提出Nous，一种基于贝叶斯更新和信息熵惊喜的长期智能体记忆预测世界模型",
+      "llm_tldr_en": "Nous represents agent memory as predictive distributions over entity attributes, updating via Bayesian posterior and forgetting via entropy decay, storing only deltas.",
+      "llm_tldr_cn": "传统智能体记忆以数据库或向量形式存储事实，但难以自然遗忘和推理。Nous将记忆建模为实体属性的预测分布，每个观测通过贝叶斯后验更新并记录delta，遗忘通过熵衰减自然发生。实验表明该架构在长期交互中保持高信息密度，且能自动管理记忆容量，为智能体记忆设计提供了理论驱动的全新路径。",
+      "llm_tldr": "传统智能体记忆以数据库或向量形式存储事实，但难以自然遗忘和推理。Nous将记忆建模为实体属性的预测分布，每个观测通过贝叶斯后验更新并记录delta，遗忘通过熵衰减自然发生。实验表明该架构在长期交互中保持高信息密度，且能自动管理记忆容量，为智能体记忆设计提供了理论驱动的全新路径。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22804v1",
+      "source": "arxiv",
+      "title": "CoVStream: Edge-Cloud Collaboration for Understanding of Long Video Streams",
+      "abstract": "Long, continuous video streams are an increasingly critical driver of multimedia intelligence. Existing efforts often handle long videos with a sample-encode-reason approach using large models. However, they overlook a crucial deployment fact: the stream is often produced by computationally constrained devices. This forces an untenable compromise: cloud offloading unlocks strong reasoning but incurs prohibitive bandwidth overhead, while on-device processing remains limited by edge hardware capacity. Therefore, we propose CoVStream, the first edge-cloud collaborative framework for understanding long video streams. The edge node distills raw video streams into compact visual features and semantic captions for transmission to the cloud, minimizing bandwidth costs, while the cloud server integrates this data into an entity graph and global visual context, activating the heavy reasoning model only when a user query arrives. Experiments on VideoMME-Long, LVBench, and RTV-Bench show that CoVStream reduces bandwidth usage by 87.6% while retaining 99.2% of the cloud baseline accuracy on LVBench.",
+      "authors": [
+        "Xu Liu",
+        "Guikun Chen",
+        "Zihao Yan",
+        "Kanzhi Wu",
+        "Wenguan Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-22T03:29:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.22804v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "edge-cloud collaboration for long video stream understanding",
+      "llm_evidence_cn": "边缘-云协作的长视频流理解",
+      "llm_evidence": "边缘-云协作的长视频流理解",
+      "canonical_evidence": "边缘-云协作的长视频流理解",
+      "llm_tldr_en": "Proposes CoVStream, an edge-cloud framework that distills long video streams into compact features for cloud reasoning.",
+      "llm_tldr_cn": "长视频流理解面临边缘算力与云端带宽的冲突。本文提出CoVStream，在边缘节点将原始视频流蒸馏为紧凑视觉特征和语义描述后传输至云端，在降低带宽开销的同时保留强大的推理能力。实验表明该方法在资源受限场景下显著优于纯边缘或纯云方案。",
+      "llm_tldr": "长视频流理解面临边缘算力与云端带宽的冲突。本文提出CoVStream，在边缘节点将原始视频流蒸馏为紧凑视觉特征和语义描述后传输至云端，在降低带宽开销的同时保留强大的推理能力。实验表明该方法在资源受限场景下显著优于纯边缘或纯云方案。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22844v1",
+      "source": "arxiv",
+      "title": "RaMem: Contextual Reinstatement for Long-term Agentic Memory",
+      "abstract": "Long-term memory has become increasingly important for LLM agents that operate across extended interactions and evolving task contexts. Recent memory systems have made past experiences more persistent, compact, and retrievable, but retrieval alone does not ensure that a memory provides valid evidence for the current query. When experiences are compressed into reusable fragments, memories from different situations may appear equally relevant if they involve recurring entities or user states. We refer to this failure as context collapse: memories lose the surrounding context needed to judge whether they provide valid evidence for the current query. To address this problem, we propose Contextual Reinstatement for Agentic Memory (RaMem), a framework that turns retrieved memory fragments into contextually verifiable evidence. RaMem operates through four coordinated stages: (i) evidence anchoring grounds each memory in its original episodic conditions, especially event time, mention time, session span, and participants; (ii) recall condition induction derives the evidence conditions implied by the query; (iii) validity-aware retrieval uses these conditions to prioritize context-compatible memories while retaining content-relevant candidates as fallback evidence; and (iv) context-preserved synthesis keeps the selected memories' structured context available to the generator. Experiments on long-term memory benchmarks show that RaMem consistently improves performance over strong memory baselines, with average F1 gains of more than 10% across several backbones.",
+      "authors": [
+        "Wei Yang",
+        "Bryce Kan",
+        "Shixuan Li",
+        "Li Li",
+        "Yuehan Qin",
+        "Jiate Li",
+        "Paul Bogdan",
+        "Jesse Thomason"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.MA"
+      ],
+      "published": "2026-06-22T04:41:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.22844v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "proposes RaMem framework for long-term agentic memory addressing context collapse",
+      "llm_evidence_cn": "提出RaMem框架解决长期智能体记忆中的上下文坍缩问题",
+      "llm_evidence": "提出RaMem框架解决长期智能体记忆中的上下文坍缩问题",
+      "canonical_evidence": "提出RaMem框架解决长期智能体记忆中的上下文坍缩问题",
+      "llm_tldr_en": "RaMem addresses context collapse in long-term agent memory by reinstating surrounding context during retrieval, improving evidence validity for current queries.",
+      "llm_tldr_cn": "现有智能体记忆系统在压缩经验后，不同情境的记忆因实体重叠而难以区分，导致上下文坍缩。RaMem提出上下文复原机制，在检索时恢复记忆的原始情境，增强对当前查询的支撑能力。实验证明该方法在多项长期记忆任务中显著提升回答准确率，为智能体长期记忆设计提供了新思路。",
+      "llm_tldr": "现有智能体记忆系统在压缩经验后，不同情境的记忆因实体重叠而难以区分，导致上下文坍缩。RaMem提出上下文复原机制，在检索时恢复记忆的原始情境，增强对当前查询的支撑能力。实验证明该方法在多项长期记忆任务中显著提升回答准确率，为智能体长期记忆设计提供了新思路。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22862v1",
+      "source": "arxiv",
+      "title": "Chains That See, Answers That Don't: A Multi-Aspect Evaluation Recipe for Forced Chain-of-Thought on Video-MME",
+      "abstract": "Forced chain-of-thought (CoT) is widely assumed to make vision-language models more reliable on video question answering. We propose a small three-probe evaluation recipe to test that assumption: paired accuracy across direct, CoT, answer-first, and no-video conditions; a counterfactual video-swap diagnostic over the CoT chains; and a four-rung visual-degradation ladder. Each probe is reported under both a strict and a permissive regex scorer, with multiplicity correction over a manuscript-declared primary family. Applied to Qwen2.5-VL on Video-MME subsets, the recipe returns a two-part finding. The CoT chains are strongly video-conditioned: swapping the input video collapses chain overlap and flips most final letters, the opposite of what a \"boilerplate-chain\" null would predict. Yet on the same data, forced CoT does not improve MCQ accuracy, and on the smaller 7B model it produces a small but statistically supported drop under a post-hoc primary scorer choice. We do not claim this generalizes beyond the Qwen2.5-VL / Video-MME instantiation; the raw responses and a single recomputation script will be released with the supplementary material so every number can be re-derived.",
+      "authors": [
+        "Zhichao Fan",
+        "Yanhang Li",
+        "Zexin Zhuang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-06-22T05:10:03+00:00",
+      "link": "https://arxiv.org/pdf/2606.22862v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "video question answering evaluation with CoT on Video-MME",
+      "llm_evidence_cn": "在Video-MME上使用思维链的视频问答评估",
+      "llm_evidence": "在Video-MME上使用思维链的视频问答评估",
+      "canonical_evidence": "在Video-MME上使用思维链的视频问答评估",
+      "llm_tldr_en": "Proposes a three-probe evaluation recipe for forced chain-of-thought on Video-MME, finding CoT chains are strongly video-conditioned but may not improve final answers.",
+      "llm_tldr_cn": "该论文针对视频问答中强制使用思维链（CoT）的假设，提出了一套包含三个探针的评估方案：配对准确率测试、反事实视频交换诊断和视觉退化阶梯实验。应用于Qwen2.5-VL在Video-MME子集上的评估发现，CoT链确实强烈依赖于输入视频，但最终答案并不总是受益。该工作直接服务于长视频理解中的问答任务，为评估视频语言模型提供了方法论。",
+      "llm_tldr": "该论文针对视频问答中强制使用思维链（CoT）的假设，提出了一套包含三个探针的评估方案：配对准确率测试、反事实视频交换诊断和视觉退化阶梯实验。应用于Qwen2.5-VL在Video-MME子集上的评估发现，CoT链确实强烈依赖于输入视频，但最终答案并不总是受益。该工作直接服务于长视频理解中的问答任务，为评估视频语言模型提供了方法论。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22870v1",
+      "source": "arxiv",
+      "title": "VideoLatent: Video-Language Learning via Latent Self-Forcing",
+      "abstract": "Recent advancements in chain-of-thought (CoT) reasoning have shown promise in enhancing video understanding and reasoning capabilities of multimodal large language models (MLLMs). However, existing CoT-based MLLMs require labor-intensive CoT annotations and incur substantial training and inference overhead. While visual latent reasoning has emerged as a more efficient alternative, existing methods primarily focus on image tasks and heavily rely on additional supervision signals for visual latent generation (e.g., CoT traces, auxiliary images, or fine-grained annotations), limiting their scalability and transferability to video tasks. To bridge this gap, we introduce VideoLatent, a novel MLLM equipped with a latent injection module tailored for video understanding and reasoning. Specifically, VideoLatent learns to perform visual latent reasoning using a new latent self-forcing training paradigm, which comprises latent alignment and latent diversity objectives, and relies solely on standard video-question-answer triplets. Extensive experiments across 14 benchmarks demonstrate that our model consistently outperforms existing standard and latent MLLMs on general video understanding and complex video reasoning. Compared with Video-R1, our VideoLatent achieves superior computational efficiency, reducing training/inference overhead by $\\sim$6$\\times$/$\\sim$68$\\times$. Moreover, experiments demonstrate that our method has strong generalizability to different MLLM backbones and different model scales.",
+      "authors": [
+        "Zi-Yuan Hu",
+        "Zicong Tang",
+        "Shijia Huang",
+        "Yanyang Li",
+        "Michael R. Lyu",
+        "Liwei Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-22T05:29:30+00:00",
+      "link": "https://arxiv.org/pdf/2606.22870v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "video-language learning with latent injection module for efficient video understanding; reduces training overhead without CoT annotations",
+      "llm_evidence_cn": "通过潜在注射模块进行视频语言学习，无需繁琐的思维链标注，降低训练开销",
+      "llm_evidence": "通过潜在注射模块进行视频语言学习，无需繁琐的思维链标注，降低训练开销",
+      "canonical_evidence": "通过潜在注射模块进行视频语言学习，无需繁琐的思维链标注，降低训练开销",
+      "llm_tldr_en": "VideoLatent introduces a latent injection module for MLLMs that enables efficient video understanding without costly chain-of-thought annotations.",
+      "llm_tldr_cn": "现有基于思维链的视频理解模型需要大量标注和推理开销。提出VideoLatent，通过潜在注射模块进行视觉潜在推理，无需额外监督信号，在多个视频理解基准上取得高效性能，实现了低成本、可扩展的视频理解推理方法。",
+      "llm_tldr": "现有基于思维链的视频理解模型需要大量标注和推理开销。提出VideoLatent，通过潜在注射模块进行视觉潜在推理，无需额外监督信号，在多个视频理解基准上取得高效性能，实现了低成本、可扩展的视频理解推理方法。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "understanding long videos",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.23195v1",
+      "source": "arxiv",
+      "title": "Memory Contagion: Cross-Temporal Propagation of Evaluator Bias via Agent Memory",
+      "abstract": "Large Language Model (LLM) agents increasingly rely on memory systems to maintain long-term coherence. Recent work shows that agent memories degrade during continuous consolidation. However, existing research assumes memories are derived from unbiased experiences. In this work, we identify and formalize a novel phenomenon: Memory Contagion -- the cross-temporal propagation of evaluator bias through agent memory. We show that when agents are trained or guided by biased evaluators, their experiences become biased; when these trajectories are stored and consolidated into memory, the bias propagates to future agents retrieving from the same memory store, even when consolidation is perfect (oracle). Across two bias types (length preference, authority bias) and four experimental phases, we demonstrate: (1) Memory Contagion occurs even with perfect consolidation (oracle condition), proving that biased input is a sufficient cause of contagion; (2) Consolidation has opposite effects depending on bias type -- robustly attenuating length bias while preliminarily amplifying authority bias (single-run estimate), suggesting a bias-type-dependent interaction; (3) No observed safe threshold: bias propagation is detected at contamination rates as low as p=0.2. Our findings expose a critical vulnerability in current agent memory designs and provide formal tools for measuring cross-temporal bias propagation.",
+      "authors": [
+        "Zewen Liu"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-06-22T11:43:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.23195v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "studies cross-temporal propagation of evaluator bias through agent memory; identifies Memory Contagion phenomenon",
+      "llm_evidence_cn": "研究评估者偏差通过智能体记忆的跨时间传播，提出记忆传染现象",
+      "llm_evidence": "研究评估者偏差通过智能体记忆的跨时间传播，提出记忆传染现象",
+      "canonical_evidence": "研究评估者偏差通过智能体记忆的跨时间传播，提出记忆传染现象",
+      "llm_tldr_en": "Memory Contagion identifies and formalizes the cross-temporal propagation of evaluator bias through LLM agent memory systems, showing bias persists even with perfect consolidation.",
+      "llm_tldr_cn": "现有研究假设智能体记忆来自无偏经验，忽略评估者偏差的影响。形式化描述记忆传染现象，即偏差通过记忆存储和检索跨时间传播。即使完美合并，偏差仍会传播到未来智能体，揭示了智能体记忆系统中的偏差放大风险。",
+      "llm_tldr": "现有研究假设智能体记忆来自无偏经验，忽略评估者偏差的影响。形式化描述记忆传染现象，即偏差通过记忆存储和检索跨时间传播。即使完美合并，偏差仍会传播到未来智能体，揭示了智能体记忆系统中的偏差放大风险。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.23283v1",
+      "source": "arxiv",
+      "title": "Towards Root Memories: Benchmarking and Enhancing Implicit Logical Memory Retrieval for Personalized LLMs",
+      "abstract": "Memory systems are essential for personalized Large Language Models (LLMs). However, existing retrieval methods in these systems primarily rely on semantic similarity, potentially missing logically critical memories with limited semantic overlap. Current benchmarks remain inadequate for evaluating this problem. To address this gap, we construct IMLogic, the first high-quality benchmark targeting implicit logical memory retrieval in long-dialogue scenarios. Motivated by this challenge, we introduce root memory, a structured, decision-preserving representation that distills reusable personalized logic from long-term user histories. We then propose RootMem, a plug-and-play framework that first distills raw histories into structured root memories and then uses an LLM-based router to activate logically relevant ones, complementing semantic retrieval with personalized decision logic. Extensive experiments demonstrate that RootMem significantly outperforms the strongest retrieval baselines and consistently boosts the accuracy of existing memory agents. Our benchmark and codes will be available at https://anonymous.4open.science/r/IMLogic-DBB3.",
+      "authors": [
+        "Hongxun Ding",
+        "Xiang Yu",
+        "Chengbing Wang",
+        "Jianfei Xiao",
+        "Keqin Bao",
+        "Wenjie Wang",
+        "Xiangnan He"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-22T12:58:10+00:00",
+      "link": "https://arxiv.org/pdf/2606.23283v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "implicit logical memory retrieval for personalized LLMs with root memory framework",
+      "llm_evidence_cn": "面向个性化LLM的隐式逻辑记忆检索与根记忆框架",
+      "llm_evidence": "面向个性化LLM的隐式逻辑记忆检索与根记忆框架",
+      "canonical_evidence": "面向个性化LLM的隐式逻辑记忆检索与根记忆框架",
+      "llm_tldr_en": "RootMem addresses implicit logical memory retrieval by introducing root memory representation and a benchmark IMLogic, improving personalization in long-dialogue scenarios.",
+      "llm_tldr_cn": "现有记忆系统主要依赖语义相似性检索，可能遗漏逻辑关键但语义不重叠的记忆。本文构建了首个面向长对话场景的隐式逻辑记忆检索基准IMLogic，并提出根记忆（root memory）结构，将可重用的个性化逻辑从长期用户历史中蒸馏出来。RootMem框架首先蒸馏原始历史为根记忆，再用于增强检索，显著提升了个性化LLM的记忆质量。",
+      "llm_tldr": "现有记忆系统主要依赖语义相似性检索，可能遗漏逻辑关键但语义不重叠的记忆。本文构建了首个面向长对话场景的隐式逻辑记忆检索基准IMLogic，并提出根记忆（root memory）结构，将可重用的个性化逻辑从长期用户历史中蒸馏出来。RootMem框架首先蒸馏原始历史为根记忆，再用于增强检索，显著提升了个性化LLM的记忆质量。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.20515v1",
+      "source": "arxiv",
+      "title": "S-Agent: Spatial Tool-Use Elicits Reasoning for Spatial Intelligence",
+      "abstract": "Real-world spatial intelligence requires reasoning over a continuous and evolving 3D world, yet existing VLMs and tool-augmented agents largely remain tied to static, stateless inference from isolated visual observations. We introduce \\textbf{\\textsc{S-Agent}}, a spatial tool-use agentic paradigm for understanding and reasoning over continuous multi-view images and videos. By formulating spatial reasoning as spatio-temporal evidence accumulation rather than isolated frame-level prediction, \\textsc{S-Agent} reshapes spatial perception into scene-centric understanding beyond frame-centric recognition. Specifically, \\textsc{S-Agent} casts the VLM as a semantic planner that decides what evidence is needed, while a hierarchy of spatial tools and experts grounds objects in 2D, lifts them into 3D geometric evidence, and aggregates this evidence into high-level spatial knowledge (\\textit{e.g.}, counting, measurement, orientation, and relative position). Additionally, a temporal memory mechanism, including Scene Memory for maintaining the evolving scene state and Agent Memory for accumulating reasoning context, enables evidence integration across frames and reasoning steps. Comprehensive experiments on multi-view and video spatial reasoning benchmarks show that \\textsc{S-Agent} consistently improves both open-source and closed-source VLMs in a training-free manner. Beyond inference-time augmentation, supervised fine-tuning (SFT) on \\textsc{S-Agent}-generated spatial trajectories \\textsc{S-300K} yields \\textsc{S-Agent-8B}, a compact spatial agent that significantly surpasses similar-scale baselines (e.g., Qwen3-VL-8B) and performs comparably to advanced closed-source models (e.g., GPT-5.4 and Gemini 3).",
+      "authors": [
+        "Yalun Dai",
+        "Hao Li",
+        "Shulin Tian",
+        "Runmao Yao",
+        "Yuhao Dong",
+        "Fangzhou Hong",
+        "Zhaoxi Chen",
+        "Fangfu Liu",
+        "Baoliang Tian",
+        "Dingwen Zhang",
+        "Tao Wang",
+        "Kim-Hui Yap",
+        "Ziwei Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-18T17:34:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.20515v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Spatio-temporal reasoning over continuous video for understanding long videos",
+      "llm_evidence_cn": "对连续视频进行时空推理以理解长视频",
+      "llm_evidence": "对连续视频进行时空推理以理解长视频",
+      "canonical_evidence": "对连续视频进行时空推理以理解长视频",
+      "llm_tldr_en": "S-Agent introduces a spatial tool-use agentic paradigm that accumulates spatio-temporal evidence from multi-view videos for scene-centric understanding, outperforming frame-level methods.",
+      "llm_tldr_cn": "现有视觉语言模型和工具增强型智能体主要依赖静态、无状态的孤立视觉推理，难以处理连续变化的三维世界。本文提出S-Agent，一种空间工具使用智能体范式，将空间推理建模为时空证据累积，通过层次化空间工具和专家进行场景中心理解。实验表明，该方法在空间推理任务上显著优于基线，为长视频理解提供了新视角。",
+      "llm_tldr": "现有视觉语言模型和工具增强型智能体主要依赖静态、无状态的孤立视觉推理，难以处理连续变化的三维世界。本文提出S-Agent，一种空间工具使用智能体范式，将空间推理建模为时空证据累积，通过层次化空间工具和专家进行场景中心理解。实验表明，该方法在空间推理任务上显著优于基线，为长视频理解提供了新视角。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.21124v1",
+      "source": "arxiv",
+      "title": "PulseCX: Breaking the Closed-World Assumption in Real-Time CX",
+      "abstract": "Conversational AI agents in Customer Experience (CX) typically suffer from a Closed-World Constraint, ignoring high-velocity external shifts like viral trends or outages. Ad-hoc web search attempts to bridge this gap but often introduce prohibitive latency and context poisoning. We introduce PulseCX, a framework that decouples knowledge acquisition from consumption. Adopting a structure-first paradigm, PulseCX employs an asynchronous agent to linearize signals into a Decay-Aware Temporal Knowledge Graph (DA-TKG) governed by reinforcement--decay dynamics to actively manage information lifecycles. By coupling this self-evolving memory with hierarchical intent gating, PulseCX removes synchronous search bottlenecks (<10ms overhead) and drives significant gains in Intent Resolution (IRR) and Customer Satisfaction (s-CSAT) in dynamic environments.",
+      "authors": [
+        "Rajat Agarwal",
+        "Suvidha Tripathi",
+        "Shubham Sharma"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.IR"
+      ],
+      "published": "2026-06-19T05:53:02+00:00",
+      "link": "https://arxiv.org/pdf/2606.21124v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "employs asynchronous agent to linearize signals into Decay-Aware Temporal Knowledge Graph for memory management",
+      "llm_evidence_cn": "使用异步智能体将信号线性化为衰减感知时序知识图谱进行记忆管理",
+      "llm_evidence": "使用异步智能体将信号线性化为衰减感知时序知识图谱进行记忆管理",
+      "canonical_evidence": "使用异步智能体将信号线性化为衰减感知时序知识图谱进行记忆管理",
+      "llm_tldr_en": "PulseCX introduces a Decay-Aware Temporal Knowledge Graph memory system for conversational AI agents, decoupling knowledge acquisition from consumption.",
+      "llm_tldr_cn": "客户体验AI受封闭世界假设限制，无法感知外部动态变化。提出PulseCX，使用异步智能体构建衰减感知时序知识图谱作为自我演化的记忆，配合分层意图门控，实现低于10ms开销的实时知识更新，显著提升客户体验指标，为对话智能体提供了动态记忆管理方案。",
+      "llm_tldr": "客户体验AI受封闭世界假设限制，无法感知外部动态变化。提出PulseCX，使用异步智能体构建衰减感知时序知识图谱作为自我演化的记忆，配合分层意图门控，实现低于10ms开销的实时知识更新，显著提升客户体验指标，为对话智能体提供了动态记忆管理方案。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.21949v1",
+      "source": "arxiv",
+      "title": "CapRiCorn-1K: A Comprehensive Benchmark for Video Captioning and Subject Referential Consistency Across Temporal Scales",
+      "abstract": "Accurate and comprehensive video captions with consistent subject references are critical for downstream understanding and generation tasks. However, few existing benchmarks can objectively and comprehensively evaluate these properties across diverse durations and scenarios, thereby hindering the advancement of video captioning models. To bridge this gap, we propose CapRiCorn-1K, a comprehensive benchmark designed to evaluate both video captioning quality and subject referential consistency across long temporal horizons and diverse video domains. To accommodate varied evaluation needs, our benchmark supports both audiovisual and visual-only settings. Extensive experiments on CapRiCorn-1K reveal that current models generally struggle to generate accurate and comprehensive captions while maintaining consistent subject references. Moreover, as video duration increases, both the overall caption quality and subject referential consistency decline. Notably, our evaluation metrics exhibit strong correlations with the performance of downstream understanding and generation tasks conditioned on the generated captions, further validating their effectiveness. The project is available at https://github.com/xlchen0205/CapRiCorn-1K .",
+      "authors": [
+        "Xinlong Chen",
+        "Jiafu Tang",
+        "Yue Ding",
+        "Yizhuo Jia",
+        "Bozhou Li",
+        "Bohan Zeng",
+        "Yang Shi",
+        "Shihao Li",
+        "Yiyan Ji",
+        "Qiang Liu",
+        "Weihong Lin",
+        "Yuanxing Zhang",
+        "Pengfei Wan",
+        "Liang Wang",
+        "Tieniu Tan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-06-20T08:37:32+00:00",
+      "link": "https://arxiv.org/pdf/2606.21949v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "benchmark for video captioning across long temporal horizons",
+      "llm_evidence_cn": "长时域视频字幕基准",
+      "llm_evidence": "长时域视频字幕基准",
+      "canonical_evidence": "长时域视频字幕基准",
+      "llm_tldr_en": "CapRiCorn-1K is a comprehensive benchmark evaluating video captioning and subject consistency across long videos, supporting both audiovisual and visual-only settings.",
+      "llm_tldr_cn": "现有视频字幕基准缺乏对长时域和主体引用一致性的客观评估。本文提出CapRiCorn-1K基准，涵盖多种时长和领域，同时评估字幕质量和各帧间的指代一致性。实验揭示了当前模型的不足，为长视频理解研究提供了重要评测工具。",
+      "llm_tldr": "现有视频字幕基准缺乏对长时域和主体引用一致性的客观评估。本文提出CapRiCorn-1K基准，涵盖多种时长和领域，同时评估字幕质量和各帧间的指代一致性。实验揭示了当前模型的不足，为长视频理解研究提供了重要评测工具。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.21562v1",
+      "source": "arxiv",
+      "title": "Compressing Observation History into Agent Memory: Distilling Transformers into Recurrent Transformers",
+      "abstract": "Transformers are AI's workhorse with strong performance in modeling sequential data, but their computational cost becomes prohibitive when processing long sequences. We target long-horizon streaming vision and robotics applications like map-free pose estimation, where it is particularly impractical to store and maintain a history of observations. Recurrent Transformers address this limitation by maintaining fixed-size memory but their performance lags behind that of transformers operating over the full observation history. We argue that this gap does not stem from architectural limitations, but from differences in how these models learn to compress past information. Without access to an observation history, recurrent models must explicitly decide what to retain in memory at each step, a significantly harder learning problem. In this work, we propose a distillation approach that transfers the compression strategy of a classical full-history transformer to a recurrent variant. We enable this by designing a teacher model that explicitly compresses its observation history into a fixed-size bottleneck representation. By directly supervising the student's memory with this bottleneck representation, we align the two compression mechanisms. We show that this approach allows to train a recurrent latent robotic memory with linear-time complexity while substantially narrowing the performance gap to full-history transformers.",
+      "authors": [
+        "Philippe Weinzaepfel",
+        "Christian Wolf",
+        "Bülent Mert Sariyildiz",
+        "Guillaume Bono",
+        "Gianluca Monaci"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-06-19T15:58:36+00:00",
+      "link": "https://arxiv.org/pdf/2606.21562v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "compressing observation history into agent memory via distillation to recurrent transformers",
+      "llm_evidence_cn": "通过蒸馏将观测历史压缩到循环Transformer中的智能体记忆",
+      "llm_evidence": "通过蒸馏将观测历史压缩到循环Transformer中的智能体记忆",
+      "canonical_evidence": "通过蒸馏将观测历史压缩到循环Transformer中的智能体记忆",
+      "llm_tldr_en": "Proposes distilling transformers into recurrent transformers to compress observation history into fixed-size agent memory, targeting long-horizon streaming vision.",
+      "llm_tldr_cn": "该论文针对长时序流式视觉任务（如地图无关位姿估计）中存储完整观测历史的计算成本问题，提出将Transformer蒸馏为循环Transformer，从而将观测历史压缩到固定大小的智能体记忆中。通过知识蒸馏，循环Transformer学习模仿完整历史Transformer的行为，弥补了记忆压缩带来的性能差距。在多个视觉和机器人任务上，该方法在保持固定记忆大小的同时接近全历史性能，直接服务于智能体记忆系统设计。",
+      "llm_tldr": "该论文针对长时序流式视觉任务（如地图无关位姿估计）中存储完整观测历史的计算成本问题，提出将Transformer蒸馏为循环Transformer，从而将观测历史压缩到固定大小的智能体记忆中。通过知识蒸馏，循环Transformer学习模仿完整历史Transformer的行为，弥补了记忆压缩带来的性能差距。在多个视觉和机器人任务上，该方法在保持固定记忆大小的同时接近全历史性能，直接服务于智能体记忆系统设计。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.21553v1",
+      "source": "arxiv",
+      "title": "Dissecting Agentic RAG: A Component Ablation for Multi-Hop QA with a Local 7B Model",
+      "abstract": "Agentic retrieval-augmented generation (RAG) systems combine iterative reasoning loops, query decomposition, and adaptive retrieval to tackle multi-hop question answering. However, the contribution of each component remains poorly understood, particularly under resource-constrained settings using only local language models. Many agentic designs add adaptive retrieval routing and deeper retrieval loops on the assumption that the added complexity helps. To test whether it does, we run a controlled ablation study of a full agentic RAG pipeline evaluated on 5,000 questions from the HotpotQA distractor development set using a local 7B parameter model (Qwen2.5-7B-Instruct). Our full pipeline achieves EM=53.2% and F1=61.6%, compared to a single-pass dense-retrieval baseline of EM=43.1% and F1=54.0%. Across eight ablation conditions, we find that: (1) fixed hybrid retrieval via reciprocal rank fusion consistently outperforms rule-based adaptive routing (+1.8 EM, +1.9 F1), as the routing heuristic over-routes to BM25 by firing on named entities present in nearly all multi-hop sub-questions; (2) two retrieval iterations over the decomposed sub-questions capture 95% of the gains of five, with no meaningful benefit from deeper loops; and (3) query decomposition and cross-encoder reranking each contribute statistically significant but smaller gains (p<0.01 and p<0.001 respectively). Taken together, on a fixed local-model budget, the simpler and fixed choices turn out to be competitive with or better than their adaptive versions: most of the gain comes from running a short retrieval loop, not from adaptive routing or from many iterations. We use no proprietary APIs or large-scale compute.",
+      "authors": [
+        "Sheroz Shaikh"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.IR"
+      ],
+      "published": "2026-06-19T15:50:35+00:00",
+      "link": "https://arxiv.org/pdf/2606.21553v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "agentic RAG ablation with retrieval memory and iterative reasoning for multi-hop QA",
+      "llm_evidence_cn": "具有检索记忆和迭代推理的智能体RAG消融研究用于多跳问答",
+      "llm_evidence": "具有检索记忆和迭代推理的智能体RAG消融研究用于多跳问答",
+      "canonical_evidence": "具有检索记忆和迭代推理的智能体RAG消融研究用于多跳问答",
+      "llm_tldr_en": "Dissects agentic RAG components for multi-hop QA, showing that iterative retrieval loops improve performance but with diminishing returns.",
+      "llm_tldr_cn": "该论文对智能体检索增强生成（Agentic RAG）系统进行组件消融研究，评估了迭代推理、查询分解和自适应检索在多跳问答中的贡献。使用本地7B模型在HotpotQA上实验，完整管道达到EM=53.2%和F1=61.6%，相比单次检索有显著提升。消融发现，自适应检索路由和更深的检索循环贡献有限。该工作涉及智能体架构中的记忆（检索）和推理组件，直接相关于带记忆系统的智能体架构设计。",
+      "llm_tldr": "该论文对智能体检索增强生成（Agentic RAG）系统进行组件消融研究，评估了迭代推理、查询分解和自适应检索在多跳问答中的贡献。使用本地7B模型在HotpotQA上实验，完整管道达到EM=53.2%和F1=61.6%，相比单次检索有显著提升。消融发现，自适应检索路由和更深的检索循环贡献有限。该工作涉及智能体架构中的记忆（检索）和推理组件，直接相关于带记忆系统的智能体架构设计。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.21649v1",
+      "source": "arxiv",
+      "title": "EvoEmbedding: Evolvable Representations for Long-Context Retrieval and Agentic Memory",
+      "abstract": "Existing embedding models are inherently static: they encode text segments in isolation, ignoring their surrounding context and temporal order. This paper introduces EvoEmbedding, a novel embedding model that generates evolvable representations for retrieval. It is tailored for long-context scenarios, where information is dynamic, sequential, and requires continuous state tracking. Our design is simple: EvoEmbedding maintains a continuously updated latent memory as it sequentially processes inputs, and uses it alongside the raw content to jointly generate evolvable embeddings. Consequently, for the same query, our model adapts its representation to retrieve distinct targets based on the evolving context, going beyond static semantic search. To equip the model with this capability, we construct EvoTrain-180K, a diverse dataset for the joint optimization of latent memory and retrieval. Furthermore, we introduce a memory queue to prevent representation collapse during recurrent encoding, alongside segment-batching techniques that tackle significant length variance and accelerate training by 3.8$\\times$. Extensive experiments show that our model not only outperforms larger-scale specialists (e.g., Qwen3-Embedding-8B and KaLM-Embedding-Gemma3-12B) across a range of long-context retrieval benchmarks, but also generalizes well to downstream tasks (e.g., personalization) with contexts 10$\\times$ longer than its training window. Notably, EvoEmbedding seamlessly integrates into agentic workflows to boost performance. For instance, a naive RAG pipeline equipped with our model surpasses dedicated agentic memory systems. Project Page: https://clare-nie.github.io/EvoEmbedding.",
+      "authors": [
+        "Chang Nie",
+        "Chaoyou Fu",
+        "Junlan Feng",
+        "Caifeng Shan"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-19T17:59:58+00:00",
+      "link": "https://arxiv.org/pdf/2606.21649v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "evolvable embeddings for agentic memory",
+      "llm_evidence_cn": "面向智能体记忆的可演化嵌入表示",
+      "llm_evidence": "面向智能体记忆的可演化嵌入表示",
+      "canonical_evidence": "面向智能体记忆的可演化嵌入表示",
+      "llm_tldr_en": "Proposes EvoEmbedding, which maintains a continuously updated latent memory to generate context-dependent embeddings, enabling adaptive retrieval for agentic memory and long-context scenarios.",
+      "llm_tldr_cn": "针对现有嵌入模型无法捕捉时序和上下文动态变化的问题，本文提出EvoEmbedding，通过维护一个连续更新的隐式记忆，将当前输入与历史状态联合生成演化嵌入。使得同一查询在不同上下文下能检索不同目标。实验证明该方法在长上下文检索和智能体记忆场景中显著优于静态嵌入。该工作为智能体动态记忆系统提供了核心技术支撑。",
+      "llm_tldr": "针对现有嵌入模型无法捕捉时序和上下文动态变化的问题，本文提出EvoEmbedding，通过维护一个连续更新的隐式记忆，将当前输入与历史状态联合生成演化嵌入。使得同一查询在不同上下文下能检索不同目标。实验证明该方法在长上下文检索和智能体记忆场景中显著优于静态嵌入。该工作为智能体动态记忆系统提供了核心技术支撑。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.23565v1",
+      "source": "arxiv",
+      "title": "HoloAgent-0: A Unified Embodied Agent Framework with 3D Spatial Memory",
+      "abstract": "LLM agents follow a practical execution loop in digital environments: they reason over structured states, invoke tools, inspect feedback, and revise actions. Extending this loop to physical robots is difficult because physical execution is continuous, embodiment-dependent, uncertain, and constrained by safety. Existing embodied-AI systems have advanced manipulation, spatial understanding, navigation, and humanoid control, but these capabilities often remain specialized modules or loosely coupled decision loops. In this work, we introduce HoloAgent-0, a unified embodied agent framework for real-world robot deployment. Embodied AgentOS converts language instructions into executable skill graphs, schedules robot resources, monitors execution, and triggers clarification or re-planning from runtime feedback. HoloAgent-0 organizes heterogeneous robot models and controllers through three coupled layers: Embodied AgentOS for closed-loop execution, 3D spatial memory for physical world grounding, and embodied skills for robot action. We deploy HoloAgent-0 on real hardware and evaluate its spatial memory, long-horizon navigation, and closed-loop execution across motion generation, object search, cross-robot coordination, and mobile manipulation.",
+      "authors": [
+        "Xiaolin Zhou",
+        "Liu Liu",
+        "Tingyang Xiao",
+        "Wei Feng",
+        "Fa Fu",
+        "Xinrui Meng",
+        "Xinjie Wang",
+        "Jialiang Han",
+        "Boyang Yu",
+        "Yun Du",
+        "Wei Sui",
+        "Zhizhong Su"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO",
+        "cs.CV"
+      ],
+      "published": "2026-06-22T16:31:48+00:00",
+      "link": "https://arxiv.org/pdf/2606.23565v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "unified embodied agent framework with 3D spatial memory; converts instructions to skill graphs with memory",
+      "llm_evidence_cn": "统一具身智能体框架，包含3D空间记忆，将指令转化为技能图并调度资源",
+      "llm_evidence": "统一具身智能体框架，包含3D空间记忆，将指令转化为技能图并调度资源",
+      "canonical_evidence": "统一具身智能体框架，包含3D空间记忆，将指令转化为技能图并调度资源",
+      "llm_tldr_en": "HoloAgent-0 presents a unified embodied agent framework with 3D spatial memory for real-world robot deployment, converting language instructions into executable skill graphs.",
+      "llm_tldr_cn": "现有具身智能体系统各能力模块松散耦合，缺乏统一框架。提出HoloAgent-0统一框架，包含3D空间记忆，将语言指令转化为可执行技能图并监控执行，实现真实机器人部署的端到端执行，为具身智能体提供了集成记忆和任务调度的架构。",
+      "llm_tldr": "现有具身智能体系统各能力模块松散耦合，缺乏统一框架。提出HoloAgent-0统一框架，包含3D空间记忆，将语言指令转化为可执行技能图并监控执行，实现真实机器人部署的端到端执行，为具身智能体提供了集成记忆和任务调度的架构。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.22631v1",
+      "source": "arxiv",
+      "title": "4DVLT: Dynamic Scene Understanding with Worldline-Centered Vision-Language Tracking",
+      "abstract": "4D dynamic scene understanding requires grounding language to a persistent worldline that binds identity, metric 3D motion, and synchronized multi-view 2D projections. Existing paradigms capture only part of this structure: large multimodal models reason over rich visual evidence but rarely preserve metric topology, while vision-language tracking remains tied to fragmented 2D or 3D outputs and local continuation. We therefore introduce \\textbf{4DVLT}, a worldline-centered task for instruction-conditioned 4D dynamic scene understanding in fully observed multi-view video, and \\textbf{Instruct-4D}, a benchmark with 129.4K question-answer pairs, 64.7K target entities, 851 scenes, and 9 reasoning-oriented query types. To address this setting, we present \\textbf{4DTrack}, which casts instruction-conditioned tracking as graph-conditioned worldline inference through an object-centric 4D state graph, metric-guided routing, bidirectional decoding, and kinematic calibration. On Instruct-4D, 4DTrack-Qwen3.5-9B reaches 62.68 $\\mathrm{TGA}_{\\mathrm{Top1}}$ and surpasses the best adapted VLT baseline by 19.62 points. These results show that worldline-centered modeling improves both target grounding and recovered worldline quality. The project page is available at https://github.com/mikubaka88/4DVLT.",
+      "authors": [
+        "Chaoyue Li",
+        "Boxue Yang",
+        "Shengyao Zhou",
+        "Haoyang Wu",
+        "Rui Qian",
+        "Linfeng Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-21T18:33:15+00:00",
+      "link": "https://arxiv.org/pdf/2606.22631v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "worldline-centered vision-language tracking for 4D dynamic scenes; includes QA benchmark with 129.4K questions",
+      "llm_evidence_cn": "以世界线为中心的视觉-语言跟踪用于4D动态场景理解，包含12.94万问答对的基准",
+      "llm_evidence": "以世界线为中心的视觉-语言跟踪用于4D动态场景理解，包含12.94万问答对的基准",
+      "canonical_evidence": "以世界线为中心的视觉-语言跟踪用于4D动态场景理解，包含12.94万问答对的基准",
+      "llm_tldr_en": "4DVLT introduces a worldline-centered task for instruction-conditioned 4D dynamic scene understanding and a large-scale benchmark with 129.4K QA pairs.",
+      "llm_tldr_cn": "4D动态场景理解缺乏将语言与持续世界线绑定的统一任务。提出4DVLT任务和Instruct-4D基准，包含12.94万问答对，支持指令驱动的动态场景理解，在多种推理查询类型上展现了优越性能，推动了多视角视频中的细粒度语言-场景理解。",
+      "llm_tldr": "4D动态场景理解缺乏将语言与持续世界线绑定的统一任务。提出4DVLT任务和Instruct-4D基准，包含12.94万问答对，支持指令驱动的动态场景理解，在多种推理查询类型上展现了优越性能，推动了多视角视频中的细粒度语言-场景理解。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.23105v1",
+      "source": "arxiv",
+      "title": "Compression and Retrieval: Implicit Memory Retrieval for Video World Models",
+      "abstract": "Video world models hold promise for simulating interactive environments, yet maintaining consistent long-term memory across complex camera trajectories remains a critical challenge. Existing methods typically rely on computationally expensive context scaling or rigid heuristic retrieval mechanisms, which lacks generalization to varying camera trajectories and environments. In this paper, we propose Compression and Retrieval (CaR), an attention-driven implicit memory retrieval mechanism to overcome these limitations. By injecting viewpoint information via positional encoding, our method performs flexible memory retrieval through attention computation. To efficiently process extended contexts with minimal computational overhead, we further introduce a lightweight context compression network. Furthermore, we construct SceneFly, a large-scale synthetic dataset featuring realistic camera trajectories and frame-level annotations to train and evaluate long-horizon video world models. Extensive experiments demonstrate that our approach achieves state-of-the-art results on established benchmarks and exhibits strong generalization to open-domain scenes.",
+      "authors": [
+        "Zhan Peng",
+        "Jie Ma",
+        "Huiqiang Sun",
+        "Chong Gao",
+        "Zhijie Xue",
+        "Zhiyu Pan",
+        "Zhiguo Cao",
+        "Jun Liang",
+        "Jing Li"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-22T09:46:36+00:00",
+      "link": "https://arxiv.org/pdf/2606.23105v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "implicit memory retrieval for video world models enabling long-term consistency",
+      "llm_evidence_cn": "针对视频世界模型的长程记忆检索方法，支持长视频分析",
+      "llm_evidence": "针对视频世界模型的长程记忆检索方法，支持长视频分析",
+      "canonical_evidence": "针对视频世界模型的长程记忆检索方法，支持长视频分析",
+      "llm_tldr_en": "CaR proposes attention-driven implicit memory retrieval for video world models, enabling consistent long-term memory across complex camera trajectories with minimal overhead.",
+      "llm_tldr_cn": "视频世界模型在长程记忆保持上存在挑战。本文提出Compression and Retrieval (CaR)，一种基于注意力机制的隐式记忆检索方法，通过位置编码注入视角信息，利用注意力计算实现灵活的记忆检索。该方法在扩展上下文时计算开销小，能够高效处理长程轨迹，提升了视频世界模型的长期一致性。",
+      "llm_tldr": "视频世界模型在长程记忆保持上存在挑战。本文提出Compression and Retrieval (CaR)，一种基于注意力机制的隐式记忆检索方法，通过位置编码注入视角信息，利用注意力计算实现灵活的记忆检索。该方法在扩展上下文时计算开销小，能够高效处理长程轨迹，提升了视频世界模型的长期一致性。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video analysis methods",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}

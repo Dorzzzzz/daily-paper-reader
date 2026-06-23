@@ -1,0 +1,524 @@
+Title: How Well Can Your Video Model Remember? Measuring Memory-Budget Trade-offs in Long Video Understanding
+
+URL Source: https://arxiv.org/pdf/2606.20726v1
+
+Published Time: Tue, 23 Jun 2026 00:05:56 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# How Well Can Your Video Model Remember? 
+
+# Measuring Memory-Budget Trade-offs in Long Video Understanding 
+
+## Yixian Tian 1,2
+
+> 1
+
+Fudan University 2Beijing University of Posts and Telecommunications 
+
+tianyixian.nanshan@foxmail.com 
+
+Abstract 
+
+We introduce a compact empirical model that quantifies how answer accuracy degrades as a function of frame budget B and temporal distance D in long video understanding—the question of how a model performs when it must recall content from D seconds in the past using only a fraction B of total frames. Long-form video models operate under strict frame budgets, yet no prior framework predicts how accuracy degrades as B shrinks and the relevant event recedes in time. We fit a weighted least-squares model on ∼155 ,000 binary predictions across ten models and three sampling strategies, deriving a compact law in which logit-accuracy scales linearly in log-budget with a distance-dependent exponent that itself decays log-linearly with distance. We call this exponent the budget exponent α(D)—the marginal value of extra frames at distance 
+
+D. Its intercept captures overall budget responsiveness, while its slope (the distance decay rate )measures how fast this responsiveness degrades with temporal distance. The law achieves cell-level weighted R2 = 0 .05 –0.75 across models (highest for models with strong budget sensitivity, near-zero for models where budget has minimal effect on accuracy). Our most striking finding: budget effectiveness at D = 1000 s differs by ≈7.4× between the best streaming model and the best base model . S TREAMING VLM achieves α(1000) = 1 .26 (95% CI via video-level cluster bootstrap: [1 .06 , 1.58] ), meaning each tenfold budget increase substantially increases accuracy even at long distances, while the best Qwen3-VL base model reaches only α(1000) = 0 .17 (CI: 
+
+[0 .04 , 0.34] ); the intervals do not overlap. In accuracy space, a 10 × budget increase at D = 1000 syields +29 percentage points for S TREAMING VLM versus +4 pp for the best base model. Frame sampling strategy has model-dependent effects: random sampling yields higher base sensitivity a
+
+but steeper distance decay e, with the optimal choice depending on the target temporal distance. We demonstrate how α(D) enables principled budget allocation, including a model-ranking reversal at long distance that a simpler law would miss, and propose it as a standardized diagnostic metric for evaluating streaming video models. 
+
+# 1 Introduction 
+
+Long-form video models must answer questions about events that occurred minutes or hours before the query. They do so under a strict frame budget : only a fraction B ∈ (0 , 1] of video frames can be processed. Yet no quantitative framework characterizes how answer accuracy degrades as B shrinks and the relevant event recedes in time by distance D.This gap matters in practice. As video understanding systems are deployed on hour-long recordings— security footage, surgical video, lecture archives—engineers must choose how many frames to process 1
+
+> arXiv:2606.20726v1 [cs.CV] 17 Jun 2026
+
+and which architectural properties ensure that distant events remain recoverable. Without a predictive framework, these choices are made by intuition rather than by theory. 
+
+Prior work does not provide this framework. Scaling laws for language models [Kaplan et al., 2020, Hoffmann et al., 2022] characterize training-time resource allocation but say nothing about inference-time frame budgets. Streaming video architectures [Xu et al., 2026, Chen et al., 2025, Zhang et al., 2024] are evaluated on average accuracy across video lengths but are never compared on the same principled metric of budget effectiveness at distance . Prior work studies frame selection, token compression, and streaming adaptation under compute or memory budgets [Eltahir et al., 2026, Mahdizadeh et al., 2026, Xie et al., 2026, Liu et al., 2026a], but does not model accuracy jointly as a function of frame budget and temporal distance. Long-video benchmarks [Shi et al., 2026, Fu et al., 2024, Mangalam et al., 2023] aggregate performance over conditions without systematically varying both B and D.
+
+Our contribution. We derive, to our knowledge, the first compact empirical model that jointly links answer accuracy, frame budget, and temporal distance across multiple streaming video models: logit (P ) = α(D) · log 10 B + β · log 10 D + δ · log 10 T, α(D) = a + e · log 10 D. (1) Here α(D) = ∂logit (P )/∂ log 10 B is the budget exponent —the logit-accuracy gain per tenfold increase in frames at distance D. The base sensitivity a captures how much a model benefits from additional frames overall, while the distance decay rate e = ∂α/∂ log D measures how fast this benefit degrades as D grows. A model with high a and e ≈ 0 is a true streaming model—it extracts large, distance-invariant value from each additional frame. 
+
+Overview. We fit Equation (1) via weighted least squares on ∼155 ,000 binary predictions across ten models, 15 budget fractions, and 4 temporal-distance tiers (22s–2400s) on the RIVER-bench Retro-Memory subset [Shi et al., 2026]. The law achieves cell-level weighted R2 = 0 .05 –0.75 across models (interpretable fits for models with budget sensitivity; near-zero for budget-insensitive models). 
+
+Contributions. 
+
+1. We derive the empirical model (Eq. 1), validated with cell-level weighted R2 = 0 .05 –0.75 
+
+across ten models on ∼155 ,000 predictions, and show the budget exponent α(D) provides a principled diagnostic metric for comparing streaming capability. 2. We show that α(D) separates S TREAMING VLM from the best base model by ≈7.4× at D =1000 s: S TREAMING VLM achieves α(1000) = 1 .26 (95% CI: [1 .06 , 1.58] , video-level cluster bootstrap) while Q WEN 3-VL-8B (the strongest base model at this distance) reaches α(1000) = 0.17 (95% CI: [0 .04 , 0.34] ); the intervals do not overlap. The next-strongest model overall is FLASH -VS TREAM (uniform) at α(1000) = 0 .30 , still a 4.2× gap versus S TREAMING VLM. 3. We show that frame sampling strategy has model-dependent effects : random sampling yields higher base budget sensitivity a but steeper distance decay e, with the net effect on long-distance performance varying across architectures. 4. We illustrate how α(D) enables principled budget allocation and show that the interaction term 
+
+e produces model-ranking reversals at long distance that a simpler distance-independent law would miss. 
+
+Positioning. This paper is a diagnostic study, not a new model. The contribution is a standardized measurement protocol : a compact empirical model and its derived metric α(D) that allows system-atic comparison of how different architectures handle the budget–distance trade-off. We show that models already labeled “streaming” by their authors differ by 7.4× in budget effectiveness at long distances, and that a simple measurement protocol—fitting five coefficients per model—can expose these differences where aggregate accuracy cannot. 2(a) For each question, we sample a fraction B of frames from a long video in which the relevant event occurred at temporal distance D before the query. At large D, the same budget covers fewer event-relevant frames. 
+
+(b) The budget exponent α(D) fitted from our scaling law ranks models on streaming capability. At D = 1000 s, STREAMING VLM maintains α = 1 .26 while Q WEN 3-VL-8B drops to α = 0 .17 —a gap of ≈7.4×.
+
+Figure 1: How we measure budget effectiveness and what it reveals. (a) Experimental setup: varying frame budget B at different temporal distances D. (b) The resulting α(D) curves reveal large differences in how well models leverage additional frames at long distances. 
+
+# 2 Related Work 
+
+Scaling laws for training-time resources. Kaplan et al. [2020] established that language-model loss follows a power law in parameters, data, and compute. Hoffmann et al. [2022] (Chinchilla) refined optimal compute allocation. Analogues exist for vision [Zhai et al., 2022] and multimodal models [Aghajanyan et al., 2023]. All of these characterize training-time resource allocation: how much data 3or compute to invest to reach a target loss. Q UICKSVIEWER [Qi et al., 2025] observes a power law between input frame count and model capability at inference time, motivating their nonuniform video compression method. However, this observation is incidental to their engineering contribution and does not model temporal distance as a variable or formalize the budget–accuracy relationship. Our law addresses an orthogonal problem: at inference time , given a fixed model, how does accuracy degrade jointly as frame budget B shrinks and temporal distance D grows? 
+
+Streaming and online video models. STREAMING VLM [Xu et al., 2026] processes streaming video by maintaining a compact KV cache with attention sinks and sliding vision windows. L IVE CC [Chen et al., 2025] and F LASH -VS TREAM [Zhang et al., 2024] adapt Qwen2-VL [Wang et al., 2024] for online caption generation. V IDEO LLM-ONLINE [Chen et al., 2024] uses a streaming LoRA adapter on LLaMA. More recently, R3-S TREAMING [Liu et al., 2026a] introduces agentic remember-respond-reason control with age-aware forgetting under token budgets, E VO STREAMING [Wen et al., 2026] self-evolves offline models into streaming assistants via interaction-policy learning, S TREAM PRO [Li et al., 2026] benchmarks proactive streaming responses under partial observations, and Yao et al. [Yao et al., 2026] propose a plug-and-play streaming harness with 12-hour memory retention and sub-second latency. Prior evaluations compare these models by average accuracy on standard benchmarks, which does not separate the effect of temporal distance or frame budget. In our offline retrospective evaluation (all models receive sampled frames via full attention), L IVE CC and F LASH -VS TREAM 
+
+achieve α(1000) ≤ 0.23 under random sampling ( ≤ 0.30 under uniform)—comparable to standard base models—despite their streaming-oriented training. S TREAMING VLM [Xu et al., 2026] achieves 
+
+α(1000) = 1 .26 (a = 1 .87 ) with random sampling in our offline retrospective evaluation; with recency sampling (matching its streaming training regime), α rises to 1.71 due to the retrospective-task interaction (Section 4.1). V IDEO LLM-ONLINE [Chen et al., 2024] uses a related streaming LoRA adapter on LLaMA; we do not evaluate it directly but note its architectural similarity to STREAMING VLM. 
+
+Long-video benchmarks. EgoSchema [Mangalam et al., 2023] provides 5-minute egocentric videos with temporal questions. Video-MME [Fu et al., 2024] spans seconds to hours across diverse domains. MLVU [Zhou et al., 2024] targets multi-task long-video understanding. RIVER-bench [Shi et al., 2026] is the only benchmark that explicitly structures questions by temporal distance to the answer, making it suitable for our study. Neptune [Nagrani et al., 2024] exposes long-horizon failure modes but does not vary frame budget. E XTREME WHEN BENCH [Seo and Kim, 2026] demonstrates that hour-scale temporal grounding is fundamentally a search problem: all tested Video-LLMs collapse, while frame-level retrieval baselines succeed—consistent with our finding that budget becomes critical at long temporal distances. E GOSTREAM [Forte et al., 2026] introduces a diagnostic benchmark for streaming episodic memory with an “Answer Validity Window” that controls recall distance, comparing KV-cache management strategies within a unified Qwen3-VL backbone. Their key finding—that comparable aggregate accuracies mask starkly different memory profiles—is conceptually aligned with our α(D) diagnostic. However, E GOSTREAM evaluates KV-cache policies (pruning, merging, offloading) in an egocentric streaming setting, while we evaluate model architectures under controlled frame-budget variation in an offline retrospective setting, and provide a continuous parametric model rather than per-condition accuracy tables. Unlike these benchmarks, our analysis is not just a fixed evaluation: it systematically sweeps both budget and distance to derive a predictive law. 
+
+Frame sampling and token budgets. Uniform sampling—selecting evenly spaced frames—is the default in virtually all video understanding systems [Chen et al., 2025, Zhang et al., 2024, Fu et al., 42024]. Adaptive or keyframe-based sampling [Zhu et al., 2025] requires content understanding before sampling, adding latency. S WIFT SAMPLING [Kim et al., 2026] identifies high-information frames via Taylor-expansion-based temporal surprise detection, achieving +12.5 pp on long videos under limited budgets—addressing which frames to select, complementary to our measurement of how much 
+
+budget matters. A DA CODEC [Hou et al., 2026] uses predictive visual coding to surpass a 224K-token baseline at 1/7 the budget on Qwen3-VL-8B, demonstrating that intelligent frame encoding can invert the budget–accuracy relationship. Q-F OLD [Tang et al., 2026] constructs query-aware focus–context representations under fixed visual budgets, gaining up to 9.1 pp on ultra-long videos. PEEK [Steunou et al., 2026] distills caption-conditioned frame relevance into a lightweight selector, outperforming uniform sampling especially at 1–2 frames. D YNA TOK [Park et al., 2026] retains 95% of baseline accuracy with 90% token reduction via temporally adaptive budget allocation. M UKV [Xiao et al., 2026] compresses KV caches at patch, frame, and segment granularities for long streaming video QA. M OMENT -V IDEO [Liu et al., 2026b] diagnoses temporal fidelity and finds that denser sampling helps some models but not others—consistent with our finding that α varies widely across architectures. I NFINI POT -V [Kim et al., 2025] and S TREAM MEM [Yang et al., 2025] study memory-efficient architectures under token budgets. G RID PROBE [Eltahir et al., 2026] adaptively allocates test-time compute by probing frame-importance posteriors for long-video VLMs. At the architectural level, F LUX MEM [Xie et al., 2026] and C ORDS [Mahdizadeh et al., 2026] compress streaming KV caches via adaptive hierarchical memory and coreset selection respectively, both operating under fixed memory budgets. Qu et al. [Qu et al., 2025] introduce LSDBench to study the trade-off between temporal coverage and spatial detail fidelity under a fixed frame budget. All of these methods optimize 
+
+how to allocate a budget; our contribution is a diagnostic metric (α(D)) that quantifies how much a given model benefits from budget at each temporal distance—a measurement tool that can guide the deployment of any budget-allocation strategy. 
+
+# 3 Empirical Model: Derivation and Validation 
+
+## 3.1 Problem Formulation 
+
+Consider a video of total length T seconds (ranging from 60 s to 3600 s in our experiments). A question 
+
+Q is posed at query time tq (where tq ≤ T ), and its answer lies in a temporal window [tstart , t end ] with 
+
+tend < t q. We define temporal distance D = tq − tend (seconds; always D < T ) and frame budget 
+
+B ∈ (0 , 1] (fraction of total frames sampled from [0 , t q]). The outcome Y ∈ { 0, 1} indicates whether the model answers correctly. We aim to characterize P (Y = 1) as a function of B, D, and T —an empirical law for memory-budget trade-offs on the RIVER-bench Retro-Memory subset. 
+
+Experimental setup. We use the Retro-Memory subset of RIVER-bench [Shi et al., 2026], which structures questions by temporal distance to the answer. • Distance tiers : short ( ¯D ≈ 23 s), medium ( ¯D ≈ 44 s), long ( ¯D ≈ 578 s), very long ( ¯D ≈
+
+2,358 s), based on the temporal distance from query to answer • Video length buckets T ∈ { 60 , 300 , 900 , 1800 , 3600 } s• Budget fractions : 15 levels, B ∈ [0 .01 , 1.0] (see Appendix for full list) • Models (10): STREAMING VLM [Xu et al., 2026], L IVE CC-7B, F LASH -VS TREAM -7B, QWEN 3-VL-{2B, 4B, 8B, 32B}, I NTERN VL3.5-8B, V IDEO LL AMA3-7B, V IDEO LL AMB-7B • Sampling strategies : random (stochastic uniform over [0 , t q]), uniform (evenly spaced frames), 5and recency (most recent B frames; S TREAMING VLM only); both random and uniform strate-gies applied to all models except Q WEN 3-VL-2B (uniform only) • Scale : ≈155,000 binary predictions total across 19 model-strategy combinations 
+
+Offline retrospective evaluation. All models are evaluated in an offline retrospective setting: B
+
+frames sampled from [0 , t q] are provided to the model simultaneously as a batch, together with the question. This is a deliberate design choice: we aim to measure architectural capacity to leverage frames at different temporal distances, independent of any specific KV-cache management policy. Real-time streaming evaluation conflates model architecture with cache strategy—a model may fail because its eviction policy discards relevant tokens, not because its architecture cannot utilize distant frames. By providing B frames via full attention, we isolate the architectural factor. This applies uniformly to all models, including streaming-trained ones (S TREAMING VLM, L IVE CC-7B, F LASH -VS TREAM -7B). These models were trained with streaming-oriented objectives (e.g., interleaved frame–text sequences or online caption supervision), but at inference time they process the sampled frames via standard full attention—the same as base models. S TREAMING VLM is additionally evaluated with recency sampling (retaining the B most recent frames), which emulates its streaming KV-cache behavior during training. The budget B therefore measures input frame coverage , not online memory capacity. This setting isolates the effect of frame budget on retrospective QA accuracy, independent of any inference-time memory management mechanism. 
+
+## 3.2 The Empirical Model 
+
+Functional form. We propose: logit (P ) = α(D) · log 10 B + β · log 10 D + δ · log 10 T + c, (2) where α(D) = a + e · log 10 D. (3) 
+
+Motivation. The log-log form reflects diminishing returns to budget: each tenfold increase in frames provides less marginal information at high-budget regimes. The dependence on log D
+
+reflects the difficulty of longer-term recall. The interaction term e · log B · log D captures that budget effectiveness itself changes with distance —the core novelty of our formulation. 
+
+Interpretation. α(D) = ∂logit (P )/∂ log 10 B is the marginal value of extra frames at distance 
+
+D. e = ∂α (D)/∂ log 10 D is the distance decay rate : how fast this marginal value degrades as the answer recedes in time. Note that α(D) measures budget-distance responsiveness —how much a model benefits from additional frames at a given distance—not absolute model quality. A model with low α
+
+may still achieve higher accuracy than a high-α model at very low budgets, where the high-α model’s steep frame dependence becomes a liability. 
+
+e ≈ 0 means that budget and distance are independent—a frame added at any distance provides the same marginal value (true streaming). e ≪ 0 means that at large D, budget becomes nearly useless: adding more frames provides no benefit because the model cannot leverage distant context. 
+
+Control term. The term δ · log 10 T is a control for video length. The main scaling relation is between B, D, and P ; we include log T to avoid confounding D effects with video-length effects, not as part of the primary law. 
+
+## 3.3 Estimation 
+
+We estimate the coefficients via weighted least squares (WLS) on cell-level aggregated data. For each (budget, tier, T -bucket) cell with ≥ 5 predictions and B ∈ [0 .03 , 1.0) , we compute the empirical 6accuracy, clip to [0 .02 , 0.98] , and apply the logit transform. The feature vector for each cell is: 
+
+x = [log 10 B, log 10 B · log 10 D, log 10 D, log 10 T, 1] . (4) We solve the weighted normal equations with weights proportional to cell sample size. The coefficient on log 10 B gives a, the interaction coefficient gives e, and α(D) = a+e·log 10 D. Budget and distance are independently varied across 13 budget levels and 16 (tier, T -bucket) combinations (4 tiers × 5
+
+T -buckets less 4 impossible combinations where D > T ), yielding up to 208 cells per model-strategy configuration. This ensures e is identified separately from a and β.
+
+Filtering. We exclude B = 1 .0 (trivial full-budget case) and B < 0.03 (extreme low-budget regime where most cells have too few correct predictions for stable logit estimates). Distance D is represented by the mean query horizon within each tier. Bootstrap confidence intervals (Appendix) resample at the cell level only; they do not account for clustering by video or question, and random-sampling configurations use a single draw per budget level, so the reported intervals are likely optimistic. 
+
+## 3.4 Validation 
+
+In-sample fit. The scaling law coefficients reported in Tables 2 and 3 are in-sample fits on the full prediction set per model. We prioritize in-sample analysis because the law is a descriptive tool—it characterizes the budget–distance–accuracy surface for a given model, not a predictive model for unseen videos. We additionally report leave-one-budget-level-out cross-validation in the Appendix (Table 7) to assess interpolation across budget levels. 
+
+Goodness-of-fit. We validate the law at the cell level via weighted R2 on aggregated (budget, distance, T ) cells, yielding R2 = 0 .05 –0.75 across all model-strategy configurations. Models with strong budget sensitivity (S TREAMING VLM: R2 = 0 .75 ) are well-fit; models with flat accuracy across budgets (V IDEO LL AMA3-7B: R2 = 0 .05 ) show near-zero fit, indicating no systematic budget–distance structure to capture. 
+
+Interpretability criteria. We consider α(D) a meaningful diagnostic for a given model-strategy configuration only when: (1) R2 ≥ 0.20 (the law captures at least modest systematic variation), and (2) the bootstrap 95% CI for a excludes zero (budget has a statistically detectable effect). Of the 19 configurations evaluated, 13 meet both criteria. For the remaining 6 (V IDEO LL AMA3-7B, VIDEO LL AMB-7B, and select low-budget-sensitivity configurations), α(D) is not interpretable—the relevant diagnostic finding is simply that these models exhibit negligible budget-distance structure on this task. 
+
+Important caveat. The law is a cell-level model: it predicts how average accuracy varies with budget and distance, not whether any single prediction will be correct. Individual binary outcomes are dominated by question-specific difficulty, which the law does not model. An instance-level linear probability model yields R2 < 0.08 across all models—expected given that budget and distance explain systematic trends, not per-question variance. We therefore do not report per-instance classification accuracy, as it would be misleading: the majority-class baseline (always predicting the more frequent outcome) ranges from 0.54 to 0.63 across models, leaving little room for a model that uses only budget and distance as features. Table 1 reports cell-level weighted R2 for the full law and two ablations. The interaction term ( e)improves R2 by 0.002 –0.02 across models; the distance main effect ( β · log D) contributes 0.00 –0.03 ,with the largest effect for L IVE CC-7B. While modest individually, these terms are necessary for the law to capture how α(D) varies with distance—the core diagnostic quantity. The bulk of variance is explained by log B alone, consistent with budget being the dominant factor in accuracy. 7Table 1: Ablation of formula components. Cell-level weighted R2 for the full law vs. ablations. The interaction term contributes modest but consistent improvement; the log D term matters most for models with strong distance dependence.                     
+
+> Model Full law No eterm No log D
+> STREAMING VLM (random) 0.75 0.74 0.75 LIVE CC-7B (random) 0.21 0.20 0.18 FLASH -VS TREAM (random) 0.47 0.45 0.45 QWEN 3-VL-8B (random) 0.32 0.32 0.32
+
+Figure 2: Scaling law fit for S TREAMING VLM. Predicted accuracy (from Eq. 2) versus observed cell-mean accuracy across all (distance, budget) combinations. Dot size indicates cell sample count. 
+
+Scatter plot. Figure 2 shows predicted versus actual cell-mean accuracy for S TREAMING VLM (Pearson r = 0 .84 ), the best-fit model. Across models, Pearson r ranges from 0.39 (L IVE CC-7B) to 0.84 (S TREAMING VLM), reflecting that the law captures more structure in models with high budget sensitivity. 
+
+# 4 Results 
+
+## 4.1 Budget Effectiveness Varies Widely Across Models at Long Distance 
+
+Table 2 presents fitted parameters for all models and sampling strategies. The law achieves cell-level weighted R2 ranging from 0.05 (V IDEO LL AMA3-7B, effectively no fit) to 0.75 (S TREAMING VLM, strong fit) across all 19 model-strategy configurations. Among the 13 configurations with R2 ≥ 0.20 ,the range is 0.21 –0.75 ; the remaining 6 configurations—V IDEO LL AMA3-7B, V IDEO LL AMB-7B, and select Q WEN 3-VL configurations—exhibit near-flat accuracy across budget levels, meaning the law cannot capture meaningful structure. Leave-one-budget-level-out cross-validation shows that out-of-sample R2 drops by 0.01 –0.07 relative to in-sample values across configurations (Appendix, Table 7), though 20% of individual folds yield negative R2, concentrated at extreme budget levels (B ≤ 0.03 and B ≥ 0.75 ). 8Figure 3: Raw accuracy landscape across budget and distance. Cell-mean accuracy for S TREAM -
+
+> ING
+
+VLM (left) and Q WEN 3-VL-8B (right), averaged over video lengths. S TREAMING VLM shows a clear gradient along the budget axis at all distances, while Q WEN 3-VL-8B’s accuracy is nearly flat—the “terrain” that the scaling law captures as high vs. low α(D).STREAMING VLM achieves a = 1 .87 with random sampling, giving α(1000) = 1 .26 —meaning that at D = 1000 s, each tenfold increase in frame budget still increases the log-odds of a correct answer by 1.26 (equivalently, each doubling adds 1.26 · log 10 2 ≈ 0.38 log-odds). In contrast, the best Qwen3-VL base model (Q WEN 3-VL-8B, random) achieves α(1000) = 0 .17 , a ≈7.4× gap that remains significant under video-level cluster bootstrap (non-overlapping 95% CIs). The next-strongest model overall is F LASH -VS TREAM (uniform) at α(1000) = 0 .30 , a 4.2× gap versus S TREAMING VLM. 
+
+Interpreting S TREAMING VLM’s high α. STREAMING VLM is a streaming-trained model (Qwen2.5-VL-7B fine-tuned with interleaved frame–text streaming objectives). Even under stan-dard random sampling at inference time, it retains substantially higher budget sensitivity at long distances ( α(1000) = 1 .26 ) compared to all other models ( α(1000) ≤ 0.30 ). We additionally evaluate STREAMING VLM with recency sampling—retaining the B most recent frames closest to query time 
+
+tq, matching its training regime—which yields α(1000) = 1 .71 (Table 2), an even steeper budget curve. However, recency sampling is adversarial for Retro-Memory’s retrospective recall task: at low budget, the frames containing the answer are discarded, driving B = 0 .01 accuracy to ≈5% (near chance) while B = 1 .0 recovers to ≈53% . The inflated α under recency thus reflects the cost of discarding relevant frames, not solely model capability. We therefore use the random-sampling results as the primary comparison throughout, as they provide a fairer apples-to-apples evaluation across all models. 
+
+Confidence intervals. Cell-level bootstrap resampling (1000 iterations) yields 95% CIs of 
+
+[1 .48 , 2.30] for S TREAMING VLM’s a and [0 .01 , 0.31] for Q WEN 3-VL-8B’s α(1000) . Video-level cluster bootstrap (500 iterations, resampling entire videos to account for within-video correlation) yields wider but still non-overlapping intervals: [1 .06 , 1.58] for S TREAMING VLM’s α(1000) and 
+
+[0 .04 , 0.34] for Q WEN 3-VL-8B’s. The gap is robust to both cell-level and video-level resampling variation. These CIs are conditional on a single random-sampling draw per budget level and on the fixed cell aggregation. For some models (e.g., L IVE CC-7B), the CI for e includes zero, indicating that distance decay is not statistically significant—consistent with the low R2 for these models. 
+
+Effect sizes in accuracy space. To translate α into operational terms, we apply the fitted law (Eq. 2) at D = 1000 s and T = 3600 s: increasing budget from B = 0 .10 to B = 1 .0 yields a predicted accuracy gain of +29 pp for S TREAMING VLM (from 26% to 55% ) versus +4 pp for Q WEN 3-VL-8B (from 35% to 39% ). (These are model-predicted values from Eq. 2, not raw observations.) Conversely, cutting budget to B = 0 .01 drops S TREAMING VLM to 9% (near chance) while Q WEN 3-VL-8B 9Table 2: Scaling law parameters for all models and sampling strategies. e = distance decay rate. 
+
+a = base budget exponent. α(D) = a + e · log 10 D = budget exponent at distance D. Ret.% = 
+
+α(1000) /α (10) , measuring how much budget effectiveness is retained at long distance. R2 = cell-level weighted goodness-of-fit. † 95% CI includes zero. ‡ Recency row is from a separate evaluation run (Section 4.1); included for comparison but not part of the primary analysis. Blue row = primary comparison.                                                                                                                                      
+
+> Model Type Sampling eaα(1000) Ret.% R2
+> StreamingVLM ‡Streaming recency −0.09 1.97 1.71 91 0.85
+> StreamingVLM Streaming random −0.21 1.87 1.26 75 0.75
+> StreamingVLM Streaming uniform −0.17 1.79 1.27 79 0.72
+> LiveCC-7B Streaming random −0.14 0.61 0.20 42 0.21
+> LiveCC-7B Streaming uniform −0.13 0.58 0.19 43 0.23
+> Flash-VStream Streaming random −0.16 0.72 0.23 41 0.47
+> Flash-VStream Streaming uniform −0.09 0.56 0.30 63 0.45
+> Qwen3-VL-2B Base uniform 0.01 0.13 0.15 ≈100 0.23
+> Qwen3-VL-4B Base random −0.05 0.23 0.08 43 0.38
+> Qwen3-VL-4B Base uniform −0.20 0.60 0.01 20.47
+> Qwen3-VL-8B Base random −0.09 0.43 0.17 49 0.32
+> Qwen3-VL-8B Base uniform −0.18 0.60 0.06 15 0.27
+> Qwen3-VL-32B Base random −0.10 0.30 0.00 ≈00.31
+> Qwen3-VL-32B Base uniform −0.08 0.34 0.10 36 0.45
+> InternVL3.5-8B Base random −0.54 1.51 −0.12 †—0.65
+> InternVL3.5-8B Base uniform −0.31 1.13 0.20 25 0.71
+> VideoLLaMA3-7B Base random 0.05 −0.17 †−0.03 †—0.05
+> VideoLLaMA3-7B Base uniform −0.02 −0.11 †−0.16 †—0.11
+
+remains at 31% —still above chance, but unable to benefit from additional frames. Importantly, at 
+
+B = 0 .01 , Q WEN 3-VL-8B outperforms STREAMING VLM in absolute accuracy ( 31% vs. 9% )despite its much lower α. This illustrates that α(D) measures budget responsiveness —not absolute model quality—and high α can be a liability at very low budgets where frame dependence means rapid degradation. The 7.4× gap in α thus corresponds to a 7.3× difference in accuracy responsiveness to budget ( 29 pp vs. 4 pp for a 10 × budget increase). At short distance ( D = 23 s), the picture is reversed in relative terms: S TREAMING VLM’s α(23) = 1 .59 gives +32 pp while Q WEN 3-VL-8B’s 
+
+α(23) = 0 .31 gives +8 pp—a 4× gap, confirming that the distance-dependent term e amplifies the separation at long distances. 
+
+Ratio robustness. We report the α ratio as ≈7.4 × throughout. Because Q WEN 3-VL-8B’s CI lower bound ( 0.04 ) is near zero, the bootstrapped ratio distribution is right-skewed. We therefore also report the absolute gap: ∆α(1000) = 1 .26 − 0.17 = 1 .09 (cluster bootstrap 95% CI: [0 .72 , 1.54] ,derived from the individual-model CIs under independence). Whether expressed multiplicatively or as an absolute difference, the separation is substantively large and robust to resampling. Interestingly, L IVE CC-7B and F LASH -VS TREAM —despite being designed for streaming— achieve α(1000) ≈ 0.20 –0.23 with random sampling, closer to base models than to S TREAMING VLM. This suggests that the architectural modifications in these models provide limited benefit for long-distance budget effectiveness. Figure 4 shows α(D) curves for all models. S TREAMING VLM’s curve remains above α = 1 .0
+
+across all distances, while all other models fall below α = 0 .6.10 Figure 4: Budget exponent α(D) across all models (random sampling). STREAMING VLM (blue) maintains α > 1.0 across all distances, while base models (orange/purple) and standard streaming models (green/red) remain below α = 0 .6.
+
+## 4.2 Sampling Strategy Has Model-Dependent Effects 
+
+Figure 7a compares random versus uniform sampling for two representative streaming models. The effect of sampling strategy is more nuanced than a simple ranking: • Random sampling consistently yields higher base budget sensitivity a for streaming models (e.g., F LASH -VS TREAM : a = 0 .72 random vs. 0.56 uniform). • However, random sampling also produces more negative e (e.g., F LASH -VS TREAM : e = −0.16 
+
+random vs. −0.09 uniform). • The net effect on α(1000) varies: F LASH -VS TREAM achieves α(1000) = 0 .23 (random) vs. 
+
+0.30 (uniform), favoring uniform at long distances. For base models, the pattern is more complex. Q WEN 3-VL-4B with uniform sampling achieves higher a (0.60 vs. 0.23 ) but much steeper decay ( e = −0.20 vs. −0.05 ), resulting in α(1000) ≈ 0.01 
+
+compared to 0.08 with random sampling. Q WEN 3-VL-32B shows the opposite: uniform sampling yields α(1000) = 0 .10 versus 0.00 for random. This confirms that the optimal sampling strategy is model-dependent and cannot be determined without measuring α(D) at the target distance. This finding complicates the standard recommendation of uniform sampling: the optimal strategy depends on the target temporal distance and the specific model architecture. For applications requiring long-distance recall, the choice should be guided by α(D) at the target distance rather than by default convention. 
+
+## 4.3 Model Scale Alone Does Not Close the Gap 
+
+Scaling Q WEN 3-VL from 2B to 32B parameters with uniform sampling yields a non-monotonic pattern in α(1000) : 0.15 (2B), 0.01 (4B), 0.06 (8B), 0.10 (32B). The 2B model’s relatively high 
+
+α(1000) = 0 .15 is noteworthy—it achieves this through a near-zero interaction term ( e = +0 .01 ), meaning budget effectiveness barely decays with distance, despite starting from a low base ( a = 0 .13 ). 11 Figure 5: Budget exponent α(D) heatmap across models and temporal distances. Each cell shows 
+
+α(D) = a + e · log 10 D for a given model at distance D (random sampling; Q WEN 3-VL-2B uses uniform). S TREAMING VLM maintains α > 1 everywhere (dark red); most other models collapse below 0.3 at D ≥ 300 s. In contrast, the 4B model starts with higher a = 0 .60 but decays sharply ( e = −0.20 ), yielding 
+
+α(1000) ≈ 0.01 . This non-monotonic relationship suggests that scale effects on budget effectiveness are complex and cannot be summarized as a simple capacity threshold within a single model family. With random sampling (available for 4B–32B), the 8B model achieves α(1000) = 0 .17 , the best among the Qwen3-VL family. In all cases, the Qwen3-VL family remains far below S TREAM -
+
+> ING
+
+VLM’s α(1000) = 1 .26 (random sampling). We note that this comparison is observational: the models differ in pretraining data, architecture, and tuning, so we cannot attribute differences solely to parameter count. Figure 6 shows α(D) curves for the Qwen3-VL family alongside S TREAMING VLM. 
+
+## 4.4 Cross-Architecture Evidence 
+
+To confirm that the budget–distance relationship generalizes beyond the Qwen3-VL family, we evaluate INTERN VL3.5-8B, a base model from a different architecture lineage. I NTERN VL3.5-8B achieves a high base budget sensitivity ( a = 1 .51 , random), between S TREAMING VLM ( a = 1 .87 ) and base models—indicating strong budget responsiveness at short distances. However, its distance decay rate is the most negative among all models ( e = −0.54 ), meaning budget effectiveness collapses most rapidly with increasing temporal distance. The result is α(1000) = −0.12 (95% CI: [−0.52 , 0.25] ,includes zero), indicating that at long distances, additional frames provide no measurable benefit. This pattern—high a paired with steep e—is distinct from the Qwen3-VL models, which show both lower a and less negative e. I NTERN VL3.5-8B demonstrates that raw model capability (as reflected in high oracle accuracy of 0.477) does not confer sustained budget sensitivity at long distances. VIDEO LL AMA3-7B (based on Qwen2.5-7B) exhibits a third distinct pattern: a ≈ 0 with 12 Figure 6: Model scale versus budget effectiveness. Scaling Q WEN 3-VL from 4B to 32B parameters does not consistently improve α(D). S TREAMING VLM achieves α(D) > 1.0 at all distances through specialized streaming training. 
+
+R2 < 0.11 under both sampling strategies, meaning the scaling law captures essentially no budget– accuracy structure. All coefficients have 95% CIs that include zero ( a = −0.17 , CI: [−0.80 , 0.44] ;
+
+α(1000) = −0.03 , CI: [−0.39 , 0.30] ). Despite achieving above-chance accuracy ( ≈33% vs. 25% 
+
+random baseline), V IDEO LL AMA3-7B’s accuracy is flat across all budget levels—from 2 frames (budget 5%) to 48 frames (budget 100%)—indicating complete budget insensitivity. VIDEO LL AMB-7B Wang et al. [2025], a model with explicit recurrent memory (RMT) designed for long video understanding, represents a fourth failure mode: answer generation collapse. Despite its memory-augmented architecture, V IDEO LL AMB-7B achieves only 4.4% oracle accuracy on RIVER-bench (below the 25% random baseline for 4-choice MCQ), with 79% of responses failing to produce a valid answer letter. The scaling law fit is correspondingly poor ( R2 = 0 .13 –0.16 ), and all coefficients have wide CIs that include zero. This result indicates that architectural memory mechanisms alone do not guarantee temporal memory capability: V IDEO LL AMB-7B’s RMT design, while effective on its training benchmarks, does not transfer to RIVER-bench’s fine-grained temporal retrieval task. Together, I NTERN VL3.5-8B, V IDEO LL AMA3-7B, and V IDEO LL AMB-7B illustrate three failure modes for budget effectiveness in base models: rapid distance decay (high a, steep e), outright budget insensitivity ( a ≈ 0), and answer generation collapse (below-chance accuracy). The finding reinforces the conclusion that high α(D) in streaming-trained models (S TREAMING VLM) arises from memory-specific training rather than from general model capacity, and that this property is absent in base models across architecture families. (We note that “memory” here refers to budget-distance responsiveness on the retrospective recall task; see Limitations for the answer-span confound.) 
+
+## 4.5 Cross-Benchmark Probe on LVOmniBench 
+
+To probe whether the model form (not the specific coefficients) applies beyond RIVER-bench, we evaluate Q WEN 3-VL on LVOmniBench Tao et al. [2026], a long-video QA benchmark with 275 videos (duration 10 min–60 min). For LVOmniBench, the temporal scale proxy D is the video duration in seconds, since all questions probe content distributed across the full video. Crucially, D here means “video length” rather than “temporal recall distance,” so coefficients are not directly comparable 
+
+13 to RIVER-bench. This section demonstrates that the functional form fits a second benchmark, not that the metric values generalize. We sample up to 15 questions per duration bin at five budget levels B ∈ { 0.05 , 0.10 , 0.20 , 0.50 , 1.0},yielding 300 total evaluations per configuration, and fit the scaling law with D = video duration. Table 3 reports fitted parameters for four configurations: Q WEN 3-VL-8B with uniform and random sampling, QWEN 3-VL-4B with uniform sampling, and Q WEN 3-VL-2B with uniform sampling. Table 3: Budget scaling law across benchmarks and model configurations. D is temporal recall distance on RIVER-bench and full video duration on LVOmniBench. The interaction term e has opposite signs across benchmarks ( e < 0 on RIVER-bench, e > 0 on LVOmniBench for the 8B model), reflecting different semantics of D (see text). α(D†): evaluated at D = 1000 s for RIVER-bench, D = 3600 s for LVOmniBench. The 4B and 2B models yield e < 0 and low R2; the poor fit quality means budget sensitivity cannot be reliably characterized at these model scales.                                          
+
+> Benchmark Model Sampling aeα(D†)R2
+> RIVER-bench QWEN 3-VL-8B uniform 0.60 −0.18 0.06 0.27
+> RIVER-bench QWEN 3-VL-2B uniform 0.13 0.01 0.15 0.23
+> LVOmniBench QWEN 3-VL-8B uniform −1.34 0.41 0.12 0.54
+> QWEN 3-VL-8B random −0.84 0.24 0.00 0.37
+> QWEN 3-VL-4B uniform 1.81 −0.52 −0.03 0.12 †
+> QWEN 3-VL-2B uniform 1.83 −0.40 0.42 0.15 †
+> †R2≤0.15 : fit quality too low for reliable coefficient interpretation.
+
+Sign of e suggests a capacity effect. For Q WEN 3-VL-8B, the interaction term e > 0 under both sampling strategies ( e = +0 .41 uniform, e = +0 .24 random), indicating that budget sensitivity 
+
+increases with video duration. This is the opposite of e < 0 on RIVER-bench, and is coherent: video duration captures how much content the model must cover (longer ⇒ more frames help), while temporal recall distance captures how far back the model must remember (longer ⇒ relevant frames are diluted across a fixed budget). By contrast, Q WEN 3-VL-4B yields e = −0.52 , R2 = 0 .12 ,and Q WEN 3-VL-2B yields e = −0.40 , R2 = 0 .15 . Both sub-8B models show e < 0 and low R2
+
+(≤ 0.15 ), but the low fit quality means the fitted coefficients are not stable enough to support strong conclusions about budget sensitivity in these models. We interpret this as preliminary evidence that model capacity interacts with the ability to systematically leverage additional frames on LVOmniBench, though the pattern warrants confirmation across model families. 
+
+Budget allocation on long videos. For Q WEN 3-VL-8B uniform, α(3600) = 0 .12 > 0 at the 60-minute tier, confirming that budget allocation matters for very long videos. Random sampling yields a weaker effect ( α(3600) ≈ 0.00 ): higher base sensitivity ( a = −0.84 vs. −1.34 ) is offset by a smaller interaction term ( e = 0 .24 vs. 0.41 ), resulting in near-zero budget sensitivity at the longest duration. Across both benchmarks, the law form captures the budget–temporal-scale structure, and its parameters encode both benchmark-specific temporal dynamics and model capacity effects. 
+
+## 4.6 Budget Allocation Application 
+
+Given a target accuracy and temporal distance, Equation (2) predicts the required frame budget. Figure 7b shows accuracy versus budget at five distances for S TREAMING VLM and Q WEN 3-VL-8B. 14 (a) Effect of sampling strategy on α(D): random (solid blue) starts higher but decays faster than uni-form (dashed red). 
+
+> (b) Predicted accuracy vs. budget at multiple dis-tances for S TREAMING VLM (left) and Q WEN 3-VL-8B (right).
+
+Figure 7: Budget sensitivity diagnostics. (a) Sampling strategy affects the α(D) curve shape: random sampling yields higher base sensitivity but steeper distance decay, with model-dependent crossover points. (b) The scaling law predicts accuracy as a function of budget at each distance; STREAMING VLM’s high α translates budget increases into large accuracy gains even at D = 1000 s, while Q WEN 3-VL-8B’s low α renders additional frames nearly ineffective. 
+
+The interaction term e produces ranking reversals. Without the distance-dependent term ( α = a,constant), the simpler law would rank Q WEN 3-VL-32B above Q WEN 3-VL-4B in budget effectiveness at all distances ( a = 0 .30 vs. 0.23 , random sampling). However, the full law with e reverses this ranking at D = 1000 s: Q WEN 3-VL-4B achieves α(1000) = 0 .08 while Q WEN 3-VL-32B drops to α(1000) ≈ 0.00 , because the 32B model’s steeper decay ( e = −0.10 vs. −0.05 ) erases its short-distance advantage. A practitioner targeting long-distance recall would choose the wrong model without the interaction term. The high α(D) of S TREAMING VLM means it can achieve target accuracy levels with far fewer frames: • At D = 1000 s, S TREAMING VLM’s α(1000) = 1 .26 means each 10 × increase in budget raises accuracy substantially. • QWEN 3-VL-8B’s α(1000) = 0 .17 means budget increases have minimal effect at long dis-tances. 
+
+# 5 Discussion 
+
+## 5.1 Relation to Concurrent Work 
+
+Comparison with E GOSTREAM . The concurrent E GOSTREAM benchmark [Forte et al., 2026] shares our goal of diagnosing how streaming models handle temporal recall at varying distances. How-ever, the two studies differ in three key respects. First, E GOSTREAM evaluates KV-cache management policies (sliding windows, pruning, merging, offloading) applied to a single backbone (Qwen3-VL), whereas we compare model architectures (10 models across 4 families) under a controlled frame-budget sweep. Second, E GOSTREAM reports per-condition accuracy tables across seven cognitive dimensions, whereas our α(D) provides a single continuous metric that enables direct model ranking and budget-allocation predictions. Third, our offline retrospective evaluation isolates the frame-budget variable from inference-time cache dynamics, providing a cleaner measurement of architectural mem-ory capacity. The two approaches are complementary: E GOSTREAM reveals which cache strategy best preserves episodic memory, while our law reveals which architectures benefit from additional frames at long distances. 15 Distance-aware memory in video generation. Independently, F ADE MEM [Lu et al., 2026] proposes distance-aware KV memory consolidation for autoregressive video generation , motivated by the observation that “fine details decorrelate quickly, while coarse scene structure remains useful over longer horizons.” This mirrors our empirical finding that e < 0 across all RIVER-bench models: budget effectiveness decays with temporal distance. The convergence of this pattern across understanding and generation tasks suggests that distance-dependent memory decay is a fundamental property of transformer-based video processing, not an artifact of our specific evaluation setup. 
+
+## 5.2 Generalizability of the Empirical Model 
+
+Our cross-benchmark evaluation on LVOmniBench provides preliminary evidence that the scaling law form applies beyond RIVER-bench’s temporal memory task, while revealing that the law’s coefficients encode both benchmark-specific temporal dynamics and model capacity effects. Importantly, D has different semantics across the two benchmarks—temporal recall distance on RIVER-bench versus video duration on LVOmniBench—so the sign of e is not directly comparable; rather, the consistent finding is that the law form fits both settings and α(D) remains a useful diagnostic. For Q WEN 3-VL-8B, the interaction term e > 0 on LVOmniBench under both sampling strategies ( e = +0 .41 uniform, 
+
+e = +0 .24 random)—opposite in sign to all RIVER-bench models ( e < 0)—reflects the different semantic meaning of D: video duration captures how much content a model must cover, so longer videos benefit more from additional frames ( e > 0); temporal recall distance captures how far back a model must remember, so budget becomes less effective as the relevant frames are spread more thinly (e < 0). For Q WEN 3-VL-4B and Q WEN 3-VL-2B, the sign reverses ( e = −0.52 and e = −0.40 
+
+respectively) and the fit quality is poor ( R2 = 0 .12 and 0.15 ), meaning the fitted coefficients are not stable enough to support strong conclusions about budget sensitivity in these models—the law form still fits, but the low R2 suggests the budget–duration relationship is too noisy to characterize reliably at this model scale. Leave-one-budget-level-out cross-validation on RIVER-bench (Table 7) shows that aggregated out-of-sample R2 drops by 0.01 –0.07 across configurations (median drop: 0.016 ), with overall OOS 
+
+R2 ranging from 0.16 (Q WEN 3-VL-2B) to 0.82 (S TREAMING VLM). However, 20% of individual folds yield negative R2, concentrated at extreme budget levels ( B ≤ 0.03 and B ≥ 0.75 ), indicating that the law’s predictions are unreliable when extrapolating to very low or very high allocations. The law is most predictive in the B ∈ [0 .05 , 0.60] range. We view the two benchmarks as complementary in what they reveal about the law. RIVER-bench isolates the memory-recall signal and shows that architectural design (not just budget) determines α
+
+at long distances. LVOmniBench shows that the law form applies to general long-video reasoning: the tested 8B model exhibits e > 0 and fitted e and α(D) remain useful diagnostics even when D is a coarse proxy (video duration) rather than a precisely defined temporal recall distance; broader model family coverage is needed to confirm whether this pattern generalizes. 
+
+## 5.3 Implications for Model Design and Deployment 
+
+Optimize for high α(D), not just accuracy. A model with α(1000) > 1.0 benefits substantially from additional frames even at long distances; one with α(1000) ≈ 0 cannot improve at long distances regardless of budget (within the B ∈ (0 , 1] range). Practitioners should select models by α(D) at the target distance and allocate budgets via Equation (2). 
+
+Training paradigm matters more than scale in our experiments. STREAMING VLM’s α(1000) = 1.26 (random sampling) versus 0.17 for Q WEN 3-VL-8B suggests that streaming-oriented training 16 is key, though this comparison is confounded by pretraining differences. Under recency sampling (which matches its training regime), S TREAMING VLM achieves α(1000) = 1 .71 , but this inflated value reflects the task–sampling interaction rather than pure model capability (Section 4.1). Standard streaming-trained models achieve α(1000) ≈ 0.20 –0.23 , closer to base models than to S TREAM -
+
+> ING
+
+VLM. 
+
+Sampling strategy involves a trade-off. Random sampling yields higher a but steeper e; the net effect at a given distance is model-dependent. For F LASH -VS TREAM , uniform sampling achieves better α(1000) (0.30 vs. 0.23 ); for S TREAMING VLM the strategies are comparable ( 1.26 vs. 1.27 ). 
+
+## 5.4 Limitations 
+
+Benchmark and task scope. Main results are from RIVER-bench Retro-Memory (factual recall). We additionally validate on LVOmniBench, a general long-video QA benchmark, where the 8B model yields e > 0 and α(3600) = 0 .12 at the 60-minute tier, while the 4B and 2B models yield e < 0
+
+and R2 ≤ 0.15 , with fit quality too low to draw strong conclusions about budget sensitivity at this scale (Section 4.5). Broader model family coverage would strengthen generalization claims. Stratified analysis reveals that video length ( T ) and temporal distance ( D) are independent dimensions: accuracy varies across both, with S TREAMING VLM showing more stable performance on long videos at long distances compared to base models. 
+
+Interaction term contribution. The interaction e · log B · log D improves cell-level R2 by 0.002 –
+
+0.02 across models (Table 1). While modest in variance-explained terms, this term is necessary for α(D) to vary with distance—the core diagnostic quantity. Leave-one-distance-tier-out analysis (Appendix, Table 8) confirms that α(1000) is stable within ±0.08 when any single tier is dropped, and the StreamingVLM–base gap exceeds 1.0 under all conditions. The small R2 improvement reflects that budget ( log B) explains most cell-level variance; the interaction captures how budget effectiveness 
+
+changes with distance, which is a second-order but practically important effect. Without it, the model would predict identical budget sensitivity at all distances, missing the ranking reversals documented in Section 4.6. We therefore retain the interaction as a diagnostic refinement, not as evidence of a strong distance-budget coupling in all models. 
+
+Variable fit quality. The law fits well for models with strong budget sensitivity ( R2 = 0 .75 for STREAMING VLM) but poorly for budget-insensitive models ( R2 = 0 .05 for V IDEO LL AMA3-7B, 
+
+R2 = 0 .21 for L IVE CC-7B). This is expected: when a model’s accuracy barely changes with budget, there is little systematic variation for the law to capture. The law is most informative precisely for models where budget allocation matters—those with high α(D). For low-α models, the main takeaway is that budget has minimal effect, which is itself a useful diagnostic finding. 
+
+Answer span as an uncontrolled confound. Our formulation defines temporal distance as D =
+
+tq −tend , treating the answer as a point in time. In practice, answers span a temporal window [tstart , t end ]
+
+of varying width—a brief activity (e.g., “someone falls”, ∼2 s) versus a prolonged event (e.g., “the meeting discussion”, ∼10 min). Under uniform or random sampling, the probability of capturing at least one frame from the answer window scales with B · (tend − tstart )/t q, so narrow-span activities require substantially higher budget to sample reliably, while wide-span events are captured even at low budget. This answer-span width is a confound that our model does not control for: two questions with the same D but different span widths will exhibit different effective budget sensitivity. The high 17 α of S TREAMING VLM could partly reflect that its streaming training makes it better at localizing narrow-span events, not purely that it has better temporal memory. RIVER-bench does not annotate answer span width, so we cannot stratify directly; incorporating span width as an additional covariate (or stratifying by question type as a proxy) is a natural extension that could sharpen the model’s predictions and disentangle memory from localization ability. 
+
+Offline retrospective evaluation. All models are evaluated in an offline retrospective setting: B
+
+frames are provided simultaneously as a batch, not processed online. This applies to streaming-trained models (S TREAMING VLM, L IVE CC-7B, F LASH -VS TREAM -7B) as well as base models. STREAMING VLM is additionally evaluated with recency sampling (the B most recent frames), which matches its streaming training regime but is adversarial for Retro-Memory’s retrospective recall task: at low budget, the frames containing the answer are discarded. This inflates α relative to random sampling and should be interpreted as a property of the recency–retrospective interaction, not solely of the model. The budget B therefore measures input frame coverage rather than online memory capacity. Evaluating these models in their native streaming inference mode—where the KV cache window size serves as the budget—is a natural extension that would directly test inference-time memory management. 
+
+Other limitations. Our law uses fractional budget B rather than absolute frame count; we include 
+
+log T as a control but a full analysis with absolute counts is future work. We test only random and uniform sampling. Our WLS estimation treats cell-level observations as independent; clustered standard errors (by video or question) would give more conservative intervals. Random sampling uses a single draw per budget level; multiple seeds would provide confidence intervals on a and e.
+
+# 6 Conclusion 
+
+We derived a compact empirical model for memory-budget trade-offs in streaming video understanding, validated on RIVER-bench Retro-Memory with ∼155 ,000 predictions across ten models and three sampling strategies, with cross-benchmark evaluation on LVOmniBench. The budget exponent 
+
+α(D) = a + e · log 10 D differs by ≈7.4× at D = 1000 s between S TREAMING VLM ( 1.26 , 95% CI: 
+
+[1 .06 , 1.58] ) and the best base model ( 0.17 , CI: [0 .04 , 0.34] ); the intervals do not overlap under video-level cluster bootstrap. In accuracy space, this translates to a 29 pp gain from a 10 × budget increase for STREAMING VLM versus only 4 pp for the best base model at D = 1000 s. Leave-one-distance-tier-out analysis confirms that no single tier drives the result (maximum |∆α(1000) | = 0 .08 ). Sampling strategy involves a model-dependent trade-off between base sensitivity a and distance decay e. We propose α(D) as a standardized diagnostic metric for streaming capability on this benchmark and encourage future work on adaptive sampling, architectural analysis of high-α models, and validation on additional benchmarks. 
+
+# References 
+
+A. Aghajanyan, L. Yu, A. Conneau, W.-N. Hsu, K. Hambardzumyan, S. Zhang, S. Roller, N. Goyal, O. Levy, and L. Zettlemoyer. Scaling laws for generative mixed-modal language models. In ICML ,2023. arXiv:2301.03728. J. Chen, Z. Ge, S. Zhu, W. Xie, and P. Luo. Videollm-online: Online video large language model for streaming video. In CVPR , 2024. arXiv:2406.11816. 18 J. Chen, Z. Zeng, Y. Lin, W. Li, Z. Ma, and M. Z. Shou. Livecc: Learning video llm with streaming speech transcription at scale. In CVPR , 2025. M. Eltahir, L. Ayash, A. Habibullah, T. Hussain, and N. Khan. Gridprobe: Posterior-probing for adaptive test-time compute in long-video VLMs. arXiv preprint arXiv:2605.10762 , 2026. R. Forte, G. Lando, and A. Furnari. EGOSTREAM: A diagnostic benchmark for streaming episodic memory in egocentric vision. arXiv preprint arXiv:2605.31557 , 2026. C. Fu, Y. Dai, Y. Luo, L. Li, S. Ren, R. Zhang, Z. Wang, C. Zhou, Y. Shen, M. Zhang, P. Chen, Y. Li, S. Lin, S. Zhao, K. Li, T. Xu, X. Zhu, Y. Zheng, Z. Wen, Y. Zhang, Y. Qiao, and L. Wang. Video-mme: The first-ever comprehensive evaluation benchmark of multi-modal llms in video analysis. arXiv preprint arXiv:2405.21075 , 2024. J. Hoffmann, S. Borgeaud, A. Mensch, E. Buchatskaya, T. Cai, E. Rutherford, D. de Las Casas, L. A. Hendricks, J. Welbl, A. Clark, T. Hennigan, E. Noland, K. Millican, G. van den Driessche, B. Damoc, A. Guy, S. Osindero, K. Simonyan, E. Elsen, J. W. Rae, O. Vinyals, and L. Sifre. Training compute-optimal large language models. arXiv preprint arXiv:2203.15556 , 2022. H. Hou, Z. Huang, Z. Liang, Q. Si, C. Li, S. Dong, K. Shao, R. Li, D. Wang, N. Duan, and J. Wang. AdaCodec: A predictive visual code for video MLLMs. arXiv preprint arXiv:2606.02569 , 2026. J. Kaplan, S. McCandlish, T. Henighan, T. B. Brown, B. Chess, R. Child, S. Gray, A. Radford, J. Wu, and D. Amodei. Scaling laws for neural language models. arXiv preprint arXiv:2001.08361 , 2020. D. Kim, B. Sachdeva, K. Uppal, N. Gupta, V. N. Balasubramanian, and D. Ghadiyaram. Swift sampling: Selecting temporal surprises via taylor series. arXiv preprint arXiv:2605.22678 , 2026. M. Kim, S. Yun, J. Cho, S. Kim, S. Kim, and D. Yoo. Infinipot-v: Memory-constrained kv cache compression for streaming video understanding. arXiv preprint arXiv:2506.15745 , 2025. A. Li, Z. Xiao, Z. Yue, B. Xu, L. Yao, J. Li, P. Fu, J. Ju, J. Luan, and Q. Jin. Streampro: From reactive perception to proactive decision-making in streaming video. arXiv preprint arXiv:2605.16381 ,2026. J. Liu, J. Huang, Z. Jia, J. Li, X. Zhang, Z. Guo, B. Li, W. Zeng, Y. Lu, and X. Jin. An efficient streaming video understanding framework with agentic control. arXiv preprint arXiv:2605.17921 ,2026a. X. Liu, Y. Zhu, X. Zhao, X. Wang, Y. Li, X. Li, H. Cao, X. Sun, S. Zhang, X. Yang, Z. Zhong, and X. Yang. Moment-video: Diagnosing temporal fidelity of video MLLMs on momentary visual events. arXiv preprint arXiv:2606.02522 , 2026b. Y. Lu, J. Yang, P. Koniusz, Y. Song, and Y. Yang. FadeMem: Distance-aware memory consolidation for autoregressive video diffusion. arXiv preprint arXiv:2606.10671 , 2026. A. Mahdizadeh, P. Azadi, M. Li, X. He, and L. Sigal. Cords: Coreset-based representative and diverse selection for streaming video understanding. arXiv preprint arXiv:2605.14310 , 2026. K. Mangalam, R. Akshulakov, and J. Malik. Egoschema: A diagnostic benchmark for very long-form video language understanding. In NeurIPS , 2023. arXiv:2308.09126. A. Nagrani, P. H. Seo, B. Seybold, N. Houlsby, A. Piergiovanni, A. Jaegle, and A. Arnab. Neptune: The long orbit to benchmarking long video understanding. arXiv preprint arXiv:2412.09582 , 2024. 19 M. Park, T. Kong, and S. Ahn. DynaTok: Temporally adaptive and positional bias-aware token compression for video-LLMs. arXiv preprint arXiv:2605.19322 , 2026. J. Qi, Y. Yao, Y. Bai, B. Xu, J. Li, Z. Liu, and T.-S. Chua. An LMM for efficient video understanding via reinforced compression of video cubes. arXiv preprint arXiv:2504.15270 , 2025. T. Qu, L. Tang, B. Peng, S. Yang, B. Yu, and J. Jia. Does your vision-language model get lost in the long video sampling dilemma? arXiv preprint arXiv:2503.12496 , 2025. S. Seo and G. Kim. Natural-language temporal grounding in hour-long videos is a search problem. 
+
+arXiv preprint arXiv:2606.12300 , 2026. Y. Shi, Q. Zhao, T. Jiang, X. Zeng, Y. Wang, and L. Wang. River: A real-time interaction benchmark for video llms. In ICLR , 2026. arXiv:2603.03985. K. Steunou, A. F. Razzouki, K. Guetari, M. A. El-Yacoubi, and Y. Tevissen. PEEK: Picking essential frames via efficient knowledge distillation. arXiv preprint arXiv:2605.31029 , 2026. B. Tang, X. Chen, S. Gou, J. Yuan, Y. Zhang, and C. Gao. Q-Fold: Query-aware focus-context spatio-temporal folding for long video understanding. arXiv preprint arXiv:2606.12125 , 2026. K. Tao, Y. Zheng, J. Xu, W. Du, K. Shao, H. Wang, X. Chen, X. Jin, J. Zhu, B. Yu, W. Wang, J. Liu, C. Qin, Y. Zhang, M.-H. Yang, and H. Wang. Lvomnibench: Pioneering long audio-video understanding evaluation for omnimodal llms. arXiv preprint arXiv:2603.19217 , 2026. P. Wang, S. Bai, S. Tan, S. Wang, Z. Fan, J. Bai, K. Chen, X. Liu, J. Wang, W. Ge, Y. Fan, K. Dang, M. Du, X. Ren, R. Men, D. Liu, M. Chang, J. Yu, A. Yang, and J. Lin. Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 ,2024. Y. Wang, C. Xie, Y. Liu, and Z. Zheng. VideoLLaMB: Long streaming video understanding with recurrent memory bridges. In ICCV , 2025. arXiv:2409.01071. Z. Wen, B. Yang, J. Ke, J. Huang, C. Liao, J. Wang, X. Liu, and L. Zhang. Evostreaming: Your offline video model is a natively streaming assistant. arXiv preprint arXiv:2605.10343 , 2026. J. Xiao, J. Chen, T. Sun, X. Yang, and A. Yao. MuKV: Multi-grained KV cache compression for long streaming video question-answering. arXiv preprint arXiv:2605.22269 , 2026. Y. Xie, B. He, J. Wang, X. Zheng, Z. Ye, and Z. Wu. Fluxmem: Adaptive hierarchical memory for streaming video understanding. In CVPR , 2026. arXiv:2603.02096. R. Xu, G. Xiao, Y. Chen, L. He, K. Peng, Y. Lu, and S. Han. Streamingvlm: Real-time understanding for infinite video streams. In ICLR , 2026. arXiv:2510.09608. Y. Yang, L. Xiao, K. Zheng, Y. Li, and S. Wang. Streammem: Query-agnostic kv cache memory for streaming video understanding. arXiv preprint arXiv:2508.15717 , 2025. D. Yao, S. Gu, Q. Si, J. Zhou, C. Yang, C. Qin, N. Gu, Z. Lin, W. Wang, N. Duan, and J. Wang. Harnessing streaming video in the wild. arXiv preprint arXiv:2606.08615 , 2026. X. Zhai, A. Kolesnikov, N. Houlsby, and L. Beyer. Scaling vision transformers. In CVPR , 2022. arXiv:2106.04560. 20 H. Zhang, Y. Wang, Y. Tang, Y. Liu, J. Feng, J. Dai, and X. Jin. Flash-vstream: Memory-based real-time understanding for long video streams. arXiv preprint arXiv:2406.08085 , 2024. J. Zhou, Y. Shu, B. Zhao, B. Wu, S. Xiao, X. Yang, Y. Xiong, B. Zhang, T. Huang, and Z. Liu. Mlvu: A comprehensive benchmark for multi-task long video understanding. arXiv preprint arXiv:2406.04264 , 2024. Z. Zhu, Y. Yin, M. Ren, H. Jiang, S. Chen, K. Keutzer, and T. Darrell. Focus: Efficient keyframe selection for long video understanding. arXiv preprint arXiv:2510.27280 , 2025. 
+
+# A Implementation Details 
+
+## A.1 Hyperparameters and Inference Settings 
+
+All models were evaluated with greedy decoding: • Temperature: 0.0 • Max output tokens: 512 • Top-p: 1.0 • No beam search For each model-strategy combination, we evaluate all 15 budget fractions × 4 distance tiers × 5video-length buckets, yielding ≈10,770 binary predictions per combination. With 17 model-strategy combinations (9 models × 2 sampling strategies, except Q WEN 3-VL-2B with uniform only), the total dataset comprises ≈155,000 predictions. S TREAMING VLM contributes ≈12,188 predictions per strategy (random and uniform), I NTERN VL3.5-8B contributes ≈4,500 predictions (random and uniform), and remaining combinations contribute ≈10,770 each. 
+
+## A.2 Hardware Specifications 
+
+Experiments were conducted on a single node with: • 8 × NVIDIA H200 GPUs (141 GB HBM3e each) • 2.0 TiB system RAM • Intel Xeon Platinum 8558 (192 cores) Each model-strategy combination was evaluated on a single GPU. Total wall-clock time was approximately 72 hours across all experiments. 
+
+## A.3 Scaling Law Fitting Details 
+
+The WLS fitting procedure operates on cell-level aggregated data: 1. For each (budget, tier, T -bucket) cell, compute the empirical accuracy from all predictions in that cell. 2. Exclude cells with B ≥ 1.0, B < 0.03 , or fewer than 5 predictions. 3. Clip accuracy to [0 .02 , 0.98] and apply the logit transform. 4. Represent distance D by the mean query horizon within each tier. 5. Fit the feature vector [log 10 B, log 10 B · log 10 D, log 10 D, log 10 T, 1] via weighted least squares with weights proportional to cell sample size. 21 B Extended Results 
+
+## B.1 Per-Tier Accuracy Breakdown 
+
+Table 4 reports the overall accuracy (fraction of correct predictions) for each model at each distance tier, averaged across all budget fractions. These raw accuracies complement the scaling law parameters in Table 2 by showing absolute performance levels. Table 4: Overall accuracy by distance tier (random sampling, all budget fractions). 
+
+Model Short Medium Long Very Long 
+
+( ¯D ≈ 23 s) ( ¯D ≈ 44 s) ( ¯D ≈ 578 s) ( ¯D ≈ 2358 s) 
+
+StreamingVLM 0.32 0.33 0.35 0.31 
+
+StreamingVLM (random) 0.36 0.35 0.41 0.32 
+
+LiveCC-7B 0.48 0.48 0.48 0.35 
+
+Flash-VStream 0.43 0.42 0.43 0.32 
+
+Qwen3-VL-4B 0.46 0.43 0.44 0.32 
+
+Qwen3-VL-8B 0.44 0.43 0.44 0.34 
+
+Qwen3-VL-32B 0.46 0.44 0.45 0.38 
+
+Note: These are raw accuracy values averaged across all budget fractions. The scaling law captures how accuracy changes with budget at each distance, not the absolute accuracy level. A model with high α(D) but lower raw accuracy (e.g., S TREAMING VLM at the very-long tier) benefits more from additional frames than a model with higher raw accuracy but low α(D).
+
+## B.2 Full Scaling Law Coefficients 
+
+Table 5 reports all five coefficients of the scaling law for each model-strategy combination. Table 5: Full scaling law coefficients for all model-strategy combinations. 
+
+Model Sampling a e β δ c
+
+StreamingVLM recency 1.97 −0.09 0.12 −0.45 1 .60 
+
+StreamingVLM uniform ∗ 2.14 −0.17 0.01 −0.31 1 .44 
+
+StreamingVLM random 1.87 −0.21 0.01 −0.26 1 .11 
+
+StreamingVLM uniform 1.79 −0.17 −0.03 −0.21 0.99 
+
+LiveCC-7B random 0.61 −0.14 −0.20 −0.20 1 .06 
+
+LiveCC-7B uniform 0.58 −0.13 −0.20 −0.25 1.17 
+
+Flash-VStream random 0.72 −0.16 −0.14 −0.34 1.19 
+
+Flash-VStream uniform 0.56 −0.09 −0.06 −0.40 1.18 
+
+Qwen3-VL-2B uniform 0.13 0.01 −0.20 −0.33 0 .76 
+
+Qwen3-VL-4B random 0.23 −0.05 −0.07 −0.41 1.11 
+
+Qwen3-VL-4B uniform 0.60 −0.20 −0.18 −0.39 1.31 
+
+Qwen3-VL-8B random 0.43 −0.09 −0.06 −0.38 1.07 
+
+Qwen3-VL-8B uniform 0.60 −0.18 −0.16 −0.27 0.91 
+
+Qwen3-VL-32B random 0.30 −0.10 −0.04 −0.37 0.97 
+
+Qwen3-VL-32B uniform 0.34 −0.08 −0.09 −0.37 1.07 
+
+InternVL3.5-8B random 1.51 −0.54 −0.33 −0.84 3.28 
+
+InternVL3.5-8B uniform 1.13 −0.31 −0.21 −0.92 3.26 
+
+VideoLLaMA3-7B random −0.17 0.05 −0.07 −0.23 0 .46 
+
+VideoLLaMA3-7B uniform −0.11 −0.02 −0.12 −0.20 0 .36 
+
+22 B.3 Bootstrap Confidence Intervals 
+
+Table 6 reports 95% bootstrap confidence intervals (1000 cell-level resamples) for the key coefficients 
+
+a, e, and α(1000) .Table 6: Bootstrap 95% confidence intervals for key scaling law parameters (random sampling). 
+
+Model a [95% CI] e [95% CI] α(1000) [95% CI] 
+
+StreamingVLM (recency) 1.97 [1.57, 2.41] −0.09 [−0.30 , 0.12 ] 1.71 [1.44, 1.99] 
+
+StreamingVLM (random) 1.87 [1.48, 2.30] −0.21 [−0.39 , −0.04 ] 1.26 [1.08, 1.43] 
+
+LiveCC-7B 0.61 [0.24, 0.99] −0.14 [−0.29 , 0.02 ] 0.20 [0.02, 0.38] 
+
+Flash-VStream 0.72 [0.47, 0.99] −0.16 [−0.29 , −0.05 ] 0.23 [0.05, 0.36] 
+
+Qwen3-VL-4B 0.23 [ −0.04 , 0.53] −0.05 [−0.21 , 0.09 ] 0.08 [ −0.13 , 0.27] 
+
+Qwen3-VL-8B 0.43 [0.15, 0.74] −0.09 [−0.22 , 0.03 ] 0.17 [0.01, 0.31] 
+
+Qwen3-VL-32B 0.30 [0.06, 0.53] −0.10 [−0.21 , 0.00 ] −0.00 [−0.15 , 0.13] 
+
+InternVL3.5-8B 1.51 [0.89, 2.18] −0.54 [−0.87 , −0.27 ] −0.12 [−0.52 , 0.25] 
+
+VideoLLaMA3-7B −0.17 [−0.80 , 0.44] 0.05 [−0.24 , 0.33 ] −0.03 [−0.39 , 0.30] 
+
+## B.4 Held-Out Predictive Validation 
+
+To assess whether the scaling law overfits to in-sample cells, we perform leave-one-budget-level-out cross-validation: for each of the 13 budget levels B ∈ [0 .03 , 0.9] , we fit the law on cells from the remaining 12 levels and predict logit(accuracy) for the withheld level. Table 7 reports in-sample and out-of-sample weighted R2 and MAE on logit(accuracy). Table 7: Leave-one-budget-level-out cross-validation. Out-of-sample (OOS) R2 drops by 0.01–0.07 relative to in-sample R2 (median drop: 0.016). However, 20% of individual folds yield negative R2,concentrated at extreme budgets (see text). 
+
+Model Sampling In-sample R2 OOS R2 OOS MAE 
+
+StreamingVLM (recency) random 0.85 0.81 0.39 
+
+StreamingVLM (recency) uniform 0.86 0.82 0.38 
+
+StreamingVLM random 0.75 0.72 0.33 
+
+StreamingVLM uniform 0.72 0.68 0.35 
+
+LiveCC-7B random 0.21 0.19 0.40 
+
+LiveCC-7B uniform 0.23 0.22 0.39 
+
+Flash-VStream random 0.47 0.45 0.25 
+
+Flash-VStream uniform 0.45 0.44 0.26 
+
+Qwen3-VL-8B random 0.32 0.31 0.30 
+
+Qwen3-VL-8B uniform 0.27 0.26 0.30 
+
+Qwen3-VL-4B random 0.38 0.36 0.26 
+
+Qwen3-VL-4B uniform 0.47 0.45 0.24 
+
+Qwen3-VL-32B random 0.31 0.29 0.25 
+
+Qwen3-VL-32B uniform 0.45 0.43 0.23 
+
+Qwen3-VL-2B uniform 0.23 0.16 0.45 
+
+Fold-level analysis. The overall OOS R2 aggregates predictions across all withheld budget levels, but individual fold performance varies substantially. Across all 174 folds (13 model-strategy combinations 
+
+× 13 budget levels, except Q WEN 3-VL-2B and I NTERN VL3.5-8B with 6 folds each), 32 folds (20%) 23 have negative R2, concentrated at extreme budgets: B=0 .03 (58% negative) and B=0 .25 (33%). Mid-range budgets are best predicted ( B=0 .5: 0% negative, B=0 .4: 8%). This pattern is expected: at very low budgets the model sees too few frames for stable performance, and at near-saturation budgets the accuracy variance collapses. The median fold R2 is 0.222 (mean: 0.178, min: −0.945 ,max: 0.633). The negative fold R 2 values do not invalidate the aggregated OOS R2, which remains positive for all 15 configurations, but they indicate that single-budget-level predictions carry substantial uncertainty—especially at extreme allocation levels. 
+
+## B.5 Leave-One-Distance-Tier-Out Sensitivity 
+
+To assess whether the fitted parameters are driven by a single distance tier (particularly the “very long” tier at ¯D ≈ 2358 s, which provides the largest lever arm for estimating e), we re-fit the law after dropping each of the four distance tiers in turn (Table 8). Table 8: Leave-one-distance-tier-out sensitivity for key models (random sampling). ∆α(1000) reports the change from the full-data estimate. The maximum deviation is ±0.08 for S TREAMING VLM, confirming that no single tier drives the result.                                                                    
+
+> Model Dropped tier aeα(1000) ∆ α(1000)
+> StreamingVLM (full data) 1.87 −0.21 1.26 —short 2.08 −0.28 1.25 −0.01
+> medium 1.78 −0.18 1.25 −0.01
+> long 1.91 −0.23 1.21 −0.05
+> very long 1.78 −0.15 1.34 +0 .08
+> Qwen3-VL-8B (full data) 0.43 −0.09 0.17 —short 0.33 −0.05 0.17 +0 .01
+> medium 0.48 −0.10 0.17 +0 .01
+> long 0.41 −0.07 0.20 +0 .03
+> very long 0.50 −0.13 0.11 −0.05
+> Flash-VStream (full data) 0.72 −0.16 0.23 —short 0.69 −0.15 0.23 +0 .00
+> medium 0.72 −0.17 0.23 +0 .00
+> long 0.70 −0.15 0.25 +0 .02
+> very long 0.75 −0.18 0.20 −0.03
+
+The key result: α(1000) is stable within ±0.08 for S TREAMING VLM and ±0.05 for base models when any single tier is removed. The gap between S TREAMING VLM and Q WEN 3-VL-8B remains 
+
+> 1.0 in absolute α difference under all leave-one-out conditions (minimum gap: 1.21 − 0.20 = 1 .01 
+
+when dropping the long tier). This confirms that the interaction term e is identified from the full distance range, not driven solely by the very-long-distance lever arm. 
+
+## B.6 Nonparametric Per-Tier Budget Slopes 
+
+As a model-free validation of the parametric α(D) form, we compute the univariate WLS slope of logit (accuracy ) on log 10 B separately within each distance tier (Table 9). These slopes estimate the budget effect at each distance without imposing the log-linear α(D) = a + e · log 10 D structure. The nonparametric slopes are broadly consistent with the parametric model’s predictions, with small deviations attributable to the interaction between budget and video length (the δ · log T term, which the per-tier slopes do not control for). The per-tier slopes independently confirm the main 24 Table 9: Per-tier budget slopes (nonparametric) vs. parametric α(D) predictions. The monotonic decrease in per-tier slopes for S TREAMING VLM confirms that budget effectiveness diminishes with distance, consistent with e < 0.
+
+Short Medium Long Very Long 
+
+(D ≈ 23 s) (D ≈ 44 s) (D ≈ 578 s) (D ≈ 2358 s) STREAMING VLM (random) 
+
+Per-tier slope 1.52 1.61 1.36 1.10 Parametric α(D) 1.59 1.53 1.31 1.18 QWEN 3-VL-8B (random) 
+
+Per-tier slope 0.35 0.25 0.15 0.19 Parametric α(D) 0.31 0.29 0.19 0.11 
+
+qualitative conclusions: (1) S TREAMING VLM’s budget effect exceeds 1.0 at every tier; (2) the effect decreases monotonically with distance (except for a slight uptick at the very-long tier for Qwen, within noise given 26 cells); (3) the gap exceeds 3× at every distance tier. 25
