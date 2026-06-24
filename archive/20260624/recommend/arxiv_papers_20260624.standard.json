@@ -1,0 +1,786 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-06-24T20:50:58.029879+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 2,
+    "deep_divecandidates": 16,
+    "deep_cap": 7,
+    "deep_selected": 13,
+    "quick_candidates": 6,
+    "quick_skim_target": 12,
+    "quick_selected": 6
+  },
+  "deep_dive": [
+    {
+      "id": "2606.20726v1",
+      "source": "arxiv",
+      "title": "How Well Can Your Video Model Remember? Measuring Memory-Budget Trade-offs in Long Video Understanding",
+      "abstract": "We introduce a compact empirical model that quantifies how answer accuracy degrades as a function of frame budget B and temporal distance D in long video understanding -- analyzing performance when recalling content from D seconds in the past using a fraction B of total frames. Long-form models operate under strict budgets, yet no prior framework predicts how accuracy degrades as B shrinks and events recede. We fit a weighted least-squares model on ~155,000 binary predictions across ten models and three sampling strategies, deriving a law where logit-accuracy scales linearly in log-budget with a distance-dependent exponent that decays log-linearly with distance. This budget exponent α(D) captures the marginal value of extra frames at distance D. The law achieves cell-level weighted R^2 = 0.05-0.75 across models. Notably, budget effectiveness at D = 1000 s differs by \\approx 7.4\\times between the best streaming and base models. STREAMINGVLM achieves α(1000) = 1.26 (95% CI: [1.06, 1.58]), meaning a tenfold budget increase substantially improves long-distance accuracy, while the best Qwen3-VL base model reaches only α(1000) = 0.17 (CI: [0.04, 0.34]). In accuracy space, a 10\\times budget increase at D = 1000 s yields +29 percentage points for STREAMINGVLM versus +4 pp for the base model. Sampling strategies show model-dependent trade-offs: random sampling yields higher base sensitivity but steeper distance decay. We demonstrate how α(D) enables principled budget allocation, including a model-ranking reversal at long distance, and propose it as a diagnostic metric for streaming video models.",
+      "authors": [
+        "Yixian Tian"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-17T03:30:01+00:00",
+      "link": "https://arxiv.org/pdf/2606.20726v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "memory-budget trade-offs in long video understanding",
+      "llm_evidence_cn": "长视频理解中的记忆-预算权衡",
+      "llm_evidence": "长视频理解中的记忆-预算权衡",
+      "canonical_evidence": "长视频理解中的记忆-预算权衡",
+      "llm_tldr_en": "This paper introduces an empirical model quantifying how answer accuracy degrades with frame budget and temporal distance in long video understanding, revealing a distance-dependent exponent.",
+      "llm_tldr_cn": "长视频理解模型受严格帧预算约束，但尚无框架预测精度如何随预算和事件间隔衰减。本文提出一个紧凑的经验模型，基于约15.5万次二元预测，拟合出对数精度与对数预算呈线性关系，且距离相关指数随距离对数线性衰减。该模型揭示了记忆预算与时间距离的内在权衡，为长视频理解系统的资源分配提供理论指导。",
+      "llm_tldr": "长视频理解模型受严格帧预算约束，但尚无框架预测精度如何随预算和事件间隔衰减。本文提出一个紧凑的经验模型，基于约15.5万次二元预测，拟合出对数精度与对数预算呈线性关系，且距离相关指数随距离对数线性衰减。该模型揭示了记忆预算与时间距离的内在权衡，为长视频理解系统的资源分配提供理论指导。",
+      "llm_tags": [
+        "query:long-video:composite"
+      ],
+      "matched_query_tag": "query:long-video:composite",
+      "matched_query_text": "Papers central to 请为我检索长视频理解领域的论文, especially work that connects or combines: long video understanding; question answering on long videos; understanding long videos; long video analysis methods.",
+      "matched_requirement_id": "req-composite-long-video",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.22804v1",
+      "source": "arxiv",
+      "title": "CoVStream: Edge-Cloud Collaboration for Understanding of Long Video Streams",
+      "abstract": "Long, continuous video streams are an increasingly critical driver of multimedia intelligence. Existing efforts often handle long videos with a sample-encode-reason approach using large models. However, they overlook a crucial deployment fact: the stream is often produced by computationally constrained devices. This forces an untenable compromise: cloud offloading unlocks strong reasoning but incurs prohibitive bandwidth overhead, while on-device processing remains limited by edge hardware capacity. Therefore, we propose CoVStream, the first edge-cloud collaborative framework for understanding long video streams. The edge node distills raw video streams into compact visual features and semantic captions for transmission to the cloud, minimizing bandwidth costs, while the cloud server integrates this data into an entity graph and global visual context, activating the heavy reasoning model only when a user query arrives. Experiments on VideoMME-Long, LVBench, and RTV-Bench show that CoVStream reduces bandwidth usage by 87.6% while retaining 99.2% of the cloud baseline accuracy on LVBench.",
+      "authors": [
+        "Xu Liu",
+        "Guikun Chen",
+        "Zihao Yan",
+        "Kanzhi Wu",
+        "Wenguan Wang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-22T03:29:45+00:00",
+      "link": "https://arxiv.org/pdf/2606.22804v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "edge-cloud collaboration for understanding long video streams",
+      "llm_evidence_cn": "边缘云协作理解长视频流",
+      "llm_evidence": "边缘云协作理解长视频流",
+      "canonical_evidence": "边缘云协作理解长视频流",
+      "llm_tldr_en": "Proposes CoVStream, an edge-cloud collaborative framework that distills raw long video streams into compact features and captions at the edge to minimize bandwidth while enabling cloud-based reasoning.",
+      "llm_tldr_cn": "针对长视频流理解中边缘设备算力有限、云端传输带宽过大的问题，提出了CoVStream框架，在边缘节点将原始视频流蒸馏为紧凑的视觉特征和语义描述，传输到云端进行推理，实现了高效的边云协作。实验表明该方法在降低带宽的同时保持了强推理能力，为长视频实时理解提供了新范式。",
+      "llm_tldr": "针对长视频流理解中边缘设备算力有限、云端传输带宽过大的问题，提出了CoVStream框架，在边缘节点将原始视频流蒸馏为紧凑的视觉特征和语义描述，传输到云端进行推理，实现了高效的边云协作。实验表明该方法在降低带宽的同时保持了强推理能力，为长视频实时理解提供了新范式。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.23752v1",
+      "source": "arxiv",
+      "title": "ESAA-Conversational: An Event-Sourced Memory Layer for Continuity, Handoff, and Curation Across Heterogeneous LLM Coding Agents",
+      "abstract": "Software developers increasingly work with multiple LLM coding agents, switching among tools such as Codex, Grok, Claude Code, and other assistants as context windows fill, sessions end, or a particular agent becomes better suited to a subtask. Each agent, however, persists its conversation in a private and vendor-specific log. The result is conversational state drift: goals, decisions, open tasks, and rationales established with one agent are not reliably available when another agent takes over. This paper presents \\emph{ESAA-Conversational}, a domain specialization of Event-Sourcing Agent Architecture (ESAA)~\\cite{esaa} for shared conversational memory across heterogeneous agents. The method treats the visible conversation as a local event store: hooks and watchers capture visible turns, normalize them into an append-only \\texttt{activity.jsonl}, and deterministically project read models such as \\texttt{handoff.md}, \\texttt{state.md}, \\texttt{decisions.md}, and \\texttt{tasks.json}. Mechanical capture does not require LLM inference; agents use judgment only for explicit curation, recording durable decisions and conversational tasks through domain commands. The public v1.1.0 release implements a PowerShell CLI with \\texttt{init}, \\texttt{enable-hooks}, \\texttt{sync}, \\texttt{project}, \\texttt{verify}, \\texttt{context}, \\texttt{decide}, and \\texttt{task}; includes \\texttt{workspace\\_root} isolation and a write-path lockfile; and is distributed as a greenfield package with an empty public log. A self-referential case study with 570 development-lab events shows that heterogeneous agents can collaborate through a shared log without a direct agent-to-agent channel, while the public distribution preserves privacy by excluding the private conversational history.",
+      "authors": [
+        "Elzo Brito dos Santos Filho"
+      ],
+      "primary_category": "cs.SE",
+      "categories": [
+        "cs.SE"
+      ],
+      "published": "2026-06-22T01:02:24+00:00",
+      "link": "https://arxiv.org/pdf/2606.23752v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "shared conversational memory across heterogeneous LLM coding agents via event-sourcing",
+      "llm_evidence_cn": "通过事件溯源实现异构LLM编码智能体间的共享会话记忆",
+      "llm_evidence": "通过事件溯源实现异构LLM编码智能体间的共享会话记忆",
+      "canonical_evidence": "通过事件溯源实现异构LLM编码智能体间的共享会话记忆",
+      "llm_tldr_en": "ESAA-Conversational presents an event-sourced memory layer for sharing conversational state across heterogeneous LLM coding agents, preventing state drift and enabling handoff.",
+      "llm_tldr_cn": "软件开发者在多个LLM编码智能体间切换时，会话状态漂移导致目标丢失。本文提出ESAA-Conversational，一种基于事件溯源的共享会话记忆层，将对话视为事件流，支持跨不同智能体的连续性、切换和策划。实验表明该方法有效维护了会话一致性，减少了重复工作。",
+      "llm_tldr": "软件开发者在多个LLM编码智能体间切换时，会话状态漂移导致目标丢失。本文提出ESAA-Conversational，一种基于事件溯源的共享会话记忆层，将对话视为事件流，支持跨不同智能体的连续性、切换和策划。实验表明该方法有效维护了会话一致性，减少了重复工作。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24151v1",
+      "source": "arxiv",
+      "title": "Metis: Bridging Text and Code Memory for Self-Evolving Agents",
+      "abstract": "Self-evolving agents improve over time by distilling experience from past executions and reusing it in future tasks. Existing systems represent such experience either as natural-language text injected into the agent context or as code exposed as callable tools. However, the choice between these representations is typically made at design time rather than derived from the characteristics of the experience itself, leaving the trade-offs between them poorly understood. We present the first controlled study that isolates text memory and code memory over an identical set of experiences. Our results show that the two forms exhibit complementary trade-offs in construction cost, execution efficiency, and transferability, such that neither representation alone is sufficient. Guided by these findings, we propose Metis, a self-evolving agent system built on a hierarchical dual-representation memory. Metis organizes textual experience into execution plans, environment facts, and common pitfalls, and selectively crystallizes recurring plans into validated callable tools. This design combines the broad applicability of text memory with the execution efficiency of code memory while incurring tool-generation cost only when justified by repeated reuse. We evaluate Metis on AppWorld, a challenging benchmark for interactive agents. The results show that Metis improves task accuracy by up to 20.6% over ReAct while reducing execution cost by up to 22.8%. Compared with representative self-evolving agent systems, Metis consistently achieves a better balance between accuracy, execution efficiency, and memory-construction cost.",
+      "authors": [
+        "Zijie Dai",
+        "Siuhin He",
+        "Hui Li",
+        "Qihui Zhou",
+        "Jiajun Li",
+        "Mingcong Song",
+        "Guoping Long",
+        "Hongjie Si",
+        "Xin Yao",
+        "Lin Zhang",
+        "James Cheng",
+        "Xiao Yan"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-06-23T05:17:22+00:00",
+      "link": "https://arxiv.org/pdf/2606.24151v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Agent memory system design: compares text memory and code memory for self-evolving agents",
+      "llm_evidence_cn": "Agent记忆系统设计：比较自进化智能体的文本记忆与代码记忆",
+      "llm_evidence": "Agent记忆系统设计：比较自进化智能体的文本记忆与代码记忆",
+      "canonical_evidence": "Agent记忆系统设计：比较自进化智能体的文本记忆与代码记忆",
+      "llm_tldr_en": "Metis bridges text and code memory for self-evolving agents, revealing complementary trade-offs in cost, efficiency, and transferability through controlled study.",
+      "llm_tldr_cn": "自进化智能体通常将过往经验表示为文本或代码，但两者优劣尚未明确。Metis通过控制实验隔离文本记忆与代码记忆，发现两者在构建成本、执行效率和可迁移性上存在互补权衡，单独使用任一表示均不足。该研究为智能体记忆系统设计提供了经验指导。",
+      "llm_tldr": "自进化智能体通常将过往经验表示为文本或代码，但两者优劣尚未明确。Metis通过控制实验隔离文本记忆与代码记忆，发现两者在构建成本、执行效率和可迁移性上存在互补权衡，单独使用任一表示均不足。该研究为智能体记忆系统设计提供了经验指导。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24187v1",
+      "source": "arxiv",
+      "title": "Towards Fast and Effective Long Video Understanding of Multimodal Large Language Models via Adaptive Quasi-Gaussian Sampling",
+      "abstract": "Long video understanding remains a daunting challenge for \\emph{Multimodal Large Language Models} (MLLMs) due to the excessive computation and memory footprint. Thus, \\emph{keyframe selection} is often adopted to mitigate this shortcoming, which however still suffers from low flexibility and high noise due to its hard sampling principle. In this paper, we define video frame selection as a problem of \\emph{Quasi-Gaussian Sampling}, and propose an adaptive and training-free approach termed \\textbf{\\emph{AdaQ}}. Inspired by the $3$-$σ$ rule of Gaussian distribution, the objective of AdaQ is to achieve the optimal $3$-$σ$ interval for different examples, \\emph{i.e.}, a smaller $3$-$σ$ interval for the local query and a larger one for the global query, thereby facilitating robust and adaptive frame sampling. To validate AdaQ, we apply it to four MLLMs with three embedding models. The extensive experimental results not only show its obvious performance gains over the default MLLMs and the SOTA keyframe selection methods, \\emph{e.g.}, helping Qwen3-VL-8B outperform GPT4o by 15.8\\% on average by using only 64 frames, but also confirm its superior robustness and high efficiency for long-video understanding, \\emph{e.g.}, \\textbf{only 1 hyper-parameter} needs to be set. \\textbf{Our code project} is given at \\href{https://github.com/Zkayovo-xmu/AdaQ}{https://github.com/Zkayovo-xmu/AdaQ}.",
+      "authors": [
+        "Kun Zhang",
+        "Chenxin Fang",
+        "Tao Chen",
+        "Baiyang Song",
+        "Yunhang Shen",
+        "Yiyi Zhou",
+        "Rongrong Ji"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-23T06:13:30+00:00",
+      "link": "https://arxiv.org/pdf/2606.24187v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "adaptive quasi-Gaussian sampling for long video understanding",
+      "llm_evidence_cn": "面向长视频理解的自适应准高斯采样",
+      "llm_evidence": "面向长视频理解的自适应准高斯采样",
+      "canonical_evidence": "面向长视频理解的自适应准高斯采样",
+      "llm_tldr_en": "Proposes AdaQ, an adaptive training-free keyframe selection method for long video understanding, using quasi-Gaussian sampling to reduce computation while maintaining accuracy.",
+      "llm_tldr_cn": "针对多模态大语言模型处理长视频时计算和内存开销过大的问题，本文提出一种无需训练的自适应关键帧选择方法AdaQ。该方法将帧选择建模为准高斯采样问题，利用3σ规则自适应确定最优采样区间。实验表明，AdaQ在显著降低计算量的同时，保持了高准确率，为长视频理解提供了一种快速有效的解决方案。",
+      "llm_tldr": "针对多模态大语言模型处理长视频时计算和内存开销过大的问题，本文提出一种无需训练的自适应关键帧选择方法AdaQ。该方法将帧选择建模为准高斯采样问题，利用3σ规则自适应确定最优采样区间。实验表明，AdaQ在显著降低计算量的同时，保持了高准确率，为长视频理解提供了一种快速有效的解决方案。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24286v1",
+      "source": "arxiv",
+      "title": "AVOC: Enhancing Hour-Level Audio-Video Understanding in Omni-Modal LLMs via Retrieval-Inspired Token Compression",
+      "abstract": "Multimodal Large Language Models have achieved remarkable progress in short-form audio-video understanding, yet long-form audio-video comprehension remains challenged by limited context windows and severe information redundancy. To address these bottlenecks, we propose AVOC, a framework for long-form audio-video understanding in Omni-modal Large Language Models. AVOC introduces a learnable token compression module between the modality encoders and the LLM backbone. We reframe multimodal token compression as a top-$K$ retrieval problem: given a fixed context budget, the module must retrieve a compact subset of tokens that best supports answering the user query. We draw inspiration from three classical Information Retrieval criteria for selecting informative units from a large candidate pool: relevance, importance, and diversity. AVOC instantiates each criterion as a tailored mechanism for audio-video understanding, and integrates them into a unified retrieval-style compression pipeline. Experiments show that AVOC achieves state-of-the-art performance on long-form audio-video benchmarks, surpassing the second-best model by 4.9 and 5.5 points in average accuracy on OmniVideoBench and LVOmniBench, respectively. Moreover, AVOC maintains robust performance on Audio-Video Needle-in-a-Haystack task at durations up to one hour.",
+      "authors": [
+        "Yijing Chen",
+        "Wenhui Tan",
+        "Xiaoyi Yu",
+        "Yuyue Wang",
+        "Xin Cheng",
+        "Kaisi Guan",
+        "Hao Jiang",
+        "Xiangyang Li",
+        "Guojie Zhu",
+        "Ruihua Song"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.CV"
+      ],
+      "published": "2026-06-23T08:06:58+00:00",
+      "link": "https://arxiv.org/pdf/2606.24286v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "long-form audio-video understanding via token compression",
+      "llm_evidence_cn": "通过令牌压缩实现长音频视频理解",
+      "llm_evidence": "通过令牌压缩实现长音频视频理解",
+      "canonical_evidence": "通过令牌压缩实现长音频视频理解",
+      "llm_tldr_en": "AVOC proposes a learnable token compression framework for hour-level audio-video understanding in omni-modal LLMs, reframing compression as top-K retrieval to overcome context limits and redundancy.",
+      "llm_tldr_cn": "针对多模态大模型在处理长音频视频时面临的上下文窗口限制和信息冗余问题，本文提出AVOC框架，通过将令牌压缩建模为top-K检索问题，学习从模态编码器到LLM主干的可压缩模块。实验表明AVOC在长视频问答和理解任务上显著提升性能，并能在有限预算下保留关键信息，为长视频理解提供了高效解决方案。",
+      "llm_tldr": "针对多模态大模型在处理长音频视频时面临的上下文窗口限制和信息冗余问题，本文提出AVOC框架，通过将令牌压缩建模为top-K检索问题，学习从模态编码器到LLM主干的可压缩模块。实验表明AVOC在长视频问答和理解任务上显著提升性能，并能在有限预算下保留关键信息，为长视频理解提供了高效解决方案。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24322v1",
+      "source": "arxiv",
+      "title": "Securing LLM-Agent Long-Term Memory Against Poisoning: Non-Malleable, Origin-Bound Authority with Machine-Checked Guarantees",
+      "abstract": "LLM agents increasingly rely on persistent long-term memory, which creates a critical vulnerability that we study here: memory poisoning. An adversary can store untrusted content in one session that later steers a consequential action, such as a payment, a setting change, or data exfiltration, in a future session. Existing defenses base a memory item's authority to act on either its content (detection or trust-scoring) or its derivation history (lineage). We show that both signals are malleable. An attacker can launder an untrusted origin through three channels specific to LLM agents: the agent's own summarization, a trusted-tool echo, and manufactured corroboration. Each makes the content look benign and breaks or flips its derivation edge to ``trusted.'' We formalize malleability for the memory write-retrieve-act pipeline and prove a machine-checked separation theorem. No content- or lineage-based defense is sound under laundering (T1), write-time origin binding is necessary (T2), and non-malleable origin-bound authority with Sybil-resistant corroboration-gated elevation is sufficient (T3). Our construction, TMA-NM (Tamper-evident Memory Authority, Non-Malleable), instantiates non-malleable information-flow control (IFC) for LLM-agent memory. A cross-defense, cross-attack, and cross-model benchmark over eight frontier models shows that existing defenses fail exactly where the theory predicts (up to 68% laundering attack-success), while TMA-NM reaches 0% attack success on both direct and laundering attacks across all models and channels, at full legitimate utility. We release the benchmark, harness, and machine-checked TLA+ models to support reproducibility.",
+      "authors": [
+        "Yedidel Louck"
+      ],
+      "primary_category": "cs.CR",
+      "categories": [
+        "cs.CR"
+      ],
+      "published": "2026-06-23T08:57:50+00:00",
+      "link": "https://arxiv.org/pdf/2606.24322v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "security of LLM-agent long-term memory against poisoning attacks",
+      "llm_evidence_cn": "LLM智能体长期记忆针对投毒攻击的安全性",
+      "llm_evidence": "LLM智能体长期记忆针对投毒攻击的安全性",
+      "canonical_evidence": "LLM智能体长期记忆针对投毒攻击的安全性",
+      "llm_tldr_en": "This paper identifies memory poisoning vulnerabilities in LLM agent long-term memory and proposes non-malleable authority based on origin bounds to prevent untrusted content from steering actions.",
+      "llm_tldr_cn": "LLM智能体长期记忆存在投毒漏洞：攻击者可在一次会话中注入恶意内容，影响后续关键决策。本文指出基于内容或谱系的现有防御均可被绕过，并提出非可塑的源边界权威机制，通过机器检验保证记忆项只能按其原始授权执行操作。该工作为安全记忆系统提供了理论基础。",
+      "llm_tldr": "LLM智能体长期记忆存在投毒漏洞：攻击者可在一次会话中注入恶意内容，影响后续关键决策。本文指出基于内容或谱系的现有防御均可被绕过，并提出非可塑的源边界权威机制，通过机器检验保证记忆项只能按其原始授权执行操作。该工作为安全记忆系统提供了理论基础。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24422v1",
+      "source": "arxiv",
+      "title": "EgoSAT: A Comprehensive Benchmark of Egocentric Streaming Interaction Understanding",
+      "abstract": "We introduce EgoSAT, the first comprehensive benchmark for egocentric video reasoning in streaming settings, designed to evaluate the capabilities of modern vision-language models (VLMs). The benchmark targets streaming interaction understanding, where video frames arrive sequentially and models must continuously interpret evolving visual context. EgoSAT unifies several previously distinct tasks within a single streaming framework. In this formulation, queries about completed events correspond to retrospective reasoning, queries about ongoing activities require online understanding, and queries about future actions involve prospective anticipation. This unified setting requires models to reason about the past, present, and future while operating under the constraint that only previously observed frames are available. EgoSAT contains 1,997 unique videos spanning 165 hours of egocentric footage and around 4,800 high-quality question-answer pairs, carefully designed to probe reasoning across varying temporal contexts. Using this benchmark, we evaluate a diverse set of both open-weight and closed-weight VLMs, providing a systematic assessment of their ability for streaming interaction understanding. By distinguishing answerability and conducting diagnostics on confidence of models, we find existing models not only struggle with prospective and retrospective modeling, but also exhibit severe mis-calibration: confidence often fails to track inherent answerability, leading to dangerous \"confidently wrong\" behaviors. Project page: https://leiyj23.github.io/EgoSAT/",
+      "authors": [
+        "Yijia Lei",
+        "Jinzhao Li",
+        "Yichi Zhang",
+        "Jiacheng Hua",
+        "Yin Li",
+        "Miao Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-23T10:59:25+00:00",
+      "link": "https://arxiv.org/pdf/2606.24422v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "egocentric streaming video reasoning benchmark for QA",
+      "llm_evidence_cn": "自我中心流式视频推理问答基准",
+      "llm_evidence": "自我中心流式视频推理问答基准",
+      "canonical_evidence": "自我中心流式视频推理问答基准",
+      "llm_tldr_en": "EgoSAT is the first comprehensive benchmark for egocentric video reasoning in streaming settings, unifying retrospective, online, and prospective understanding tasks for VLMs.",
+      "llm_tldr_cn": "现有视频推理基准缺乏流式设置下的全面评估。EgoSAT首个针对自我中心视频流式推理的基准，将回顾性（已完成事件）、在线（进行中）和前瞻性（未来动作）任务统一在流式框架中，要求模型在帧序列到达时连续解释动态视觉上下文。该基准全面评估现代VLM的流式理解能力。",
+      "llm_tldr": "现有视频推理基准缺乏流式设置下的全面评估。EgoSAT首个针对自我中心视频流式推理的基准，将回顾性（已完成事件）、在线（进行中）和前瞻性（未来动作）任务统一在流式框架中，要求模型在帧序列到达时连续解释动态视觉上下文。该基准全面评估现代VLM的流式理解能力。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24477v1",
+      "source": "arxiv",
+      "title": "video-SALMONN-R$^3$: Learning to ReWatch, ReAsk, and ReAnswer for Efficient Video Understanding",
+      "abstract": "Video large language models (LLMs) are often constrained by computation and memory budgets, leading them to use reduced frame rates and spatial resolutions, which may cause them to miss critical information for question answering (QA). A practical and efficient solution is a two-stage paradigm: first perform coarse video understanding to localize relevant segments, and then re-watch these segments at higher temporal or spatial fidelity. In this paper, we present video-SALMONN-R$^3$, the first end-to-end video-LLM that enables re-watch through reinforcement learning without relying on chain-of-thought (CoT) cold-start. This design removes the need for costly CoT data annotations and avoids CoT-based supervised fine-tuning (SFT), which can otherwise degrade the pretrained video understanding abilities. To address the mismatch between the reasoning-first behavior induced by re-watch and the answer-first tendency of pretrained video-LLMs, we propose a re-answer strategy, in which the model first produces a direct answer in the first watch and then refines it after re-watching. Finally, to improve question adherence during re-watching, we propose a re-ask mechanism that re-injects the query when revisiting localized segments. Experimental results show that video-SALMONN-R$^3$ consistently outperforms both the base model and the QA-SFT baseline, while surpassing prior re-watch-based approaches with significantly lower computational cost. Code, models, and data will be publicly released upon acceptance.",
+      "authors": [
+        "Yixuan Li",
+        "Guangzhi Sun",
+        "Yudong Yang",
+        "Wei Li",
+        "Zejun MA",
+        "Chao Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.SD"
+      ],
+      "published": "2026-06-23T12:13:19+00:00",
+      "link": "https://arxiv.org/pdf/2606.24477v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "efficient video understanding by re-watching relevant segments",
+      "llm_evidence_cn": "通过重看相关片段实现高效视频理解",
+      "llm_evidence": "通过重看相关片段实现高效视频理解",
+      "canonical_evidence": "通过重看相关片段实现高效视频理解",
+      "llm_tldr_en": "Presents video-SALMONN-R3, an end-to-end video-LLM that learns to re-watch relevant segments via reinforcement learning for efficient video QA.",
+      "llm_tldr_cn": "视频LLM受限于计算和内存，常采用低帧率导致信息缺失。本文提出video-SALMONN-R3，通过强化学习实现端到端的重看机制：先粗粒度定位相关片段，再以高保真度重看。无需链式思考数据，提高了视频问答的效率与准确性。",
+      "llm_tldr": "视频LLM受限于计算和内存，常采用低帧率导致信息缺失。本文提出video-SALMONN-R3，通过强化学习实现端到端的重看机制：先粗粒度定位相关片段，再以高保真度重看。无需链式思考数据，提高了视频问答的效率与准确性。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24535v1",
+      "source": "arxiv",
+      "title": "Governed Shared Memory for Multi-Agent LLM Systems",
+      "abstract": "Multi-agent LLM environments require robust mechanisms for shared knowledge management. This paper formalizes the fleet-memory problem and identifies four foundational failure modes: unauthorized leakage, stale propagation, contradiction persistence, and provenance collapse. To address these, we define explicit systems-level primitives: scoped retrieval, temporal supersession, provenance tracking, and policy-governed memory propagation. These primitives are implemented in MemClaw, a production multi-tenant memory service, and evaluated via ArgusFleet, a reproducible harness testing four governance dimensions. Rather than a baseline comparison, this study measures a live production service, emphasizing real-world architectural insights and negative results. Key Evaluation Results Provenance: Successfully reconstructed 100% of depth-four derivation chains with correct writer identity at sub-second per-hop latency. Propagation: Demonstrated high intra-fleet visibility with zero cross-fleet leakage. Under strong write mode, write-to-visible latency was optimized to a single search round-trip. Production Architectural Issues Discovered Asymmetric Scope Enforcement: Tenant isolation held, but sub-tenant scope was initially bypassed on direct GET-by-id requests for agent-scoped credentials (disclosed and remediated during the study). Pipeline Ordering Conflict: While contradiction supersession works for admitted writes, a synchronous near-duplicate gate can prematurely reject contradictory writes before the asynchronous contradiction detector can evaluate them. Conclusion: Long-context retrieval alone is insufficient for production multi-agent memory. Governed shared memory demands explicit systems-level abstractions, and live evaluation is vital to expose enforcement and pipeline-ordering failures missed by design-only treatments.",
+      "authors": [
+        "Yanki Margalit",
+        "Nurit Cohen-Inger",
+        "Erni Avram",
+        "Ran Taig",
+        "Oded Margalit"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-23T13:04:14+00:00",
+      "link": "https://arxiv.org/pdf/2606.24535v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "formalized shared memory for multi-agent systems with governance primitives",
+      "llm_evidence_cn": "形式化的多智能体系统共享记忆，包含治理原语",
+      "llm_evidence": "形式化的多智能体系统共享记忆，包含治理原语",
+      "canonical_evidence": "形式化的多智能体系统共享记忆，包含治理原语",
+      "llm_tldr_en": "Formalizes the fleet-memory problem and presents MemClaw, a production memory service with scoped retrieval, temporal supersession, provenance tracking, and policy-governed propagation.",
+      "llm_tldr_cn": "多智能体LLM系统需要共享知识管理机制。本文形式化舰队记忆问题，识别四种失败模式，定义系统级原语：范围检索、时间替代、来源追踪和策略治理传播。在MemClaw生产服务中实现，通过ArgusFleet进行测试，提供了真实世界架构洞见。",
+      "llm_tldr": "多智能体LLM系统需要共享知识管理机制。本文形式化舰队记忆问题，识别四种失败模式，定义系统级原语：范围检索、时间替代、来源追踪和策略治理传播。在MemClaw生产服务中实现，通过ArgusFleet进行测试，提供了真实世界架构洞见。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24595v1",
+      "source": "arxiv",
+      "title": "MEMPROBE: Probing Long-Term Agent Memory via Hidden User-State Recovery",
+      "abstract": "Long-term memory promises LLM agents that grow more capable across sessions, maintaining an accurate, evolving understanding of the user that interaction forms. In practice, however, this memory is evaluated mostly through downstream behavior, such as later answers, personalization quality, or task success, which tests that understanding only indirectly and leaves the memory artifact itself largely unaudited. We argue that long-term memory should instead be evaluated as an auditable post-interaction artifact: after ordinary assistance, what structured user state can be reconstructed from the memory the agent leaves behind? We instantiate this view in MEMPROBE, a benchmark in which a memory-equipped agent assists simulated users, each carrying a hidden, taxonomy-anchored user-state bank, across a trajectory of leak-controlled tasks, after which that bank is reconstructed from the agent's resulting memory under both full-store and top-k access. Built on synthetic ground truth for efficient, scalable measurement, MEMPROBE spans 50 simulated users with 31 hidden dimensions each (1,550 recovery targets) and tests 5 representative memory systems. Testing state-of-the-art memory agents, we find that successful assistance and recoverable memory behave as distinct capabilities. Task completion nearly saturates, even for a memoryless baseline, while category-balanced recovery stays moderate (about 0.6) and drops further under top-k retrieval. MEMPROBE is the first benchmark to study memory recovery directly, reconstructing the user state a system retains and scoring it against ground truth. We see recovery as a concrete objective for future memory agents to optimize, and MEMPROBE as a step toward an environment where agents are trained to remember their users, growing more faithful the longer they know them.",
+      "authors": [
+        "Enze Ma",
+        "Yufan Zhou",
+        "Wei-Chieh Huang",
+        "Jie Yang",
+        "Huanhuan Ma",
+        "Zixuan Wang",
+        "Chengze Li",
+        "Chunyu Miao",
+        "Philip S. Yu",
+        "Zhen Wang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-23T13:52:46+00:00",
+      "link": "https://arxiv.org/pdf/2606.24595v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "benchmark for probing long-term agent memory via user-state recovery",
+      "llm_evidence_cn": "通过用户状态恢复探测长期代理记忆的基准",
+      "llm_evidence": "通过用户状态恢复探测长期代理记忆的基准",
+      "canonical_evidence": "通过用户状态恢复探测长期代理记忆的基准",
+      "llm_tldr_en": "MEMPROBE evaluates long-term agent memory as an auditable artifact by recovering hidden user states from memory artifacts after interactions.",
+      "llm_tldr_cn": "该工作提出MEMPROBE基准，将长期代理记忆评估从下游行为转向记忆构件本身的可审计性。模拟隐藏用户状态的代理辅助场景，通过从记忆构件中恢复用户状态来量化记忆质量。实验揭示了现有记忆系统在准确恢复用户状态方面的不足，强调了记忆审计的重要性。",
+      "llm_tldr": "该工作提出MEMPROBE基准，将长期代理记忆评估从下游行为转向记忆构件本身的可审计性。模拟隐藏用户状态的代理辅助场景，通过从记忆构件中恢复用户状态来量化记忆质量。实验揭示了现有记忆系统在准确恢复用户状态方面的不足，强调了记忆审计的重要性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "long term memory in agents",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24775v1",
+      "source": "arxiv",
+      "title": "Are We Ready For An Agent-Native Memory System?",
+      "abstract": "Memory for large language model (LLM) agents has rapidly evolved from simple retrieval-augmented mechanisms into a data management system that supports persistent information storage, retrieval, update, consolidation, and dynamic lifecycle governance throughout agent execution. Despite this evolution, existing evaluations still benchmark agent memory mainly through end-to-end task success metrics (e.g., F1, BLEU), while treating the underlying system as a monolithic black box. As a result, critical system-level concerns, including operational costs, architectural trade-offs across memory modules, and robustness under dynamic knowledge updates, remain insufficiently explored. In this paper, we present a systematic experimental study of agent memory from a data management perspective. We propose an analytical framework that decomposes agent memory into four core modules: memory representation and storage, extraction, retrieval and routing, and maintenance. Under this framework, we evaluate 12 representative memory systems and two reference baselines across five benchmark workloads spanning 11 datasets. Our extensive end-to-end evaluation shows that no single architecture dominates across all scenarios; instead, effectiveness depends heavily on how well the memory structure aligns with the workload bottleneck. Furthermore, through fine-grained ablation studies, we quantify their individual effects on representation fidelity, retrieval precision, update correctness, and long-horizon stability. Finally, we reveal cost-performance trade-offs under realistic workloads, showing localized maintenance is more cost-efficient than global reorganization. Based on these findings, we identify promising directions towards building truly agent-native memory systems. The code is publicly available at https://github.com/OpenDataBox/MemoryData.",
+      "authors": [
+        "Wei Zhou",
+        "Xuanhe Zhou",
+        "Shaokun Han",
+        "Hongming Xu",
+        "Guoliang Li",
+        "Zhiyu Li",
+        "Feiyu Xiong",
+        "Fan Wu"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.DB",
+        "cs.IR"
+      ],
+      "published": "2026-06-23T16:34:55+00:00",
+      "link": "https://arxiv.org/pdf/2606.24775v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "agent-native memory system design and evaluation",
+      "llm_evidence_cn": "智能体原生记忆系统设计与评估",
+      "llm_evidence": "智能体原生记忆系统设计与评估",
+      "canonical_evidence": "智能体原生记忆系统设计与评估",
+      "llm_tldr_en": "This paper systematically studies agent memory from a data management perspective, evaluating operational costs, architectural trade-offs, and robustness under dynamic updates, beyond end-to-end metrics.",
+      "llm_tldr_cn": "LLM智能体记忆已从简单检索增强演变为支持持久存储、更新、合并和生命周期管理的复杂系统，但现有评估仅通过端到端任务指标将系统视为黑箱。本文从数据管理视角对智能体记忆进行系统性实验研究，揭示操作成本、模块架构权衡和动态知识更新下的鲁棒性等关键问题，为设计高效智能体记忆系统提供指导。",
+      "llm_tldr": "LLM智能体记忆已从简单检索增强演变为支持持久存储、更新、合并和生命周期管理的复杂系统，但现有评估仅通过端到端任务指标将系统视为黑箱。本文从数据管理视角对智能体记忆进行系统性实验研究，揭示操作成本、模块架构权衡和动态知识更新下的鲁棒性等关键问题，为设计高效智能体记忆系统提供指导。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2606.24797v1",
+      "source": "arxiv",
+      "title": "EG-VQA: Benchmarking Verifiable Video Question Answering with Grounded Temporal Evidence",
+      "abstract": "Recent advances in Video Large Language Models (Video-LLMs) have yielded promising performance on video question answering (VideoQA). Nevertheless, existing benchmarks are predominantly evaluated through answer correctness, while the grounding of predictions in relevant video evidence remains largely unexamined. This disconnect between answer generation and evidence understanding motivates the construction of the Evidence-Grounded Video Question Answering Benchmark (EG-VQA), an open-ended evaluation protocol in which each QA pair is explicitly annotated with supporting temporal evidence, thereby requiring joint reasoning and precise evidence localization. EG-VQA is comprised of 2,067 videos and 11,838 QA pairs with fine-grained evidence annotations. To evaluate predicted evidence, Evidence-Grounded F1 (EG-F1) is introduced as a unified metric in which temporal alignment and semantic consistency against ground-truth evidence are jointly measured. Experimental evaluation reveals that even strong proprietary models struggle to accurately ground their predictions, exposing a fundamental discrepancy between answer correctness and faithful evidence localization. To bridge this gap, EG-Reasoner, an evidence-grounded reasoning model trained with explicit supervision, is proposed. State-of-the-art performance is achieved among open-source models, with results competitive against proprietary systems, particularly pronounced gains are observed on reasoning-intensive tasks such as counterfactual questions. These findings demonstrate that scaling alone is insufficient for robust video understanding and that structured evidence supervision is essential for the development of more reliable and interpretable VideoQA systems.",
+      "authors": [
+        "Linpeng Huang",
+        "Weixing Chen",
+        "Zexin Chen",
+        "Yang Liu",
+        "Liang Lin"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-06-23T16:49:28+00:00",
+      "link": "https://arxiv.org/pdf/2606.24797v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "video question answering benchmark with grounded temporal evidence",
+      "llm_evidence_cn": "带时间证据定位的视频问答基准",
+      "llm_evidence": "带时间证据定位的视频问答基准",
+      "canonical_evidence": "带时间证据定位的视频问答基准",
+      "llm_tldr_en": "Introduces EG-VQA, a benchmark for video question answering requiring joint reasoning and precise evidence localization, with 2,067 videos and 11,838 QA pairs.",
+      "llm_tldr_cn": "现有视频问答基准仅评估答案正确性，忽略证据定位。本文提出EG-VQA基准，每个问答对都标注了时间证据，要求模型同时进行推理和精确证据定位。包含2067个视频和11838个问答对，推动视频理解评估更加全面。",
+      "llm_tldr": "现有视频问答基准仅评估答案正确性，忽略证据定位。本文提出EG-VQA基准，每个问答对都标注了时间证据，要求模型同时进行推理和精确证据定位。包含2067个视频和11838个问答对，推动视频理解评估更加全面。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2606.21649v1",
+      "source": "arxiv",
+      "title": "EvoEmbedding: Evolvable Representations for Long-Context Retrieval and Agentic Memory",
+      "abstract": "Existing embedding models are inherently static: they encode text segments in isolation, ignoring their surrounding context and temporal order. This paper introduces EvoEmbedding, a novel embedding model that generates evolvable representations for retrieval. It is tailored for long-context scenarios, where information is dynamic, sequential, and requires continuous state tracking. Our design is simple: EvoEmbedding maintains a continuously updated latent memory as it sequentially processes inputs, and uses it alongside the raw content to jointly generate evolvable embeddings. Consequently, for the same query, our model adapts its representation to retrieve distinct targets based on the evolving context, going beyond static semantic search. To equip the model with this capability, we construct EvoTrain-180K, a diverse dataset for the joint optimization of latent memory and retrieval. Furthermore, we introduce a memory queue to prevent representation collapse during recurrent encoding, alongside segment-batching techniques that tackle significant length variance and accelerate training by 3.8$\\times$. Extensive experiments show that our model not only outperforms larger-scale specialists (e.g., Qwen3-Embedding-8B and KaLM-Embedding-Gemma3-12B) across a range of long-context retrieval benchmarks, but also generalizes well to downstream tasks (e.g., personalization) with contexts 10$\\times$ longer than its training window. Notably, EvoEmbedding seamlessly integrates into agentic workflows to boost performance. For instance, a naive RAG pipeline equipped with our model surpasses dedicated agentic memory systems. Project Page: https://clare-nie.github.io/EvoEmbedding.",
+      "authors": [
+        "Chang Nie",
+        "Chaoyou Fu",
+        "Junlan Feng",
+        "Caifeng Shan"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-19T17:59:58+00:00",
+      "link": "https://arxiv.org/pdf/2606.21649v1",
+      "tags": [
+        "keyword:agent-memory",
+        "keyword:long-video",
+        "query:agent-memory",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "agentic memory via evolvable embeddings",
+      "llm_evidence_cn": "通过可演化嵌入实现智能体记忆",
+      "llm_evidence": "通过可演化嵌入实现智能体记忆",
+      "canonical_evidence": "通过可演化嵌入实现智能体记忆",
+      "llm_tldr_en": "EvoEmbedding generates evolvable representations for long-context retrieval and agentic memory by maintaining continuously updated latent memory, enabling context-aware adaptive retrieval.",
+      "llm_tldr_cn": "现有嵌入模型静态编码文本片段，忽略动态上下文和时序。EvoEmbedding 提出一种新颖的可演化嵌入模型，通过维护持续更新的潜在记忆来联合生成上下文感知的嵌入表示，专为长上下文检索和智能体记忆设计。实验表明，该模型能够根据演化上下文自适应检索不同目标，突破静态语义搜索的局限，为智能体长期记忆架构提供基础。",
+      "llm_tldr": "现有嵌入模型静态编码文本片段，忽略动态上下文和时序。EvoEmbedding 提出一种新颖的可演化嵌入模型，通过维护持续更新的潜在记忆来联合生成上下文感知的嵌入表示，专为长上下文检索和智能体记忆设计。实验表明，该模型能够根据演化上下文自适应检索不同目标，突破静态语义搜索的局限，为智能体长期记忆架构提供基础。",
+      "llm_tags": [
+        "query:agent-memory:composite"
+      ],
+      "matched_query_tag": "query:agent-memory:composite",
+      "matched_query_text": "Papers central to 请为我查询Agent Memory系统设计的有关论文, especially work that connects or combines: agent memory system design; long term memory in agents; memory architecture for intelligent agents; agent architecture with memory systems; research papers on agent memory system design.",
+      "matched_requirement_id": "req-composite-agent-memory",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.24428v1",
+      "source": "arxiv",
+      "title": "Escaping the Self-Confirmation Trap: An Execute-Distill-Verify Paradigm for Agentic Experience Learning",
+      "abstract": "Experience-driven self-evolution is critical for large language model (LLM) agents to improve through open-world interaction. However, existing experience learning methods mostly rely on single-agent loops, where the same agent executes tasks, summarizes outcomes, and determines memory content. This setup makes agents vulnerable to the Self-Confirmation Trap: wrong-but-self-consistent trajectories are misidentified as successful experience, leading to cumulative errors during retrieval and reuse. To address this issue, we propose EDV, an Execute-Distill-Verify framework for reliable experience learning. In the Execute stage, multiple heterogeneous agents explore the same task space in parallel to generate diverse candidate trajectories. In the Distill stage, a dedicated third-party agent comparatively analyzes these trajectories to produce candidate experiences, reducing executor-centric summarization bias. In the Verify stage, the execution group validates candidates via a consensus mechanism, and only approved experiences are written into shared or private memory. By decoupling the three stages, EDV transforms experience learning from isolated self-reflection into collaborative construction, filtering erroneous and noisy content before memory insertion. We evaluate EDV on three challenging long-horizon benchmarks: tau2-bench, Mind2Web and MMTB. Results show EDV consistently outperforms strong baselines, validating that reliable experience construction is essential for robust agent self-evolution. Our code is available at https://github.com/shidingz/EDV.",
+      "authors": [
+        "Shiding Zhu",
+        "Yudi Qi",
+        "Yajie Wang",
+        "Jiaze Li",
+        "Chao Song",
+        "Yaorui Shi",
+        "Yibo Miao",
+        "Hanqi Gao",
+        "Kai Zhang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-06-23T11:05:05+00:00",
+      "link": "https://arxiv.org/pdf/2606.24428v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Agent memory system design: execute-distill-verify paradigm for reliable experience learning",
+      "llm_evidence_cn": "Agent记忆系统设计：执行-蒸馏-验证范式用于可靠经验学习",
+      "llm_evidence": "Agent记忆系统设计：执行-蒸馏-验证范式用于可靠经验学习",
+      "canonical_evidence": "Agent记忆系统设计：执行-蒸馏-验证范式用于可靠经验学习",
+      "llm_tldr_en": "EDV proposes Execute-Distill-Verify to overcome self-confirmation trap in agent memory learning, using multiple agents for diverse trajectories and distillation with verification.",
+      "llm_tldr_cn": "智能体经验学习常因自确认陷阱将错误轨迹当作成功经验。EDV提出“执行-蒸馏-验证”框架：多个异构智能体并行探索任务空间产生多样轨迹，再通过蒸馏和验证筛选可靠经验存入记忆。该方法有效避免了错误经验的累积，提升了记忆召回和重用质量。",
+      "llm_tldr": "智能体经验学习常因自确认陷阱将错误轨迹当作成功经验。EDV提出“执行-蒸馏-验证”框架：多个异构智能体并行探索任务空间产生多样轨迹，再通过蒸馏和验证筛选可靠经验存入记忆。该方法有效避免了错误经验的累积，提升了记忆召回和重用质量。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.24626v1",
+      "source": "arxiv",
+      "title": "SAFARI: Scaling Long Horizon Agentic Fault Attribution via Active Investigation",
+      "abstract": "As autonomous agents tackle increasingly complex multi-step, multi-agent tasks, their execution trajectories have scaled beyond the constraints of even the largest context windows. Current methods for effectively diagnosing agent failures load the full trajectory into an LLM's context window, which suffers from attention dilution and fails when agentic traces inevitably exceed context limits. To address this, we introduce SAFARI (Scaling long-horizon Agentic Fault AttRibution via active Investigation), a framework that replaces linear context loading with a tool-augmented diagnostic loop. By equipping LLMs with a specialized toolbox to read and search trajectory segments alongside a persistent Short-Term Memory (STM) for cross-turn reasoning, SAFARI effectively decouples diagnostic accuracy from architectural context limits. Our experiments demonstrate that SAFARI outperforms state-of-the-art results by 20% on the Who&When dataset within a 1M token budget, and by 19% on TRAIL GAIA subset on a 25K token budget. Most significantly, SAFARI maintains a 0.58 precision even when the target fault resides 5x beyond the model's native context window, a scenario where traditional evaluators fail entirely.",
+      "authors": [
+        "Chenyang Zhu",
+        "Jiayu Yao",
+        "Kushal Chawla",
+        "Youbing Yin",
+        "Nathan Wolfe",
+        "Pengshan Cai",
+        "Jingyu Wu",
+        "Spencer Hong",
+        "Sangwoo Cho",
+        "Shi-Xiong Zhang",
+        "Daben Liu",
+        "Sambit Sahu",
+        "Erin Babinsky"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-23T14:23:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.24626v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "uses persistent Short-Term Memory for cross-turn reasoning in long-horizon agent fault diagnosis",
+      "llm_evidence_cn": "在长程代理故障诊断中使用持久短期记忆进行跨回合推理",
+      "llm_evidence": "在长程代理故障诊断中使用持久短期记忆进行跨回合推理",
+      "canonical_evidence": "在长程代理故障诊断中使用持久短期记忆进行跨回合推理",
+      "llm_tldr_en": "SAFARI replaces linear context loading with a tool-augmented diagnostic loop and Short-Term Memory to handle long agent trajectories beyond context limits.",
+      "llm_tldr_cn": "该工作针对长程多步代理任务中执行轨迹超出文脉窗口的问题，提出SAFARI框架。它用工具增强的诊断循环替代线性加载，并引入持久短期记忆实现跨回合推理，有效解决了注意力稀释和文脉长度限制。实验表明该方法在故障归因任务上优于基线，展示了记忆在长程代理中的关键作用。",
+      "llm_tldr": "该工作针对长程多步代理任务中执行轨迹超出文脉窗口的问题，提出SAFARI框架。它用工具增强的诊断循环替代线性加载，并引入持久短期记忆实现跨回合推理，有效解决了注意力稀释和文脉长度限制。实验表明该方法在故障归因任务上优于基线，展示了记忆在长程代理中的关键作用。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent architecture with memory systems",
+      "matched_requirement_id": "req-8",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2606.24437v1",
+      "source": "arxiv",
+      "title": "ReM-MoA: Reasoning Memory Sustains Mixture-of-Agents Scaling",
+      "abstract": "Mixture-of-Agents (MoA) architectures improve inference-time scaling by organizing multiple LLM agents into layered reasoning pipelines. However, existing MoA variants fail to sustain gains as depth increases, exhibiting degradation, early plateauing, or saturation. We propose ReM-MoA, a memory-augmented MoA framework that sustains scaling through two mechanisms: (1) a Ranked Reasoning Memory that persistently stores and ranks reasoning traces from all layers using a comparative Reviewer Agent, and (2) a Curated Diversified Memory Routing scheme that exposes different agents to distinct combinations of successful and failed traces, preserving exploration diversity while propagating high-quality reasoning. We further introduce an optional multi-domain Reviewer distillation pipeline that improves ranking quality through frontier-model supervision. Across five reasoning benchmarks spanning math, formal logic, code, knowledge, and commonsense, ReM-MoA consistently outperforms prior MoA variants across both depth and width scaling, and its advantage widens with depth, establishing structured cross-layer reasoning memory as a key missing mechanism for scalable multi-agent inference.",
+      "authors": [
+        "Heng Ping",
+        "Arijit Bhattacharjee",
+        "Peiyu Zhang",
+        "Shixuan Li",
+        "Wei Yang",
+        "Ali Jannesari",
+        "Nesreen Ahmed",
+        "Paul Bogdan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-23T11:14:37+00:00",
+      "link": "https://arxiv.org/pdf/2606.24437v1",
+      "tags": [
+        "keyword:agent-memory",
+        "query:agent-memory"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "memory-augmented Mixture-of-Agents framework for sustained scaling",
+      "llm_evidence_cn": "记忆增强的混合智能体框架，用于持续扩展",
+      "llm_evidence": "记忆增强的混合智能体框架，用于持续扩展",
+      "canonical_evidence": "记忆增强的混合智能体框架，用于持续扩展",
+      "llm_tldr_en": "Proposes ReM-MoA with Ranked Reasoning Memory and Curated Diversified Memory Routing to sustain scaling in Mixture-of-Agents architectures.",
+      "llm_tldr_cn": "现有混合智能体（MoA）架构在深度增加时性能退化。本文提出ReM-MoA，通过排名推理记忆和精选多样化记忆路由机制，维持MoA的扩展增益，避免早期饱和。实验表明该方法能有效传播高质量推理并保持探索多样性。",
+      "llm_tldr": "现有混合智能体（MoA）架构在深度增加时性能退化。本文提出ReM-MoA，通过排名推理记忆和精选多样化记忆路由机制，维持MoA的扩展增益，避免早期饱和。实验表明该方法能有效传播高质量推理并保持探索多样性。",
+      "llm_tags": [
+        "query:agent-memory"
+      ],
+      "matched_query_tag": "query:agent-memory",
+      "matched_query_text": "agent memory system design",
+      "matched_requirement_id": "req-5",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2606.24636v1",
+      "source": "arxiv",
+      "title": "CineCap: Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning",
+      "abstract": "Cinematographic captioning aims to describe how a video is filmed using professional film-language concepts such as camera movement, shot size, depth of field, composition, and shooting angle. This capability is important for fine-grained video understanding and controllable movie-quality video generation, yet remains underexplored in existing multimodal large language models. Unlike question-answering-based evaluation of cinematic understanding, cinematographic captioning requires a unified open-form description over multiple cinematographic dimensions. This task is challenging for two main reasons: the model must infer professional cinematographic concepts from subtle visual evidence, and it must generate captions that are both comprehensive and accurate. Accordingly, we propose CineCap, a framework that combines structured reasoning with spatio-temporal anchors and reinforcement learning with comprehensiveness, accuracy, and gated coverage rewards. The former grounds professional cinematographic descriptions in explicit visual evidence and organizes them into compact atomic reasoning for supervised fine-tuning, while the latter improves the balance between descriptive completeness and factual correctness. In addition, we construct CineCap Bench, a benchmark of 472 manually annotated video-caption pairs for systematic evaluation. Extensive experiments show that CineCap consistently outperforms strong proprietary and open-source baselines, establishing a new state of the art for cinematographic captioning. The code, model checkpoint, and benchmark are publicly available in https://github.com/Hectormxy/CineCap.git.",
+      "authors": [
+        "Xinyu Mao",
+        "Yuhui Zeng",
+        "Xiaokun Liu",
+        "Wenyu Qin",
+        "Meng Wang",
+        "Xin Tao",
+        "Pengfei Wan",
+        "Xiaohan Xing",
+        "Max Meng"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-06-23T14:29:40+00:00",
+      "link": "https://arxiv.org/pdf/2606.24636v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "fine-grained video understanding for cinematographic captioning",
+      "llm_evidence_cn": "面向电影摄影字幕的细粒度视频理解",
+      "llm_evidence": "面向电影摄影字幕的细粒度视频理解",
+      "canonical_evidence": "面向电影摄影字幕的细粒度视频理解",
+      "llm_tldr_en": "CineCap addresses cinematographic captioning by inferring professional film-language concepts from subtle visual evidence and generating structured captions, advancing long video understanding.",
+      "llm_tldr_cn": "电影摄影字幕要求模型理解摄像机运动、景深等专业概念，这对细粒度视频理解至关重要。CineCap通过时空锚点进行结构化推理，从细微信号推断电影摄影概念并生成统一描述。实验证明其在多种电影尺度上优于现有模型，推动了对长视频中复杂视觉语言的理解。",
+      "llm_tldr": "电影摄影字幕要求模型理解摄像机运动、景深等专业概念，这对细粒度视频理解至关重要。CineCap通过时空锚点进行结构化推理，从细微信号推断电影摄影概念并生成统一描述。实验证明其在多种电影尺度上优于现有模型，推动了对长视频中复杂视觉语言的理解。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "long video understanding",
+      "matched_requirement_id": "req-1",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2606.24602v1",
+      "source": "arxiv",
+      "title": "ViTexQA: A Multi-Frame Temporal Perception Dataset for Video Text Question Answering",
+      "abstract": "Despite remarkable progress in multimodal understanding, current MLLMs still exhibit limitations in video text understanding, particularly when semantics emerge through the integration of temporally distributed textual cues across multiple frames. This perception challenge fundamentally differs from static image text understanding, yet existing datasets fail to capture: the vast majority of questions remain answerable from single frames, inadequately reflecting real-world video text comprehension demands. To address this, we present ViTexQA, a large-scale video-text QA dataset, and FrameThinker for robust multi-frame temporal reasoning. We build ViTexQA via a quality-controlled Chain-of-Thought (CoT) annotation pipeline boosted with temporal constraints; all its QA pairs demand cross-frame text fusion to solve, enforcing true temporal reliance. FrameThinker adopts two-stage training for explicit temporal modeling: CoT-Guided Supervised Fine-Tuning (SFT) generates frame-aware reasoning chains, followed by Temporally-grounded Reinforcement Learning (RL) optimized with multi-frame coherence rewards. Evaluations show our method outperforms SOTA baselines on ViTexQA, lifting ROUGE-L by 6.3%.",
+      "authors": [
+        "Zhentao Guo",
+        "Chen Duan",
+        "Tongkun Guan",
+        "Zining Wang",
+        "Kai Zhou",
+        "Pengfei Yan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-06-23T14:03:56+00:00",
+      "link": "https://arxiv.org/pdf/2606.24602v1",
+      "tags": [
+        "keyword:long-video",
+        "query:long-video"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "video text question answering dataset for multi-frame temporal reasoning",
+      "llm_evidence_cn": "面向视频文本问答的多帧时间感知数据集",
+      "llm_evidence": "面向视频文本问答的多帧时间感知数据集",
+      "canonical_evidence": "面向视频文本问答的多帧时间感知数据集",
+      "llm_tldr_en": "Introduces ViTexQA, a large-scale video-text QA dataset requiring multi-frame temporal reasoning, and FrameThinker for robust multi-frame perception.",
+      "llm_tldr_cn": "现有视频文本问答数据集大多可从单帧回答，无法反映真实视频理解需求。本文提出ViTexQA数据集，要求多帧时间整合推理，并设计FrameThinker方法实现鲁棒的多帧时间感知。通过质量控制的链式思维标注流水线构建数据集，实验证明该方法在复杂视频问答任务上表现优异。",
+      "llm_tldr": "现有视频文本问答数据集大多可从单帧回答，无法反映真实视频理解需求。本文提出ViTexQA数据集，要求多帧时间整合推理，并设计FrameThinker方法实现鲁棒的多帧时间感知。通过质量控制的链式思维标注流水线构建数据集，实验证明该方法在复杂视频问答任务上表现优异。",
+      "llm_tags": [
+        "query:long-video"
+      ],
+      "matched_query_tag": "query:long-video",
+      "matched_query_text": "question answering on long videos",
+      "matched_requirement_id": "req-2",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    }
+  ]
+}

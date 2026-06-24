@@ -1,0 +1,529 @@
+Title: CineCap: Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning
+
+URL Source: https://arxiv.org/pdf/2606.24636v1
+
+Published Time: Wed, 24 Jun 2026 01:07:20 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# CineCap: Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning 
+
+# Xinyu Mao ∗† 
+
+The Chinese University of Hong Kong HKSAR 
+
+# Yuhui Zeng ∗† 
+
+Xiamen University China 
+
+# Xiaokun Liu ‡
+
+Kling Team, Kuaishou Technology China 
+
+# Wenyu Qin 
+
+Kling Team, Kuaishou Technology China 
+
+# Meng Wang 
+
+Kling Team, Kuaishou Technology China 
+
+# Xin Tao 
+
+Kling Team, Kuaishou Technology China 
+
+# Pengfei Wan 
+
+Kling Team, Kuaishou Technology China 
+
+# Xiaohan Xing 
+
+National University of Singapore Singapore 
+
+# Max Meng §
+
+Southern University of Science and Technology China 𝑡 ! 𝑡 " 𝑡 # 𝑡 $      
+
+> Subject Scale
+> Background
+> Reference
+> Camera Movement
+> Shot Size
+> Depth of Field
+> Camera Angle
+> Composition
+> Subject Directio n
+
+- Camera Movement: 
+
+- [00:00 - 00:0 2] Background seaweed on the left moves downward -> Tilt upward .
+
+- [00:02 - 00:09] Seaweed irregular vibrates in frame -> Slightly shake .
+
+- Shot Size: 
+
+- Fr ame captures the subject's head and shoulders -> Close -up ... .
+
+Anchor -based Structured Reasoning (Thinking Process) 
+
+The camera tilts upward initially , then it slightly shakes , capturing a close -up of the woman. The 
+
+shot starts from a higher angle , focusing downward on the sea urchin and the woman's hand. As the 
+
+camera moves, it transitions to an eye -level view of the woman, who is positioned slightly to the 
+
+right of center in the frame. The video employs a shallow depth of field technique, capturing a
+
+frontal view of the woman. 
+
+This video features a static ,
+
+close -up , eye -level shot with 
+
+a me dium depth of field . A 
+
+person is centered in the 
+
+frame, facing the camera .
+
+Generic Baselin e CineCap Caption (Ours) 
+
+Video 
+
+Time -axis 
+
+(a) Case Study (b)Benchmark Results 
+
+Figure 1: Case study of our CineCap and benchmark comparison. (a) Demonstration of the thinking process on a video sequence, where specific cinematic attributes like camera movement and shot size are inferred from spatial anchors. CineCap clearly provides more comprehensive and accurate camera movement descriptions than the generic baseline. (b) Radar chart showing benchmark results, indicating CineCap outperforms existing vision-language models across multiple cinematic dimensions. 
+
+## Abstract 
+
+Cinematographic captioning aims to describe how a video is filmed using professional film-language concepts such as camera move-ment, shot size, depth of field, composition, and shooting angle. This capability is important for fine-grained video understanding and controllable movie-quality video generation, yet remains un-derexplored in existing multimodal large language models. Unlike question-answering-based evaluation of cinematic understanding, cinematographic captioning requires a unified open-form descrip-tion over multiple cinematographic dimensions. This task is chal-lenging for two main reasons: the model must infer professional cinematographic concepts from subtle visual evidence, and it must 
+
+> ∗
+
+Both authors contributed equally to this research. 
+
+> †
+
+This work was conducted during the author’s internship at Kling Team, Kuaishou Technology. 
+
+> ‡
+
+Project Leader. 
+
+> §
+
+Corresponding author. email: max.meng@ieee.org 
+
+generate captions that are both comprehensive and accurate. Ac-cordingly, we propose CineCap , a framework that combines struc-tured reasoning with spatio-temporal anchors and reinforcement learning with comprehensiveness, accuracy, and gated coverage rewards. The former grounds professional cinematographic descrip-tions in explicit visual evidence and organizes them into compact atomic reasoning for supervised fine-tuning, while the latter im-proves the balance between descriptive completeness and factual correctness. In addition, we construct CineCap Bench , a bench-mark of 472 manually annotated video-caption pairs for systematic evaluation. Extensive experiments show that CineCap consistently outperforms strong proprietary and open-source baselines, estab-lishing a new state of the art for cinematographic captioning. The code, model checkpoint, and benchmark are publicly available in our https://github.com/Hectormxy/CineCap.git.  
+
+> arXiv:2606.24636v1 [cs.AI] 23 Jun 2026 MM, xx–xx xx xxxx, xxx Mao et al.
+
+## CCS Concepts 
+
+• Computing methodologies → Video summarization ; Scene understanding ; Description logics. 
+
+## Keywords 
+
+Cinematographic Caption; Chain of Thought Reasoning; Reinforce-ment Learning 
+
+## 1 Introduction 
+
+The cinematography of video, also referred to as camera-related cinematics [ 5], denotes the visual language governing the manner in which visual content is filmed, organized, and presented across spatial and temporal dimensions [ 3, 14 , 29 , 32 , 35 ]. Beyond the mere recording of scene content, cinematography shapes the structuring of visual information, directs viewer attention, and conveys motion, spatial relationships, and narrative emphasis. As multimodal large language models (MLLMs) [ 1, 33 , 34 , 52 ] are increasingly expected to understand videos at a level surpassing coarse semantic interpre-tation, reliable cinematographic understanding emerges as a crucial capability. This not only necessitates perception of scene content but also requires inference of the observer’s state via changes in viewpoint, scale, and spatial relations, which is indispensable for three-dimensional spatial comprehension. Moreover, it provides a critical foundation for controllable generation of movie-quality videos [ 2, 13 , 22 , 50 ], where precise modeling of camera-related attributes is essential to produce professional visual outputs. Recently, cinematic understanding has garnered increasing atten-tion within MLLM research [ 20 , 21 , 39 , 41 ]. One research direction formulates the problem as visual question answering, encompass-ing classification and multiple-choice formats [ 21 , 30 ], where mod-els predict predefined cinematic concepts from limited candidate options. While convenient for benchmarking, these approaches primarily evaluate constrained recognition capabilities and do not require the model to articulate a unified description of how a video is filmed. Another direction addresses caption generation [ 44 ] but typically restricts itself to limited factors, most commonly camera motion. For example, CamReasoner [ 41 ] emphasizes camera mo-tion understanding in a VQA-style setting rather than producing joint descriptions of broader cinematographic attributes. In con-trast, our work focuses on cinematographic captioning, aiming to generate open-form descriptions that jointly encompass six key dimensions: camera movement, shot size, shooting angle, depth of field, composition, and subject orientation. This task is essential because cinematographic understanding in practice is inherently multi-dimensional [ 5], and isolated prediction of individual fac-tors fails to fully capture how visual presentation is constructed. Compared to constrained recognition tasks, cinematographic cap-tioning offers a more comprehensive generative formulation of cinematic understanding and a practical setting for end-to-end video-cinematography alignment. Despite its significance, cinematographic captioning remains a challenging task. First, it requires fine-grained understanding of professional cinematographic concepts that are often visually subtle and prone to confusion. For instance, the model must dis-tinguish between camera motion and subject motion, as well as differentiate closely related categories such as close-up and medium close-up. Second, cinematographic patterns within a video typically exhibit temporal compositionality rather than static characteristics. A single video may present compound camera behaviors, where one segment displays a particular type of camera movement and a subsequent segment shifts to another, as illustrated in Fig. 1. This ne-cessitates modeling of temporally evolving cinematographic struc-tures instead of assigning a single label to the entire video. Third, as a dense captioning task [6, 23, 46], cinematographic captioning requires the model to be not only accurate but also comprehensive. The description must faithfully cover multiple cinematographic dimensions and integrate them into a coherent and fluent narrative. To address these challenges, we propose CineCap, a framework that grounds caption generation in explicit visual evidence via Struc-tured Reasoning with Spatio-Temporal Anchors. Specifically, spatial anchors are introduced to infer professional cinematographic con-cepts from observable visual cues, while temporal anchors associate dynamic aspects with specific timestamps. For example, in Fig. 1, the model detects a tilt-up during 00:00–00:02 from the downward motion of background seaweed and identifies a shaking phase be-tween 00:02–00:09 by observing its irregular entry and exit from the frame. To support unified descriptions across multiple cine-matographic dimensions, we construct atomic structured chain-of-thought (CoT) data for supervised fine-tuning. Subsequently, reinforcement learning is employed with atomic caption evaluation using Group Relative Policy Optimization [ 11 ] (GRPO), where an LLM-as-a-Judge provides a comprehensiveness score 𝑠 cmp and an accuracy score 𝑠 acc . However, sole optimization of 𝑠 cmp and 𝑠 acc 
+
+within GRPO leads to insufficient coverage in practice. To address this trade-off, where joint optimization improves accuracy at the expense of comprehensiveness, we propose an atomic coverage re-ward that constrains the number of described atomic aspects rather than caption length, thus better balancing the two objectives. To systematically evaluate cinematic captioning quality, we build CineCap Bench, a benchmark comprising 472 manually annotated video-caption pairs sourced from public film datasets and YouTube videos. We assess captions both at the aspect level and overall, measuring comprehensiveness and accuracy across multiple cin-ematographic dimensions. Experimental results demonstrate that CineCap surpasses both closed-source models and an array of open-source baselines, establishing new state-of-the-art performance. These findings validate the efficacy of our spatio-temporal anchor-based structured reasoning and reinforcement learning framework. Our key contributions can be summarized as follows: 
+
+• We introduce a novel perspective for addressing multi-dimensional cinematographic understanding by grounding caption gen-eration in explicit spatio-temporal visual evidence, thereby tackling the inherent complexity of cinematic attribute in-teraction and temporal composition. 
+
+• We propose CineCap, which introduces spatio-temporal anchor-based structured reasoning coupled with an atomic coverage reward mechanism to enhance fine-grained comprehension of professional cinematographic concepts and achieve a bal-anced trade-off between description comprehensiveness and accuracy. CineCap : Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning MM, xx–xx xx xxxx, xxx 
+
+• We construct CineCap Bench , the first comprehensive bench-mark dataset for cinematic captioning, featuring 472 care-fully annotated video-caption pairs covering diverse cine-matographic aspects. 
+
+• We conduct extensive experiments showing that CineCap consistently outperforms both open-source and proprietary baselines, achieving up to 32.41% improvement in F1 evalua-tion. 
+
+## 2 Related Work 2.1 Camera Related Video Analysis. 
+
+To enable cinematic video generation, understanding cinematogra-phy in videos [ 20 , 21 , 30 , 39 ] has drawn growing attention. VidCom-position [ 30 ] introduces a benchmark for evaluating the composi-tion understanding ability of multimodal large language models (MLLMs) and comprehensively assesses 33 models on this task. Focusing specifically on camera motion, CameraBench [ 20 ] defines a rigorous taxonomy of camera motion primitives and collects a large set of expert-annotated video clips, demonstrating via SFT that MLLMs can acquire limited understanding of motion types and directions. CineTechBench [ 39 ] and ShotBench [ 21 ] further extend the evaluation scope to include composition, shot size, and depth of field, providing a more holistic benchmark for assessing cinematographic understanding in video models. However, most existing studies rely on multiple-choice evaluation [12, 25, 27]. 
+
+## 2.2 Reinforcement Learning for Vision Language Model. 
+
+Inspired by the success of reinforcement learning in large language models, recent studies have explored its application to multimodal large models [ 36 , 48 , 51 ]. Vision-R1 [ 16 ] introduces a Progressive Thinking Suppression Training strategy combined with GRPO, ef-fectively enhancing complex reasoning ability after cold-start train-ing. VLM-R1 [ 28 ] rigorously demonstrates the effectiveness and generalization of reinforcement learning on visual understanding tasks. R1-VL [ 47 ] proposes Step-wise GRPO, enabling multimodal models to self-improve reasoning through simple yet dense step-wise rewards. For video understanding, Video-R1 [ 7] creatively proposes T-GRPO, incorporating temporal modeling to promote explicit temporal reasoning; Video-RFT [ 37 ] introduces a semantic-consistency reward to strengthen alignment between textual rea-soning and visual evidence; and VideoChat-R1 [ 7, 43 ] systematically explores Reinforcement Fine-Tuning (RFT) with GRPO for video MLLMs. Unlike these works, our CineJudge targets video caption evaluation, which demands both temporal sensitivity and accurate assessment of video–caption alignment. 
+
+## 2.3 Dense Captioning. 
+
+Dense captioning aims to generate multiple fine-grained descrip-tions for visual content and has been studied in both images and videos. DenseCap [ 17 ] first formulates dense captioning in im-ages by jointly localizing salient regions and generating region-level descriptions. Dense-Captioning Events in Videos [ 18 ] extends this setting to videos by detecting and describing multiple tempo-ral events. Later work further improves dense video captioning through streamlined proposal-caption pipelines [ 24 ]. Reinforce-ment learning has also been widely explored to improve caption quality. SCST [ 26 ] optimizes non-differentiable caption metrics with policy gradients, while hierarchical reinforcement learning [ 38 ]encourages more detailed video descriptions through multi-level decision making. More recently, CapRL [ 42 ], CCCaption [ 31 ], and RubiCap [ 15 ] investigate fine-grained reward design for dense cap-tion generation, focusing on utility, completeness and correctness, or structured rubric-based evaluation. However, these methods tar-get general dense captioning rather than cinematic description. Our work instead studies dense captioning in the cinematographic do-main, where the model must jointly describe multiple professional camera-related attributes. 
+
+## 3 Task Formulation and Benchmark 3.1 Task Formulation 
+
+Given a video clip v, the goal of cinematographic captioning is to generate a free-form caption c that comprehensively describes its cinematographic characteristics across six specific dimensions: camera movement, shot size, shooting angle, depth of field, compo-sition, and subject orientation. Unlike standard video captioning, which focuses primarily on the events occurring within the scene, this task centers on how the scene is visually filmed and presented. Moreover, it diverges from typical classification or multiple-choice approaches by requiring a unified caption that covers multiple dimensions simultaneously, rather than producing isolated predic-tions for predefined labels. Thus, this task directly addresses the problem of aligning video content with cinematographic descrip-tion in an end-to-end manner. 
+
+## 3.2 Data Construction 
+
+Data Source. For cinematographic captioning, the quality of source videos is critical since fine-grained camera-related attributes de-mand sufficient visual clarity and rich cinematic expression to be reliably perceived. To this end, data are collected from two sources: YouTube videos and publicly available film content. To obtain clips with consistent cinematographic structure, PySceneDetect [4] is first applied to segment raw videos into single-shot clips. Focusing primarily on camera-related cinematography, each clip is initially annotated with a camera-motion category label. These labels are then used to balance the data distribution across motion types, af-ter which dense cinematographic captions are annotated on the balanced subset. This pipeline enhances coverage of key camera-motion patterns and establishes a more appropriate data foundation for multi-dimensional cinematographic captioning. 
+
+Annotation Pipeline. To ensure annotation quality and consis-tency, annotators with backgrounds in aesthetics or film-related fields are recruited and required to complete training and qual-ification tests prior to formal annotation. For each video clip, a semi-automatic pipeline is adopted: an initial caption is generated using the closed-source model Gemini 3 Pro [ 9 ], after which an-notators revise the caption by correcting errors, adding missing details, removing unsupported content, and refining professional terminology. The revised caption is subsequently normalized into a unified output format. To guarantee data quality, a two-stage re-view process is implemented post-annotation: a first-round review MM, xx–xx xx xxxx, xxx Mao et al. (b) Caption Length (c) Video Duration (d) Per -dim Statement Count 
+
+(a) Caption Word Cloud      
+
+> 
+> #!
+> !
+> $
+> !
+> 
+> 
+> 
+> 
+>  ! "!
+> !!
+> 
+> 
+> 
+> 
+> 
+> 
+> #    "!  !  
+>  
+> 
+> 
+> 
+>    
+>   
+>  
+
+Figure 2: Overview statistics of the CineCap Bench. (a) Word cloud of captions. (b) Distribution of caption lengths, ranging from 25 to 185 words with an average length of 65.7 words. (c) Distribution of video durations, where most clips are between 5 and 10 seconds. (d) Average number of statements per caption corresponding to each cinematographic dimension. 
+
+randomly inspects approximately 30% of the samples, followed by a second-round expert review on about 10% of the samples. This multi-stage procedure improves the accuracy, consistency, and pro-fessionalism of the resulting annotations. 
+
+Benchmark Statistics. CineCap Bench comprises 472 manually annotated video-caption pairs. As shown in Fig. 2a, the caption word cloud predominantly features cinematography-oriented ex-pressions related to framing, shot scale, viewpoint, and subject position, indicating that the benchmark captures professional vi-sual presentation rather than generic scene semantics. Figures 2b–c illustrate that the benchmark covers a wide range of video durations and caption lengths. Most clips last between 5 and 10 seconds, while captions range from brief descriptions to relatively long paragraphs, with an average length of 65.7 words. This variability indicates that cinematographic captioning requires flexible description granular-ity rather than a fixed-length output. Further examination of the distribution of statement counts across cinematographic dimensions is presented in Fig. 2d. Differ-ent dimensions exhibit distinct annotation patterns, demonstrating that cinematographic description is inherently multi-dimensional and compositional. In particular, certain dimensions, such as cam-era movement and composition, frequently involve multiple state-ments within a single caption, reflecting the temporally evolving and compound nature of cinematographic expression. These statis-tics confirm that CineCap Bench presents realistic variation in both temporal structure and descriptive granularity, making it suitable for evaluating whether a model can generate captions that are both comprehensive and accurate. 
+
+## 3.3 Evaluation Protocol 
+
+Cinematographic captioning is evaluated from two perspectives: 
+
+comprehensiveness and accuracy . Comprehensiveness assesses whether a caption sufficiently covers the cinematographic attributes expressed in the video, whereas accuracy evaluates whether the described attributes are visually correct. Both criteria are essential. A caption may be accurate but incomplete if it describes only a subset of the relevant dimensions, and it may be comprehensive yet unreliable if it includes unsupported or incorrect descriptions. To capture the multi-dimensional nature of the task, evaluation is performed at both the aspect level and the overall level . The aspect-level evaluation measures whether the generated caption provides sufficiently complete and factually accurate descriptions for each of the six cinematographic dimensions: camera movement, shot size, shooting angle, depth of field, composition, and subject ori-entation. The overall-level evaluation assesses whether the caption as a whole offers a globally comprehensive and accurate account of how the video is filmed. We report both comprehensiveness and accuracy at these two levels to assess not only fine-grained perfor-mance on individual factors but also the quality of the caption as a unified dense description. CineCap : Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning MM, xx–xx xx xxxx, xxx 𝑡 ! 𝑡 " 𝑡 # 𝑡 $                     
+
+> Compound Camera Motion
+> Temporal Anchors Spatial Anchors
+> Static Reference
+> Camera Motion
+> Subject Scale
+> Shot Size
+> Structured Atomic
+> Chain of Though t
+> <think>
+> -Camera Motion:
+> -[T -Anchor] [S -Anchor] ->Statement
+> ...</think>
+> <answer> Caption </answer>
+> Supervised Finetuning
+
+Stage 1: Spatio -Temporal Anchor -Based Supervised Finetuning          
+
+> Video Input
+> SFT
+> Model
+> <think>
+> <answer>
+> <think>
+> <answer>
+> <think>
+> <answer>
+> 𝑜 !
+> 𝑜 %
+> 𝑜 &
+> .. .
+> .. .
+> LLM -as -a-Judge Evaluation
+> Camera
+> Movement
+> Shot
+> Size
+> Depth of
+> Field
+> Camera
+> Angle
+> Compo -
+> sition
+> Subject
+> Orientation
+> Decompose
+> GT Caption
+> Atomic
+> Statemen t
+> Matching
+> 𝑁 '(
+> Ground -truth
+> Statements
+> 𝑁 )*+,
+> Predictio n
+> Statements
+> 𝑁 -.(/0
+> Matched
+> Statements
+> Reward Design
+> Comprehensive -
+> ness Reward
+> Gated Coverage
+> Reward
+> Accuracy
+> Reward
+> Group Relative
+> Policy Optimizatio n
+
+Stage 2: CineCap GRPO Reinforcement Learning  
+
+> Video Input
+
+Figure 3: Overview of CineCap. Stage 1 employs spatio-temporal anchors to construct atomic CoT supervision. Stage 2 utilizes GRPO with rewards designed for comprehensiveness, accuracy, and gated coverage. 
+
+## 4 Method 4.1 Overview 
+
+Given a video clip, the objective is to generate a dense cinemato-graphic caption that jointly describes multiple camera-related at-tributes within a unified paragraph. This task requires the model not only to infer professional cinematographic concepts from ex-plicit visual evidence but also to balance comprehensiveness and accuracy in an open-form generation setting. To address these challenges, we propose a two-stage framework. In the first stage, 
+
+Spatio-Temporal Anchor-Based Structured Reasoning is in-troduced to organize visual evidence into structured reasoning for multi-dimensional cinematographic description, which is then used to construct atomic chain-of-thought (CoT) supervision for supervised fine-tuning. In the second stage, GRPO is applied with rewards targeting comprehensiveness, accuracy, and coverage to enhance the quality of the generated captions. The overall pipeline is illustrated in Fig. 3. 
+
+## 4.2 Spatio-Temporal Anchor-Based Reasoning 
+
+Cinematographic attributes are not directly observable as discrete labels from video alone. Camera motion is typically perceived relative to reference objects within the scene, and professional cinematographic concepts require explicit interpretation of visual evidence. A video clip may contain compound cinematographic patterns, with camera movement evolving over time and other dimensions, such as composition and subject orientation, chang-ing accordingly. These characteristics render single-shot global descriptions insufficient for cinematographic captioning. Based on this observation, we propose Spatio-Temporal Anchor-Based Struc-tured Reasoning, which introduces spatial anchors to ground professional concepts in scene evidence, and temporal anchors 
+
+to localize dynamically changing attributes. 
+
+Spatial anchors. Spatial anchors ground fine-grained cinemato-graphic concepts in directly observable visual evidence. Rather than predicting abstract film-language terms holistically, the model first identifies concrete cues and subsequently infers the corresponding attribute. For example, camera motion is inferred from positional changes of static background references, which distinguishes it from subject motion; subject scale indicates shot size; foreground-background sharpness informs depth of field. In this manner, spatial anchors explicitly link scene evidence with professional cinemato-graphic terminology. All such cues are directly observable from the current frame or local visual content. 
+
+Temporal anchors. By combining spatial and temporal anchors, our structured reasoning framework provides an intermediate rep-resentation between raw video signals and final language output. It enables the model to describe cinematographic attributes based on explicit evidence, while preserving the compositional structure needed for dense multi-dimensional captioning. Temporal anchors bind dynamic cinematographic attributes to localized temporal MM, xx–xx xx xxxx, xxx Mao et al. 
+
+intervals. Formally, for a video clip, each dynamic attribute is repre-sented by one or more anchors 𝜏 = [𝑡 𝑠 , 𝑡 𝑒 ] indicating the temporal segment during which the attribute is exhibited. This enables the model to describe compound cinematographic patterns within a single clip rather than generating a single global description. In practice, different intervals may correspond to different camera motions, while related dimensions such as composition and subject orientation may also vary with the camera trajectory. Temporal an-chors thus provide the temporal structure necessary for multi-stage and compound cinematographic reasoning. By combining spatial and temporal anchors, the structured rea-soning framework provides an intermediate representation bridg-ing raw video signals and final language output. This facilitates description of cinematographic attributes based on explicit evidence while preserving the compositional structure required for dense multi-dimensional captioning. 
+
+## 4.3 Supervised Fine-Tuning with Atomic CoT 
+
+We construct supervised fine-tuning data in the form of atomic chain-of-thought (CoT) instead of unconstrained long-form rea-soning. This design is motivated by two observations. First, re-cent video-language studies indicate that explicit CoT is not uni-formly beneficial across all multimodal tasks; for some perception-intensive settings, direct answering can match or outperform CoT despite its higher generation cost [ 40 ]. Second, overly long reason-ing chains in cinematographic captioning often introduce redun-dant statements and accumulate errors across steps. In light of these observations, explicit reasoning is applied only to cinematographic attributes that require inference, notably cam-era motion and other temporally evolving patterns. Conversely, attributes such as subject orientation or composition are often di-rectly observable from the current frame or local visual content, and are therefore supervised with direct statements rather than extended reasoning chains. Accordingly, the supervision is organized into an atomic struc-tured format. For dynamic attributes requiring temporal reason-ing, each unit follows the form [temporal anchor] [spatial anchor] → statement , where [spatial anchor] is optional. For directly observable attributes, supervision consists of the statement alone. This design maintains concise supervision while preserving explicit reasoning where necessary, enabling the model to learn multi-dimensional cinematographic descriptions without relying on unnecessarily long CoT trajectories. To construct the supervision data, we begin with manually an-notated video-caption pairs and generate atomic CoT annotations conditioned on ground-truth captions. This construction recovers the visual evidence underpinning each target description, producing an evidence-to-answer CoT that aligns with the evidence-grounded nature of cinematographic captioning. The generated reasoning traces undergo review by human annotators and a closed-source model to enhance logical coherence and mitigate reasoning or for-matting errors. Finally, all samples are normalized into a unified 
+
+<answer>...</answer> format, yielding 80K video–CoT–caption training samples for supervised fine-tuning. Additional details re-garding the construction pipeline and exact prompts are provided in the supplementary material. 
+
+## 4.4 Fine-grained Reward Design 
+
+The supervised fine-tuned model is further optimized via Group Rel-ative Policy Optimization (GRPO) to improve caption quality accord-ing to two fundamental objectives of cinematographic captioning: comprehensiveness and accuracy. Given a sampled caption, an LLM is employed as a judge to perform atomic evaluation following the same six-aspect decomposition employed in our CoT supervision, including Camera Movement, Shot Size, Depth of Field, Camera Angle, Composition, and Subject Orientation. For each aspect 𝑑 , the judge decomposes both the ground-truth and generated captions into atomic statements, producing counts of ground-truth state-ments 𝑛 gt  
+
+> 𝑑
+
+, predicted statements 𝑛 pred  
+
+> 𝑑
+
+, and semantically matched statements 𝑛 match  
+
+> 𝑑
+
+. These counts are aggregated over all six aspects: 
+
+𝑁 gt =
+
+> 6
+
+∑︁ 
+
+> 𝑑 =1
+
+𝑛 gt  
+
+> 𝑑
+
+, 𝑁 pred =
+
+> 6
+
+∑︁ 
+
+> 𝑑 =1
+
+𝑛 pred  
+
+> 𝑑
+
+, 𝑁 match =
+
+> 6
+
+∑︁ 
+
+> 𝑑 =1
+
+𝑛 match  
+
+> 𝑑
+
+. (1) Based on these statistics, the comprehensiveness score and accuracy score are defined as 
+
+𝑠 cmp = 𝑁 match 
+
+max (𝑁 gt , 1) , 𝑠 acc = 𝑁 match 
+
+max (𝑁 pred , 1) . (2) Here, 𝑠 cmp measures the proportion of ground-truth cinemato-graphic content covered by the generated caption, while 𝑠 acc mea-sures the factual correctness of generated content. A natural approach is to combine 𝑠 cmp and 𝑠 acc directly as rein-forcement signals. However, in practice, improvement in accuracy tends to dominate the overall reward. Consequently, the model favors producing shorter and more conservative captions to in-crease 𝑠 acc , which limits gains in comprehensiveness. To balance these objectives, an additional coverage reward is introduced to regularize the overall count of described atomic statements. Unlike length-based regularization, this coverage reward is defined using atomic statement counts rather than caption length, motivated by the observation that a longer caption does not necessarily yield higher comprehensiveness; what matters is coverage of critical atomic cinematographic information. Concretely, the coverage reward is defined as 
+
+𝑟 cov = − min 
+
+
+
+1, |𝑁 gt − 𝑁 pred |
+
+max (𝑁 gt , 1)
+
+
+
+. (3) This reward encourages the generated caption to better match the target coverage at the atomic level. However, we observe that directly applying 𝑟 cov can suppress accuracy improvement, since coverage control may encourage additional statements even when their correctness is not yet reliable. To mitigate this, a gated design is implemented, activating the coverage reward only when the caption attains sufficient accuracy. Specifically, the gated coverage reward is defined as 
+
+𝑟 gate cov = I(𝑠 acc > 𝜏 )
+
+
+
+− min 
+
+
+
+1, |𝑁 gt − 𝑁 pred |
+
+max (𝑁 gt , 1)
+
+ 
+
+, (4) where I(·) is the indicator function and 𝜏 is an accuracy threshold. For the 𝑖 -th sampled response, we set 
+
+𝑟 cmp ,𝑖 = 𝑠 cmp ,𝑖 , 𝑟 acc ,𝑖 = 𝑠 acc ,𝑖 , (5) and define the final reward as 
+
+𝑅 𝑖 = 𝜆 cmp 𝑟 cmp ,𝑖 + 𝜆 acc 𝑟 acc ,𝑖 + 𝜆 cov 𝑟 gate cov ,𝑖 . (6) CineCap : Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning MM, xx–xx xx xxxx, xxx 
+
+Following the GRPO training paradigm, the group-wise advan-tage of each sampled response is computed by 
+
+𝐴 𝑖 = 𝑅 𝑖 − mean ({ 𝑅 𝑗 }) 
+
+std ({ 𝑅 𝑗 }) , (7) where {𝑅 𝑗 } represents the rewards of all sampled responses within the same group. Let 
+
+𝜌 𝑖 = 𝜋 𝜃 (𝑜 𝑖 | 𝑞 )
+
+𝜋 𝜃 old (𝑜 𝑖 | 𝑞 ) . (8) The final GRPO objective is formulated as 
+
+JGRPO (𝜃 ) = E𝑞, {𝑜 𝑖 }
+
+"
+
+1
+
+𝑁 
+
+> 𝑁
+
+∑︁ 
+
+> 𝑖 =1
+
+L𝑖 − 𝛽 DKL 
+
+ 𝜋 𝜃 ∥𝜋 ref 
+
+#
+
+, (9) 
+
+L𝑖 = min 
+
+
+
+𝜌 𝑖 𝐴 𝑖 , clip (𝜌 𝑖 , 1 − 𝜖, 1 + 𝜖 )𝐴 𝑖 
+
+
+
+. (10) Here, 𝑞 denotes the input query, 𝑜 𝑖 denotes the 𝑖 -th sampled re-sponse, and 𝜋 ref is the reference policy. This optimization encour-ages the model to generate captions that achieve a better balance between factual correctness and descriptive coverage. 
+
+## 5 Experiments 5.1 Implementation Details 
+
+During the SFT stage, we train the base model Qwen3-VL-8B [ 33 ]on 80K samples for 2 epochs, with a batch size of 128 and a learning rate of 2 × 10 −5. During the GRPO stage, we further train on 2K samples for 1 epoch, using 8 rollouts, a learning rate of 1 × 10 −5,and a prompt-wise batch size of 32. In the reward design, we set 
+
+𝜆 acc = 0.5, 𝜆 cmp = 0.5, and 𝜆 cov = 0.1, while the gate threshold ( 𝜏 )for activating the coverage reward is set to 0.75. Videos are sampled at 2 FPS, with a maximum of 256 tokens per frame. All experiments are conducted on 32 × 80 GB GPUs. More implementation details are provided in the appendix. 
+
+## 5.2 Comparison with State of the Art 
+
+To evaluate the effectiveness of CineCap, we compare it against a broad set of strong baselines, including both proprietary and open-source multimodal models. Specifically, the proprietary base-lines include Gemini-2.5-Pro [ 8 ] and Gemini-3.1-Pro [ 10 ], while the open-source baselines include Qwen3-VL-30B [ 33 ], Qwen2.5-VL-72B [ 1], Qwen3-VL-8B [ 33 ], Tarsier-7B [ 45 ], InternVL3-8B [ 52 ], LLaVA-OneVision-7B [ 19 ], and LLaVA-NeXT-Video-7B [ 49 ]. These baselines cover representative recent models with strong visual un-derstanding and generation capabilities, enabling a comprehensive comparison on cinematographic captioning. For evaluation, we report both aspect-level and overall-level 
+
+results under the two criteria defined in Sec.3.3: comprehensive-ness (Cmp) and accuracy (Acc). The aspect-level evaluation cov-ers six cinematographic dimensions, including Camera Movement (CM), Shot Size (SS), Depth of Field (DF), Camera Angle (CA), Com-position (CO), and Subject Orientation (SO), while the overall level further reports holistic Cmp, Acc, and F1. Tab. 1 shows that CineCap consistently outperforms all propri-etary and open-source baselines across all metrics. In particular, CineCap achieves 72.38 overall Cmp, 74.80 overall Acc, and 73.57 F1, significantly surpassing the strongest baseline Gemini-3.1-Pro (46.31, 60.48, 52.45). This demonstrates that our method improves not only factual correctness but also descriptive coverage. The gains are consistent across all six cinematographic dimen-sions. The improvements are especially large on Camera Move-ment, Shot Size, Depth of Field, and Composition, where multi-dimensional dense description requires both fine-grained visual understanding and explicit structured reasoning. For example, on Camera Movement, CineCap improves Cmp/Acc from 40.23/43.09 to 54.38/60.50, and on Depth of Field from 48.11/47.37 to 79.68/82.91. Meanwhile, the strong performance on Camera Angle (90.06/88.35) and Subject Orientation (72.51/69.54) further indicates that our framework can jointly support both dynamic and static cinemato-graphic description within a unified caption. These results verify the effectiveness of our spatio-temporal structured reasoning and reward design for multi-dimensional cinematographic captioning. 
+
+## 5.3 Ablation Analysis 
+
+5.3.1 Fine-tuning Strategy Ablation. Tab. 2 shows the ablation of progressive fine-tuning strategies. From the base model, direct caption SFT raises overall F1 from 41.16 to 69.27, confirming that curated cinematographic caption data provide strong supervision. However, this gain is not solely due to data. Replacing direct caption SFT with CineCap SFT, which uses the same training source but adds spatio-temporal anchor-based atomic CoT supervision, further improves F1 from 69.27 to 70.21. This indicates that structured supervision, not just more data, drives this improvement. Applying CineCap GRPO on top of CineCap SFT raises overall F1 from 70.21 to 73.57 with simultaneous gains in accuracy and comprehensiveness. This verifies the reward design effectively complements supervised learning by balancing descriptive coverage and factual correctness. The consistent improvements in both metrics suggest the gain arises from better alignment of captions with the cinematographic structure rather than longer or more aggressive generation. 
+
+Findings 
+
+Structured spatio-temporal atomic supervision improves per-formance beyond curated caption data alone. The proposed reward further enhances accuracy and comprehensiveness by balancing coverage and correctness, promoting better caption-structure alignment. 
+
+5.3.2 Reward Design Ablation. Table 3 presents an analysis of re-ward design commencing from CineCap SFT. The addition of the Cmp & Acc Reward increases the overall F1 score from 70.21 to 72.93, demonstrating the advantage of reinforcement learning on these objectives. Introducing a naive length penalty improves com-prehensiveness but decreases accuracy, which causes the F1 score to decline to 71.71, indicating that longer captions tend to be more complete but less accurate. Substituting the length penalty with the proposed coverage reward yields improved balance between metrics, confirming that atomic statement coverage serves as a more effective control signal than caption length. The inclusion of the gating mechanism further enhances the final results to 74.80 in accuracy, 72.38 in comprehensiveness, and 73.57 in F1—the high-est among all variants—validating that the gated coverage reward effectively balances descriptive completeness and factual accuracy. MM, xx–xx xx xxxx, xxx Mao et al. 
+
+Table 1: Performance comparison of various models across different metrics. The best results are highlighted in bold. CM denotes Camera Movement. SS denotes Shot Size. DF denotes Depth of Field. CA denotes Camera Angle. CO denotes Composition. SO denotes Subject Orientation. Cmp denotes comprehensiveness. Acc denotes accuracy.                                                                                                                                                                                
+
+> Model CM SS DF CA CO SO Overall Cmp Acc Cmp Acc Cmp Acc Cmp Acc Cmp Acc Cmp Acc Cmp Acc F1
+> Proprietary models
+> Gemini-2.5-Pro[8] 40.23 43.09 51.07 47.92 48.11 47.37 80.92 78.61 40.24 43.55 48.90 45.44 52.03 52.53 52.28 Gemini-3.1-Pro[10] 29.22 40.50 54.34 60.52 43.01 43.59 79.00 80.60 19.98 22.76 54.78 58.01 46.31 60.48 52.45
+> Open-source models ( >10B)
+> Qwen3-VL-30B[33] 29.22 30.31 54.26 49.47 36.12 36.39 44.67 43.53 30.19 33.16 34.52 34.32 39.33 43.42 41.27 Qwen2.5-VL-72B[1] 28.42 32.23 53.19 52.83 31.92 31.11 65.65 60.58 35.71 37.93 28.70 30.18 41.02 43.39 42.17
+> Open-source models ( <10B)
+> Tarsier-7B[45] 8.06 13.11 37.57 35.51 27.38 28.28 15.81 14.92 17.83 21.47 22.95 25.23 22.64 31.05 26.19 InternVL-3-8B[52] 18.80 25.21 42.70 40.32 33.66 34.89 27.17 26.41 27.85 31.54 29.27 31.57 30.69 36.81 33.47 LLaVa-OV-7B[19] 8.94 13.51 28.21 25.98 19.50 20.04 11.66 10.86 16.14 17.98 19.79 21.10 19.30 31.40 23.91 LLaVa-NV-7B[49] 8.11 12.89 56.68 34.91 23.23 23.71 30.37 25.44 24.31 29.91 20.23 22.02 28.05 30.14 29.06 Qwen3-VL-8B[33] 34.48 31.66 45.49 38.52 36.76 33.40 61.12 51.14 33.31 36.73 44.19 41.21 44.09 38.60 41.16
+> Ours (CineCap) 54.38 60.50 76.51 77.44 79.68 82.91 90.06 88.35 66.17 66.09 72.51 69.54 72.38 (+28.29 )74.80 (+36.2 )73.57 (+32.41 )
+
+Table 2: Ablation study on the effectiveness of different fine-tuning strategies. We progressively add components to the Base model. Acc: Overall Accuracy, Cmp: Overall Compre-hensiveness. The best results are highlighted in bold. 
+
+Model Cmp Acc F1 Δ F1 Base (Qwen3)[33] 44.09 38.60 41.16 -+ Direct Caption SFT 68.00 70.58 69.27 +28.11 + CineCap SFT 69.36 71.08 70.21 +29.05 + CineCap SFT w/ GRPO 72.38 74.80 73.57 +32.41 Table 3: Ablation study on the reward design. Starting from the Baseline, we first add the Cmp & Acc Reward . We then compare three parallel strategies applied on top of this strong foundation. Acc: Overall Accuracy, Cmp: Overall Compre-hensiveness. The best result in each column is highlighted in bold. 
+
+Model Cmp Acc F1 Δ F1 CineCap SFT 69.36 71.08 70.21 -+ Cmp & Acc Reward 71.40 74.52 72.93 +2.72 
+
+Parallel variations based on (+ Cmp & Acc Reward): 
+
+w/ Len Penalty 73.29 70.20 71.71 +1.50 w/ Cov (w/o gate) 72.27 73.96 73.11 +2.90 w/ Cov (w/ gate) 72.38 74.80 73.57 +3.36 
+
+Findings 
+
+Caption length is an inadequate proxy for cinematographic completeness. Controlling atomic aspect coverage through a gating mechanism attains a superior balance between accu-racy and coverage. 0 10 20 30 40 50 60 70 
+
+> Training Steps
+> 0.50
+> 0.55
+> 0.60
+> 0.65
+> 0.70
+> Reward
+> Reward Component Comparison
+> Overall Reward
+> Accuracy Reward
+> Completeness Reward
+
+Figure 4: Training dynamics of reward components during reinforcement learning. All reward curves increase steadily, indicating stable optimization. 
+
+Fig. 4 shows the training dynamics of different reward compo-nents. All curves increase steadily, indicating stable GRPO optimiza-tion. The accuracy reward grows faster and remains higher than the completeness reward. Overall, the trend supports the effectiveness of our reward design. 
+
+## 6 Conclusion 
+
+This work proposes CineCap, a unified framework for cinemato-graphic captioning, and formulates the task as a multi-dimensional dense description problem across six essential cinematographic di-mensions. The proposed method integrates spatio-temporal anchor-based structured reasoning, atomic chain-of-thought supervision, and GRPO-based reward optimization to enhance both descriptive completeness and factual accuracy. To enable systematic evaluation, CineCap Bench is introduced, offering fine-grained assessments CineCap : Structured Reasoning with Spatio-Temporal Anchors for Cinematographic Video Captioning MM, xx–xx xx xxxx, xxx 
+
+at both the aspect and overall levels. We conduct extensive ex-periments showing that CineCap consistently outperforms both open-source and proprietary baselines, achieving up to 32.41% im-provement in F1 evaluation. It is expected that this work will pro-mote further research on cinematographic understanding and pro-vide valuable support for downstream tasks involving controllable cinematic video generation. 
+
+## References 
+
+[1] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al . 2025. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 (2025). [2] Omer Bar-Tal, Hila Chefer, Omer Tov, Charles Herrmann, Roni Paiss, Shiran Zada, Ariel Ephrat, Junhwa Hur, Yuanzhen Li, Tomer Michaeli, Oliver Wang, Deqing Sun, Tali Dekel, and Inbar Mosseri. 2024. Lumiere: A Space-Time Diffusion Model for Video Generation. In ACM SIGGRAPH / ACM Multimedia conference (or relevant venue, see reference) . https://arxiv.org/abs/2401.12945 [3] Digbalay Bose, Rajat Hebbar, Krishna Somandepalli, Haoyang Zhang, Yin Cui, Kree Cole-McLaughlin, Huisheng Wang, and Shrikanth Narayanan. 2023. Movieclip: Visual scene recognition in movies. In Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision . 2083–2092. [4] Brandon Castellano. 2025. PySceneDetect . https://github.com/Breakthrough/ PySceneDetect Python and OpenCV-based scene cut and transition detection library, accessed 2026-03-31. [5] Agneet Chatterjee, Rahim Entezari, Maksym Zhuravinskyi, Maksim Lapin, Reshinth Adithyan, Amit Raj, Chitta Baral, Yezhou Yang, and Varun Jampani. 2025. Stable Cinemetrics: Structured Taxonomy and Evaluation for Professional Video Generation. arXiv preprint arXiv:2509.26555 (2025). [6] Xinlong Chen, Yue Ding, Weihong Lin, Jingyun Hua, Linli Yao, Yang Shi, Bozhou Li, Yuanxing Zhang, Qiang Liu, Pengfei Wan, et al . 2025. Avocado: An audiovisual video captioner driven by temporal orchestration. arXiv preprint arXiv:2510.10395 
+
+(2025). [7] Kaituo Feng, Kaixiong Gong, Bohao Li, Zonghao Guo, Yibing Wang, Tianshuo Peng, Benyou Wang, and Xiangyu Yue. 2025. Video-R1: Reinforcing Video Reasoning in MLLMs. arXiv preprint arXiv:2503.21776 (2025). [8] Google DeepMind. 2025. Gemini 2.5 Pro Model Card. https://deepmind.google/ models/model-cards/. Accessed: 2026-04-02. [9] Google DeepMind. 2025. Gemini 3 Pro: the frontier of vision AI. https://blog. google/innovation-and-ai/technology/developers-tools/gemini-3-pro-vision/. [10] Google DeepMind. 2026. Gemini 3.1 Pro Model Card. https://deepmind.google/ models/model-cards/gemini-3-1-pro/. Accessed: 2026-04-02. [11] D Guo et al . 2025. DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning. Nature (2025). https://www.nature.com/articles/s41586-025-09422-z [12] Kairui Hu, Penghao Wu, Fanyi Pu, Wang Xiao, Yuanhan Zhang, Xiang Yue, Bo Li, and Ziwei Liu. 2025. Video-mmmu: Evaluating knowledge acquisition from multi-discipline professional videos. arXiv preprint arXiv:2501.13826 (2025). [13] Haoyang Huang, Guoqing Ma, Nan Duan, Xing Chen, Changyi Wan, Ranchen Ming, Tianyu Wang, Bo Wang, Zhiying Lu, Aojie Li, Xianfang Zeng, Xinhao Zhang, Gang Yu, Yuhe Yin, Qiling Wu, Wen Sun, Kang An, Xin Han, Deshan Sun, Wei Ji, Bizhu Huang, Brian Li, Chenfei Wu, Guanzhe Huang, Huixin Xiong, Jiaxin He, Jianchang Wu, Jianlong Yuan, Jie Wu, Jiashuai Liu, Junjing Guo, Kaijun Tan, Liangyu Chen, Qiaohui Chen, Ran Sun, Shanshan Yuan, Shengming Yin, Sitong Liu, Wei Chen, Yaqi Dai, Yuchu Luo, Zheng Ge, Zhisheng Guan, Xiaoniu Song, Yu Zhou, Binxing Jiao, and Jiansheng Chen. 2025. Step-Video-TI2V Technical Report: A State-of-the-Art Text-Driven Image-to-Video Generation Model. In 
+
+ArXiv preprint arXiv:2503.11251 . https://arxiv.org/abs/2503.11251 [14] Qingqiu Huang, Yu Xiong, Anyi Rao, Jiaze Wang, and Dahua Lin. 2020. Movienet: A holistic dataset for movie understanding. In European conference on computer vision . Springer, 709–727. [15] Tzu-Heng Huang, Sirajul Salekin, Javier Movellan, Frederic Sala, and Manjot Bilkhu. 2026. RubiCap: Rubric-Guided Reinforcement Learning for Dense Image Captioning. arXiv preprint arXiv:2603.09160 (2026). [16] Wenxuan Huang, Bohan Jia, Zijie Zhai, Shaosheng Cao, Zheyu Ye, Fei Zhao, Zhe Xu, Yao Hu, and Shaohui Lin. 2025. Vision-r1: Incentivizing reasoning capability in multimodal large language models. arXiv preprint arXiv:2503.06749 (2025). [17] Justin Johnson, Andrej Karpathy, and Li Fei-Fei. 2016. DenseCap: Fully Convolu-tional Localization Networks for Dense Captioning. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition . 4565–4574. [18] Ranjay Krishna, Kenji Hata, Frederic Ren, Li Fei-Fei, and Juan Carlos Niebles. 2017. Dense-Captioning Events in Videos. In Proceedings of the IEEE International Conference on Computer Vision . 706–715. [19] Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang, Yanwei Li, Ziwei Liu, et al . 2024. Llava-onevision: Easy visual task transfer. arXiv preprint arXiv:2408.03326 (2024). [20] Zhiqiu Lin, Siyuan Cen, Daniel Jiang, Jay Karhade, Hewei Wang, Chancharik Mitra, Tiffany Ling, Yuhan Huang, Sifan Liu, Mingyu Chen, et al . 2025. Towards Understanding Camera Motions in Any Video. arXiv preprint arXiv:2504.15376 
+
+(2025). [21] Hongbo Liu, Jingwen He, Yi Jin, Dian Zheng, Yuhao Dong, Fan Zhang, Ziqi Huang, Yinan He, Yangguang Li, Weichao Chen, et al . 2025. ShotBench: Expert-Level Cinematic Understanding in Vision-Language Models. arXiv preprint arXiv:2506.21356 (2025). [22] Xin Ma, Yaohui Wang, Gengyun Jia, Xinyuan Chen, Ziwei Liu, Yuan-Fang Li, Cunjian Chen, and Yu Qiao. 2024. Latte: Latent Diffusion Transformer for Video Generation. arXiv preprint arXiv:2401.03048 (2024). https://arxiv.org/abs/2401. 03048 [23] Desen Meng, Rui Huang, Zhilin Dai, Xinhao Li, Yifan Xu, Jun Zhang, Zhen-peng Huang, Meng Zhang, Lingshu Zhang, Yi Liu, et al . 2025. Videocap-r1: Enhancing mllms for video captioning via structured thinking. arXiv preprint arXiv:2506.01725 (2025). [24] Jonghwan Mun, Linjie Yang, Zhou Ren, Ning Xu, and Bohyung Han. 2019. Stream-lined Dense Video Captioning. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition . 6588–6597. [25] Anyi Rao, Jiaze Wang, Linning Xu, Xuekun Jiang, Qingqiu Huang, Bolei Zhou, and Dahua Lin. 2020. A unified framework for shot type classification based on subject centric lens. In European Conference on Computer Vision . Springer, 17–34. [26] Steven J. Rennie, Etienne Marcheret, Youssef Mroueh, Jarret Ross, and Vaibhava Goel. 2017. Self-Critical Sequence Training for Image Captioning. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition . 7008–7024. [27] Mattia Savardi, András Bálint Kovács, Alberto Signoroni, and Sergio Benini. 2023. CineScale2: a dataset of cinematic camera features in movies. Data in Brief 51 (2023), 109627. [28] Haozhan Shen, Peng Liu, Jingcheng Li, Chunxin Fang, Yibo Ma, Jiajia Liao, Qiaoli Shen, Zilun Zhang, Kangjia Zhao, Qianqian Zhang, et al . 2025. Vlm-r1: A stable and generalizable r1-style large vision-language model. arXiv preprint arXiv:2504.07615 (2025). [29] Enxin Song, Wenhao Chai, Guanhong Wang, Yucheng Zhang, Haoyang Zhou, Feiyang Wu, Haozhe Chi, Xun Guo, Tian Ye, Yanting Zhang, et al . 2024. Moviechat: From dense token to sparse memory for long video understanding. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition . 18221– 18232. [30] Yunlong Tang, Junjia Guo, Hang Hua, Susan Liang, Mingqian Feng, Xinyang Li, Rui Mao, Chao Huang, Jing Bi, Zeliang Zhang, et al . 2025. Vidcomposition: Can mllms analyze compositions in compiled videos?. In Proceedings of the Computer Vision and Pattern Recognition Conference . 8490–8500. [31] Zhijiang Tang, Linhua Wang, Jiaxin Qi, Weihao Jiang, Peng Hou, Anxiang Zeng, and Jianqiang Huang. 2026. CCCaption: Dual-Reward Reinforcement Learning for Complete and Correct Image Captioning. arXiv preprint arXiv:2602.21655 
+
+(2026). [32] Makarand Tapaswi, Yukun Zhu, Rainer Stiefelhagen, Antonio Torralba, Raquel Urtasun, and Sanja Fidler. 2016. Movieqa: Understanding stories in movies through question-answering. In Proceedings of the IEEE conference on computer vision and pattern recognition . 4631–4640. [33] Alibaba Cloud Qwen Team. 2025. Qwen3-VL: Sharper Vision, Deeper Thought, Broader Action . Technical Report. ArXiv / Qwen Blog. https://qwen.ai/blog?from=research.latest-advancements-list&id=99f0335c4ad9ff615418d48535ab6d8afef [34] OpenBMB Team. 2025. MiniCPM-V 4.5: A GPT-4o Level MLLM for Single Image, Multi Image and High-FPS Video Understanding . Technical Report. GitHub / OpenBMB. https://github.com/OpenBMB/MiniCPM-V [35] Paul Vicol, Makarand Tapaswi, Lluis Castrejon, and Sanja Fidler. 2018. Moviegraphs: Towards understanding human-centric situations from videos. In Proceedings of the IEEE conference on computer vision and pattern recognition .8581–8590. [36] Fei Wang, Wenxuan Zhou, James Y Huang, Nan Xu, Sheng Zhang, Hoifung Poon, and Muhao Chen. 2024. mdpo: Conditional preference optimization for multimodal large language models. arXiv preprint arXiv:2406.11839 (2024). [37] Qi Wang, Yanrui Yu, Ye Yuan, Rui Mao, and Tianfei Zhou. 2025. VideoRFT: Incentivizing Video Reasoning Capability in MLLMs via Reinforced Fine-Tuning. 
+
+arXiv preprint arXiv:2505.12434 (2025). [38] Xin Wang, Wenhu Chen, Jiawei Wu, Yuan-Fang Wang, and William Yang Wang. 2018. Video Captioning via Hierarchical Reinforcement Learning. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition . 4213–4222. [39] Xinran Wang, Songyu Xu, Xiangxuan Shan, Yuxuan Zhang, Muxi Diao, Xueyan Duan, Yanhua Huang, Kongming Liang, and Zhanyu Ma. 2025. CineTechBench: A Benchmark for Cinematographic Technique Understanding and Generation. 
+
+arXiv preprint arXiv:2505.15145 (2025). [40] Yifeng Wang et al . 2026. VideoAuto-R1: Video Auto Reasoning via Thinking Once, Streaming for the Rest. arXiv preprint arXiv:2601.05175 (2026). [41] Hang Wu, Yujun Cai, Zehao Li, Haonan Ge, Bowen Sun, Junsong Yuan, and Yiwei Wang. 2026. CamReasoner: Reinforcing Camera Movement Understanding via MM, xx–xx xx xxxx, xxx Mao et al. 
+
+Structured Spatial Reasoning. arXiv preprint arXiv:2602.00181 (2026). [42] Long Xing, Xiaoyi Dong, Yuhang Zang, Yuhang Cao, Jianze Liang, Qidong Huang, Jiaqi Wang, Feng Wu, and Dahua Lin. 2025. CapRL: Stimulating Dense Image Caption Capabilities via Reinforcement Learning. arXiv preprint arXiv:2509.22647 
+
+(2025). [43] Ziang Yan, Xinhao Li, Yinan He, Zhengrong Yue, Xiangyu Zeng, Yali Wang, Yu Qiao, Limin Wang, and Yi Wang. 2025. VideoChat-R1.5: Visual Test-Time Scaling to Reinforce Multimodal Reasoning by Iterative Perception. arXiv preprint arXiv:2509.21100 (2025). [44] Linli Yao, Yuancheng Wei, Yaojie Zhang, Lei Li, Xinlong Chen, Feifan Song, Ziyue Wang, Kun Ouyang, Yuanxin Liu, Lingpeng Kong, et al . 2026. TimeChat-Captioner: Scripting Multi-Scene Videos with Time-Aware and Structural Audio-Visual Captions. arXiv preprint arXiv:2602.08711 (2026). [45] Liping Yuan, Jiawei Wang, Haomiao Sun, Yuchen Zhang, and Yuan Lin. 2024. Tarsier: Recipes for Training and Evaluating Large Video Language Models. arXiv preprint arXiv:2407.00634 (2024). [46] Liping Yuan, Jiawei Wang, Haomiao Sun, Yuchen Zhang, and Yuan Lin. 2025. Tarsier2: Advancing large vision-language models from detailed video description to comprehensive video understanding. arXiv preprint arXiv:2501.07888 (2025). [47] Jingyi Zhang, Jiaxing Huang, Huanjin Yao, Shunyu Liu, Xikun Zhang, Shijian Lu, and Dacheng Tao. 2025. R1-vl: Learning to reason with multimodal large language models via step-wise group relative policy optimization. arXiv preprint arXiv:2503.12937 (2025). [48] Ruohong Zhang, Liangke Gui, Zhiqing Sun, Yihao Feng, Keyang Xu, Yuanhan Zhang, Di Fu, Chunyuan Li, Alexander G Hauptmann, Yonatan Bisk, et al . 2025. Direct preference optimization of video large multimodal models from language model reward. In Proceedings of the 2025 Conference of the Nations of the Ameri-cas Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) . 694–717. [49] Yuanhan Zhang, Bo Li, haotian Liu, Yong jae Lee, Liangke Gui, Di Fu, Jiashi Feng, Ziwei Liu, and Chunyuan Li. 2024. LLaVA-NeXT: A Strong Zero-shot Video Understanding Model. https://llava-vl.github.io/blog/2024-04-30-llava-next-video/ [50] Yabo Zhang, Yuxiang Wei, Dongsheng Jiang, Xiaopeng Zhang, Wangmeng Zuo, and Qi Tian. 2023. ControlVideo: Training-free Controllable Text-to-Video Gen-eration. arXiv preprint arXiv:2305.13077 (2023). https://arxiv.org/abs/2305.13077 [51] Yiyang Zhou, Chenhang Cui, Rafael Rafailov, Chelsea Finn, and Huaxiu Yao. 2024. Aligning modalities in vision large language models via preference fine-tuning. 
+
+arXiv preprint arXiv:2402.11411 (2024). [52] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shenglong Ye, Lixin Gu, Yuchen Duan, Hao Tian, Weijie Su, Jie Shao, Zhangwei Gao, Erfei Cui, Yue Cao, Yangzhou Liu, Weiye Xu, Hao Li, Jiahao Wang, Han Lv, Dengnian Chen, Songze Li, Yinan He, Tan Jiang, Jiapeng Luo, Yi Wang, Conghui He, Botian Shi, Xingcheng Zhang, Wenqi Shao, Junjun He, Yingtong Xiong, Wenwen Qu, Peng Sun, Penglong Jiao, Lijun Wu, Kai Chen, Limin Wang, Min Dou, Xizhou Zhu, Tong Lu, Dahua Lin, and Yu Qiao. 2025. InternVL3: Exploring Advanced Training and Test-Time Recipes for Open-Source Multimodal Models . Technical Report. arXiv preprint. https://arxiv.org/abs/2504.10479

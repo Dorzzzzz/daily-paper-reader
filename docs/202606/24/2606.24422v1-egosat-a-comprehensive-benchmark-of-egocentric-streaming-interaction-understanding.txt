@@ -1,0 +1,677 @@
+Title: EgoSAT: A Comprehensive Benchmark of Egocentric Streaming Interaction Understanding
+
+URL Source: https://arxiv.org/pdf/2606.24422v1
+
+Published Time: Wed, 24 Jun 2026 00:52:31 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# EgoSAT: A Comprehensive Benchmark of Egocentric Streaming Interaction Understanding 
+
+Yijia Lei 1, Jinzhao Li 1†, Yichi Zhang 1, Jiacheng Hua 1, Yin Li 2, and Miao Liu 1‡
+
+1 College of AI, Tsinghua University 
+
+2 University of Wisconsin–Madison 
+
+{leiyj23,lijinzha22}@mails.tsinghua.edu.cn, miaoliu@mail.tsinghua.edu.cn Branchy Future Surprising Future 
+
+> Multi -Step  Prediction
+> Multi -Step  Retrieval
+
+Present modeling Prospective modeling Retrospective modeling    
+
+> : What will happen about 24 seconds later?
+> :C will make pastry.
+> : What will happen about 16 seconds later?
+> :C will make dumpling.
+> : What will happen about 8 seconds later?
+> :C will make dumpling.
+
+🤔 
+
+😀 
+
+🤔            
+
+> : W hat happened about 8 seconds ago ?
+> :C cut tile.
+> : W hat happened about 16 seconds ago ?
+> : W hat happened about 24 seconds ago ?
+> : C cut tile.
+> :Cmarked the tile.
+
+🤔 
+
+🤔 
+
+😀 
+
+.. ..     
+
+> Confidence
+> : D escribe what is happening right now ?
+> : C puts potato chips into the pan.
+> :C looks at the pan.
+
+🤔 
+
+😀 
+
+😀      
+
+> : C put sthe lid on the pan.
+> :C looks at the pan.
+
+😀    
+
+> 0.71 0.52
+> 0.73 0.78
+> 0.45 0.52
+> 0.75
+> Interaction
+> Non -Interaction
+> Interaction
+> 0
+> 1Retrieval Confidence Decay
+> 0.64
+> 0.38 0.27
+> Prediction Confidence Growth
+> Low Response Confidence
+
+😀 
+
+> Interaction Frame
+> Non -Interaction Frame
+> Anchor Frame
+
+🤔   
+
+> High Response Confidence
+> Correct Incorrect
+> Interaction Non -Interaction
+> Interaction State Confidence Shift
+
+Fig. 1: EgoSAT presents a unified formulation that brings together several conven-tional vision–language tasks, e.g ., video question answering, online video narration, and activity anticipation, within a single streaming setting. In doing so, it provides the first comprehensive benchmark for evaluating the ability of modern vision–language models to reason about the past, present, and future under streaming observations. 
+
+Abstract. We introduce EgoSAT , the first comprehensive benchmark for egocentric video reasoning in streaming settings, designed to evaluate the capabilities of modern vision–language models (VLMs). The bench-mark targets streaming interaction understanding, where video frames arrive sequentially and models must continuously interpret evolving vi-sual context. EgoSAT unifies several previously distinct tasks within a single streaming framework. In this formulation, queries about completed events correspond to retrospective reasoning, queries about ongoing ac-tivities require online understanding, and queries about future actions involve prospective anticipation. This unified setting requires models to reason about the past, present, and future while operating under the constraint that only previously observed frames are available. EgoSAT 
+
+† Project Lead. ‡ Corresponding author.       
+
+> arXiv:2606.24422v1 [cs.CV] 23 Jun 2026 2Y. Lei et al. contains 1,997 unique videos spanning 165 hours of egocentric footage and around 4,800 high-quality question–answer pairs, carefully designed to probe reasoning across varying temporal contexts. Using this bench-mark, we evaluate a diverse set of both open-weight and closed-weight VLMs, providing a systematic assessment of their ability for streaming interaction understanding. By distinguishing answerability and conduct-ing diagnostics on confidence of models, we find existing models not only struggle with prospective and retrospective modeling, but also exhibit se-vere mis-calibration: confidence often fails to track inherent answerabil-ity, leading to dangerous “confidently wrong” behaviors. Project page:
+> https://leiyj23.github.io/EgoSAT/
+> Keywords: Egocentric Vision ·Temporal Reasoning ·Multimodal LLMs
+
+1 Introduction 
+
+Advances in wearable cameras and edge computing, together with recent break-throughs in vision language models (VLMs), have ushered in a new generation of AI systems that provide context-aware assistance to camera wearers through natural language interfaces, often combined with voice commands and gesture-based controls. A key characteristic of this setting is streaming processing : the AI assistant must continuously perceive, comprehend, and retain both the video captured by the device and queries issued by the user, in order to reason about past events ( e.g ., video question answering), describe ongoing activities ( e.g ., online video narration), and predict future intent ( e.g ., activity anticipation). Traditionally, these problems have been studied in silos, with dedicated meth-ods and benchmarks designed for individual tasks. However, evaluating VLMs on isolated tasks provides only a partial assessment of their capabilities in realistic streaming scenarios, where perception and reasoning about past, present, and fu-ture events is inherently intertwined. In practice, an AI assistant must seamlessly integrate these capabilities within a unified, temporally evolving context. 
+
+Our key insight is that many previously distinct tasks can be naturally re-formulated within a single streaming framework . In this setting, video frames arrive sequentially as a continuous stream, and user queries in text form may occur at arbitrary time points, and models are restricted to using only the por-tion of the video stream observed up to the time of the query. As shown in Figure 1, a query about a completed event ( i.e ., retrospective ) corresponds to standard video question answering (QA); a query about an ongoing event ( i.e ., 
+
+present ) instantiates online video QA; and a query about a future event ( i.e ., 
+
+prospective ) falls under event anticipation. Beyond producing accurate answers, they must infer the temporal context of each query, and determine whether sufficient evidence has been observed. More-over, they must continuously update their confidence as new evidence accumu-lates, and appropriately calibrate their uncertainty in light of multiple plausible future outcomes. This unified formulation enables a more realistic and holistic evaluation of streaming video understanding in the context of AI assistants EgoSAT: Egocentric Streaming Interaction Benchmark 3
+
+To this end, we introduce EgoSAT , the first benchmark for Egocentric Streaming interaction understanding, designed to evaluate the temporal rea-soning capabilities of modern VLMs. We leveraged Ego4D, a scenario-rich and interaction-dense egocentric video corpus with careully curated temporal anno-tations. Leveraging EgoSAT, we conduct extensive evaluation of both closed- and open- weight MLLMs under a strict online protocol. Across all settings, we find that prospective anticipation and retrospective retrieval remain challeng-ing even for frontier models, while online streaming baselines further lag be-hind offline counterparts due to irreversible input-side compression. Finally, our answerability-aware confidence diagnostics reveal that model confidence often fails to track factual answerability, frequently staying high on inherently uncer-tain or incorrect predictions. 
+
+Our main contributions are summarized as follows. 1. We present EgoSAT, a comprehensive benchmark for egocentric stream-ing interaction understanding, designed to evaluate the temporal reasoning capabilities of modern VLMs. 2. Our key technical innovations are (1) a unified streaming reasoning for-mulation integrates several conventional vision-language tasks and requires models to reason about the past, present and future with streaming obser-vations; and (2) a principled quantification of answerability and its corre-sponding benchmark design for future event prediction, enabling fair and systematic evaluation of VLMs. 3. Leveraging EgoSAT, we conduct a systematic evaluation of a diverse set of both open-weight and closed-weight vision–language models. Our empiri-cal results reveals that (1) prospective anticipation and retrospective retrieval remain challenging across model families , and online streaming models fur-ther lag behind offline counterparts; (2) confidence is often poorly calibrated to factual answerability , with several models remaining confidently wrong, motivating answerability-aware diagnostics beyond accuracy. 
+
+2 Related Work 
+
+Streaming Visual Language Models . Streaming visual language models op-erate under an online prefix constraint where each query can only use frames observed so far. This setting requires low latency responses, continual state up-dates, and sustained reasoning over long streams. Vinci presents a real time embodied assistant based on egocentric vision language models [16], and Dispi-der introduces a disentangled perception, decision, and reaction framework for active real time interaction [27]. Streaming long video understanding with large language models(LLMs) proposes a streaming framework that processes videos segment by segment with memory propagation [28], while STREAMCHAT stud-ies streaming video understanding with multiround interaction and memory en-hanced knowledge [40]. Streaming VLM targets real time understanding for in-finite video streams and aligns training with streaming inference through com-4 Y. Lei et al. 
+
+pact memory management [41]. VideoLLM-online introduces the LIVE frame-work with efficient visual token encoding and decoding for online interaction [7], and TimeChat-Online proposes to prune redundant visual tokens in streaming videos [47]. LiveCC builds a streaming speech transcription pipeline for tempo-rally aligned training and provides a benchmark for streaming video language models [8]. These works focus on system design, memory management, and efficiency for continuous streams. In egocentric settings, critical evidence is often local-ized around hands, objects, and gaze, and evidence can decay when background tokens dominate the budget. Our approach targets this interaction blind gap by prioritizing Region-of-Interest (ROI)-aware token budgeting and by training confidence to track evidence accumulation and decay for real time decisions. 
+
+Efficient Token Compression for Long Video Understanding . A large body of work improves efficiency by compressing or selecting visual tokens for long video and multimodal understanding. LongVU explores spatiotemporal adaptive compression for long video understanding [32], and PVC proposes pro-gressive visual token compression across frames [43]. TESTA aggregates tempo-ral and spatial tokens to condense video semantics [29], and VideoChat-Flash introduces hierarchical compression for long context video modeling [21]. DeCo analyzes visual projector design and decouples compression from semantic ab-straction [46]. TokenLearner learns a compact set of informative tokens [30], and VQToken introduces discrete token representations through vector quanti-zation [50]. TopV [42], FastV [9], ToMe [6], HoliTom [31], and DART [37] further explore pruning or merging strategies to accelerate inference. These methods primarily optimize general efficiency, while our work emphasizes interaction cen-tered evidence selection in egocentric streaming. 
+
+Video Understanding Benchmarks . Several benchmarks have been devel-oped for long video understanding, include LongVideoBench [39], LVBench [35], and MLVU [53], which evaluate long context video language reasoning. Online and streaming evaluation includes OVO-Bench [25], StreamingBench [23], IP-IBench [20], Inf-Streams-Eval from Streaming VLM [41], LiveSports-3K from LiveCC [8], and Eyes Wide Open which introduces ESTP Bench for proactive egocentric streaming QA [52]. Egocentric datasets provide rich interaction struc-ture, including EPIC-KITCHENS-100 [12], Ego4D [14], Ego4D Goal-Step for hierarchical procedural understanding [33], Ego-Exo4D for ego and exo perspec-tive skill understanding [15] and EgoProx [19] for egocentric interaction reasoning from a spatial perspective. Despite this progress, most existing benchmarks emphasize final accuracy under offline access or simplified streaming conditions. Our benchmark builds on these datasets while enforcing streaming constraints in egocentric settings and explicitly evaluating confidence behavior over time. A detailed benchmark comparison is provided in the supplementary appendix. EgoSAT: Egocentric Streaming Interaction Benchmark 5
+
+3 Problem Formulation and Benchmark Design 
+
+In what follows, we first present a temporally structured formulation of stream-ing interaction understanding. We then formalize the conditions under which a response is warranted under partial observability. Finally, we describe our eval-uation tasks and their metrics, and present our benchmark construction. 
+
+3.1 Problem Formulation 
+
+Streaming interaction understanding requires MLLMs to produce timely and accurate judgments from continuously arriving video frames. Unlike conven-tional offline video understanding under full observability, this setting introduces response-timing challenges under partial observability. Specifically, models must determine (1) interaction presence — whether an interaction is occurring at all to warrant responding to the user’s query, (2) the answerability of the situation — whether the inference is feasible given the currently available partial observation, and (3) the confidence level of the response under streaming uncertainty. Impor-tantly, these challenges are inherently tied to distinct temporal formulations of the reasoning tasks. Formally, we denote a streaming video as a sequence of short video clips 
+
+X1: t = {x1, . . . , x t}, where xt denotes the clip at time step t and X1: t are thus the observed clips up to t. Under a standard multiple-choice question (MCQ) answering setting, given a query Q (often in text form) and a candidate set C,the MLLM fθ produces a response ˆA = Fθ (Q, X 1: t) ∈ C. We consider the three key reasoning tasks in streaming interaction understanding. 
+
+Present modeling . The query Q pertains to the current clip xt, and the model is required to address Q using only xt, without accessing to the past clips X1: t−1
+
+preceding xt. In this setting, the model must explicitly assess the presence of interaction related to Q in the current clip xt.
+
+Prospective modeling . The query Q concerns a future clip xt+τ with τ > 0,and the model is required to address Q using only the observed clips X1: t, without accessing to future clips Xt+1: t+τ . Notably, the model must explicitly reason about if reliable prediction is feasible given the current observations. 
+
+Retrospective modeling . The query Q refers to a past clip xt−τ ∈ X1: t, and the model must resolve Q based on the accumulated observations X1: t. Naturally, the model is required to identify and retrieve the relevant prior context associated with xt−τ from the observed history. Note that we adopt the terms prospective and retrospective modeling to em-phasize the streaming setting, where responses must be generated under par-tial observability and appropriate response timing must be determined. This distinguishes our formulation from conventional future anticipation or memory retrieval tasks [14]. 6 Y. Lei et al. Branchiness 
+
+> Surprise
+
+.. 
+
+..      
+
+> You move the wooden bar.
+> Semantically similar prefix:
+> You open the door
+> You throw the paper bag.
+> Semantically separated &
+> unobservable future:
+> 1. You throw the paper bag.
+> 2. You move the wooden bar. You open the door.
+> Surprise:
+> Abrupt visual & semantic change
+> Visually & semantically consistent
+> visual prefix: You take the tile.
+> Visually & semantically surprising
+> future: You turn on the grinder.
+> Branchiness :
+> Various and separated
+> Semantic suffix
+> 22.9%
+> Leisure, sports &
+> social/
+> culture
+> Eating
+> Food & daily
+> consumption
+> Home &
+> personal care
+> Work, trades,
+> making & study
+> Outdoor,
+> nature &
+> mobility
+> 35.2%
+> 16.2%
+> 16.4%
+> 9.4%
+
+(a)  (b) 
+
+.. 
+
+> You pick up a pillow.
+
+Fig. 2: Scenario distribution of EgoSAT and examples of predictability.(a) We attribute unpredictability to branchiness (a fixed, observable semantic prefix followedd by various and separated semantic suffix) and surprise (abrupt visual and semantic change). (b) Our EgoSAT covers 56 different scenarios categorized into five distinct activity groups. 
+
+3.2 Answerability and Confidence in Prospective Modeling Answerability . A key to scientific evaluation in prospective modeling is to dis-tinguish models’ capabilities from inherent unpredictability, which derives from partial observation of the activities. Here we assume that the interaction cate-gories and intervals are known, and we carefully characterize the answerability of future events via surprise and branchiness, as shown in Figure 2 (a). We further validate the answerability labels with a human sanity check in the supplemen-tary material, where human judgments agree with our branchiness and surprise labels by 78% and 84%, respectively. 
+
+(1) Surprise: unpredictability induced by abrupt local visual and semantic shifts. 
+
+We quantify surprising short-horizon futures by measuring the cross-modal discrepancy level between recent context and the imminent future. Specifically, for each query time t, we define a context window A = [ t − τ, t ) and a target window with the ground-truth event after t: B = [ t, t + h]. We compute two complementary shift signals. Visual shift: we extract CLIP image features for frames within A and B, average-pool them followed by ℓ2-normalize to obtain vA
+
+and vB , and compute the visual similarity sv = cos( vA, v B ). Semantic shift: 
+
+we encode action texts with a CLIP text encoder; for all actions {ai} overlapping 
+
+A, we assign overlap-based weights wi with P
+
+i wi = 1 , and compare them to the ground-truth text vector tB via a weighted similarity st = P
+
+i wi cos( tai , t B ).Because sv and st come from different modalities and are not directly comparable in scale, we align them through an empirical distribution transform (probability integral transform + probit). Let ˆFv and ˆFt denote the empirical CDFs estimated over all samples; we map 
+
+pv = ˆFv (sv ), pt = ˆFt(st), zv = Φ−1(pv ), zt = Φ−1(pt), (1) EgoSAT: Egocentric Streaming Interaction Benchmark 7
+
+where Φ−1 is the inverse CDF of the standard normal (probit). We then fuse the two modalities with equal weights, 
+
+z = ( zv + zt)/2, Surprise( t) = −z,  (2) where the negative sign ensures that lower similarity (stronger mismatch) 
+
+corresponds to higher surprise (low percentile ⇒ negative z). This defini-tion provides a parameter-free, reproducible cross-modal surprise score, enabling answerability-aware stratification and subsequent confidence-based diagnostics. 
+
+(2) Branchiness: unpredictability induced by diverse and semantically dispersed successor interactions. For each query time t, let O denote the ongoing inter-action covering t, and let A be the earliest successor interaction whose start time falls within a short window (t, t + h]. Aggregating such transitions over the dataset yields a conditional successor distribution p(A | O). We characterize this distribution with two complementary components: (i) variety and evenness 
+
+via the entropy 
+
+S(O) = −Σi pi log pi, pi = p(Ai | O), (3) and (ii) semantic dispersion via Rao’s quadratic entropy 
+
+Q(O) = ΣiΣj pipj d(Ai, A j ), (4) where d(Ai, A j ) = 1 − cos( ei, e j ) is the CLIP-text distance between successor interaction texts with their ℓ2-normalized embeddings ei. We then define the branchiness score 
+
+Branchiness( O) = B(O) = S(O) · Q(O). (5) Intuitively, branchiness is high when the future has both many plausible succes-sors (high S) and these successors are semantically far apart (high Q), indicat-ing low predictability. This measure is complementary to Surprise: while Surprise captures abrupt evidence shifts, Branchiness captures multi-modal, multi-branch continuations, and together they enable answerability-aware evaluation and con-fidence diagnostics. 
+
+Confidence . Unpredictability induced by branchiness and surprise , together with evidence insufficiency in prospective modeling and evidence fade in retro-spective modeling, contributes to streaming uncertainty. We therefore introduce 
+
+confidence diagnostics to evaluate whether a model can correctly judge the fea-sibility of an inference under partial observability. Following previous work on analyzing multiple-choice confidence scoring for LLMs [34], we quantify MCQ confidence by probing the model’s next-token distribution over the forced one-letter selection set C. Let praw (k) be the prob-ability mass assigned to letter k (aggregating its single-token variants), m =P 
+
+> k∈C
+
+praw (k), and p(k) = praw (k)/m be the conditional distribution on C. We define confidence and uncertainty as: 
+
+Conf = max k∈C p(k), Ent = −Σk∈C p(k) log p(k), (6) where a low Conf (or high Ent ) indicates low feasibility and enables predictability-/retrievability-aware confidence diagnostics in streaming evaluation. 8 Y. Lei et al. Retrospective modeling  Present modeling  Prospective modeling                                            
+
+> Q: Based on the egocentric video up to now, choose the
+> ONE option that best matches what MOST RECENTLY
+> happened?
+> A. You mold mould .
+> B. You put soil.
+> C. You move box.
+> D. You peel wallpaper.
+> Gemini 2.5 pro: C . You move box.
+> Qwen 2.5 7b : C. You move box.
+> TimeChat : C. You move box.
+> Q: Based on the egocentric video up to now, choose the
+> ONE option that best matches what is happening
+> RIGHT NOW?
+> A. You tighten clamp.
+> B. You take orange color.
+> C. You choose orange color.
+> D. You draw on the floor.
+> Gemini 2.5 pro: D. You draw on the floor.
+> Qwen 2.5 7b : D. You draw on the floor.
+> TimeChat : B. You take orange color.
+> Q: Based on the egocentric video up to now, choose the
+> ONE option that best matches what will MOST LIKELY
+> HAPPEN NEXT?
+> A. You drop broomstick .
+> B. You peel onion.
+> C. You pick palm .
+> D. You remove broomstick.
+> Gemini 2.5 pro: C. You pick palm.
+> Qwen 2.5 7b : A. You drop broomstick.
+> TimeChat : D. You remove broomstick.
+> Q: Based on the egocentric video up to now, choose the
+> ONE option that best matches what happened ABOUT
+> 8(16/24) seconds ago?
+> A. You sew mask.
+> B. You move mask.
+> C. You peel wallpaper.
+> D. You fold cloth.
+> Gemini 2.5 pro: You sew mask.
+> Qwen 2.5 7b : You move mask.
+> TimeChat : You sew mask.
+> Q: Based on the egocentric video up to now, decide
+> whether there is a visible object interaction RIGHT
+> NOW.
+> Gemini 2.5 pro : <STATE>NO_INTERACTION</STATE>
+> Qwen 2.5 7b : <STATE>NO_INTERACTION</STATE>
+> TimeChat : <STATE>INTERACTION</STATE>
+> Q: Based on the egocentric video up to now, choose the
+> ONE option that best matches what will happen ABOU T
+> 24(16/8) seconds later?
+> A. You open the door.
+> B. You picks a pillow.
+> C. You grabs the doorknob.
+> D. You chops potato.
+> Gemini 2.5 pro: You open the door.
+> Qwen 2.5 7b : You grabs the doorknob.
+> TimeChat : You open the door.
+
+.. 
+
+.. 
+
+.. 
+
+..     
+
+> Ground -truth Frame Correct choice
+> Hard negative Absurd negative
+
+Fig. 3: Samples from our six task settings. Red border: the ground-truth frame. Choices are colored accordingly. Notably, the MCQ choices are shuffled to ensure minimal information leakage. We also show the model outputs. 
+
+3.3 Task Formulation and Metric Design 
+
+We now present the evaluation tasks under our problem formulation. For most tasks, we use multiple-choice accuracy as the primary metric to ensure objective and deterministic evaluation. We additionally report open-ended evaluation us-ing LLM-based judging in the supplement. Implementation of these metrics is described in Sec. 4.2. 
+
+Present modeling tasks . For egocentric streaming assistants, real-time under-standing via present modeling is essential not only for stable online interaction, but also as the perceptual foundation for retro-/prospective reasoning and mem-ory. We focus on two tasks to evaluate this capability: 1. Now narration : Recognize the visibility of human-object interaction and what the interaction is. 2. State switch : Promptly adjust output state when the interaction state switches (interaction to no-interaction, or the reversal). 
+
+Prospective modeling tasks . Under partial visibility and uncertainty, prospec-tive modeling presents significant challenges to streaming assistants. We intro-duce two tasks that evaluate the capability of utilizing partial observation for future prediction. 1. Short-horizon anticipation : Given streaming clip at time step t, reason over the observed visual prefix to predict the interaction that will occur in the near future at t + τ .2. Multi-step anticipation: Assuming an action begins at t + τ , we probe whether the model can anticipate this event from progressively earlier visual prefixes ending at t, t − τ , and t − 2τ .
+
+Retrospective modeling tasks . Retrospective modeling based on observed history, is another vital demonstration of streaming interaction understanding. We consider the following tasks for evaluating this capability. EgoSAT: Egocentric Streaming Interaction Benchmark 9
+
+1. Short-horizon retrieval : Retrieve information about the past clip xt−τ
+
+from the streaming inputs 2. Multi-step retrieval : Retrieve an anchored past event at several past steps forming an arithmetic sequence: t − τ , t − 2τ , and t − 3τ .
+
+3.4 Benchmark Construction Video source . Our benchmark is built on the recent effort in creating large-scale egocentric video datasets. We adopt Ego4D [14] as the video source. Ego4D is a massive-scale egocentric video dataset with over 3,600 hours of video collected around the world, covering a wide range of (>100) real-world activities and providing human annotated intervals for many hand-object interactions. 
+
+Data curation . In an egocentric setting, we define a segment as an interaction segment only when there is a visible hand-object interaction in the view; oth-erwise, we treat it as a gap , i.e ., a background segment between interactions. We leverage Ego4D’s mature rejection tags as a quality-control mechanism and filter out events that do not contain visible interactions. Specifically, we use two rejection reasons: (1) no human-object interaction from camera wearer , and (2) object of change is not visible . We validate the reliability of these rejection tags in the appendix through manual inspection. Finally, we orchestrate 1,997 video sessions with valid annotations, spanning 56 scenarios. Each session lasts roughly 230–300 seconds, with an average duration of 296.8 seconds. These ses-sions typically contain dense hand-object interactions, making them adequate for constructing streaming QA with interaction-centric ground truth. 
+
+QA pair construction . Since our QA ground truth is derived from Ego4D annotations and filtered using the above quality-assurance rules, we construct queries using fixed templates with dynamically generated answer options for MCQ evaluation. We additionally provide an open-ended version of all queries using the same templates, enabling complementary evaluation when needed. Each MCQ instance contains four options: the ground-truth answer, two hard negatives, and one absurd negative. The hard negatives are designed to be temporally confusing and are sampled from events adjacent to the ground-truth segment while ensuring different (verb, noun) pairs. Specifically, for Now Narration task, negatives are drawn from the nearest neighboring events of the ground-truth event. For Short-horizon Anticipation and Retrieval tasks, we sam-ple negatives around the (query time, ground-truth segment) pair. For Multi-step Anticipation and Retrospection, negatives are sampled near the query times-tamp, as queries and answers may be temporally far apart. The absurd negative is designed to be semantically distant from the ground truth. We construct a candidate pool of (verb, noun) pairs from the training split for each task, remove the top 10% most frequent pairs to avoid trivial options, and exclude pairs appearing in the same video as the ground truth. The absurd negative is then selected as the candidate with the largest text-embedding distance to the ground-truth option (see supplement for details). 10 Y. Lei et al. 
+
+Finally, we randomly shuffle the four options for each MCQ instance and store the shuffled queries offline, following prior benchmark practices to mitigate answer-position bias and potential information leakage. We also include a blind baseline using a text-only model to verify that the answer options alone provide little information beyond random guessing. 
+
+EgoSAT . Our final benchmark, EgoSAT, contains 1,997 unique videos spanning 165 hours of egocentric footage and around 4,800 high-quality question–answer pairs. The distribution of videos across scenarios are shown in Figure 2 (b). In terms of task-level distribution, our benchmark is evenly distributed by design. 
+
+4 Experiments and Results 
+
+4.1 Experiment Protocol Models . We evaluate three groups of models (Table 1). 1. Offline video LLMs , including two proprietary models (Gemini 2.5 Pro [2], Claude Sonnet 4 [1]) and several open-weight models (Qwen2.5-VL [4], Video-LLaVA [22]). 2. Streaming VLM , TimeChat-Online-7B [47], which performs streaming in-ference via dynamic KV cache dropping, Flash-VStream [51], and LLaVA-OV1.5 [3]. 3. ROI-augmented Streaming VLM , our variant (ROI+TimeChat-Online) of TimeChat-Online that uses egocentric hand and gaze cues for token selection. 
+
+Offline-online emulation . Since most off-the-shelf video LLMs only support offline processing, and do not accept streaming inputs, we simulate strict-online evaluation by truncating the video and retain only the visual prefix at each query time t. This ensures no look-ahead for all offline baselines. 
+
+Our training-free ROI module . One of the models evaluated in our study, TimeChat-Online, introduces Dynamic Token Drop (DTD) to improve efficiency in streaming settings by mitigating temporal and spatial redundancy in visual tokens. We observe that, in egocentric streaming inference, informative visual regions often concentrate around hand–object interactions and gaze-related ar-eas. Motivated by this observation, we define an Interaction Region of Inter-est (ROI) that captures the spatial neighborhoods surrounding these egocentric cues. Building on this idea, we introduce ROI-TimeChat-Online, an ROI-aware variant of TimeChat-Online that prioritizes KV cache of tokens within the Inter-action ROI during token selection. Importantly, this modification is parameter-free and training-free, making it easy to incorporate into existing models. We evaluate ROI-TimeChat-Online on our benchmark to study how egocentric pri-ors can improve streaming interaction understanding. 
+
+Supervised fine-tuning (SFT) . Beyond zero-shot evaluation, we apply lightweight LoRA-based SFT to the two TimeChat-Online variants using next-token LM loss on EgoSAT target outputs. This setting is used to reduce schema violations and examine whether the observed ROI-related trends persist after task-format alignment. EgoSAT: Egocentric Streaming Interaction Benchmark 11 
+
+Table 1: Main results (MCQ-first). All models are evaluated with strict-online prefix truncation at each query time t. Rec. is recall for interaction-visible ( TP /(TP + FN) ), and Prec. is precision ( TP /(TP + FP) ) Multi. reports average MCQ accuracy over three probes at τ, 2τ, 3τ .                                                                                                                                 
+
+> Model \task Present Prospective Retrospective Narration State switch Short Multi. Short Multi. Rec. Prec. MCQ acc Fg →bg Bg →fg MCQ acc. MCQ avg. acc. MCQ acc. MCQ avg. acc.
+> Human agents
+> Human 84.62 93.13 73.13 60.63 63.75 70.63 63.13 76.25 73.75
+> Offline proprietary models
+> Gemini 2.5 Pro 69.63 89.02 43.00 21.43 16.67 29.92 29.43 39.80 48.15 Claude Sonnet 4 77.51 86.30 38.43 11.59 12.00 32.20 29.98 40.46 39.64
+> Offline open-sourced models
+> Qwen2.5-VL-72B 73.66 85.64 38.86 3.95 8.64 43.06 26.00 51.87 43.46 Qwen2.5-VL-32B 86.16 86.94 39.91 2.63 7.41 37.24 25.23 50.86 40.74 Qwen2.5-VL-7B 78.72 84.78 36.50 4.00 6.25 27.84 28.11 42.79 34.46 Video-LLaVA 7B 100.00 83.46 25.75 0.00 0.00 25.11 25.50 20.89 25.00
+> Blind model: see Table 4: Blind Model Online models
+> TimeChat-Online-7B 98.51 83.35 33.33 0.00 0.00 29.72 26.01 37.84 31.63 ROI-TimeChat-Online 97.92 83.40 36.47 0.00 1.25 30.51 25.05 34.41 30.82 Flash-VStream 94.61 87.44 36.92 1.02 1.78 29.64 28.50 39.76 33.80 LLaVA-OV1.5 93.27 84.68 32.30 2.54 2.03 25.53 23.68 37.84 32.39
+> SFT Online Models
+> TimeChat-Online-7B 0.00 0.00 45.59 0.00 0.00 61.63 42.79 43.90 45.43 ROI-TimeChat-Online 0.00 0.00 46.94 0.00 0.00 59.54 40.55 44.00 41.24
+
+Metrics . We instantiate the metrics designed in Sec. 3.3. Further details can be found in the supplement. Now Narration Task : we also report the recall for interaction-visible class. State Switch Task : we anchor the query time before switch and gradually moving the After-switch query to the GT Switch moment. Here, a successful state switch occurs if and only if the model predicts correct states in both the two queries. We then report the rate of success when the After-switch query is furthest to the GT switch moment. Short-horizon Anticipation Task : we compare confidence scores from the models against those derived in Sec. 3.2. Multi-step Anticipation Task : we divide queries into three groups based on their relative distance to anchor events: lead τ (2τ , 3τ ) means GT event is τ (2τ ,
+
+3τ ) seconds ahead ( τ = 8 ), and break down the MCQ accuracy. For Short-horizon / Multi-step Retrieval Tasks , we report metrics similar to Prospective Modeling, except that we do not associate answerability with Short-horizon Retrospection in our task settings. 
+
+4.2 Results on EgoSAT Benchmark 
+
+Table A2 reports the main results across present, prospective, and retrospec-tive modeling tasks. Overall, proprietary frontier models such as Gemini 2.5 Pro 12 Y. Lei et al. 
+
+and Claude Sonnet 4 achieve the strongest performance on present narration tasks, suggesting that large-scale pretraining and proprietary data pipelines still provide general advantages even in the challenging egocentric scenarios consid-ered in our benchmark. Interestingly, proprietary models do not exhibit clear advantages on the precision metric for narration generation. We attribute this behavior to human preference alignment objectives, which encourage models to produce reasonable responses even in partially unanswerable settings, leading to lower precision under the strict evaluation protocol adopted in our benchmark. In addition, both prospective and retrospective modeling pose significant challenges for prevailing methods, albeit in different ways. Retrospective rea-soning requires models to retrieve relevant information at the correct temporal point, which can be hindered by imperfect temporal grounding, information loss during sampling, and positional bias introduced by temporal embeddings. On the other hand, prospective modeling introduces inherent uncertainty, as the future outcome often represents only one of many plausible possibilities. This observa-tion further emphasizes the importance of explicitly accounting for predictability in anticipation settings. 
+
+Online vs. offline modeling . We further compare streaming online TimeChat-Online-7B models with offline models of similar scale. Despite operating at com-parable model capacity, the online model consistently lags behind its offline counterpart across most tasks. This performance gap primarily stems from the streaming memory constraint: online models must maintain a compressed rep-resentation of past observations through incremental caching, which inevitably leads to information loss. As expected, the gap becomes more pronounced in multi-step settings, where longer temporal dependencies exacerbate the infor-mation loss accumulated during caching. 
+
+ROI-based KV caching and task-specific SFT . For a fair comparison, we enforce the same KV caching budget for both TimeChat-Online and its ROI-augmented version. Interestingly, this simple ROI caching improves model per-formance on present modeling tasks by 3.14%. However, it leads to large perfor-mance degradation on both prospective and retrospective modeling tasks. We attribute this to the fact that these tasks often require reasoning over broader contextual cues in the background to address temporal dynamics, whereas the hand- and gaze-conditioned ROI regions may omit such cues. Unsurprisingly, task-specific SFT yields notable performance improvements across tasks, especially for prospective modeling. We freeze the visual encoder during SFT following standard practice. The substantial gains suggest that ex-isting models are already capable of extracting temporally sensitive visual rep-resentations, but lack the instruction-level alignment needed to connect these representations with temporally grounded MCQ reasoning tasks. Lightweight SFT can effectively address this misalignment. For SFT variants, some entries are omitted in Table A2 because the MCQ-first SFT training set only has MCQ type data with structured output schema, which can catastrophically violate the state-only output format required by the EgoSAT: Egocentric Streaming Interaction Benchmark 13 
+
+Table 2: Detailed results of prospective and retrospective tasks . We report confidence slope and accuracy by temporal distance. Conf slope : mean least-squares slope of confidence vs. temporal distance over the three probes; a negative slope implies confidence decreases with the temporal distance.                                                                            
+
+> Model Multi-step anticipation Multi-step retrospection Acc lead 3τ
+> Acc lead 2τ
+> Acc lead τConf slope Acc lag τ
+> Acc lag 2τ
+> Acc lag 3τConf slope
+> Qwen-2.5-VL-72B 27.99 23.51 26.49 -0.76 47.78 42.22 40.37 -0.16
+> Qwen-2.5-VL-32B 25.68 22.07 27.93 <0.01 42.96 40.37 38.89 <0.01
+> Qwen-2.5-VL-7B 27.86 29.39 31.30 0.16 40.00 37.78 37.41 0.86
+> Video-LLaVA-7B 24.63 23.13 26.49 1.24 28.15 24.81 24.81 1.44
+> TimeChat-Online-7B 27.99 26.49 29.85 0.61 44.07 42.96 42.59 0.99
+> ROI-TimeChat-Online 29.09 20.19 25.88 17.36 30.05 28.30 34.10 4.61
+> TimeChat-Online-7B (SFT) 42.91 42.91 42.54 <0.01 45.93 48.52 41.85 0.01
+> ROI-TimeChat-Online (SFT) 38.06 42.16 41.42 -0.07 42.47 44.02 44.40 0.40
+
+interaction-visibility evaluation in Now State Switch. We therefore report addi-tional results for this metric in the supplementary. 
+
+4.3 Answerability Diagnostics Confidence-level for state switch task . Interaction boundaries pose a key challenge in streaming settings, where models must switch their output state according to interaction visibility. As shown in Table A2, although proprietary models achieve relatively better state-switch accuracy, all tested models remain far from satisfactory. We provide a fine-grained analysis of query timing around the ground-truth switch moment in the supplementary material. 
+
+Confidence-level for multi-step tasks . For multi-step anticipation and re-trieval, answerability is closely tied to temporal distance. Larger anticipation lead implies less relevant observation for predicting the anchored event, while larger retrieval lag makes past evidence more likely to be diluted or overwritten by later content. We therefore expect both accuracy and self-contained confi-dence to decrease as lead or lag grows. To test this, we report accuracy at three temporal distances and summarize the confidence–distance relationship by fit-ting a line to each model’s three-point confidence curve, with the normalized mean slope reported in Table 2. Across tasks, multi-step retrospection is generally easier than multi-step an-ticipation, since the queried events have already occurred and only need to be localized in the observed history. However, many models still fail to show mono-tonic accuracy degradation as lead/lag increases, especially for anticipation, where local visual similarity and inherent uncertainty can dominate temporal distance. Moreover, confidence slopes are often inconsistent with the expected negative trend, indicating that current models’ self-contained confidence does not reliably track factual answerability or temporal difficulty. 14 Y. Lei et al. 
+
+Table 3: Detailed results of short-horizon anticipation : accuracy and confidence statistics on predictable vs. unpredictable queries.                                                                         
+
+> Model Short-horizon anticipation predictable unpredictable accuracy conf conf_correct conf_wrong accuracy conf conf_correct conf_wrong Qwen2.5VL-72B 37.56 68.43 72.07 66.24 28.11 73.00 74.02 72.61 Qwen2.5-VL-32B 38.05 65.99 68.50 64.45 31.07 66.68 69.87 65.24 Qwen2.5-VL-7B 34.31 53.01 54.90 52.03 24.26 51.26 47.58 52.44 Video-LLaVa-7B 18.37 52.24 53.12 52.04 19.23 53.91 53.89 53.92 TimeChat-Online-7B 33.50 49.61 51.46 48.68 28.99 48.81 49.76 48.42 ROI-TimeChat-Online 32.58 49.14 48.90 49.25 27.16 48.40 46.49 49.11 TimeChat-Online-7B (SFT) 57.24 52.16 58.53 43.62 47.04 48.82 52.97 45.13 ROI-TimeChat-Online (SFT) 47.10 44.34 49.75 39.52 35.46 42.28 47.57 39.38
+
+Predictability . As discussed earlier, predictability for short-horizon anticipa-tion is shaped by the branchiness and surprise of interaction dynamics. For an uncertainty-aware AI agent, it should assign lower confidence to unpredictable queries than to predictable ones. Note that we evaluate predictability only on short-horizon tasks, as the multi-step setting is already sufficiently challeng-ing; therefore, we restrict those tasks to predictable scenarios. We present the breakdown of predictable and unpredictable queries in Table 3. Not surpris-ingly, models generally achieve higher accuracy on predictable queries than on unpredictable ones. However, we observe little difference in the confidence lev-els assigned to these two categories. These results suggest that current MLLMs struggle to distinguish predictable from inherently uncertain situations, often producing overconfident responses even when predictions are incorrect, indicat-ing that their self-contained confidence does not reliably reflect the factual pre-dictability of the query under high unanswerability. 
+
+5 Conclusion 
+
+We introduced EgoSAT , the first comprehensive benchmark for egocentric stream-ing interaction understanding that unifies retrospective , present , and prospec-tive reasoning under a strict online protocol. Beyond accuracy, EgoSAT evalu-ates answerability through confidence calibration and future-event predictability. Our results reveal persistent gaps between offline and streaming models, show-ing that current VLMs struggle to maintain temporally grounded representations under constrained KV-cache budgets. We hope EgoSAT serves as a principled testbed for studying streaming video understanding and developing proactive egocentric AI assistants. 
+
+Acknowledgments 
+
+This work is supported by Tsinghua University–Keystone Electrical (Zhejiang) Co., Ltd. Joint Research Center for Embodied Multimodal Artificial Intelligence (JCEMAI). EgoSAT: Egocentric Streaming Interaction Benchmark 15 
+
+References 
+
+1. Claude opus 4 and claude sonnet 4 summary table (2025), https : / / www . anthropic.com/transparency 
+
+2. Gemini 2.5 pro model card (2025), https://storage.googleapis.com/deepmind-media/Model-Cards/Gemini-2-5-Pro-Model-Card.pdf 
+
+3. An, X., Xie, Y., Yang, K., Zhang, W., Zhao, X., Cheng, Z., Wang, Y., Xu, S., Chen, C., Didi, Z., Wu, C., Tan, H., Li, C., Yang, J., Yu, J., Wang, X., Qin, B., Wang, Y., Yan, Z., Feng, Z., Liu, Z., Li, B., Deng, J.: Llava-onevision-1.5: Fully open framework for democratized multimodal training (2025) 4. Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., Zhong, H., Zhu, Y., Yang, M., Li, Z., Wan, J., Wang, P., Ding, W., Fu, Z., Xu, Y., Ye, J., Zhang, X., Xie, T., Cheng, Z., Zhang, H., Yang, Z., Xu, H., Lin, J.: Qwen2.5-vl technical report (2025), https://arxiv.org/abs/2502.13923 
+
+5. Bärmann, L., Waibel, A.: Where did i leave my keys? - episodic-memory-based question answering on egocentric videos. In: Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition (CVPR) Workshops. pp. 1560–1568 (June 2022) 6. Bolya, D., Fu, C.Y., Dai, X., Zhang, P., Feichtenhofer, C., Hoffman, J.: Token merg-ing: Your vit but faster. In: The Eleventh International Conference on Learning Representations 7. Chen, J., Lv, Z., Wu, S., Lin, K.Q., Song, C., Gao, D., Liu, J.W., Gao, Z., Mao, D., Shou, M.Z.: Videollm-online: Online video large language model for streaming video. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 18407–18418 (2024) 8. Chen, J., Zeng, Z., Lin, Y., Li, W., Ma, Z., Shou, M.Z.: Livecc: Learning video llm with streaming speech transcription at scale. In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp. 29083–29095 (2025) 9. Chen, L., Zhao, H., Liu, T., Bai, S., Lin, J., Zhou, C., Chang, B.: An image is worth 1/2 tokens after layer 2: Plug-and-play inference acceleration for large vision-language models. In: European Conference on Computer Vision. pp. 19–35 (2024) 10. Chen, Y., Ge, Y., Ge, Y., Ding, M., Li, B., Wang, R., Xu, R., Shan, Y., Liu, X.: Egoplan-bench: Benchmarking multimodal large language models for human-level planning (2024), https://arxiv.org/abs/2312.06722 
+
+11. Cheng, S., Guo, Z., Wu, J., Fang, K., Li, P., Liu, H., Liu, Y.: Egothink: Evalu-ating first-person perspective thinking capability of vision-language models. 2024 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) pp. 14291–14302 (2023), https://api.semanticscholar.org/CorpusID:265456330 
+
+12. Damen, D., Doughty, H., Farinella, G.M., Furnari, A., Kazakos, E., Ma, J., Molti-santi, D., Munro, J., Perrett, T., Price, W., et al.: Rescaling egocentric vision: Collection, pipeline and challenges for epic-kitchens-100. International Journal of Computer Vision 130 (1), 33–55 (2022) 13. Fan, C.: Egovqa - an egocentric video question answering benchmark dataset. In: 2019 IEEE/CVF International Conference on Computer Vision Workshop (IC-CVW). pp. 4359–4366 (2019). https://doi.org/10.1109/ICCVW.2019.00536 
+
+14. Grauman, K., Westbury, A., Byrne, E., Chavis, Z., Furnari, A., Girdhar, R., Ham-burger, J., Jiang, H., Liu, M., Liu, X., et al.: Ego4d: Around the world in 3,000 hours of egocentric video. In: Proceedings of the IEEE/CVF conference on com-puter vision and pattern recognition. pp. 18995–19012 (2022) 16 Y. Lei et al. 15. Grauman, K., Westbury, A., Torresani, L., Kitani, K., Malik, J., Afouras, T., Ashutosh, K., Baiyya, V., Bansal, S., Boote, B., et al.: Ego-exo4d: Understanding skilled human activity from first-and third-person perspectives. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 19383–19400 (2024) 16. Huang, Y., Xu, J., Pei, B., He, Y., Chen, G., Yang, L., Chen, X., Wang, Y., Nie, Z., Liu, J., et al.: Vinci: A real-time embodied smart assistant based on egocentric vision-language model. arXiv preprint arXiv:2412.21080 (2024) 17. Huang, Z., Ji, Y., Wang, X., Mehta, N., Xiao, T., Lee, D., Vanvalkenburgh, S., Zha, S., Lai, B., Yu, L., Zhang, N., Lee, Y.J., Liu, M.: Building a mind palace: Structuring environment-grounded semantic graphs for effective long video analysis with llms (2025), https://arxiv.org/abs/2501.04336 
+
+18. Jia, B., Lei, T., Zhu, S.C., Huang, S.: Egotaskqa: Understanding human tasks in egocentric videos (2022), https://arxiv.org/abs/2210.03929 
+
+19. Li, J., Chen, Y., Piao, D., Pan, P., Yu, Y., Wang, D., Yan, H., Yue, L., Wang, S., Chen, Y., et al.: Egoprox: Evaluating mllms on egocentric 3d proximity reasoning across a cognitive hierarchy. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 23751–23762 (2026) 20. Li, J., Chen, Y., Song, W., Lei, Y., Zhang, Y., Yan, H., Pan, P., Liu, M.: Ipibench: Evaluating interactive proactive intelligence of mllms under continuous streams. arXiv preprint arXiv:2605.27074 (2026) 21. Li, X., Wang, Y., Yu, J., Zeng, X., Zhu, Y., Huang, H., Gao, J., Li, K., He, Y., Wang, C., et al.: Videochat-flash: Hierarchical compression for long-context video modeling. arXiv e-prints pp. arXiv–2501 (2024) 22. Lin, B., Ye, Y., Zhu, B., Cui, J., Ning, M., Jin, P., Yuan, L.: Video-llava: Learn-ing united visual representation by alignment before projection (2024), https: //arxiv.org/abs/2311.10122 
+
+23. Lin, J., Fang, Z., Chen, C., Wan, Z., Luo, F., Li, P., Liu, Y., Sun, M.: Stream-ingbench: Assessing the gap for mllms to achieve streaming video understanding. arXiv preprint arXiv:2411.03628 (2024) 24. Mangalam, K., Akshulakov, R., Malik, J.: Egoschema: A diagnostic benchmark for very long-form video language understanding. ArXiv abs/2308.09126 (2023), 
+
+https://api.semanticscholar.org/CorpusID:261031047 
+
+25. Niu, J., Li, Y., Miao, Z., Ge, C., Zhou, Y., He, Q., Dong, X., Duan, H., Ding, S., Qian, R., et al.: Ovo-bench: How far is your video-llms from real-world online video understanding? In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp. 18902–18913 (2025) 26. Peng, T., Hua, J., Liu, M., Lu, F.: In the eye of mllm: Benchmarking egocentric video intent understanding with gaze-guided prompting. In: Advances in Neural Information Processing Systems (2025) 27. Qian, R., Ding, S., Dong, X., Zhang, P., Zang, Y., Cao, Y., Lin, D., Wang, J.: Dispider: Enabling video llms with active real-time interaction via disentangled perception, decision, and reaction. In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp. 24045–24055 (2025) 28. Qian, R., Dong, X., Zhang, P., Zang, Y., Ding, S., Lin, D., Wang, J.: Streaming long video understanding with large language models. Advances in Neural Information Processing Systems 37 , 119336–119360 (2024) 29. Ren, S., Chen, S., Li, S., Sun, X., Hou, L.: Testa: Temporal-spatial token aggrega-tion for long-form video-language understanding. In: Findings of the Association for Computational Linguistics: EMNLP 2023. pp. 932–947 (2023) EgoSAT: Egocentric Streaming Interaction Benchmark 17 30. Ryoo, M.S., Piergiovanni, A., Arnab, A., Dehghani, M., Angelova, A.: Token-learner: What can 8 learned tokens do for images and videos? arXiv preprint arXiv:2106.11297 (2021) 31. Shao, K., Keda, T., Qin, C., You, H., Sui, Y., Wang, H.: Holitom: Holistic to-ken merging for fast video large language models. In: The Thirty-ninth Annual Conference on Neural Information Processing Systems 32. Shen, X., Xiong, Y., Zhao, C., Wu, L., Chen, J., Zhu, C., Liu, Z., Xiao, F., Varadarajan, B., Bordes, F., et al.: Longvu: Spatiotemporal adaptive compres-sion for long video-language understanding. In: 42nd International Conference on Machine Learning, ICML 2025. ML Research Press (2025) 33. Song, Y., Byrne, E., Nagarajan, T., Wang, H., Martin, M., Torresani, L.: Ego4d goal-step: Toward hierarchical understanding of procedural activities. Advances in neural information processing systems 36 , 38863–38886 (2023) 34. Tsvilodub, P., Wang, H., Grosch, S., Franke, M.: Predictions from language models for multiple-choice tasks are not robust under variation of scoring methods. arXiv preprint arXiv:2403.00998 (2024) 35. Wang, W., He, Z., Hong, W., Cheng, Y., Zhang, X., Qi, J., Ding, M., Gu, X., Huang, S., Xu, B., et al.: Lvbench: An extreme long video understanding benchmark. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 22958–22967 (2025) 36. Wang, Y., Wang, Y., Chen, B., Wu, T., Zhao, D., Zheng, Z.: Omnimmi: A com-prehensive multi-modal interaction benchmark in streaming video contexts. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recog-nition. pp. 18925–18935 (2025) 37. Wen, Z., Gao, Y., Wang, S., Zhang, J., Zhang, Q., Li, W., He, C., Zhang, L.: Stop looking for “important tokens” in multimodal language models: Duplication matters more. In: Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing. pp. 9972–9991 (2025) 38. Wong, B., Chen, J., Wu, Y., Lei, S.W., Mao, D., Gao, D., Shou, M.Z.: Assistq: Affordance-centric question-driven task completion for egocentric assistant. In: Avi-dan, S., Brostow, G., Cissé, M., Farinella, G.M., Hassner, T. (eds.) Computer Vi-sion – ECCV 2022. pp. 485–501. Springer Nature Switzerland, Cham (2022) 39. Wu, H., Li, D., Chen, B., Li, J.: Longvideobench: A benchmark for long-context interleaved video-language understanding. Advances in Neural Information Pro-cessing Systems 37 , 28828–28857 (2024) 40. Xiong, H., Yang, Z., Yu, J., Zhuge, Y., Zhang, L., Zhu, J., Lu, H.: Streaming video understanding and multi-round interaction with memory-enhanced knowledge. In: The Thirteenth International Conference on Learning Representations 41. Xu, R., Xiao, G., Chen, Y., He, L., Peng, K., Lu, Y., Han, S.: Streamingvlm: Real-time understanding for infinite video streams. arXiv preprint arXiv:2510.09608 (2025) 42. Yang, C., Sui, Y., Xiao, J., Huang, L., Gong, Y., Li, C., Yan, J., Bai, Y., Sa-dayappan, P., Hu, X., et al.: Topv: Compatible token pruning with inference time optimization for fast and low-memory multimodal vision language model. In: Pro-ceedings of the Computer Vision and Pattern Recognition Conference. pp. 19803– 19813 (2025) 43. Yang, C., Dong, X., Zhu, X., Su, W., Wang, J., Tian, H., Chen, Z., Wang, W., Lu, L., Dai, J.: Pvc: Progressive visual token compression for unified image and video processing in large vision-language models. In: Proceedings of the Computer Vision and Pattern Recognition Conference. pp. 24939–24949 (2025) 18 Y. Lei et al. 44. Yang, J., Liu, S., Guo, H., Dong, Y., Zhang, X., Zhang, S., Wang, P., Zhou, Z., Xie, B., Wang, Z., Ouyang, B., Lin, Z., Cominelli, M., Cai, Z., Zhang, Y., Zhang, P., Hong, F., Widmer, J., Gringoli, F., Yang, L., Li, B., Liu, Z.: Egolife: Towards egocentric life assistant (2025), https://arxiv.org/abs/2503.03803 
+
+45. Yang, Z., Hu, Y., Du, Z., Xue, D., Qian, S., Wu, J., Yang, F., Dong, W., Xu, C.: Svbench: A benchmark with temporal multi-turn dialogues for streaming video understanding. In: The Thirteenth International Conference on Learning Repre-sentations 46. Yao, L., Li, L., Ren, S., Wang, L., Liu, Y., Sun, X., Hou, L.: Deco: Decoupling token compression from semantic abstraction in multimodal large language models. arXiv preprint arXiv:2405.20985 (2024) 47. Yao, L., Li, Y., Wei, Y., Li, L., Ren, S., Liu, Y., Ouyang, K., Wang, L., Li, S., Li, S., et al.: Timechat-online: 80% visual tokens are naturally redundant in streaming videos. In: Proceedings of the 33rd ACM International Conference on Multimedia. pp. 10807–10816 (2025) 48. Ye, H., Zhang, H., Daxberger, E., Chen, L., Lin, Z., Li, Y., Zhang, B., You, H., Xu, D., Gan, Z., Lu, J., Yang, Y.: Mmego: Towards building egocentric mul-timodal llms for video qa. In: Yue, Y., Garg, A., Peng, N., Sha, F., Yu, R. (eds.) International Conference on Representation Learning. vol. 2025, pp. 71705– 71723 (2025), https://proceedings.iclr.cc/paper_files/paper/2025/file/ b29a95e7d9f1e1a6dfc567b556733744-Paper-Conference.pdf 
+
+49. Yuan, Y., Dang, R., Li, L., Li, W., Jiao, D., Li, X., Zhao, D., Wang, F., Zhang, W., Xiao, J., et al.: Eoc-bench: Can mllms identify, recall, and forecast objects in an egocentric world? arXiv preprint arXiv:2506.05287 (2025) 50. Zhang, H., Fu, Y.: Vqtoken: Neural discrete token representation learning for ex-treme token reduction in video large language models. In: The Thirty-ninth Annual Conference on Neural Information Processing Systems 51. Zhang, H., Wang, Y., Tang, Y., Liu, Y., Feng, J., Jin, X.: Flash-vstream: Efficient real-time understanding for long video streams. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 21059–21069 (2025) 52. Zhang, Y., Shi, C., Wang, Y., Yang, S.: Eyes wide open: Ego proactive video-llm for streaming video. In: The Thirty-ninth Annual Conference on Neural Information Processing Systems 53. Zhou, J., Shu, Y., Zhao, B., Wu, B., Liang, Z., Xiao, S., Qin, M., Yang, X., Xiong, Y., Zhang, B., et al.: Mlvu: Benchmarking multi-task long video understanding. In: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition. pp. 13691–13701 (2025) 54. Zhou, S., Xiao, J., Li, Q., Li, Y., Yang, X., Guo, D., Wang, M., Chua, T.S., Yao, A.: Egotextvqa: Towards egocentric scene-text aware video question answering. 2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) pp. 3363–3373 (2025), https://api.semanticscholar.org/CorpusID:276258564 EgoSAT: Egocentric Streaming Interaction Benchmark 19 
+
+Supplementary Material 
+
+This is the supplementary material for the paper “EgoSAT: A Comprehensive Benchmark of Egocentric Streaming Interaction Understanding”. We organize the content as follows: 
+
+A – Implementation Details 
+
+B – Additional Experiments 
+
+C – Comparison with Related Benchmarks 
+
+D – Limitations and Future Work 
+
+A Implementation Details 
+
+A.1 Training Details 
+
+We conduct two supervised fine-tuning runs with different output schemas: (1) MCQ SFT for multiple-choice tasks with structured <ANS>, <VERB>, <NOUN>, <DESC> outputs, and (2) State SFT for present modeling tasks that require a decision on state: <STATE> INTERACTION <STATE> vs. <STATE> NO_INTERACTION <STATE>. 
+
+Base model . All SFT runs start from the same base checkpoint of TimeChat-Online-7B. We fine-tune two variants: TimeChat-Online and ROI-TimeChat-Online. MCQ SFT trains the model to produce a structured answer aligned with the MCQ options. State SFT is meant for the state-only schema. 
+
+MCQ SFT. We perform a mixed-task fine-tuning stage over the MCQ tasks. For each MCQ task, we sample 1,200 training instances from the training split and merge them into a single mixed training manifest. We then fine-tune the model on this combined manifest to improve task-specific alignment for temporally grounded multiple-choice reasoning. 
+
+STATE MCQ SFT. To additionally support tasks with non-MCQ output schemas, we perform a second-stage fine-tuning starting from the checkpoint obtained after the first MCQ SFT stage. In this stage, we use 1,200 samples from Now Narration State-only mode and 1,200 samples from State Switch, together with 120 samples from each MCQ task. This design allows the model to retain competence on the MCQ tasks while improving alignment to state-style outputs required by non-MCQ tasks. 
+
+A.2 Elaboration on Evaluation Metrics 
+
+This section provides additional details on how the evaluation metrics used in our tables and analyses beyond MCQ accuracy are derived. 
+
+Recall and precision for present modeling. We treat interaction visibil-ity at the query time as a binary classification problem, where the positive class is INTERACTION. We therefore build a confusion matrix and compute 
+
+Precision = T P T P +F P and Recall = T P T P +F N .20 Y. Lei et al. 
+
+Conf_correct and conf_wrong. Following Sec. 3.2 in the main paper, we derive a self-contained confidence score c from the model’s MCQ scoring for each sample. We then report the average confidence conditioned on correctness and obtain the conf_correct/conf_wrong scores. 
+
+Confidence slope for multi-step tasks . For multi-step anticipation and ret-rospection, we query the model with three consecutive probes anchored to the same event but with different query-anchor temporal distances. When all three probes are correct , we sort them by increasing distance τ , 2 τ , and 3 τ with corresponding confidence c1, c2 and c3. We fit a least-squares line c ≈ αd + β on the three points, and report the mean slope α across anchors as the confidence slope . A well-calibrated model is expected to have α < 0, indicating lower confi-dence for probes farther away from the anchor event. 
+
+A.3 Details on ROI Construction 
+
+In this section, we give supplementary to how we obtain the ROI annotations, including the hand bounding boxes and gaze region, from the egocentric videos of Ego4D. 
+
+Hand Annotation The raw annotations of Ego4D contain human-calibrated annotations of hands and object-of-change, which are pitifully sparse and only covered several key frames of each interaction segment. To ensure constant, dense input of our ROI-driven TimeChat model, we automatically extracted hand ROIs using the MediaPipe Hand Landmarker of Google on Ego4D full-scale videos. To validate the robustness and accuracy of the annotated boxes, we conducted a simple hyperparameter gridsearch, leveraging the sparse Ego4D FHO hand annotations on 40 selected intervals covering 8 most common scenarios. With an IoU-based loss integrated with miss penalty, we found and fixed the ideal configuration for full-scale annotation. 
+
+Gaze Annotation We used the GLC gaze estimator for egocentric gaze annota-tion. It’s official release includes pretrained weights for Ego4D; therefore, unlike hand bounding boxes, we did not conduct an additional hyperparameter search and instead directly adopted the provided Ego4D checkpoint. We ran GLC of-fline on each annotated interval and obtained gaze caches containing timestamp, (x,y ), radius and confidence for downstream ROI-aware inference. 
+
+A.4 Details on ROI-TimeChat Online 
+
+In this section, we will give a detailed description of how we crafted the ROI-aware variant of TimeChat-Online by switching its DTD module to a ROI-prioritized module. EgoSAT: Egocentric Streaming Interaction Benchmark 21 
+
+Table A1: Detailed results of Now State Switch . We report transition accuracy at different probing positions and the fitted accuracy slope for foreground-to-background and background-to-foreground state switches.                                                                                               
+
+> Model Now State Switch Fg →bg Bg →fg Acc t1Acc t2Acc t3Acc slope Acc t1Acc t2Acc t3Acc slope
+> Gemini 2.5 Pro 8.96 7.14 21.43 4.5836 12.33 10.14 16.67 1.7064
+> Claude Sonnet 4 1.35 2.67 11.59 3.5629 6.41 8.75 12.00 1.8293
+> Qwen2.5-VL-72B 5.26 3.95 3.95 -0.3743 4.94 8.64 8.64 1.0571
+> Qwen2.5-VL-32B 2.63 0.00 2.63 0.1879 2.47 0.00 7.41 1.9407
+> Qwen2.5-VL-7B 4.00 9.33 4.00 -0.3807 7.50 3.75 6.25 -0.1786
+> Video-LLaVA-7B 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
+> TimeChat-Online-7B 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
+> ROI-TimeChat-Online 1.32 0.00 0.00 -0.3771 1.25 1.25 1.25 0.00
+> TimeChat-Online-7B(SFT) 18.42 13.16 10.53 -2.4421 5.00 5.00 6.25 0.4464
+> ROI-TimeChat-Online(SFT) 0.00 0.00 0.00 0.00 0.00 0.00 1.25 0.4464
+
+ROI-aware Token Dropping Our ROI variant is built on top of the orig-inal DTD-based TimeChat model. The model reserves the original vision and language backbone, takes the same visual and text inputs, while additionally receives a lightweight ROI cache with each frame. The ROI cache specifies the interaction and gaze centric regions. Our key modification takes place before the decoder attention. Instead of applying token dropping uniformly to all vi-sual tokens, which is how DTD works, we make the dropping policy ROI-aware. Concretely, ROI information is passed through the generation interface and used only when the visual tokens are first constructed. We then select token on the visual token sequence before decoding. The tokens inside the ROI are always preserved, while tokens outside the ROI are further compressed using the origi-nal DTD module. In this way, the ROI variant changes only the token selection policy. It preserves interaction-relevant regions and compresses non-ROI regions. 
+
+Memory-budget Control. For streaming evaluation, we control the cache budget and compare methods under the same memory constraint. Specifically, the released TimeChat-Online setting keeps a 6K video-token budget with an approximately 85% token drop rate, and our ROI-TimeChat-Online variant is run under the same budget, while applying 85% drop mainly to background tokens. 
+
+B Additional Experiments 
+
+B.1 State Switch: Timeliness and Confidence 
+
+In this section, we present more analysis on the switch timeliness of models’ output mode, by gradually moving query time closer to the ground-truth state switch moment. Concretely, we fix the query time before state switch, and make 22 Y. Lei et al. 
+
+queries t1s, t2s, and t3s after state switch in three distinct runs, and derive the correctness curve consequently. Here, we adopt t1 = 1 s, t2 = 2 s and t3 = 4 s.A successful state switch requires the model to recognize both the before-switch state and after-switch state correctly. The accuracy slope is derived in a similar way to the confidence slope, with least-squares line fitting. Ideally, when the query time before the switch is fixed, a larger temporal distance after the switch should make the new state easier to recognize. Therefore, a well-calibrated model is expected to show a positive accuracy slope, as well as high state-switch accuracy. From Table A1, only proprietary MLLMs consistently ex-hibit positive slopes, and their switch accuracy is significantly higher than other models. In contrast, most open-source models fail to show this desired trend. For the Qwen variants, the slope is weak or even negative, especially for the fg →bg transition, suggesting unstable trend. Video-LLaVA-7B and TimeChat-Online-7B collapse to near-zero performance, indicating that they almost fail to track state switch at all. Another notable phenomenon is the asymmetry between the two directions. For several models, bg →fg yields a more positive slope than fg →bg. This suggests that for most models, entering interaction is easier to detect than exiting from it. The SFT results show that hybrid training fails to resolve the problems with the accuracy trend, but it does improves switch accuracy. Overall, these results show that state-switch evaluation reveals not only existing models exhibit huge performance gap in switch accuracy, but they also demonstrate weak or none calibration to a consistent and ideal belief trend. 
+
+B.2 Confidently Wrong and SFT Impact Confidence Calibration and Confidently-wrong Errors. We present in Ta-ble A3, the absolute value of models’ confidence, which is supplementary to the 
+
+conf slope in the main paper. Ideally, the model should be less confident when it chooses wrong answers. However, we observe serious violations of this desirable behavior, especially in multi-step anticipation. Several models, including Qwen 2.5 VL 32B/72B and TimeChat-Online exhibit higher confidence when wrong. This indicates overconfident errors when self-contained confidence fails to cal-ibrate with factual correctness. In retrospection, while several models recover the 
+
+confidently wrong behavior, some still remain overconfidently wrong, suggesting the mis-calibration persists. 
+
+Effect of SFT. Comparing TimeChat-Online with its SFT variant, SFT sub-stantially reduces confidence on wrong answers while largely preserving confi-dence on correct ones. A similar trend exists in the ROI variant, where SFT also lowers confidently wrong consistently, although the model turns out more conservative as its correct confidece is lowered as well. Overall, SFT primarily improves confidence calibration by suppressing overconfident errors rather than elevating absolute confidence. EgoSAT: Egocentric Streaming Interaction Benchmark 23 
+
+Table A2: Main results (MCQ-first). All models are evaluated with strict-online prefix truncation at each query time t. Rec. is recall for interaction-visible ( TP /(TP + FN) ), and Prec. is precision:( TP /(TP + FP) ) Multi. reports average MCQ accuracy over three probes at τ, 2τ, 3τ .                                                                                                               
+
+> Model \task Present Prospective Retrospective Narration State switch Short Multi. Short Multi. Rec. Prec. MCQ acc Fg →bg Bg →fg MCQ acc. MCQ avg. acc. MCQ acc. MCQ avg. acc.
+> Human agents
+> Human 84.62 93.13 73.13 60.63 63.75 70.63 63.13 76.25 73.75
+> Offline proprietary models
+> Gemini 2.5 Pro 69.63 89.02 43.00 21.43 16.67 29.92 29.43 39.80 48.15 Claude Sonnet 4 77.51 86.30 38.43 11.59 12.00 32.20 29.98 40.46 39.64
+> Offline open-sourced models
+> Qwen2.5-VL-72B 73.66 85.64 38.86 3.95 8.64 43.06 26.00 51.87 43.46 Qwen2.5-VL-32B 86.16 86.94 39.91 2.63 7.41 37.24 25.23 50.86 40.74 Qwen2.5-VL-7B 78.72 84.78 36.50 4.00 6.25 27.84 28.11 42.79 34.46 Video-LLaVA 7B 100.00 83.46 25.75 0.00 0.00 25.11 25.50 20.89 25.00
+> Blind model: see Table 4: Blind Model Online models
+> TimeChat-Online-7B 98.51 83.35 33.33 0.00 0.00 29.72 26.01 37.84 31.63 ROI-TimeChat-Online 97.92 83.40 36.47 0.00 1.25 30.51 25.05 34.41 30.82
+> SFT Online Models
+> TimeChat-Online-7B 0.00 0.00 45.59 0.00 0.00 61.63 42.79 43.90 45.43 ROI-TimeChat-Online 0.00 0.00 46.94 0.00 0.00 59.54 40.55 44.00 41.24
+
+B.3 Human Baseline 
+
+In Sec. 4.2 of main paper, we see huge performance gap in our task settings, es-pecially Prospective Modeling and Retrospective Modeling, even for proprietary MLLMs. We therefore conduct comparative experiments on human agents to validate the feasibility or upper-bound of our tasks. We uniformly sample 10% of the multiple-choice questions from each of our 6 task to form a validation set for human agents. As shown in Table A2, humans achieve strong performance across present, prospective and retrospective tasks, substantially surpassing all evaluated mod-els. This gap indicates that EgoSAT is far from saturated and that low model performance primarily reflects capability limitations rather than inherent unan-swerability of the benchmark. Meanwhile, human accuracy remains lower on state switch and multistep prediction, highlighting interaction-boundary sensi-tivity and observation insufficiency as key challenges in streaming interaction understanding. 
+
+B.4 MCQ Option Fairness and Validity Blind Models In this section, we validate the fairness of our multiple-choice options, by not providing the models with visual input and asking them to an-24 Y. Lei et al. 
+
+Table A3: Detailed correct/wrong breakdown for multi-step prospective tasks . We report the number (or percentage) of correct and wrong predictions at different temporal distances for multi-step anticipation and multi-step retrospection.                                                                                                                        
+
+> Model Multi-step anticipation Multi-step retrospection Conf lead 3τConf lead 2τConf lead τConf lag τConf lag 2τConf lag 3τ
+> correct wrong correct wrong correct wrong correct wrong correct wrong correct wrong
+> Qwen-2.5-VL-72B 71.73 67.73 68.14 71.81 68.66 71.66 78.34 66.41 75.12 68.26 75.74 63.77
+> Qwen-2.5-VL-32B 60.31 61.15 58.25 63.01 61.16 61.73 67.44 65.95 66.87 59.27 65.40 64.17
+> Qwen-2.5-VL-7B 50.81 52.85 50.70 55.10 50.82 53.32 57.49 53.44 56.74 53.86 56.83 52.34
+> Video-LLaVA-7B 53.87 52.82 54.74 52.77 55.20 52.77 48.81 49.57 48.73 48.84 47.38 48.88
+> TimeChat-Online-7B 48.50 49.73 47.54 51.85 47.86 51.40 53.39 50.08 51.48 49.46 50.66 49.27
+> ROI-TimeChat-Online 48.22 48.54 47.41 51.10 49.30 48.52 52.58 51.37 49.97 50.22 49.14 49.65
+> TimeChat-Online-7B (SFT) 48.42 42.74 47.69 43.65 49.53 43.01 52.97 45.48 51.31 46.44 50.82 45.46
+> ROI-TimeChat-Online (SFT) 44.04 40.36 44.83 41.65 44.78 40.65 47.42 43.60 47.23 43.30 47.33 43.00
+
+Table A4: Blind Models (MCQ-first). We choose three representative models of their families and present the results of their blind vs. non-blind version here. 
+
+Model \task Present Prospective Retrospective Narration State switch Short Multi. Short Multi. Prec. MCQ acc Fg →bg Bg →fg MCQ acc. MCQ avg. acc. MCQ acc. MCQ avg. acc. 
+
+Visible representative models 
+
+Gemini 2.5 Pro 69.63 43.00 21.43 16.67 29.92 29.43 39.80 48.15 Qwen2.5-VL-32B 86.16 39.91 2.63 7.41 37.24 25.23 50.86 40.74 TimeChat-Online-7B 98.51 33.33 0.00 0.00 29.72 26.01 37.84 31.63 
+
+Blind representative models 
+
+Gemini 2.5 Pro blind 40.24 22.35 37.33 14.10 19.37 26.16 23.60 25.32 Qwen2.5-VL-32B blind 00.00 29.50 0.00 0.00 27.80 26.99 31.58 26.30 TimeChat-Online-7B blind 90.63 28.38 0.00 3.70 18.01 26.87 27.45 25.54 
+
+swer the MCQ using text input only. To balance comprehensiveness and cost, we choose the representative models of each family, namely Gemini 2.5 Pro, Qwen 2.5 vl 32b and TimeChat Online 7b for this section. As shown in Ta-ble A4, disabling vision leads to a clear and consistent performance drop on the MCQ-based prospective and retrospective tasks. This indicates that the shuffled options alone do not provide a reliable signal and that models cannot reliably inter the correct choice from the candidate texts without observing the video. Therefore, the blind baseline serves as a validation that our MCQ construction does not leak strong cues, supporting the fairness of the multiple-choice setting used throughout EgoSAT. 
+
+Hard- and Absurd-negative validation Beyond the blind-model baseline, we further analyze which type of incorrect option is selected when a model answers an MCQ incorrectly. As described in the main paper, each EgoSAT MCQ contains one ground-truth answer, two hard negatives and one absurd negative. The hard negatives are temporally confusing options sampled from events adjacent or temporally related to the ground-truth segment, while the EgoSAT: Egocentric Streaming Interaction Benchmark 25 
+
+absurd negative is selected to be semantically distant from the ground-truth answer and weakly related to the current visual context. Formally, for question 
+
+i, let  y∗
+
+i denote the ground-truth answer,  Hi denote the set of two hard negatives, 
+
+ai denote the absurd negative, and  ˆyi denote the model prediction. We define the set of valid incorrect MCQ predictions as 
+
+W = {i | ˆyi̸ = y∗
+
+i , ˆyi ∈ H i ∪ { ai}} .
+
+We then compute the conditional distribution of wrong-option types: 
+
+Phard |wrong = 1
+
+|W| 
+
+X
+
+i∈W 
+
+1[ˆ yi ∈ H i] , Pabsurd |wrong = 1
+
+|W| 
+
+X
+
+i∈W 
+
+1[ˆ yi = ai] .
+
+Since each question has two hard negatives and one absurd negative, a uniformly random choice among the three incorrect options would yield an expected hard-negative error rate of  2/3 and an absurd-negative error rate of  1/3.                                                                                                                                       
+
+> Table A5. MCQ option-order robustness and strong-distractor validation. Conditional distribution of models selecting strong distractors under the original shuffled and re-shuffled MCQ options. Model Now narr. Sh.anticip. Ms.anticip. Sh.rtrv. Ms.rtrv. orig. re-shuf. orig. re-shuf. orig. re-shuf. orig. re-shuf. orig. re-shuf. Gemini 2.5 Pro 98.20 97.02 98.34 98.01 96.79 97.35 99.42 99.77 99.05 98.05 Claude Sonnet 4 91.58 90.49 93.97 91.42 94.68 90.09 97.80 96.84 90.68 88.07 Qwen2.5-VL-72B 98.47 97.72 99.07 99.06 99.50 99.67 99.78 100.00 98.91 99.09 Qwen2.5-VL-32B 99.00 99.28 99.20 98.74 98.39 98.78 100.00 100.00 99.38 99.79 Qwen2.5-VL-7B 98.03 97.39 97.81 96.74 99.31 99.16 96.98 95.86 98.49 97.47 Video-LLaVA 7B 68.55 66.18 69.86 69.97 62.60 64.74 67.15 70.58 66.99 65.52 TimeChat-Online-7B 96.30 97.15 96.84 96.53 96.74 97.17 99.34 99.33 89.10 90.35 ROI-TimeChat-Online 94.80 94.92 84.50 84.63 96.87 87.18 98.00 98.59 90.62 89.44 Flash-VStream 93.52 96.45 94.07 96.79 94.53 97.67 97.34 97.84 97.31 98.98 LLaVA-OV1.5 98.74 98.48 95.57 94.54 97.45 99.16 98.80 98.35 96.65 96.98 TimeChat-Online-7B(SFT) 100.00 99.46 98.97 97.73 99.78 99.34 100.00 100.00 96.38 98.42 ROI-TimeChat-Online(SFT) 100.00 100.00 90.96 91.40 99.79 99.02 99.82 99.77 98.05 98.42
+
+As shown in Table A5, when models answer incorrectly, they predominantly select the hard-negative options rather than the absurd option. This suggests that models can usually reject options that are clearly unrelated to the current context, and that their failures mainly arise from confusing temporally adja-cent or semantically plausible but factually incorrect alternatives. This provides empirical support for our MCQ design: hard negatives enable fine-grained evalu-ation of temporal and interaction understanding, while the absurd negative helps identify random guessing or failures in basic contextual judgment. As an additional check for option-position bias, we re-shuffle the answer op-tions and repeat the same analysis. The resulting wrong-option distributions remain highly consistent with those under the original shuffle, further indicating that our offline option shuffling does not introduce systematic bias. 
+
+Human Validation of Answerability Labels To validate whether our au-tomatic answerability metrics align with human judgments of predictability and uncertainty, we conduct a human sanity check for the surprise and branchiness labels. Since the predictable vs. unpredictable split is derived from these auto-matic metrics, we further examine whether the resulting labels are consistent with human judgment. 26 Y. Lei et al. 
+
+> Table A6: Detailed results of Now narration : open-ended accuracy on verbs, nouns, and actions, and MCQ accuracy.
+
+model Now narration Open-ended mode MCQ mode Verb acc Noun acc Action acc MCQ acc Gemini 2.5 Pro 10.57 21.43 4.16 43.00 Qwen 2.5-VL-32B 9.65 13.82 2.25 39.91 TimeChat-Online-7B 1.17 3.82 0.34 33.33 
+
+Specifically, we construct two binary validation settings based on the metric-defined bins: predictable vs. branchy-only, and predictable vs. surprise-only. A human annotator is provided with the same type of visual and narration evi-dence used by our metrics, and is asked to decide whether each sample is pre-dictable or belongs to the corresponding uncertainty type. We then compare the human decisions with the automatic labels. The human judgments agree with our branchiness labels in  78%  of the cases and with our surprise labels in  884% 
+
+of the cases. These results suggest that, although surprise and branchienss are automatic proxy measures, they are reasonably consistent with human-judged unpredictability in streaming interaction understanding. This validation is intended as a sanity check rather than a replacement for large-scale human annotation. It supports the use of our answerablitiy split by showing that the metric-defined predictable and uncertain samples largely agree with human judgments of temporal uncertainty. 
+
+B.5 Open-ended Demonstrations and Evaluation 
+
+As we’ve mentioned in the main paper, we additionally report open-ended eval-uation for Now Narration in the supplementary to complement the MCQ results and diagnose model reliability under a more natural output setting. Unlike MCQ, models are not required to output an optional letter; instead, they are prompted to directly generate structured VERB , NOUN and the composed ACTION . We adopt a strict matching rule: a pair is counted as correct only when both the predicted verb and noun exactly match the ground truth. In practice, many mod-els, especially smaller ones, frequently violate the expected schema and produce free text, leading to a large portion of outputs that cannot be deterministically parsed. To reduce failures due to formatting, we use a teacher LLM (Gemini-3-Pro) as an intermediate parser: the teacher converts non-standard outputs into the same structured fields when possible, without making correctness judgments. If the teacher still fails to extract valid fields, the output is treated as invalid counted as wrong. EgoSAT: Egocentric Streaming Interaction Benchmark 27 
+
+Under this strict protocol, Gemini Pro achieves only 4.6% pair accuracy on 672 GT interaction samples, indicating that open-ended streaming narration remains challenging even for proprietary models. Overall, we treat open-ended results as a complementary diagnostic to reveal failure modes and robustness, rather than an ideal replacement of MCQ-based evaluation. 
+
+B.6 Memory Proxy Sensitivity 
+
+To complement the end-task evaluation and the prefix-truncation protocol used for offline models, we conduct a memory-proxy diagnostic to study how model performance changes with different amounts of available past context. This ex-periment is intended as a controlled diagnostic proxy, evaluating how a model uses a compressed memory of previous observations and captruing the memory-management challenges of native streaming architectures. For each query timestamp, we fix the dense current visual input to a clip of length  τm, and vary the duration of the long-range memory context as multiples of  τm. The memory context is represented by sparsely sampled keyframes at 0.25 FPS together with a one-sentence caption generated by Gemini 3.1 Pro. Thus, each model receives a fixed dense current clip plus a sparse memory consisting of keyframes and a textual summary over the preceding context. We evaluate representative offline models, Gemini 2.5 Pro and Qwen2.5-VL-7B, under the same MCQ protocol, and vary the sparse memory horizon among  τm, 2τm, 3τm,and  4τm. In our experiments, we set  τm = 10  seconds.                                           
+
+> Table A7. Memory proxy sensitivity. MCQ accuracy under different memory context horizons. Model Memory config Now narration Sh. anticipation Ms. anticipation Sh. retrieval Ms. retrieval Gemini2.5 Pro D10S10 37.91 31.43 31.24 41.81 40.42 D10S20 40.22 33.61 29.84 41.94 43.60 D10S30 40.60 34.66 30.54 42.87 40.23 D10S40 42.04 31.27 28.52 42.42 40.00 Qwen2.5-VL-7B D10S10 31.78 27.62 27.74 38.65 26.10 D10S20 31.63 29.26 27.86 37.74 28.27 D10S30 32.07 28.24 29.35 37.44 27.60 D10S40 32.18 29.14 28.73 38.78 28.52
+
+As shown in Table A7, increasing the memory horizon does not lead to uni-form gains. For Gemini 2.5 Pro, longer memory slightly improves Now Narra-tion, but the gains are not monotonic across anticipation and retrieval tasks. Qwen2.5-VL-7B shows similarly small and non-monotonic changes across mem-ory configurations. These results suggest that simply appending more sparse past context and captions is not sufficient for robust streaming understanding. Effective streaming models likely require more adaptive memory selection, com-pression and retrieval mechanisms to determine which past evidence is relevant to the current query. 28 Y. Lei et al. 
+
+B.7 Cross-scenario SFT Validation 
+
+To address the concern that SFT may overfit to the specific templates or data distribution of EgoSAT, we conduct a cross-scenario validation. We split the SFT data into two disjoint subsets,  A and  B, according to Ego4D scenario labels, and compare cross-scenario training against in-scenario training on the same target validation set. Specifically, we train two SFT variants. In the  A → B setting, the model is fine-tuned only on scenario subset  A and evaluated on a held-out validation set from scenario subset  B. In the  B → B setting, the model is fine-tuned on the training split of scenario subset  B and evaluated on the same held-out  B valida-tion set. Therefore,  A → B measures whether SFT transfers to target scenarios unseen during fine-tuning, while  B → B serves as an in-scenario adaptation reference.                                    
+
+> Table A8. SFT transfer analysis. Performance of TimeChat SFT variants under source-to-target task settings. Model \task Now narr. Sh.anticip. Ms.anticip. Sh.rtrv. Ms.rtrv. A→BB→BA→BB→BA→BB→BA→BB→BA→BB→BTimeChat-Online-7B (SFT) 36.60 37.43 50.14 50.89 40.81 38.11 44.87 45.18 42.24 43.23 ROI-TimeChat-Online (SFT) 40.35 41.36 51.59 51.44 38.22 39.07 43.94 44.39 38.42 38.14
+
+As shown in Table A8, the  A → B and  B → B results are highly comparable for both TimeChat-Online-7B and ROI-TimeChat-Online. Fro TimeChat-Online-7B, the two settings differ by around one percentage point on most tasks, with the largest gap appearing in Multi-step Anticipation. For ROI-TimeChat-Online, the differences are similarly small across all tasks. These results suggest that the SFT gains can transfer to held-out target scenarios. This experiment shows that the observed SFT improvements are not merely due to in-scenario overfitting. 
+
+C Comparison with Related Benchmarks 
+
+Tab. A9 situates our EgoSAT within the landscape of existing ego/exo-centric VQA benchmarks. Notably, most existing benchmarks focus on the offline set-ting and do not jointly evaluate retrospective, present, and prospective reasoning. Among the limited streaming benchmarks, the most relevant prior work is EWO, which focuses on open-ended question answering but does not explicitly model past or future temporal reasoning. OmniMMI is another recent benchmark for multi-modal interaction in streaming video contexts, covering streaming video understanding and proactive reasoning with egocentric videos; however, it tar-gets general OmniLLM-style audio-visual interaction and does not explicitly evaluate answerability or confidence under temporal uncertainty. In contrast, EgoSAT is the only benchmark that explicitly evaluates answerability by incor-porating both confidence and predictability into the benchmark design. 
+
+D Limitations and Future Work 
+
+Limitations . Though we provide the first benchmark to systematically study egocentric streaming interaction understanding across temporal hierarchies, most EgoSAT: Egocentric Streaming Interaction Benchmark 29 
+
+Table A9: Comparison of EgoSAT with representative ego/exo-centric VQA bench-marks under both offline and online/streaming settings. We summarize key dataset properties including the number of samples, egocentric perspective, task form (MCQ or open-ended), annotation pipeline, and temporal reasoning hierarchy. Temporal labels denote whether questions require retrospective (retro.) , present (pres.) , or prospective (pros.) reasoning. Only EgoSAT explicitly evaluates answerability, a necessary ca-pability for reasoning under temporal uncertainty in streaming settings. For clarity, note that human review for quality assurance is adopted by all existing QA-generation pipelines, including ours.                                                                                                                                   
+
+> Protocol Benchmark # of samples Ego-centric Task Form Annotation Temporal Hierarchy Answerability Eval.
+> Offline LongVideoBench [39] 6,678 QA ✗MCQ Human retro. + pres. + pros. ✗
+> LVBench [35] 1,549 QA ✗MCQ Human retro. + pres. + pros. ✗
+> MLVU [53] 3,102 QA ✗Both LLM+Human retro. + pres. + pros. ✗
+> EgoVQA [13] 600 QA ✓Both Human pres. ✗
+> EgoMemoria [48] 7,026 QA ✓MCQ LLM retro. ✗
+> QAEgo4D [5] 14,513 QA ✓Open Human retro. ✗
+> AssistQ [38] 531 QA ✓MCQ Human pres. + pros. ✗
+> EgoThink [11] 700 QA ✓Open Human pres. + pros. ✗
+> EgoTaskQA [18] 40,000 QA ✓Open Human retro. + pres. + pros. ✗
+> EOC-Bench [49] 3,277 QA ✓Both Human retro. + pres. + pros. ✗
+> VideoMindPalace [17] 1,800 QA ✓Both LLM+Human retro. + pres. ✗
+> EgoGazeVQA [26] 1,757 QA ✓MCQ MLLM+Human retro. + pres. ✗
+> EgoSchema [24] 5,063 QA ✓MCQ LLM+Human retro. + pres. ✗
+> EgoPlan [10] 4,939 QA ✓MCQ LLM+Human pros. ✗
+> EgoLifeQA [44] 3,000 QA ✓MCQ LLM+Human retro. + pres. + pros. ✗
+> Streaming EgoTextVQA [54] 7,064 QA ✓Open MLLM+Human retro. + pres. + pros. ✗
+> OVO-Bench [25] 2,814 QA ✗Both MLLM+Human retro. + pres. + pros. ✗
+> ESTP [52] 2,264 QA ✓Open LLM+Human pros. ✗
+> StreamingBench [23] 4,500 QA ✗MCQ LLM+Human retro. + pres. + pros. ✗
+> SVBench [45] 49,979 QA ✗Open LLM+Human retro. + pres. + pros. ✗
+> OmniMMI [36] 2,290 QA ✓Open Human retro. + pres. + pros. ✗
+> Our Benchmark 4,800 QA ✓Both Human retro. + pres. + pros. ✓
+
+of our evaluations focus on adapting existing offline models to the streaming set-ting. Currently, relatively few works have investigated native online streaming models, and the limited existing approaches often exhibit weak temporal rea-soning capabilities due to aggressive memory caching strategies and constrained model sizes. In our experiments, TimeChat-Online serves as the most feasible baseline for streaming evaluation. In addition, although we conduct supervised fine tuning to improve performance on multiple choice and state switching tasks, enabling models to properly reason about answerability, particularly through cal-ibrated confidence estimation and reasoning about event predictability, remains an open challenge. 
+
+Future Work . In future work, we plan to explore improved caching mechanisms for online streaming models. In particular, we will investigate dynamic caching strategies that incorporate region of interest selection while explicitly modeling temporal dependencies, enabling models to retain temporally informative obser-vations under limited memory budgets. In addition, we will study reinforcement learning based training to guide models in reasoning about answerability, with a focus on learning calibrated confidence and recognizing inherently unpredictable future events.

@@ -1,0 +1,363 @@
+Title: video-SALMONN-R^3: Learning to ReWatch, ReAsk, and ReAnswer for Efficient Video Understanding
+
+URL Source: https://arxiv.org/pdf/2606.24477v1
+
+Published Time: Wed, 24 Jun 2026 00:56:15 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# video-SALMONN-R 3: Learning to ReWatch, ReAsk, and ReAnswer for Efficient Video Understanding 
+
+Yixuan Li 1, Guangzhi Sun 3, Yudong Yang 1, Wei Li 2, Zejun Ma 2, Chao Zhang 11Tsinghua University 2ByteDance 3University of Cambridge 
+
+liyixuan25@mails.tsinghua.edu.cn cz277@tsinghua.edu.cn 
+
+## Abstract 
+
+Video large language models (LLMs) are often constrained by computation and memory budgets, leading them to use reduced frame rates and spatial resolutions, which may cause them to miss critical information for question answering (QA). A practical and efficient solution is a two-stage paradigm: first perform coarse video understanding to localize relevant segments, and then re-watch these segments at higher temporal or spatial fidelity. In this paper, we present video-SALMONN-R3, the first end-to-end video-LLM that enables re-watch through reinforcement learning without relying on chain-of-thought (CoT) cold-start. This design removes the need for costly CoT data annotations and avoids CoT-based supervised fine-tuning (SFT), which can otherwise degrade the pretrained video understanding abilities. To address the mismatch between the reasoning-first behavior induced by re-watch and the answer-first tendency of pretrained video-LLMs, we propose a 
+
+re-answer strategy, in which the model first produces a direct answer in the first watch and then refines it after re-watching. Finally, to improve question adherence during re-watching, we propose a re-ask mechanism that re-injects the query when revisiting localized segments. Experimental results show that video-SALMONN-R3 consistently outperforms both the base model and the QA-SFT baseline, while surpassing prior re-watch-based approaches with significantly lower computational cost. Code, models, and data will be publicly released upon acceptance. 
+
+## 1 Introduction 
+
+With rapid advances in multimodal large language models (LLMs), their capabilities have expanded from text-only understanding to images, audio, and, more recently, video [ 1– 8 ]. Among these modalities, video presents unique challenges due to its high dimensionality and long temporal horizon. A single high-resolution, long-duration video can generate an extremely large number of visual and acoustic tokens, making exhaustive processing infeasible under current computational and memory constraints. To ensure tractability, most existing video-LLMs rely on sparse frame sampling or aggressive token compression [ 9– 12 ]. While effective at reducing computational cost and capturing coarse global context, these strategies can limit access to fine-grained temporal and semantic details, which are critical for tasks requiring precise spatiotemporal reasoning beyond holistic understanding. To address this limitation, recent work has explored a two-stage re-watch paradigm: the model first performs coarse video understanding to identify relevant segments, and then revisits these segments at higher temporal or spatial fidelity. This design separates localization (“where to look”) from reasoning (“what to answer”), and has shown clear advantages over single-pass pipelines. However, existing approaches suffer from two key drawbacks. One line of work decomposes the process into multiple specialized models that communicate via natural language [ 13 , 14 ]. Although flexible, such systems incur substantial computational overhead and limit reasoning fidelity, as the final decision-making module lacks direct access to raw visual evidence. Another line embeds re-watch behavior within 
+
+> Preprint.
+> arXiv:2606.24477v1 [cs.CV] 23 Jun 2026
+
+a single model via multi-pass reasoning trajectories [ 15 – 20 ]. While architecturally cleaner, this approach depends heavily on large-scale interleaved reasoning-and-action chain-of-thought (CoT) annotations, which are expensive to construct and often introduce undesirable biases that degrade the pretrained model’s original video understanding capabilities [21]. Motivated by these limitations, we ask whether temporal localization can be incorporated into a strong video-LLM without relying on costly CoT cold-start annotations and without sacrificing existing performance. We answer this affirmatively with video-SALMONN-R 3, an end-to-end video LLM that acquires a re-watch capability purely through reinforcement learning (RL). Starting from an instruction-tuned base model, we directly optimize re-watch behavior using RL, avoiding both CoT annotation and CoT-based supervised fine-tuning (SFT). A central challenge in this setting is the mismatch between the reasoning-first behavior induced by re-watch and the answer-first tendency of pretrained video-LLMs. To address this, we introduce a re-answer strategy, in which the model first produces an answer based on its well-aligned prior during the first pass, and then refines this answer after re-watching the localized segments. This design anchors the newly acquired localization ability to existing capabilities, enabling the model to improve without overwriting its prior knowledge. Furthermore, we identify a limitation arising from causal attention: the question tokens in the first pass cannot attend to frames observed during re-watching, weakening the question adherence in the second stage. To resolve this, we propose a re-ask mechanism that re-injects the query when revisiting localized segments, allowing direct interaction between the question and the newly observed audio-visual evidence. This simple yet effective modification leads to consistent performance gains with little additional computational cost. Our contributions are summarized as follows: • We present video-SALMONN-R 3, the first end-to-end video LLM that acquires re-watch temporal localization purely via dynamic sampling policy optimization (DAPO) [ 22 ] based RL on an instruction-tuned base model, eliminating the need for CoT cold-start annotations while achieving new state-of-the-art (SOTA) performance on six benchmarks with lower computational cost. • We propose a re-answer strategy that reconciles the mismatch between re-watch-induced reason-ing and the pretrained model’s answer-first behavior, enabling stable integration of localization capability without degrading existing performance. • We introduce a re-ask mechanism that re-injects the query during re-watching, addressing a causal-attention limitation and strengthening question–video interaction with negligible overhead. 
+
+## 2 Related Works 
+
+2.1 Multimodal LLMs for Video Understanding 
+
+Recent video large language models (video-LLMs) typically connect a visual encoder to an LLM via a lightweight projector, representing videos as sparsely sampled frames, as seen in LLaVA-Video [ 2 ], VideoLLaMA 3 [ 23 ], Qwen3-VL [ 8], Video-Chat-Flash [ 24 ], and Intern-VL 3.5 [ 25 ]. A growing body of work further incorporates audio to enable joint audio-visual reasoning, including VideoLLaMA 2 [ 26 ], video-SALMONN [ 27 , 4], Qwen2.5-Omni and Qwen3-Omni [ 28 , 7], AVoCaDo [6], Omni-Captioner [29], D-ORCA [30], and MiniCPM-o 4.5 [31]. Despite these advances, such models remain constrained by memory and computational budgets, and thus typically operate at reduced frame rates and spatial resolutions, limiting access to fine-grained visual details. To alleviate this, prior work has explored a range of complementary strategies. Methods such as NVILA [ 9], Tempo [ 32 ], and F-16 [ 10 ] employ multi-frame fusion to reduce token redundancy, while Video-XL-2 [ 11 ], AdaReTaKe [ 33 ], and APVR [ 34 ] adopt chunk-wise prefilling for long-video compression. Other approaches, including VidCom 2 [35 ], DyTo [ 36 ], and InfiniPot-V [ 37 ], explore training-free token compression schemes, whereas VideoStreaming [ 38 ], video-SALMONN S [ 12 ], Flash-VStream [ 39 ], and Dispider [ 40 ] maintain streaming memories to capture long-term dependencies. While effective, these approaches typically place substantial responsibility on the projector for information compression or rely on heuristic criteria such as attention scores or feature similarity. More recently, a re-watching paradigm has emerged, in which the model processes the video iteratively and adaptively determines frame sampling strategies across passes. By leveraging the LLM’s intrinsic reasoning abilities, this paradigm reduces reliance on manually designed heuristics and offers a promising direction for more effective video understanding. 2Question: Which sentence describes this rally according to this video?        
+
+> A. Two athletes make a series of consecutive successful hits. B. The athlete in red can not easily make a good return.
+> C. The athlete in black often makes edge balls. D. None of the above is correct.
+> B<thinking>…The question asks about a specific detail in this rally. To answer this, I should look for…The time
+> segment 14.2 -33.8 is related to this question because it shows the entire rally where the athlete in red…, while the
+> athlete in black…</thinking> <tool_call >locate [14.2, 33.8] </ tool_call >
+> ReAsk the same question (Which sentence describes this rally according to this video?... )
+> Watch
+> Ask
+> Answer
+> ReWatch
+> ReAsk
+> ReAnswer A. Two athletes make a series of consecutive successful hits.
+
+Figure 1: Overview of the video-SALMONN-R 3 workflow. Given a video and a question, the model first watches the full video at low temporal and spatial fidelity, asks the query, and produces an initial 
+
+answer , followed by a reasoning trace and a temporal localization tool call. Conditioned on the localized evidence, together with the first-pass context, the model re-watches the selected segment at higher fidelity, re-asks the question, and re-answers by either retaining or refining the initial answer. By combining global low-fidelity context with local high-fidelity detail, this two-pass design enables fine-grained video understanding. 
+
+2.2 Video Re-Watching by Temporal Localization 
+
+Existing approaches to temporal localization in video-LLMs generally follow two design paradigms, differing in whether the re-watch process is implemented at the system level via multiple agents or within a single unified model. 
+
+Multi-agent approach. One line of work realizes re-watch through multi-agent collaboration. These frameworks typically compress long videos into textual memories and enable a reasoning agent to iteratively localize and revisit query-relevant segments, often processing them at higher temporal or spatial fidelity. For example, VideoLucy [ 13 ] organizes memory into a hierarchical structure with progressively finer granularity and performs agent-based backtracking from coarse to fine, while GCAgent [ 14 ] constructs schematic and narrative episodic memories from speech transcripts and couples a memory manager with a reasoning agent within a perception–action–reflection loop. While the modular design offers flexibility, coordinating multiple LLMs can introduce substantial computational overhead. Moreover, as the final answering agent typically operates on textual representations rather than raw video inputs, its reasoning often depends on intermediate summaries, which may limit access to certain fine-grained audio-visual details. 
+
+Single-model approach. Another line of work integrates the entire re-watch loop within a single video-LLM, alternating between global skimming and fine-grained inspection across multiple passs. A common approach constructs CoT trajectories that interleave textual reasoning with temporal actions, initializes the base model via SFT, and subsequently refines the agentic policy through RL. For instance, VideoChat-R1.5 [ 17 , 18 ] formulates this as visual test-time scaling with iterative perception over high-confidence spatiotemporal regions; LOVE-R1 [ 15 ] combines dense low-resolution global frames with adaptive high-resolution refinement under a CoT SFT followed by a decoupled RL stage; LongVT [ 16 ] models re-watching as tool-based clip retrieval on demand; and VideoZoomer [ 19 ]employs a temporal localization and revisiting operator within a multi-pass SFT-then-RL pipeline. While these approaches provide an elegant end-to-end formulation, they typically rely on a CoT-based cold-start stage. Constructing high-quality interleaved CoT trajectories can be labor-intensive and difficult to scale, and the resulting supervision may introduce distributional or stylistic biases that influence the pretrained model’s original behavior [21]. 
+
+## 3 Methods 
+
+3.1 Model Workflow 
+
+The workflow of video-SALMONN-R 3 is shown in Fig. 1. We interleave visual and audio tokens produced by relevant encoders to form a unified video representation V = Interleave( Vvideo , Vaudio ),3which, together with the question Q, is fed into the LLM to produce an output O:
+
+O = LLM( V, Q). (1) 
+
+First pass (watch). The model processes the full video at reduced frame rate and spatial resolution to obtain a coarse global representation V(1) = Interleave( V(1) 
+
+> video
+
+, V(1) 
+
+> audio
+
+). Conditioned on V(1) and 
+
+Q, the LLM produces a structured output O(1) comprising three components: an initial answer A(1) ,a short reasoning trace R(1) , and a temporal localization prediction T = [ tstart , t end ] identifying the segment most relevant to the query: 
+
+O(1) = ( A(1) , R(1) , T) = LLM( V(1) , Q). (2) Here, A(1) leverages the well-aligned prior of the instruction-tuned base model, while T determines where higher-fidelity processing will be applied in the next pass. 
+
+Second pass (re-watch). Guided by T, the model revisits the localized segment at higher temporal and spatial fidelity, yielding a fine-grained representation V(2) = Interleave( V(2) 
+
+> video
+
+, V(2) 
+
+> audio
+
+) sampled from [tstart , t end ]. To integrate global context and local detail, we retain the first-pass input V(1) and the interaction trace (Q, O(1) ). The question is then re-injected as Q′ after V(2) , enabling direct attention between the query and the newly observed frames under causal attention. The refined answer is produced as: 
+
+O(2) = A(2) = LLM  V(1) , Q, O(1) , V(2) , Q′. (3) The final prediction A(2) either retains A(1) when the initial evidence suffices or revises it when higher-fidelity inspection reveals additional details. This two-pass watch–re-watch loop forms the core computational unit of video-SALMONN-R 3 and serves as the trajectory for subsequent RL. 
+
+3.2 Training Procedure 
+
+Training proceeds in three stages: 1) audio alignment, 2) audio-visual caption SFT, and 3) end-to-end RL. The first two stages establish a strong instruction-tuned multimodal base model, while the final stage injects re-watch behavior without CoT-based cold-start. Unless otherwise specified, we treat audio as an integral component of the video modality throughout this paper. 
+
+Audio alignment. We first augment a visual-only LLM with an audio branch by training an audio projector that maps acoustic features into the LLM representation space [ 3 ]. During this stage, only the projector is updated, while the audio encoder, visual encoder, and LLM backbone remain frozen. Training uses large-scale speech recognition and audio captioning data under a standard cross-entropy objective. This step establishes a stable interface between audio signals and the LLM without disturbing existing visual capabilities. 
+
+Video caption SFT. Next, we jointly model audio-visual inputs by fine-tuning on densely annotated video captions [ 4]. The model is trained to generate unified textual descriptions of video content from interleaved audio and visual tokens. To enable efficient adaptation while preserving pretrained knowledge, we employ low-rank adaptation (LoRA) [ 41 ] on the LLM backbone and jointly optimize it with the modality projectors, while keeping the audio and visual encoders frozen. This stage produces a strong instruction-tuned base video-LLM. 
+
+End-to-end RL. Finally, we inject re-watch capability via RL, without relying on CoT cold-start SFT. Instead of constructing large-scale annotated reasoning trajectories, we define a lightweight system prompt specifying the interaction protocol and the <thinking> / <tool_call> format, and optimize full trajectories using DAPO [22] with rule-based rewards. Crucially, under the re-answer design, all tokens generated up to A(1) follow the original base video-LLM distribution conditioned on (V(1) , Q), without introducing additional reasoning scaffolds or tool interactions beforehand. This ensures that the first-pass behavior remains aligned with the pretrained model, while the second-pass refinement introduces localization as an additive capability rather than a disruptive modification. Additional implementation details are provided in Appendix A. 
+
+Reward design. The trajectory reward is defined as a weighted sum of five rule-based components, each taking values in {0, 1}:4• racc1 , racc2 : are accuracy rewards indicating whether the initial answer A(1) and the refined answer 
+
+A(2) match the ground-truth option, respectively, ensuring correctness across both passes. • rfmt1 : is a format reward indicating whether the first pass follows the “answer–think–locate” schema with a valid parseable tool call; otherwise, re-watch is skipped. • rfmt2 : is a format reward indicating whether the second pass contains no meta-tokens ( e.g. ,
+
+<thinking > for thinking and <tool_call > for tool calling), enforcing a clean final answer. • rrev : is a revise reward that equals 0 only when A(1) is incorrect and A(2) simply repeats it, and 1
+
+otherwise, encouraging the model to revise incorrect initial predictions. The total reward for the i th trajectory oi is computed as 
+
+R(oi) = λacc1 racc1 (oi) + λacc2 racc2 (oi) + λfmt1 rfmt1 (oi) + λfmt2 rfmt2 (oi) + λrev rrev (oi), (4) where the λs are coefficients that balance the contributions of each component. The group-normalized advantage for each token is then defined as 
+
+ˆAi,t = R(oi) − mean( R)std( R) + ϵ , (5) where ϵ is a small constant for numerical stability, and mean( ·) and std( ·) denote the mean and standard deviation. Collectively, these reward signals capture answer correctness, structural validity, and the desired re-watch behavior ( i.e. , revising the initial answer after higher-fidelity inspection) thereby guiding the model toward effective re-watch reasoning without requiring CoT supervision. 
+
+RL objective. We adopt a fully on-policy variant of DAPO [ 22 ] as the training objective. For each question q, a group of G trajectories {oi}Gi=1 is sampled from the current policy πθ . The policy is updated using the token-level loss J :
+
+J (θ) = −Eq, oi
+
+ 1
+
+PGi=1 |oi|
+
+> G
+
+X
+
+> i=1
+> |oi|
+
+X
+
+> t=1
+
+log πθ (oi,t | q, oi,<t ) · ˆAi,t 
+
+ , (6) where ˆAi,t is the group-normalized advantage derived from the trajectory rewards in Eqn. (5). 𝐕 (") 𝐎 (") 𝐕 ($) 𝐐’ 𝐀 ($) Masked tokens 
+
+Valid tokens 
+
+𝐐 
+
+Figure 2: Illustration of token selection for loss computation. Only valid tokens contribute to gradient updates. 
+
+Training efficiency. For efficiency, we do not compute rewards or losses separately for each pass. Instead, we roll out the entire trajectory and optimize the loss in a single forward–backward pass over the full sequence. The loss is applied only to tokens generated by the model, including the first-pass output O(1) (with reasoning R(1) , tool call T, and initial answer A(1) ) and the second-pass refined answer A(2) . All other tokens are masked out, as illustrated in Fig. 2. 
+
+## 4 Experiment Setup 
+
+4.1 Model Specifications 
+
+Built upon a textual LLM backbone of Qwen3-VL with 8 billion (B) parameters [ 8], the audio features of video-SALMONN-R 3 are extracted by the Whisper-Large-v3 encoder [ 42 ] and subsequently aligned through a window-level Q-Former with a 0.5-second window. In the first pass, visual frames are sampled at 10 frames per second (FPS) with a maximum of 768 frames. Videos longer than 76.8 seconds are uniformly sub-sampled to meet this budget, and each frame is capped at 44,100 pixels to maintain a broad but low-fidelity global view under a constrained token budget. In the second pass, the localized segment is also sampled at 10 FPS, but with a stricter limit of 128 frames; segments longer than 12.8 seconds are uniformly down-sampled. In contrast to the first pass, each frame is allowed up to 176,400 pixels to preserve fine-grained spatial 5details within the selected interval. Although this configuration can theoretically produce up to approximately 27,000 visual tokens across both passes, the actual count is further regulated by the visual pre-processor’s smart resizing policy, which keeps the total number of visual tokens around 23,000 per trajectory in practice. 
+
+4.2 Training Specifications 
+
+For the audio alignment stage, we train only the audio aligner while keeping the audio encoder, the visual branch, and the LLM backbone frozen, using a combination of LibriSpeech 960-hour [ 43 ] and CommonVoice [ 44 ] for automatic speech recognition, together with WavCaps [ 45 ] and AudioCaps [ 46 ] for audio captioning, so as to establish a reliable interface from acoustic features into the representation space of the LLM. For the audio-visual caption SFT stage, we fine-tune the model on audio-visual captions derived from LLaVA-Video-178k [ 2] and re-annotated with Gemini 2.5 Pro [47 ], which jointly describe the visual and acoustic content within a unified temporal narrative and yield a strong instruction-tuned audio-visual base model. For the end-to-end RL stage, we use CinePile [ 48 ] and CG-Bench [ 49 ] as training sources for short-and long-form videos, respectively, covering a broad range of temporal scales. To obtain a more informative difficulty distribution, we perform 8 rollouts using the audio-visual caption SFT model over the entire training set and discard samples that are answered either correctly or incorrectly in all attempts, retaining approximately 110k moderately challenging samples. We use a learning rate of 
+
+5 × 10 −6, a group size of 8, and reward coefficients λacc1 = 0 .9, λacc2 = 1 .1, λfmt1 = 1 , λfmt2 = 1 ,and λrev = 0 .5, slightly emphasizing the refined answer during optimization. Reward curves are provided in Appendix B, and additional ablations on the RL settings can be found in Appendix C. 
+
+4.3 Evaluation Specifications 
+
+We evaluate video-SALMONN-R 3 on both short-to-medium and long video benchmarks to compre-hensively assess the proposed re-watch paradigm across different temporal scales. Regarding short-to-medium videos, we adopt VideoHolmes [50 ], DailyOmni [51 ], AVUT [52 ], and OmniVideoBench 
+
+[53 ], which collectively focus on fine-grained audio-visual reasoning within tight temporal windows, where correctly answering the question hinges on localizing and jointly interpreting subtle acoustic and visual cues. Regarding long videos, we adopt VideoMME [54 ] and LVOmniBench [ 55 ], which collectively focus on long-range temporal understanding over videos spanning tens of minutes to hours, where the model must locate query-relevant segments scattered across lengthy content and reason over distant temporal dependencies. 
+
+## 5 Experiments 
+
+5.1 Overall Results 
+
+Table 1: Overall comparison on short-to-medium and long-form benchmarks against SOTA audio-enabled video-LLMs of comparable scale (7B/8B dense or 30B A3B mixture-of-expert). video-SALMONN-R 3 consistently achieves superior performance across all benchmarks.                                                   
+
+> Model Short-to-Medium Long
+> VideoHolmes DailyOmni AVUT OmniVideoBench VideoMME LVOmniBench Qwen 2.5-Omni [28] 43.7 62.7 66.3 29.3 64.3 32.0 video-SALMONN 2+ [4] 46.9 71.8 69.5 36.4 73.4 32.7 Qwen 3-Omni [7] 54.1 69.8 72.0 38.4 70.5 35.8 D-ORCA [30] 48.5 78.5 76.1 -72.9 -Qwen 3-VL 46.6 60.1 61.4 -71.4 35.6 AV-Caption-Base 49.8 76.7 76.7 40.0 72.5 39.3 QA-SFT 53.4 77.9 74.1 40.8 72.9 40.6
+> video-SALMONN-R 354.6 78.7 77.5 43.9 76.3 42.9
+
+Table 1 presents the overall comparison across six benchmarks spanning short-to-medium and long-form video settings. In addition to frontier audio-visual LLMs, we include two in-house baselines: AV-Caption-Base, which shares the same backbone and caption pre-training as our model, 6and QA-SFT, which is trained on the same audio-visual question answering (QA) data as video-SALMONN-R 3 but uses SFT instead of RL. This setup isolates the effect of RL-induced re-watch behavior from confounding factors such as training data and model capacity. Across all temporal scales, video-SALMONN-R 3 consistently outperforms the previous SOTA open-source audio-enabled video-LLMs of comparable scale. The improvements span reasoning-oriented (VideoHolmes), perception-intensive (AVUT), and cross-modal alignment (DailyOmni, OmniVideoBench) benchmarks, suggesting that the learned re-watch policy generalizes across diverse task formats rather than specializing to a particular benchmark. Notably, the gains become larger on long-form benchmarks (+3.4 on VideoMME and +7.1 on LVOmniBench over the strongest baseline), indicating that selectively revisiting salient segments becomes increasingly beneficial as video duration grows and uniform sampling becomes less effective. The comparison with QA-SFT is particularly revealing. Despite using identical QA supervision, video-SALMONN-R 3 consistently achieves stronger performance across all benchmarks, with the largest improvements appearing on long-form and reasoning-intensive tasks. This result suggests that re-watch behavior is difficult to acquire from answer-level supervision alone, and instead emerges more naturally under an outcome-driven RL objective. Overall, these results demonstrate that re-watch capability learned purely through RL provides scalable gains across temporal granularities and reasoning types, while preserving general video understanding performance. Table 2: Comparison of Video-MME against existing localization-based video LLMs.                                 
+
+> Model Short Medium Long Avg
+> Multi-agent localization
+> VideoLucy 78.6 72.1 66.8 72.5 GCAgent 72.6 69.8 73.4 71.9
+> Single-model localization
+> VideoChat-R1.5 ---67.1 LOVE-R1 75.3 65.6 57.7 66.2 LongVT ---67.0 VideoZoomer --55.8 65.2
+> video-SALMONN-R 383.2 78.6 67.2 76.3
+
+Table 2 compares video-SALMONN-R 3
+
+with prior localization-based approaches on Video-MME. Multi-agent methods ( e.g. ,VideoLucy and GCAgent) combine power-ful external text reasoners such as GPT-5.1 and DeepSeek-R1 with large collections of caption memories ( e.g. , over 120 captions per minute for a 2-hour video). These ap-proaches perform especially well on the Long split ( e.g. , GCAgent achieves 73.4), surpassing all models in Table 1. This high-lights the advantage of aggregating evidence from dense captions with strong text-based reasoning. However, their gains on the Short and Medium splits are more limited, likely because the final reasoning stage relies on textual summaries instead of direct video inputs and is therefore constrained by caption quality. Single-model localization methods address this limitation by integrating localization and reasoning within a unified architecture. However, they typically depend on costly CoT cold-start supervision, which can affect the alignment of the pretrained base model. Consequently, their overall performance generally remains in the 65–67 range. In contrast, video-SALMONN-R 3 achieves the best overall performance, suggesting that the combination of re-answer, re-ask, and cold-start-free RL provides a more balanced and efficient framework for fine-grained re-watch-based temporal localization. 
+
+5.2 Analysis of Re-Watch 
+
+Table 3: Ablation study isolating the effect of re-watch. All variants report the final answer A(2) ,except QA-SFT, which is single-pass and reported using its sole output. Re-Answer only feeds the same low-fidelity video into both passes, while Uniform Re-Watch uses the same total visual-token budget as the full model but samples uniformly across the entire video instead of revisiting the localized segment T. The performance gap between these baselines and the full model reflects the contribution of temporally targeted re-watching.                      
+
+> Variant VideoHolmes DailyOmni VideoMME LVOmniBench QA-SFT 53.4 77.9 72.9 40.6 Re-Answer only 53.1 77.3 74.4 39.7 Uniform Re-Watch 52.6 78.4 73.9 41.0
+> video-SALMONN-R 3(full) 54.6 78.7 76.3 42.9
+
+7To verify that the gains of video-SALMONN-R 3 arise from temporally targeted re-watching rather than simply answering twice or consuming more visual tokens, we compare four variants that share the same backbone and training data, differing only in the second-pass visual context. Results are reported in Table 3. QA-SFT processes the video only once at low fidelity and serves as the single-pass baseline. Re-Answer only performs a second answering pass after reasoning but without additional video inputs, yielding only marginal improvement over the single-pass baseline and suggesting that re-answering alone provides limited benefit without new visual evidence. Uniform Re-Watch matches the full model in token budget and second-pass sampling configuration (fewer frames but higher fidelity), but uniformly samples frames across the entire video instead of revisiting the localized segment T. Despite using the same number of tokens, it still underperforms the full model by a clear margin, indicating that the gains cannot be explained solely by increased visual input. In contrast, 
+
+video-SALMONN-R 3 (full) concentrates the same visual-token budget on the predicted interval T and consistently outperforms all baselines. Additional qualitative examples are provided in Appendix D. 
+
+5.3 Analysis of Re-Ask 
+
+To isolate the effect of re-ask on the two answering stages, we compare configurations that differ in whether the question is re-posed after the second-pass video. We report the accuracies of A(1) and 
+
+A(2) , together with the average attention mass assigned by the re-answer token across all layers to three anchors: the first-pass question ( aQ), the committed first-pass answer ( aA(1) ), and the re-posed question ( aQ′ ). The statistics are averaged over 50 randomly sampled test examples. During this analysis, we further observe that re-ask alone is insufficient. The revise reward rrev is also critical for encouraging effective refinement after re-watching. To study their interaction, we additionally include a setting that enables Q′ while disabling rrev .Table 4: Accuracy and re-answer attention mass under three RL settings. Re-ask is the primary factor under investigation, while the third setting shows that the revise reward rrev is also essential: without it, the re-posed question Q′ alone is insufficient to induce effective answer refinement.                                                 
+
+> Setting Pass Accuracy Attention Mass VideoHolmes DailyOmni VideoMME LVOmniBench aQaA(1) aQ′
+> w/o Q′, w/ rrev
+> A(1) 52.6 77.3 71.9 38.5 0.09 0.06 -
+> A(2) 52.7 77.3 71.9 38.5 w/ Q′, w/o rrev
+> A(1) 53.0 78.0 73.6 42.6 0.10 0.08 0.04
+> A(2) 53.0 77.9 73.6 42.6 w/ Q′, w/ rrev
+> A(1) 53.1 76.3 73.6 40.8 0.03 0.02 0.24
+> A(2) 54.6 78.7 76.3 42.9
+
+Focusing first on re-ask, Table 4 shows that without Q′, the refined answer A(2) remains nearly identical to A(1) across all four benchmarks, causing the second pass to collapse into a passive repetition of the first. The attention statistics help explain this behavior: the re-answer token assigns comparable attention mass to aQ and aA(1) , indicating that A(2) is strongly anchored to the committed first-pass answer, while lacking a newly posed query that can directly interact with the re-watched frames. Once Q′ is introduced (full setting), this balance shifts substantially, and A(2) consistently improves over A(1) , suggesting that re-ask is critical for making the second pass effective. At the same time, we find that the revis reward rrev is equally important. In the middle-row setting in Table 4, enabling Q′ alone while removing rrev leaves A(2) almost unchanged from A(1) , and the attention mass on Q′ remains very small ( 0.04 ). Intuitively, once A(1) already receives most of the accuracy reward, the policy lacks sufficient incentive to revise a confident initial prediction and instead learns to simply repeat it, leaving the structurally available Q′ underutilized. Only when both Q′ and rrev are enabled does attention meaningfully flow through the re-posed query and the re-watched frames, leading to clear accuracy improvements. These results suggest that re-ask establishes the causal pathway from re-watched evidence to the refined answer, while rrev provides the optimization pressure necessary to make effective use of this pathway. 85.4 Analysis of Re-Answer & RL Only Training 
+
+To isolate the contributions of the cold-start-free RL strategy and the re-answer mechanism, we compare three additional variants against the full model. A(2) only removes the re-answer design and directly generates A(2) without first committing to A(1) ; this variant is trained using only rfmt1 , rfmt2 ,and racc2 . We further include two localization-SFT baselines following the conventional cold-start pipeline on CG-Bench localization annotations. Localization SFT, w/o reasoning is trained only on localization supervision, while Localization SFT, w/ reasoning additionally incorporates CoT reasoning traces annotated by Gemini 2.5 Pro. Table 5: Ablation study on the training recipe. All variants report the model’s final answer. Variants that introduce localization through alternative training strategies achieve only marginal improvements over the QA-SFT baseline, whereas the full video-SALMONN-R 3 recipe delivers substantial gains.                          
+
+> Variant VideoHolmes DailyOmni VideoMME LVOmniBench QA-SFT 53.4 77.9 72.9 40.6
+> A(2) only 53.9 77.4 73.1 39.6 Localization SFT, w/o reasoning 53.2 77.3 72.9 40.4 Localization SFT, w/ reasoning 40.3 70.1 64.2 31.7
+> video-SALMONN-R 3(full) 54.6 78.7 76.3 42.9
+
+Table 5 shows that variants introducing localization without our re-answer scaffold fail to meaningfully outperform the QA-SFT baseline. A(2) only performs comparably to the baseline, suggesting that without an anchored first-pass answer A(1) drawn from the well-aligned prior, the additional re-watch stage does not translate into stable downstream gains. Localization SFT, w/o reasoning similarly yields little improvement in QA accuracy. Meanwhile, Localization SFT, w/ reasoning , which follows the conventional CoT cold-start pipeline, performs worst among all variants, suggesting that externally distilled reasoning traces may introduce biases inconsistent with the instruction-tuned base model and negatively affect its existing capabilities. In contrast, the full video-SALMONN-R 3 recipe achieves clear improvements over the baseline, indicating that re-answer serves as a competence-preserving anchor through which re-watch and re-ask can effectively translate temporal localization into downstream performance gains. 
+
+## 6 Limitations 
+
+Our current design leaves three aspects open for future work. First, since our cold-start-free RL recipe places no explicit supervision on the <thinking> trace, the reasoning text and the predicted temporal interval occasionally lack a clear, interpretable correspondence. Second, both training and evaluation are restricted to multiple-choice QA, where rule-based rewards are easy to derive; extending the recipe to open-ended QA would require more sophisticated reward modeling such as LLM-as-a-judge. Third, the workflow performs temporal localization only once per question, which may be insufficient for videos whose query-relevant evidence is scattered across multiple distant segments and calls for iterative, multi-pass localization. 
+
+## 7 Conclusion 
+
+We presented video-SALMONN-R 3, the first video-LLM that acquires a re-watch temporal local-ization capability purely through RL on an instruction-tuned base model, without relying on the costly chain-of-thought cold-start annotations used in prior localization-based approaches. To make this cold-start-free training paradigm effective, we introduce a re-answer mechanism that anchors the newly acquired re-watch behavior to the model’s well-aligned prior rather than overwriting it, together with a re-ask mechanism that alleviates a causal-attention limitation and enables the refined answer to better attend to re-watched evidence. By first localizing query-relevant segments and then revisiting them at higher fidelity, video-SALMONN-R 3 allocates its limited visual-token budget more effectively to informative regions. Experiments across six diverse benchmarks demonstrate consistent improvements over strong audio-visual baselines and prior localization-based video-LLMs. Further ablations show that these gains arise from targeted re-watching enabled by the re-answer and re-ask designs, rather than from increased token budgets or simply performing an additional answering pass. 9References 
+
+[1] Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang, Yanwei Li, Ziwei Liu, et al. LLaVA-OneVision: Easy Visual Task Transfer. arXiv preprint arXiv:2408.03326 , 2024. [2] Yuanhan Zhang, Jinming Wu, Wei Li, Bo Li, Zejun Ma, Ziwei Liu, and Chunyuan Li. Video Instruction Tuning with Synthetic Data. arXiv preprint arXiv:2410.02713 , 2024. [3] Changli Tang, Wenyi Yu, Guangzhi Sun, Xianzhao Chen, Tian Tan, Wei Li, Lu Lu, Zejun MA, and Chao Zhang. SALMONN: Towards Generic Hearing Abilities for Large Language Models. In Proc. ICLR ,Vienna, 2024. [4] Changli Tang, Yixuan Li, Yudong Yang, Jimin Zhuang, Guangzhi Sun, Wei Li, Zejun Ma, and Chao Zhang. video-SALMONN 2: Caption-Enhanced Audio-Visual Large Language Models. arXiv preprint arXiv:2506.15220 , 2025. [5] Boqiang Zhang, Kehan Li, Zesen Cheng, Zhiqiang Hu, Yuqian Yuan, Guanzheng Chen, Sicong Leng, Yuming Jiang, Hang Zhang, Xin Li, et al. VideoLLaMA 3: Frontier Multimodal Foundation Models for Image and Video Understanding. arXiv preprint arXiv:2501.13106 , 2025. [6] Xinlong Chen, Yue Ding, Weihong Lin, Jingyun Hua, Linli Yao, Yang Shi, Bozhou Li, Yuanxing Zhang, Qiang Liu, Pengfei Wan, et al. AVoCaDO: An Audiovisual Video Captioner Driven by Temporal Orches-tration. In Proc. ICLR , Rio de Janeiro, 2026. [7] Jin Xu, Zhifang Guo, Hangrui Hu, Yunfei Chu, Xiong Wang, Jinzheng He, Yuxuan Wang, Xian Shi, Ting He, Xinfa Zhu, et al. Qwen3-Omni Technical Report. arXiv preprint arXiv:2509.17765 , 2025. [8] Shuai Bai, Yuxuan Cai, Ruizhe Chen, Keqin Chen, Xionghui Chen, Zesen Cheng, Lianghao Deng, Wei Ding, Chang Gao, Chunjiang Ge, et al. Qwen3-VL Technical Report. arXiv preprint arXiv:2511.21631 ,2025. [9] Zhijian Liu, Ligeng Zhu, Baifeng Shi, Zhuoyang Zhang, Yuming Lou, Shang Yang, Haocheng Xi, Shiyi Cao, Yuxian Gu, Dacheng Li, et al. NVILA: Efficient Frontier Visual Language Models. arXiv preprint arXiv:2412.04468 , 2024. [10] Yixuan Li, Changli Tang, Jimin Zhuang, Yudong Yang, Guangzhi Sun, Wei Li, Zejun Ma, and Chao Zhang. Improving LLM Video Understanding with 16 Frames Per Second. In Proc. ICML , Vancouver, 2025. [11] Minghao Qin, Xiangrui Liu, Zhengyang Liang, Yan Shu, Huaying Yuan, Juenjie Zhou, Shitao Xiao, Bo Zhao, and Zheng Liu. Video-XL-2: Towards Very Long-Video Understanding Through Task-Aware KV Sparsification. arXiv preprint arXiv:2506.19225 , 2025. [12] Guangzhi Sun, Yixuan Li, Xiaodong Wu, Yudong Yang, Wei Li, Zejun Ma, and Chao Zhang. video-SALMONN S: Memory-Enhanced Streaming Audio-Visual LLM. arXiv preprint arXiv:2510.11129 ,2025. [13] Jialong Zuo, Yongtai Deng, Lingdong Kong, Jingkang Yang, Rui Jin, Yiwei Zhang, Nong Sang, Liang Pan, Ziwei Liu, and Changxin Gao. VideoLucy: Deep Memory Backtracking for Long Video Understanding. In Proc. NeurIPS , Mexico, 2025. [14] Jeong Hun Yeo, Sangyun Chung, Sungjune Park, Dae Hoe Kim, Jinyoung Moon, and Yong Man Ro. Gcagent: Long-video understanding via schematic and narrative episodic memory. arXiv preprint arXiv:2511.12027 , 2025. [15] Shenghao Fu, Qize Yang, Yuan-Ming Li, Xihan Wei, Xiaohua Xie, and Wei-Shi Zheng. LOVE-R1: Advancing Long Video Understanding with an Adaptive Zoom-in Mechanism via Multi-Step Reasoning. In Proc. ICLR , Rio de Janeiro, 2026. [16] Zuhao Yang, Sudong Wang, Kaichen Zhang, Keming Wu, Sicong Leng, Yifan Zhang, Chengwei Qin, Shijian Lu, Xingxuan Li, and Lidong Bing. LongVT: Incentivizing "Thinking with Long Videos" via Native Tool Calling. In Proc. CVPR , Colorado, 2026. [17] Ziang Yan, Yinan He, Xinhao Li, Zhengrong Yue, Xiangyu Zeng, Yali Wang, Yu Qiao, Limin Wang, and Yi Wang. VideoChat-R1.5: Visual Test-Time Scaling to Reinforce Multimodal Reasoning by Iterative Perception. In Proc. NeurIPS , Mexico, 2025. [18] Xinhao Li, Ziang Yan, Desen Meng, Lu Dong, Xiangyu Zeng, Yinan He, Yali Wang, Yu Qiao, Yi Wang, and Limin Wang. VideoChat-R1: Enhancing Spatio-Temporal Perception via Reinforcement Fine-Tuning. 
+
+arXiv preprint arXiv:2504.06958 , 2025. 
+
+10 [19] Yang Ding, Yizhen Zhang, Xin Lai, Ruihang Chu, and Yujiu Yang. VideoZoomer: Reinforcement-Learned Temporal Focusing for Long Video Reasoning. In Proc. ICLR , Rio de Janeiro, 2026. [20] Houlun Chen, Xin Wang, Guangyao Li, Yuwei Zhou, Yihan Chen, Jia Jia, and Wenwu Zhu. Think with Grounding: Curriculum Reinforced Reasoning with Video Grounding for Long Video Understanding. 
+
+arXiv preprint arXiv:2602.18702 , 2026. [21] Kaituo Feng, Kaixiong Gong, Bohao Li, Zonghao Guo, Yibing Wang, Tianshuo Peng, Junfei Wu, Xiaoying Zhang, Benyou Wang, and Xiangyu Yue. Video-R1: Reinforcing Video Reasoning in MLLMs. In Proc. NeurIPS , Mexico, 2025. [22] Qiying Yu, Zheng Zhang, Ruofei Zhu, Yufeng Yuan, Xiaochen Zuo, Yu Yue, Weinan Dai, Tiantian Fan, Gaohong Liu, Juncai Liu, et al. DAPO: An Open-Source LLM Reinforcement Learning System at Scale. In Proc. NeurIPS , Mexico, 2025. [23] Boqiang Zhang, Kehan Li, Zesen Cheng, Zhiqiang Hu, Yuqian Yuan, Guanzheng Chen, Sicong Leng, Yuming Jiang, Hang Zhang, Xin Li, Peng Jin, Wenqi Zhang, Fan Wang, Lidong Bing, and Deli Zhao. VideoLLaMA 3: Frontier Multimodal Foundation Models for Image and Video Understanding. arXiv preprint arXiv:2501.13106 , 2025. [24] Xinhao Li, Yi Wang, Jiashuo Yu, Xiangyu Zeng, Yuhan Zhu, Haian Huang, Jianfei Gao, Kunchang Li, Yinan He, Chenting Wang, Yu Qiao, Yali Wang, and Limin Wang. VideoChat-Flash: Hierarchical Compression for Long-Context Video Modeling. In Proc. ICLR , Rio de Janeiro, 2026. [25] Weiyun Wang, Zhangwei Gao, Lixin Gu, Hengjun Pu, Long Cui, Xingguang Wei, Zhaoyang Liu, Linglin Jing, Shenglong Ye, Jie Shao, et al. InternVL3.5: Advancing Open-Source Multimodal Models in Versatility, Reasoning, and Efficiency. arXiv preprint arXiv:2508.18265 , 2025. [26] Zesen Cheng, Sicong Leng, Hang Zhang, Yifei Xin, Xin Li, Guanzheng Chen, Yongxin Zhu, Wenqi Zhang, Ziyang Luo, Deli Zhao, and Lidong Bing. VideoLLaMA 2: Advancing Spatial-Temporal Modeling and Audio Understanding in Video-LLMs. arXiv preprint arXiv:2406.07476 , 2024. [27] Guangzhi Sun, Wenyi Yu, Changli Tang, Xianzhao Chen, Tian Tan, Wei Li, Lu Lu, Zejun MA, Yuxuan Wang, and Chao Zhang. video-SALMONN: Speech-Enhanced Audio-Visual Large Language Models. In 
+
+Proc. ICML , 2024. [28] Jin Xu, Zhifang Guo, Jinzheng He, Hangrui Hu, Ting He, Shuai Bai, Keqin Chen, Jialin Wang, Yang Fan, Kai Dang, et al. Qwen2.5-Omni Technical Report. arXiv preprint arXiv:2503.20215 , 2025. [29] Ziyang Ma, Ruiyang Xu, Zhenghao Xing, Yunfei Chu, Yuxuan Wang, Jinzheng He, Jin Xu, Pheng-Ann Heng, Kai Yu, Junyang Lin, et al. Omni-Captioner: Data Pipeline, Models, and Benchmark for Omni Detailed Perception. Rio de Janeiro, 2026. [30] Changli Tang, Tianyi Wang, Fengyun Rao, Jing LYU, and Chao Zhang. D-ORCA: Dialogue-Centric Optimization for Robust Audio-Visual Captioning. arXiv preprint arXiv:2602.07960 , 2026. [31] Junbo Cui, Bokai Xu, Chongyi Wang, Tianyu Yu, Weiyue Sun, Yingjing Xu, Tianran Wang, Zhihui He, Wenshuo Ma, Tianchi Cai, et al. MiniCPM-o 4.5: Towards Real-Time Full-Duplex Omni-Modal Interaction. arXiv preprint arXiv:2604.27393 , 2026. [32] Junjie Fei, Jun Chen, Zechun Liu, Yunyang Xiong, Chong Zhou, Wei Wen, Junlin Han, Mingchen Zhuge, Saksham Suri, Qi Qian, et al. Small Vision-Language Models are Smart Compressors for Long Video Understanding. arXiv preprint arXiv:2604.08120 , 2026. [33] Xiao Wang, Qingyi Si, Jianlong Wu, Shiyu Zhu, Li Cao, and Liqiang Nie. AdaReTaKe: Adaptive Redundancy Reduction to Perceive Longer for Video-language Understanding. In Proc. ACL (Findings) ,Vienna, 2025. [34] Hong Gao, Yiming Bao, Xuezhen Tu, Bin Zhong, Linan Yue, and Min-Ling Zhang. APVR: Hour-Level Long Video Understanding with Adaptive Pivot Visual Information Retrieval . In Proc. AAAI , Singapore, 2026. [35] Xuyang Liu, Yiyu Wang, Junpeng Ma, and Linfeng Zhang. Video Compression Commander: Plug-and-Play Inference Acceleration for Video Large Language Models. arXiv preprint arXiv:2505.14454 ,2025. [36] Yiming Zhang, Zhuokai Zhao, Zhaorun Chen, Zenghui Ding, Xianjun Yang, and Yining Sun. Beyond Training: Dynamic Token Merging for Zero-Shot Video Understanding. arXiv preprint arXiv:2411.14401 ,2024. 
+
+11 [37] Minsoo Kim, Kyuhong Shim, Jungwook Choi, and Simyung Chang. InfiniPot-V: Memory-Constrained KV Cache Compression for Streaming Video Understanding. arXiv:2506.15745 , 2025. [38] Rui Qian, Xiaoyi Dong, Pan Zhang, Yuhang Zang, Shuangrui Ding, Dahua Lin, and Jiaqi Wang. Streaming Long Video Understanding with Large Language Models. In Proc. NeurIPS , 2024. [39] Haoji Zhang, Yiqin Wang, Yansong Tang, Yong Liu, Jiashi Feng, Jifeng Dai, and Xiaojie Jin. Flash-VStream: Memory-Based Real-Time Understanding for Long Video Streams. arXiv preprint arXiv:2406.08085 , 2024. [40] Rui Qian, Shuangrui Ding, Xiaoyi Dong, Pan Zhang, Yuhang Zang, Yuhang Cao, Dahua Lin, and Jiaqi Wang. Dispider: Enabling Video LLMs with Active Real-Time Interaction via Disentangled Perception, Decision, and Reaction. In Proc. CVPR , 2025. [41] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. LoRA: Low-Rank Adaptation of Large Language Models. In Proc. ICLR , 2022. [42] Alec Radford, Jong Wook Kim, Tao Xu, Greg Brockman, Christine McLeavey, and Ilya Sutskever. Robust Speech Recognition via Large-scale Weak Supervision. In Proc. ICML , 2023. [43] Vassil Panayotov, Guoguo Chen, Daniel Povey, and Sanjeev Khudanpur. LibriSpeech: An ASR Corpus Based on Public Domain Audio Books. In Proc. ICASSP , 2015. [44] Rosana Ardila, Megan Branson, Kelly Davis, Michael Kohler, Josh Meyer, Michael Henretty, Reuben Morais, Lindsay Saunders, Francis Tyers, and Gregor Weber. Common Voice: A Massively-Multilingual Speech Corpus. In Proc. LREC , 2020. [45] Xinhao Mei, Chutong Meng, Haohe Liu, Qiuqiang Kong, Tom Ko, Chengqi Zhao, Mark D Plumbley, Yuexian Zou, and Wenwu Wang. WavCaps: A Chatgpt-Assisted Weakly-Labelled Audio Captioning Dataset for Audio-Language Multimodal Research. IEEE Transactions on Audio, Speech and Language Processing , 32:3339–3354, 2024. [46] Chris Dongjoo Kim, Byeongchang Kim, Hyunmin Lee, and Gunhee Kim. AudioCaps: Generating Captions for Audios in the Wild. In Proc. NAACL-HLT , 2019. [47] Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Marcel Blistein, Ori Ram, Dan Zhang, Evan Rosen, et al. Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities. arXiv preprint arXiv:2507.06261 , 2025. [48] Ruchit Rawal, Khalid Saifullah, Ronen Basri, David Jacobs, Gowthami Somepalli, and Tom Goldstein. Cinepile: A long video question answering dataset and benchmark. arXiv:2405.08813 , 2024. [49] Guo Chen, Yicheng Liu, Yifei Huang, Yuping He, Baoqi Pei, Jilan Xu, Yali Wang, Tong Lu, and Limin Wang. Cg-bench: Clue-grounded question answering benchmark for long video understanding. In Proc. ICLR , Singapore, 2025. [50] Junhao Cheng, Yuying Ge, Teng Wang, Yixiao Ge, Jing Liao, and Ying Shan. Video-Holmes: Can MLLM Think Like Holmes for Complex Video Reasoning? arXiv preprint arXiv:2505.21374 , 2025. [51] Ziwei Zhou, Rui Wang, and Zuxuan Wu. Daily-Omni: Towards Audio-Visual Reasoning with Temporal Alignment across Modalities. arXiv preprint arXiv:2505.17862 , 2025. [52] Yudong Yang, Jimin Zhuang, Guangzhi Sun, Changli Tang, Yixuan Li, Peihan Li, Yifan Jiang, Wei Li, Zejun Ma, and Chao Zhang. Audio-centric Video Understanding Benchmark without Text Shortcut. In 
+
+Proc. EMNLP , Suzhou, 2025. [53] Caorui Li, Yu Chen, Yiyan Ji, Jin Xu, Zhenyu Cui, Shihao Li, Yuanxing Zhang, Jiafu Tang, Zhenghao Song, Dingling Zhang, et al. OmniVideoBench: Towards Audio-Visual Understanding Evaluation for Omni MLLMs. In Proc. ICLR , Rio de Janeiro, 2026. [54] Chaoyou Fu, Yuhan Dai, Yondong Luo, Lei Li, Shuhuai Ren, Renrui Zhang, Zihan Wang, Chenyu Zhou, Yunhang Shen, Mengdan Zhang, et al. Video-MME: The First Ever Comprehensive Evaluation Benchmark of Multi-modal LLMs in Video Analysis. In Proc. CVPR , Nashville TN, 2025. [55] Keda Tao, Yuhua Zheng, Jia Xu, Wenjie Du, Kele Shao, Hesong Wang, Xueyi Chen, Xin Jin, Junhan Zhu, Bohan Yu, et al. LVOmniBench: Pioneering Long Audio-Video Understanding Evaluation for Omnimodal LLMs. arXiv preprint arXiv:2603.19217 , 2026. 
+
+12 [56] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica. Efficient Memory Management for Large Language Model Serving with PagedAttention. In Proc. SOSP , Koblenz, 2023. [57] Pin-Lun Hsu, Yun Dai, Vignesh Kothapalli, Qingquan Song, Shao Tang, Siyu Zhu, Steven Shimizu, Shivam Sahni, Haowen Ning, Yanning Chen, and Zhipeng Wang. Liger-Kernel: Efficient Triton Kernels for LLM Training. In Proc. ICML Workshop , Vancouver, 2025. [58] Jeff Rasley, Samyam Rajbhandari, Olatunji Ruwase, and Yuxiong He. DeepSpeed: System Optimizations Enable Training Deep Learning Models with Over 100 Billion Parameters. In Proc. KDD , 2020. 
+
+## A More Implementation Details 
+
+A.1 System Prompt 
+
+The reinforcement learning stage of video-SALMONN-R 3 relies on a carefully crafted system prompt that specifies the protocol in a machine-parseable schema. Rather than distilling chain-of-thought trajectories from a teacher model and cold-starting the policy via SFT, we provide only a minimal format prior through the system message below, and let the model explore full trajectories under rule-based rewards. The exact system message used in both training and inference is shown in Fig. 3.         
+
+> You are a helpful assistant. ### In the first round, you will be given a full video along with the question. FIRST: Output your initial answer. THEN: Think carefully to find a timestamp that is related to the question. Output the reasoning progress as an internal monologue enclosed within <thinking>...</thinking>. Your reasoning progress should follow the following logic: The video generally describes ...(overall description of the video). The question asks about ...(specific detail requested). To answer this question, I should look for segments showing ...(what needs to be found). In the video, the time segment ... is related to this question because ...(reason). Therefore, I should locate this part as it contains the answer... AT LAST: Output the located timestamp in second with the format <tool_call>locate [start, end]</tool_call> Output format: ...<thinking>...</thinking><tool_call>locate [start, end]</tool_call> ### In the second round, you will be additionally given a segmented video clip with higher framerate and resolution. You should directly output the final answer based on both the full video and the located clip. If you believe the previous answer was correct, repeat the initial answer; otherwise, correct it.
+
+Figure 3: The exact system prompt used for end-to-end RL in video-SALMONN-R 3. The first-round specification defines a three-part output ( initial answer → <thinking> reasoning →
+
+<tool_call>locate call), while the second-round specification constrains the re-answer to be a clean final answer that either repeats or corrects the initial one. The prompt is deliberately structured to expose exactly three loci of model output. In the first pass, the initial answer must be emitted before any <thinking> or <tool_call> tokens, which is what enables the re-answer mechanism to anchor A(1) onto the baseline’s well-aligned prior: since nothing precedes A(1) except (V(1) , Q), the first-pass answer is drawn from exactly the same distribution as the instruction-tuned base model and its competence is preserved by construction. The subsequent 
+
+<thinking> block provides a free-form monologue slot for the model to articulate why a particular interval is relevant, and the terminal <tool_call>locate [start, end]</tool_call> yields a strictly parseable interval that drives the second-pass sampling. In the second pass, the prompt explicitly forbids meta-tokens and asks for a clean re-answer that either repeats A(1) or corrects it, which pairs naturally with the rfmt2 and rrev reward terms defined in the main text. 13 A.2 LoRA Dropping 
+
+A second implementation detail that proved important for stable RL on top of the instruction-tuned base model is what we refer to as LoRA dropping following SALMONN [ 3 ]. During the audio-visual caption SFT stage, we attach a LoRA adapter with a relatively large scaling factor αSFT = 256 so that the adapter has enough effective capacity to absorb the dense audio-visual captioning supervision and yield a strong instruction-tuned base model. When the same adapter is subsequently loaded at the end-to-end RL stage, however, we drop its scaling factor to αRL = 32 while keeping the learned low-rank matrices A and B unchanged. Concretely, since the effective LoRA contribution at inference time is 
+
+∆W = αr BA, (7) reducing α from 256 to 32 uniformly attenuates the SFT-induced weight update by a factor of 8
+
+before RL begins, without altering the direction of the learned adaptation. This asymmetric αSFT ≫ αRL schedule serves two purposes. First, it mitigates the risk of overfitting carried over from the SFT stage: the large αSFT is desirable for fitting captioning supervision but tends to sharpen the output distribution around SFT-preferred phrasings, which is harmful for the exploratory rollouts that DAPO relies on. By dropping α at the RL entry point, we soften the baseline policy and restore a substantial fraction of the backbone’s pretrained behavior, which in turn enlarges the entropy of initial rollouts and gives the rule-based rewards a richer signal to shape. Second, the dropped adapter still retains the directional inductive bias learned during SFT, so the RL stage does not start from scratch; it starts from a softened version of the instruction-tuned base model that is simultaneously competent and sufficiently diverse. In practice, this schedule noticeably stabilizes the early phase of RL and reduces the frequency of mode-collapsed rollouts, which is consistent with the competence-preservation principle that underlies our re-answer design. 
+
+A.3 Engineering Implementation Details 
+
+Beyond the algorithmic design, the end-to-end RL stage of video-SALMONN-R 3 also benefits from a set of engineering optimizations. We summarize them below. 
+
+Inference acceleration with vLLM. Since each DAPO step requires a group of G on-policy rollouts per question, the generation phase quickly becomes the dominant bottleneck if executed with vanilla HuggingFace decoding. We therefore integrate vLLM [ 56 ] as the rollout engine, which brings paged-attention-based KV-cache management and continuous batching. This is particularly beneficial for our setting, where rollouts exhibit highly variable lengths due to the two-pass re-watch protocol: short trajectories that terminate early can be evicted and replaced on the fly, while long trajectories keep streaming without padding waste. 
+
+Training acceleration with Liger-Kernel. For the forward-backward pass, we adopt Liger-Kernel [ 57 ] to replace several memory- and compute-heavy operators in the Qwen3-VL backbone with fused Triton kernels, most notably the fused cross-entropy, RMSNorm, RoPE, and SwiGLU im-plementations. These fused kernels reduce both activation memory and kernel-launch overhead, which in our long-trajectory regime directly translates into a larger per-GPU effective batch and a shorter wall-clock time per optimization step. Combined with DeepSpeed ZeRO-1 [ 58 ] for optimizer-state sharding, the memory headroom freed by Liger-Kernel is what makes it feasible to train the full trajectory (with up to ∼20k visual tokens) end-to-end without resorting to pipeline or tensor parallelism. 
+
+Colocate mode with bidirectional offloading. Because video-SALMONN-R 3 adopts a strictly on-policy DAPO variant, the generation policy and the training policy must remain byte-identical at every step, which rules out the common asynchronous actor–learner setup. We therefore run the rollout engine and the trainer in colocate mode on the same set of GPUs, and carefully orchestrate their memory footprints via bidirectional CPU offloading: during the forward-backward pass, the vLLM engine (including its weights and KV cache) is offloaded to CPU so that the full GPU memory is available for training; during the generation phase, the trainer’s model parameters, gradients, and optimizer states are offloaded to CPU, freeing the GPU for vLLM’s paged KV cache. This ping-pong schedule, paired with ZeRO-1, allows a single A800 to accommodate both roles without the parameter duplication that a separate-GPU actor–learner split would incur, and keeps the on-policy invariant strictly satisfied. 14 Per-GPU rollout accumulation to relieve video-decoding pressure. A subtle but important bottleneck in audio-visual RL is CPU-side video decoding rather than GPU compute: every rollout requires decoding and resampling raw video frames, and naively replicating the same sample across all GPUs (the default behavior in many RL frameworks) multiplies this cost by the world size while yielding only a single effective group. To sidestep this, we reshape the data-parallel layout: instead of broadcasting one sample to all GPUs and running G rollouts in parallel, each GPU independently processes one question and runs accum_step sequential rollouts on it, after which the rollouts are all-gathered across ranks. The resulting effective batch size becomes the world size (i.e., the number of GPUs), and the effective group size becomes accum_step , which precisely matches DAPO’s group-normalized advantage formulation. This layout not only avoids redundant decoding of identical videos across ranks but also spreads the CPU decoding load uniformly over the cluster, which eliminates the CPU-bound stalls that would otherwise dominate the rollout phase. 
+
+A.4 Resources 
+
+We use 32 A800s for audio alignment and audio-visual captioning SFT, and the model is trained for about 10 hours. For the RL stage, we used 96 A800s and trained the model for about 72 hours. However, the operation of decoding video in the second pass brings severe GPU utilization issues, which might be solved in the future by using async frameworks like verl. Without video decoding time, the model can be trained in about 40 hours. 
+
+## B Reward Curves 0 500 1000 1500 2000 2433                     
+
+> step
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> reward
+> acc1
+> 0500 1000 1500 2000 2433
+> step
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> acc2
+> 0500 1000 1500 2000 2433
+> step
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> format1
+> 0500 1000 1500 2000 2433
+> step
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> format2
+> 0500 1000 1500 2000 2433
+> step
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> change
+
+Figure 4: The reward curves in the training procedure. The reward curves are shown in Fig. 4. In early steps, the model learns to follow the format in the instruction, while in later steps, the model learns to refine A(2) .
+
+## C More Ablations on RL Settings 
+
+We further conduct additional experiments to examine the sensitivity of our recipe to key RL hyperparameters and loss formulations, with results summarized in Table 6. Table 6: Ablation on RL settings. We compare different group sizes and loss formulations (GRPO vs. DAPO). Our default configuration (group size=8 with DAPO token-level loss) achieves the best overall performance. 
+
+Setting VideoHolmes DailyOmni VideoMME LVOmniBench group size=4 55.0 77.8 75.4 40.7 GRPO loss 53.9 77.4 73.1 40.2 
+
+Ours (group size=8, DAPO) 54.6 78.7 76.3 42.9 
+
+## D Cases of How Re-Watch Helps Video Understanding 
+
+To intuitively illustrate how the re-watch mechanism contributes to fine-grained video understanding, we present several qualitative cases in Table 7-Table 9, each showing how the model revises the wrong initial answer and corrects to the right answer after zooming into the localized temporal segment. 15 Table 7: Case 1 demonstrates the ability of removing unrelated part. 
+
+Video Source Question A(1) R(1) T A(2) 
+
+VideoMME FsLaTZmP6Uw Which sentence de-scribes this rally ac-cording to this video? A. Two athletes make a series of consecu-tive successful hits. B. The athlete in red can not easily make a good return. C. The athlete in black often makes edge balls. D. None of the above is correct. B The video generally describes a table tennis rally be-tween two athletes, one in a red shirt and one in a black shirt, with the score displayed as CHN 3-2 JPN. The question asks about a specific detail in this rally. To answer this, I should look for segments showing the difficulty of returns by the athlete in red. In the video, the athlete in red is seen making multiple attempts to return the ball, often stretching or diving, indicating difficulty. The time segment 14.2-33.8 is related to this question because it shows the entire rally where the athlete in red struggles to return the ball effectively, while the athlete in black consistently makes powerful returns. Therefore, I should locate this part as it may be helpful. [14.2, 33.8] A
+
+Table 8: Case 2 demonstrates the ability of locating from low fidelity to high fidelity. 
+
+Video Source Question A(1) R(1) T A(2) 
+
+LVOmniBench video_72 During the first seg-ment of background music, by looking in the mirror, which hand can we infer the vlogger is using to hold the camera? A. Right hand. B. Left hand. C. It cannot be determined. D. Both hands. B The video generally describes a vlogger exploring a new home and showcasing its features. The question asks about a specific detail regarding the vlogger’s hand position while looking in the mirror. To answer this question, I should look for segments showing the vlogger looking in the mirror and holding the camera. In the video, at 65s, the vlogger is seen looking in the mirror while holding the camera, and it is evident that she is using her left hand to hold the camera. [61.3, 68.8] A
+
+Table 9: Case 3 demonstrates the ability of locating the most important clip to answer the question. 
+
+Video Source Question A(1) R(1) T A(2) 
+
+VideoHolmes d4Gx0UTdFiU What is the girl’s in-tention of adding wa-ter to nail polish in the kitchen? A. Di-lute the overly thick texture. B. Test the mixing effect of liq-uids. C. Extend the usage time of nail polish. D. Imitate the steps of beauty tutorial. E. Pre-meditated to cover up the color of blood-stains. F. A spur-of-the-moment prank A The video generally describes a girl walking into a room, removing her shoes, and then sitting on the floor to apply nail polish to her feet. The question asks about her intention of adding water to the nail polish in the kitchen. To answer this question, I should look for segments showing her mixing water with nail polish. In the video, the time segment 1.5s-97.7s is related to this question because it shows the girl walking into the room, removing her shoes, and then sitting on the floor to apply nail polish to her feet. Therefore, I should locate this part as it may be helpful. [1.5, 97.7] E
+
+16
